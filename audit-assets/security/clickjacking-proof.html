@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <title>إثبات قابلية التضمين داخل إطار</title>
+  <style>
+    *{box-sizing:border-box}
+    body{margin:0;background:#eef1f5;color:#172033;font-family:"Simplified Arabic","Segoe UI",Arial,sans-serif}
+    main{width:1180px;margin:26px auto}
+    header{background:#fff;border:1px solid #d0d5dd;padding:22px 26px;margin-bottom:18px}
+    h1{margin:0 0 6px;color:#b42318;font-size:30px}
+    p{font-size:18px;margin:4px 0}
+    .frame-wrap{position:relative;background:#fff;border:5px solid #b42318;height:760px;overflow:hidden}
+    .label{position:absolute;z-index:2;top:12px;right:12px;background:#b42318;color:#fff;padding:8px 14px;font-weight:700}
+    iframe{display:block;width:100%;height:100%;border:0}
+    footer{font-size:15px;color:#667085;margin-top:12px}
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>إثبات غير تفاعلي: صفحة التبرع تقبل التضمين داخل موقع آخر</h1>
+    <p>الإطار الأحمر تابع لصفحة اختبار محلية مستقلة. ظهور موقع الجمعية داخله يثبت غياب منع التضمين من الخادم.</p>
+    <p><b>الخطر:</b> يمكن إساءة استخدام ذلك في هجوم Clickjacking لخداع المستخدم كي يضغط على عناصر لا يقصدها.</p>
+  </header>
+  <div class="frame-wrap">
+    <div class="label">موقع الجمعية داخل iframe خارجي</div>
+    <iframe src="https://alhikmakw.org.kw/donation/" title="صفحة التبرع داخل إطار خارجي"></iframe>
+  </div>
+  <footer>لم يتم النقر أو إرسال نموذج أو تنفيذ دفع. المعالجة: CSP frame-ancestors 'self' مع X-Frame-Options: SAMEORIGIN للتوافق.</footer>
+</main>
+</body>
+</html>

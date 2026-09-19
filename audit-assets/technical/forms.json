@@ -1,0 +1,250 @@
+[
+  {
+    "attributes": {
+      "id": "fastdonationform",
+      "name": "fastdonationform",
+      "class": "dropdown-menu p-3 text-center",
+      "autocomplete": "off",
+      "method": "POST",
+      "action": "https://alhikmakw.org.kw/donation/ar/knet/fastdonation_request"
+    },
+    "inputs": [
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "_token",
+        "value": "sbwwvytdtUWPiWB8vz1x7eUWf3APqsARvouSEMyH",
+        "autocomplete": "off"
+      },
+      {
+        "tag": "select",
+        "class": "form-select field",
+        "required": null,
+        "name": "fastdonation_project_id",
+        "aria-label": "Default select example"
+      },
+      {
+        "tag": "input",
+        "type": "number",
+        "required": null,
+        "class": "form-control field",
+        "id": "fastdonation_amount",
+        "name": "fastdonation_amount",
+        "placeholder": "قيمة التبرع"
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "class": "form-control field",
+        "id": "fastdonation_paymentmethode_id",
+        "name": "fastdonation_paymentmethode_id",
+        "placeholder": "قيمة التبرع",
+        "value": "1"
+      },
+      {
+        "tag": "button",
+        "type": "submit",
+        "class": "btn btn-primary w-100 fast_donateBtn"
+      }
+    ]
+  },
+  {
+    "attributes": {
+      "autocomplete": "off",
+      "id": "donationform_donatenow",
+      "name": "donationform_donatenow",
+      "class": "forms-sample",
+      "method": "POST",
+      "action": "https://alhikmakw.org.kw/donation/ar/knet/request"
+    },
+    "inputs": [
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "_token",
+        "value": "sbwwvytdtUWPiWB8vz1x7eUWf3APqsARvouSEMyH",
+        "autocomplete": "off"
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "project_id",
+        "id": "project_id",
+        "value": ""
+      },
+      {
+        "tag": "input",
+        "type": "hidden",
+        "name": "marketer_id",
+        "id": "marketer_id",
+        "value": ""
+      },
+      {
+        "tag": "button",
+        "class": "btn active"
+      },
+      {
+        "tag": "button",
+        "class": "btn "
+      },
+      {
+        "tag": "button",
+        "class": "btn "
+      },
+      {
+        "tag": "button",
+        "class": "btn "
+      },
+      {
+        "tag": "button",
+        "class": "btn "
+      },
+      {
+        "tag": "input",
+        "type": "number",
+        "required": null,
+        "name": "donation_amount",
+        "id": "donation_amount",
+        "class": "form-control",
+        "aria-label": "donation_amount",
+        "aria-describedby": "basic-addon1"
+      },
+      {
+        "tag": "input",
+        "type": "text",
+        "class": "form-control",
+        "id": "donor_name",
+        "name": "donor_name",
+        "placeholder": "اسم المتبرع"
+      },
+      {
+        "tag": "input",
+        "type": "text",
+        "class": "form-control",
+        "id": "donor_email",
+        "name": "donor_email",
+        "placeholder": "البريد الإلكتروني"
+      },
+      {
+        "tag": "input",
+        "type": "text",
+        "class": "form-control",
+        "id": "donor_phone",
+        "name": "donor_phone",
+        "placeholder": "رقم الهاتف"
+      },
+      {
+        "tag": "input",
+        "class": "form-check-input float-none",
+        "type": "checkbox",
+        "value": "",
+        "id": "flexCheckDefault"
+      },
+      {
+        "tag": "input",
+        "class": "form-check-input",
+        "type": "radio",
+        "name": "paymentmethode_id",
+        "id": "flexRadioDefault11header",
+        "value": "1",
+        "style": "display: none;",
+        "checked": null
+      },
+      {
+        "tag": "input",
+        "class": "form-check-input",
+        "type": "radio",
+        "name": "paymentmethode_id",
+        "id": "flexRadioDefault22header",
+        "value": "2",
+        "style": "display: none;"
+      },
+      {
+        "tag": "input",
+        "class": "form-check-input",
+        "type": "radio",
+        "id": "flexRadioDefault222header",
+        "name": "paymentmethode_id",
+        "value": "15",
+        "style": "display: none;"
+      },
+      {
+        "tag": "input",
+        "class": "form-check-input",
+        "type": "radio",
+        "id": "flexRadioDefault2222header",
+        "name": "paymentmethode_id",
+        "value": "19",
+        "style": "display: none;"
+      },
+      {
+        "tag": "input",
+        "class": "form-check-input",
+        "type": "radio",
+        "id": "flexRadioDefault22222header",
+        "name": "paymentmethode_id",
+        "value": "28",
+        "style": "display: none;"
+      },
+      {
+        "tag": "input",
+        "class": "form-check-input",
+        "type": "radio",
+        "id": "flexRadioDefault3333header",
+        "name": "paymentmethode_id",
+        "value": "4",
+        "style": "display: none;"
+      },
+      {
+        "tag": "input",
+        "class": "form-check-input",
+        "type": "radio",
+        "id": "flexRadioDefault444header",
+        "name": "paymentmethode_id",
+        "value": "8",
+        "style": "display: none;"
+      },
+      {
+        "tag": "input",
+        "class": "form-check-input",
+        "type": "radio",
+        "id": "flexRadioDefault333header",
+        "name": "paymentmethode_id",
+        "value": "24",
+        "style": "display: none;"
+      },
+      {
+        "tag": "input",
+        "class": "form-check-input",
+        "type": "radio",
+        "id": "flexRadioDefault4header",
+        "name": "paymentmethode_id",
+        "value": "26",
+        "style": "display: none;"
+      },
+      {
+        "tag": "input",
+        "class": "form-check-input",
+        "type": "radio",
+        "id": "flexRadioDefault36header",
+        "name": "paymentmethode_id",
+        "value": "35",
+        "style": "display: none;"
+      },
+      {
+        "tag": "input",
+        "class": "form-check-input",
+        "type": "radio",
+        "id": "flexRadioDefault5header",
+        "name": "paymentmethode_id",
+        "value": "6",
+        "style": "display: none;"
+      },
+      {
+        "tag": "button",
+        "type": "submit",
+        "class": "btn w-100 BTN-1"
+      }
+    ]
+  }
+]

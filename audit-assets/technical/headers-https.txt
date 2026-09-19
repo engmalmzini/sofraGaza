@@ -1,0 +1,16 @@
+HTTP/1.1 200 OK
+Connection: Keep-Alive
+Keep-Alive: timeout=5, max=100
+X-Powered-By: PHP/8.1.34
+Content-Type: text/html; charset=UTF-8
+Cache-Control: no-cache, private
+set-cookie: XSRF-TOKEN=eyJpdiI6Ilo1dThJSC93OFBDM0wwc0ZPN0lUUEE9PSIsInZhbHVlIjoid3Q4Qy85ZUVGN010L1VBWlRrdU1PYk1UaTBUdU12REpDS3dRY2ZlejUwWkEya3VhaTdWUlY0M1g4ZXJNY05uTG5tRWZEOHk3eVp6dDdXVWVJMnJXb0FNM2Z3cXVYd0FMbGIrWUs1THlWTmhZQjZ4cXhHOXBaOHBRb09iMjF0SVoiLCJtYWMiOiI0YzVhNTU4OTU1NmUzOWE5MmZiZTQwNWVkNjQ5ZmNmZTdmYTY2Yzg0MTZlYjY0MTBjOTljM2RiMWVlN2U2YjJkIiwidGFnIjoiIn0%3D; expires=Tue, 15 Sep 2026 15:12:03 GMT; Max-Age=7200; path=/; samesite=lax; secure
+set-cookie: alhikmakw_session=eyJpdiI6IjVTUTdNUFRBYjl6bE1rbUtlcGdWSEE9PSIsInZhbHVlIjoid3g1Tk0vdHdoZ3JST1djNjZMQVo4bDBSQzJSRy9KUkZUMWVNelZKUjlxYWpYVUhOTy9vR01RZTFhMWdhMXE4c3dod0c4UzZSWVVZeC9PQkN2V1hRU0U0K0dmcXFGR2JhQ1B3U1pMSEtuekZITDlVMjhYUTJXSGVnREtlaGJOblEiLCJtYWMiOiJkNmUxMTJhMDgyYWZiMzIzYzkwNGU5OTcwYjE0MTRkYzE5NDk4N2Q0YThiZDhkN2RkZDkzNzM5N2UxYzJlNTI5IiwidGFnIjoiIn0%3D; expires=Tue, 15 Sep 2026 15:12:03 GMT; Max-Age=7200; path=/; httponly; samesite=lax; secure
+Transfer-Encoding: chunked
+Date: Tue, 15 Sep 2026 13:12:03 GMT
+Server: LiteSpeed
+platform: hostinger
+panel: hpanel
+Content-Security-Policy: upgrade-insecure-requests
+alt-svc: h3=":443"; ma=2592000, h3-29=":443"; ma=2592000
+

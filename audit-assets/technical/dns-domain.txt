@@ -1,0 +1,129 @@
+﻿### A
+
+
+Address      : 185.97.145.39
+IPAddress    : 185.97.145.39
+QueryType    : A
+IP4Address   : 185.97.145.39
+Name         : alhikmakw.org.kw
+Type         : A
+CharacterSet : Unicode
+Section      : Answer
+DataLength   : 4
+TTL          : 769
+
+
+
+
+### AAAA
+
+### MX
+
+
+QueryType    : MX
+Exchange     : mx2.hostinger.com
+NameExchange : mx2.hostinger.com
+Preference   : 10
+Name         : alhikmakw.org.kw
+Type         : MX
+CharacterSet : Unicode
+Section      : Answer
+DataLength   : 16
+TTL          : 14400
+
+QueryType    : MX
+Exchange     : mx1.hostinger.com
+NameExchange : mx1.hostinger.com
+Preference   : 5
+Name         : alhikmakw.org.kw
+Type         : MX
+CharacterSet : Unicode
+Section      : Answer
+DataLength   : 16
+TTL          : 14400
+
+
+
+
+### NS
+
+
+QueryType    : NS
+Server       : ns2.dns-parking.com
+NameHost     : ns2.dns-parking.com
+Name         : alhikmakw.org.kw
+Type         : NS
+CharacterSet : Unicode
+Section      : Answer
+DataLength   : 8
+TTL          : 204
+
+QueryType    : NS
+Server       : ns1.dns-parking.com
+NameHost     : ns1.dns-parking.com
+Name         : alhikmakw.org.kw
+Type         : NS
+CharacterSet : Unicode
+Section      : Answer
+DataLength   : 8
+TTL          : 204
+
+QueryType    : NS
+Server       : ns1.dns-parking.com
+NameHost     : ns1.dns-parking.com
+Name         : alhikmakw.org.kw
+Type         : NS
+CharacterSet : Unicode
+Section      : Authority
+DataLength   : 8
+TTL          : 204
+
+QueryType    : NS
+Server       : ns2.dns-parking.com
+NameHost     : ns2.dns-parking.com
+Name         : alhikmakw.org.kw
+Type         : NS
+CharacterSet : Unicode
+Section      : Authority
+DataLength   : 8
+TTL          : 204
+
+
+
+
+### TXT
+
+
+QueryType    : TXT
+Text         : {v=spf1 include:_spf.mail.hostinger.com ~all}
+Strings      : {v=spf1 include:_spf.mail.hostinger.com ~all}
+Name         : alhikmakw.org.kw
+Type         : TXT
+CharacterSet : Unicode
+Section      : Answer
+DataLength   : 16
+TTL          : 3600
+
+QueryType    : NS
+Server       : ns2.dns-parking.com
+NameHost     : ns2.dns-parking.com
+Name         : alhikmakw.org.kw
+Type         : NS
+CharacterSet : Unicode
+Section      : Authority
+DataLength   : 8
+TTL          : 204
+
+QueryType    : NS
+Server       : ns1.dns-parking.com
+NameHost     : ns1.dns-parking.com
+Name         : alhikmakw.org.kw
+Type         : NS
+CharacterSet : Unicode
+Section      : Authority
+DataLength   : 8
+TTL          : 204
+
+
+
+

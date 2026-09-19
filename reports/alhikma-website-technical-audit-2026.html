@@ -1,0 +1,719 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>التدقيق التقني لموقع جمعية الحكمة الكويتية الخيرية — سبتمبر 2026</title>
+  <style>
+    @page{size:A4;margin:0}
+    :root{
+      --ink:#191b36;--muted:#667085;--line:#d0d5dd;--paper:#fff;
+      --soft:#f5f7fa;--green:#191b36;--green2:#f2f4f7;--gold:#475467;
+      --red:#b42318;--red2:#fee4e2;--amber:#475467;--amber2:#f2f4f7;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;background:#e5e7eb;color:var(--ink);font-family:"Simplified Arabic","Traditional Arabic",Arial,sans-serif;line-height:1.55}
+    body{counter-reset:page}
+    .page{position:relative;width:210mm;min-height:297mm;margin:10mm auto;background:var(--paper);padding:18mm 17mm 16mm;overflow:hidden;page-break-after:always;break-after:page;page-break-inside:avoid;break-inside:avoid-page}
+    .page:last-child{page-break-after:auto;break-after:auto}
+    .page-no{position:absolute;bottom:8mm;left:17mm;color:var(--muted);font-size:9pt}
+    .brand{position:absolute;top:7mm;left:17mm;width:42mm;height:12mm;font-size:0;background:url("brand/kat-logo-color-horizontal.png") left center/contain no-repeat}
+    .brand::after{content:none}
+    .eyebrow{font-size:10pt;color:var(--green);font-weight:800;letter-spacing:.06em}
+    h1{font-size:29pt;line-height:1.25;margin:5mm 0 3mm}
+    h2{font-size:20pt;line-height:1.35;margin:0 0 6mm;color:var(--green)}
+    h3{font-size:13pt;margin:5mm 0 2mm}
+    p{margin:0 0 3mm}
+    small,.small{font-size:8.8pt;color:var(--muted)}
+    .lead{font-size:14pt;line-height:1.8;max-width:150mm}
+    .cover{display:flex;flex-direction:column;justify-content:space-between;background:var(--green);color:#fff}
+    .cover .eyebrow,.cover .small{color:#e5e7eb}
+    .cover h1{font-size:34pt;max-width:160mm}
+    .cover-logo{display:block;width:72mm;height:auto;margin-bottom:7mm}
+    .cover-rule{width:30mm;height:2mm;background:#cbd5e1;margin:7mm 0}
+    .cover-meta{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8mm;border-top:1px solid rgba(255,255,255,.35);padding-top:7mm}
+    .cover-meta b{display:block;font-size:13pt}
+    .prepared{margin:0 0 7mm;font-size:12pt}
+    .prepared b{font-size:15pt}
+    .topline{height:2mm;background:var(--green);margin:-18mm -17mm 12mm}
+    .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:4mm;margin:6mm 0}
+    .kpi{border:1px solid var(--line);padding:5mm;background:var(--soft);min-height:28mm}
+    .kpi b{display:block;font-size:22pt;line-height:1.1;color:var(--green)}
+    .kpi span{font-size:9pt;color:var(--muted)}
+    .kpi.bad b{color:var(--green)} .kpi.warn b{color:var(--amber)}
+    .verdict{border-right:4px solid var(--red);background:var(--red2);padding:5mm 6mm;margin:5mm 0}
+    .verdict b{color:var(--red)}
+    .note{border-right:4px solid var(--gold);background:var(--amber2);padding:4mm 5mm;margin:4mm 0;font-size:9.5pt}
+    .good{border-right:4px solid var(--green);background:var(--green2);padding:4mm 5mm}
+    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:6mm}
+    .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:4mm}
+    .card{border:1px solid var(--line);padding:5mm;background:#fff}
+    .card h3{margin-top:0}
+    .score{display:flex;align-items:center;gap:5mm;border-bottom:1px solid var(--line);padding:3mm 0}
+    .score:last-child{border:0}
+    .score b{font-size:22pt;min-width:25mm;color:var(--red)}
+    .bar{height:3mm;background:#e5e7eb;flex:1}
+    .bar i{display:block;height:100%;background:var(--red)}
+    table{width:100%;border-collapse:collapse;font-size:8.8pt;margin:3mm 0 5mm}
+    th{background:var(--green);color:#fff;text-align:right;padding:2.6mm;border:1px solid var(--green)}
+    td{padding:2.4mm;border:1px solid var(--line);vertical-align:top}
+    tr:nth-child(even) td{background:var(--soft)}
+    .compact td,.compact th{padding:1.8mm 2mm;font-size:8pt}
+    .sev{display:inline-block;min-width:11mm;text-align:center;padding:.5mm 2mm;border-radius:10mm;font-weight:800;font-size:8pt}
+    .p1{background:#fee4e2;color:#b42318} .p2{background:#edf0f4;color:#344054} .p3{background:#f5f7fa;color:#475467}
+    .risk-high{background:#fee4e2;color:#b42318;font-weight:800}
+    .risk-medium{background:#edf0f4;color:#344054;font-weight:800}
+    .risk-low{background:#f5f7fa;color:#475467;font-weight:800}
+    .security-details{table-layout:fixed}
+    .security-details th:nth-child(1){width:24%}
+    .security-details th:nth-child(2){width:38%}
+    .security-details th:nth-child(3){width:38%}
+    .security-details td{overflow-wrap:anywhere}
+    ul{margin:2mm 0 4mm;padding-right:6mm}
+    li{margin-bottom:1.8mm}
+    .shots{display:grid;grid-template-columns:1fr 1fr;gap:5mm}
+    figure{margin:0;border:1px solid var(--line);background:var(--soft);padding:3mm;break-inside:avoid}
+    figure img{display:block;width:100%;height:96mm;object-fit:contain;background:#fff}
+    figcaption{font-size:8pt;color:var(--muted);margin-top:2mm}
+    .shot-wide img{height:112mm}
+    .shot-landscape img{height:118mm}
+    .responsive-proof{display:grid;grid-template-columns:1fr 1fr;gap:4mm}
+    .responsive-proof figure:first-child{grid-column:1/-1}
+    .responsive-proof figure:first-child img{height:68mm}
+    .responsive-proof figure:not(:first-child) img{height:52mm}
+    .risk-score{display:inline-block;min-width:15mm;text-align:center;padding:.5mm 2mm;border-radius:10mm;font-weight:800}
+    .source{font-size:7.5pt;color:var(--muted);border-top:1px solid var(--line);padding-top:2mm;margin-top:4mm}
+    .road{display:grid;grid-template-columns:24mm 1fr;gap:4mm;margin-bottom:4mm}
+    .road .when{background:var(--green);color:#fff;font-weight:800;text-align:center;padding:4mm 2mm}
+    .road .work{border:1px solid var(--line);padding:3mm 4mm}
+    .road h3{margin:0 0 1mm}
+    .check{display:grid;grid-template-columns:7mm 1fr;gap:2mm;margin-bottom:2.2mm}
+    .check b{color:var(--green)}
+    .footnotes{font-size:8pt;color:var(--muted)}
+    a{color:var(--green);text-decoration:none}
+    code{direction:ltr;display:inline-block;font-family:Consolas,monospace;font-size:8pt}
+    @media print{
+      html,body{width:210mm;margin:0;padding:0;background:#fff}
+      .page{margin:0;box-shadow:none;width:210mm;height:297mm;min-height:297mm;max-height:297mm;break-before:auto}
+      a{color:inherit}
+    }
+  </style>
+</head>
+<body>
+
+<section class="page cover">
+  <div>
+    <img class="cover-logo" src="brand/kat-logo-color-horizontal.png" alt="شعار الكويت للتقدم التكنولوجي">
+    <div class="cover-rule"></div>
+    <h1>الموقع ومنصة التبرعات<br>جمعية الحكمة الكويتية الخيرية</h1>
+    <p class="lead">تقييم البرمجة والتصميم وتجربة المستخدم والأداء والأمان والخادم والوصولية وتهيئة محركات البحث، مدعوم بقياسات ولقطات شاشة وخطة تنفيذ قابلة للمتابعة.</p>
+  </div>
+  <div>
+    <p class="prepared">إعداد وتقديم<br><b>الكويت للتقدم التكنولوجي</b><br><span class="small">شركة تقنية كويتية</span><br><span class="small">katkw.com · info@katkw.com · +965 6778 5888</span></p>
+    <div class="cover-meta">
+      <div><span class="small">تاريخ الفحص</span><b>15 سبتمبر 2026</b></div>
+      <div><span class="small">النطاق</span><b>alhikmakw.org.kw/donation</b></div>
+      <div><span class="small">نوع الفحص</span><b>خارجي · غير هدّام</b></div>
+    </div>
+    <p class="small" style="margin-top:7mm">لم تُنفذ أي عملية دفع، ولم تُرسل نماذج أو بيانات شخصية حقيقية، ولم يُجرَ اختبار اختراق استغلالي.</p>
+  </div>
+  <span class="page-no">01</span>
+</section>
+
+<section class="page">
+  <div class="topline"></div><div class="brand">التدقيق التقني · جمعية الحكمة</div>
+  <div class="eyebrow">الخلاصة التنفيذية</div>
+  <h2>الموقع يعمل، لكن جاهزيته للإنتاج منخفضة</h2>
+  <div class="verdict"><b>القرار المقترح:</b> بدء حزمة إصلاح عاجلة قبل أي حملة تبرعات واسعة. تبدأ الأولوية بتسريع الموقع وتجربة الجوال، ثم توحيد الأرقام، إزالة محتوى الاختبار، وترقية طبقات الخادم والأمان.</div>
+  <div class="kpis">
+    <div class="kpi bad"><b>25</b><span>أداء الجوال /100</span></div>
+    <div class="kpi bad"><b>4</b><span>مخاطر أمنية مرتفعة</span></div>
+    <div class="kpi warn"><b>65</b><span>الوصولية /100</span></div>
+    <div class="kpi warn"><b>67</b><span>SEO /100</span></div>
+  </div>
+  <div class="grid2">
+    <div class="card">
+      <h3>المخاطر التي تمس التبرع والثقة</h3>
+      <ul>
+        <li><b>بطء شديد:</b> LCP للجوال 21.6 ثانية ووقت التفاعل 30.7 ثانية؛ وهو أول محور تفصيلي في التقرير.</li>
+        <li><b>أرقام متعارضة:</b> أربع قيم مختلفة لإجمالي التبرعات وثلاث قيم للمستفيدين.</li>
+        <li><b>محتوى تجريبي:</b> FAQ وأخبار وإنجازات واتصال تعرض Lorem Ipsum ونصوص اختبار.</li>
+        <li><b>خصوصية:</b> أدوات تتبع تبدأ دون موافقة ظاهرة، ونموذج يجمع هوية وتوقيعاً بلا إشعار سياقي.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>المخاطر التقنية والأمنية</h3>
+      <ul>
+        <li>PHP/8.1.34 منتهي الدعم ومعلن في الاستجابة.</li>
+        <li>jQuery 3.2.1 وjQuery UI 1.12.1 ضمن نطاق نشرات أمنية لـXSS.</li>
+        <li>CSP لا تمنع حقن السكربتات، و10 سكربتات خارجية بلا تحقق SRI.</li>
+        <li>صفحة التبرع قابلة للتضمين داخل موقع آخر، وحماية البريد لا تزال في وضع المراقبة.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="good" style="margin-top:5mm"><b>نقاط قوة مثبتة:</b> HTTPS وتحويل HTTP يعملان، شهادة TLS صالحة، جلسة Secure/HttpOnly/SameSite، حماية CSRF في نماذج POST، روابط الحوكمة والتقارير موجودة، و82 رابطاً ظاهراً أعادت HTTP 200 وقت القياس.</div>
+  <p class="source">المصدر: Lighthouse 13.4.1، HTTP/TLS/DNS، DOM/CDP، فحص يدوي للجوال وسطح المكتب، وجرد الروابط والأصول.</p>
+  <span class="page-no">02</span>
+</section>
+
+<section class="page">
+  <div class="topline"></div><div class="brand">المنهجية وحدود الاستنتاج</div>
+  <h2>ما الذي فُحص، وما الذي لا يمكن إثباته من الخارج؟</h2>
+  <div class="grid2">
+    <div>
+      <h3>نطاق الفحص</h3>
+      <ul>
+        <li>الصفحة الرئيسية ومسار التبرع والسلة والزكاة والاستقطاعات والكفالات.</li>
+        <li>المشاريع والتقارير والإحصائيات وصفحات الثمار.</li>
+        <li>من نحن والحوكمة ومجلس الإدارة والأخبار والإنجازات والمعرض والأسئلة الشائعة والاتصال.</li>
+        <li>العربية والإنجليزية، الجوال 390–412px وسطح المكتب.</li>
+        <li>الروابط، HTML، الميتاداتا، الصور، CSS/JS، النماذج، DNS، TLS، البريد ورؤوس HTTP.</li>
+      </ul>
+    </div>
+    <div>
+      <h3>الاختبارات</h3>
+      <ul>
+        <li>Lighthouse Mobile وDesktop بملف تعريف اتصال ومحاكاة CPU.</li>
+        <li>قياس حي لـFCP وTTFB وDOM والعناصر المتجاوزة للعرض.</li>
+        <li>تحقق آلي من 82 رابطاً و67 مورداً ظاهراً.</li>
+        <li>مراجعة دلالات الوصولية والتفاعل والنصوص والحقول.</li>
+        <li>DNS عبر محللات عامة، وشهادة TLS واتصال HTTPS مباشر.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="note"><b>حدود مهمة:</b> ظهور Hostinger وhPanel وLiteSpeed يثبت المزود والبصمات فقط. لا يثبت أن الخادم مشترك أو أن WAF والنسخ الاحتياطي غير موجودين. التحقق من العزل، قواعد البيانات، الصلاحيات، السجلات، النسخ والتعافي يحتاج وصولاً داخلياً.</div>
+  <div class="good"><b>طريقة قراءة التقرير:</b> كل ملاحظة تشرح ما يراه المستخدم، أثره على الثقة أو التبرع، ثم الإجراء المطلوب. المصطلحات التقنية تُذكر فقط عندما يحتاجها فريق التنفيذ.</div>
+  <h3>مخرجات التدقيق القابلة للتسليم</h3>
+  <table>
+    <thead><tr><th>المحور</th><th>نطاق التحقق</th><th>المخرج</th></tr></thead>
+    <tbody>
+      <tr><td>الروابط</td><td>82 رابطاً ظاهراً ووجهاتها النهائية</td><td>جرد تقني قابل لإعادة الاختبار</td></tr>
+      <tr><td>سلامة البيانات</td><td>التبرعات والمستفيدون والمشاريع</td><td>توثيق التعارضات ومصادرها الظاهرة</td></tr>
+      <tr><td>المحتوى</td><td>الأسئلة الشائعة والأخبار والإنجازات والاتصال والمجلس والمعرض</td><td>قائمة أخطاء محددة بالصفحة والدليل</td></tr>
+      <tr><td>سهولة الاستخدام لذوي الإعاقة</td><td>وصف الأزرار والحقول، سهولة اللمس، ترتيب الصفحة، ووضوح الألوان</td><td>مخالفات وأولويات إصلاح قابلة للقياس</td></tr>
+      <tr><td>الخصوصية</td><td>التتبع وملفات الارتباط والهوية والهاتف والتوقيع</td><td>مخاطر ومعالجات تشغيلية وقانونية</td></tr>
+      <tr><td>الخادم</td><td>HTTP وTLS وDNS والبريد والبصمات المعلنة</td><td>فصل الأدلة المثبتة عن البنود التي تتطلب وصولاً داخلياً</td></tr>
+      <tr><td>التنفيذ</td><td>الأولوية والمالك والمدة ومعيار القبول</td><td>خارطة معالجة من 72 ساعة إلى 12 أسبوعاً</td></tr>
+    </tbody>
+  </table>
+  <span class="page-no">03</span>
+</section>
+
+<section class="page">
+  <div class="topline"></div><div class="brand">الأداء وتجربة التبرع</div>
+  <div class="eyebrow">المشكلة الأولى في التقرير</div>
+  <h2>الصفحة لا تصبح جاهزة في الوقت المقبول</h2>
+  <div class="grid2">
+    <div class="card">
+      <h3>جوال — Lighthouse 25/100</h3>
+      <div class="score"><b>10.9ث</b><span>First Contentful Paint</span></div>
+      <div class="score"><b>21.6ث</b><span>Largest Contentful Paint</span></div>
+      <div class="score"><b>11.96ث</b><span>Total Blocking Time</span></div>
+      <div class="score"><b>30.7ث</b><span>Time to Interactive</span></div>
+    </div>
+    <div class="card">
+      <h3>سطح المكتب — Lighthouse 33/100</h3>
+      <div class="score"><b>9.2ث</b><span>First Contentful Paint</span></div>
+      <div class="score"><b>10.9ث</b><span>Largest Contentful Paint</span></div>
+      <div class="score"><b>0.347</b><span>Layout Shift (سيئ)</span></div>
+      <div class="score"><b>16.8ث</b><span>Time to Interactive</span></div>
+    </div>
+  </div>
+  <div class="kpis">
+    <div class="kpi bad"><b>105</b><span>طلب شبكة — جوال</span></div>
+    <div class="kpi bad"><b>3.5MB</b><span>حجم النقل — جوال</span></div>
+    <div class="kpi warn"><b>50</b><span>صورة في الرئيسية</span></div>
+    <div class="kpi warn"><b>7</b><span>صور تستخدم lazy</span></div>
+  </div>
+  <h3>أسباب قابلة للإصلاح</h3>
+  <table class="compact">
+    <thead><tr><th>الدليل</th><th>القراءة</th><th>المعالجة</th></tr></thead>
+    <tbody>
+      <tr><td>20 ملف JavaScript و11 ملف تنسيق</td><td>يحمّل الموقع ملفات كثيرة قبل ظهور المحتوى الأساسي</td><td>تقسيم الملفات وتحميل غير الضروري لاحقاً (defer)</td></tr>
+      <tr><td>كل الصور PNG/JPEG</td><td>الصور أكبر من اللازم ولا تتكيف مع حجم الشاشة</td><td>WebP/AVIF مع حجم مناسب للجوال وسطح المكتب (srcset)</td></tr>
+      <tr><td>Popup PNG 1.15MB</td><td>صورة واحدة تتجاوز ميزانية الشاشة الأولى</td><td>AVIF/WebP وتحميل عند الحاجة فقط</td></tr>
+      <tr><td>Cache-Control: no-cache, private</td><td>المحتوى العام يُعاد تحميله من الخادم في كل مرة</td><td>فصل المحتوى الشخصي وتخزين نسخة سريعة من المحتوى العام قرب المستخدم</td></tr>
+      <tr><td>زمن استجابة الخادم متذبذب</td><td>تراوح بين 0.8 و12.1 ثانية في عينات مختلفة</td><td>مراقبة الخادم وقاعدة البيانات وتحديد الطلبات البطيئة وقياس الأداء المستمر</td></tr>
+    </tbody>
+  </table>
+  <div class="good"><b>معيار القبول:</b> ظهور المحتوى الرئيسي خلال 2.5 ثانية، استجابة التفاعل خلال 200ms، ثبات التخطيط، أقل من 60 طلباً، وصور الشاشة الأولى أقل من 500KB على اتصال 4G متوسط.</div>
+  <span class="page-no">04</span>
+</section>
+
+<section class="page">
+  <div class="topline"></div><div class="brand">الأمان والخادم</div>
+  <div class="eyebrow">المشكلة الثانية في التقرير</div>
+  <h2>أربع مخاطر مرتفعة تتطلب معالجة عاجلة</h2>
+  <div class="kpis">
+    <div class="kpi bad"><b>مرتفع</b><span>احتمال وجود ثغرات غير مكتشفة دون فحص داخلي</span></div>
+    <div class="kpi bad"><b>4</b><span>مخاطر مرتفعة</span></div>
+    <div class="kpi warn"><b>5</b><span>متوسطة ومتوسطة-منخفضة</span></div>
+    <div class="kpi"><b>2</b><span>منخفضة أو معلوماتية</span></div>
+  </div>
+  <figure class="shot-landscape"><img src="../audit-assets/screenshots/security-headers-evidence.png" alt="دليل رؤوس الخادم والمكتبات القديمة"><figcaption>الدليل الأمني 01 — استجابة الخادم تكشف PHP/8.1.34 وتفتقد رؤوس حماية أساسية، وصفحة التبرع تحمل مكتبات قديمة وموارد خارجية بلا تحقق SRI.</figcaption></figure>
+  <h3>المخاطر الأعلى — مميزة بالأحمر</h3>
+  <table class="compact">
+    <thead><tr><th>الرقم</th><th>المشكلة</th><th>تقدير الخطر</th><th>الدليل المختصر</th></tr></thead>
+    <tbody>
+      <tr><td>SEC-01</td><td>PHP 8.1.34 منتهي الدعم</td><td><span class="risk-score risk-high">85%</span></td><td><code>X-Powered-By: PHP/8.1.34</code></td></tr>
+      <tr><td>SEC-02</td><td>jQuery وjQuery UI ضمن نطاق نشرات XSS</td><td><span class="risk-score risk-high">80%</span></td><td><code>jQuery 3.2.1 · jQuery UI 1.12.1</code></td></tr>
+      <tr><td>SEC-03</td><td>CSP ضعيفة وسكربتات خارجية بلا تحقق سلامة</td><td><span class="risk-score risk-high">78%</span></td><td>19 مورداً خارجياً؛ 16 بلا SRI، منها 10 سكربتات</td></tr>
+      <tr><td>SEC-04</td><td>حماية البريد من الانتحال في وضع المراقبة</td><td><span class="risk-score risk-high">75%</span></td><td><code>DMARC p=none · SPF ~all</code></td></tr>
+    </tbody>
+  </table>
+  <div class="note"><b>مهم:</b> النسبة تقدير أولوية داخلي يجمع الأثر المحتمل واحتمال الحدوث وفق الأدلة الخارجية؛ وليست درجة CVSS. لم يثبت الفحص سيطرة على الخادم أو تسريب قاعدة بيانات.</div>
+  <span class="page-no">05</span>
+</section>
+
+<section class="page">
+  <div class="topline"></div><div class="brand">تفاصيل المخاطر الأمنية</div>
+  <h2>الدليل، ما قد يحدث، وكيف تتم المعالجة</h2>
+  <table class="compact security-details">
+    <thead><tr><th>المشكلة</th><th>الأثر المحتمل</th><th>الحل المطلوب</th></tr></thead>
+    <tbody>
+      <tr><td><b class="risk-high">SEC-01 · 85%</b><br>PHP منتهي الدعم</td><td>قد تبقى ثغرات جديدة أو معروفة بلا تحديث من فريق PHP، ما يرفع احتمال اختراق الخادم إذا وصل المهاجم إلى مسار متأثر.</td><td>الترقية إلى PHP 8.4 أو 8.5 بعد اختبار التوافق، تحديث إطار العمل والإضافات، وحذف X-Powered-By.</td></tr>
+      <tr><td><b class="risk-high">SEC-02 · 80%</b><br>مكتبات واجهة قديمة</td><td>إذا وصلت بيانات غير موثوقة إلى الوظائف المتأثرة فقد ينفذ كود داخل متصفح المتبرع ويغيّر الصفحة أو يقرأ بيانات متاحة للجلسة.</td><td>تحديث jQuery إلى إصدار مدعوم وjQuery UI إلى 1.13.2 على الأقل، ثم اختبار رحلة التبرع ومراجعة نقاط إدخال HTML.</td></tr>
+      <tr><td><b class="risk-high">SEC-03 · 78%</b><br>CSP وسلسلة التوريد</td><td>اختراق CDN أو حساب إدارة الوسوم قد يسمح بإدخال سكربت إلى صفحة التبرع وتغيير المحتوى أو جمع بيانات المتصفح.</td><td>استضافة المكتبات محلياً أو تثبيت إصدارات ثابتة، إضافة SRI، تقليل الأطراف الخارجية، وبناء CSP باستخدام nonce/hash.</td></tr>
+      <tr><td><b class="risk-high">SEC-04 · 75%</b><br>انتحال البريد</td><td>قد تصل رسائل تصيد تبدو كأنها صادرة من الجمعية إلى المتبرعين أو الموظفين.</td><td>حصر خدمات الإرسال، تفعيل DKIM، تحليل تقارير DMARC، ثم الانتقال تدريجياً إلى quarantine وبعدها reject.</td></tr>
+      <tr><td><b class="risk-medium">SEC-05 · 68%</b><br>Clickjacking مثبت</td><td>صفحة خبيثة تستطيع وضع طبقات مضللة فوق صفحة التبرع وخداع الزائر للضغط على عناصر لم يقصدها.</td><td><code>frame-ancestors 'self'</code> في CSP وإضافة <code>X-Frame-Options: SAMEORIGIN</code>.</td></tr>
+      <tr><td><b class="risk-medium">SEC-06 · 55%</b><br>غياب HSTS</td><td>أول زيارة لا تحمل أمراً محفوظاً في المتصفح لإجبار HTTPS، ما يترك فرصة تخفيض الاتصال على شبكة معادية.</td><td>تفعيل HSTS تدريجياً بعد اختبار جميع النطاقات الفرعية.</td></tr>
+      <tr><td><b class="risk-medium">SEC-07 · 48%</b><br>رؤوس متصفح مفقودة</td><td>قيود أقل ضد تخمين نوع الملف وتسريب عنوان الصفحة واستخدام ميزات المتصفح غير اللازمة.</td><td>إضافة nosniff وReferrer-Policy وPermissions-Policy واختبار COOP/CORP مع بوابة الدفع.</td></tr>
+    </tbody>
+  </table>
+  <h3>مؤشرات برمجية تحتاج اختباراً داخل بيئة تجريبية</h3>
+  <table class="compact">
+    <thead><tr><th>الرقم</th><th>الدليل</th><th>الخطر</th><th>المعالجة</th></tr></thead>
+    <tbody>
+      <tr><td>SEC-08 · 45%</td><td>إضافة السلة تستخدم GET وتضع token ضمن بيانات الاستعلام</td><td>تغيير غير متوقع للسلة وتسرب معاملات عبر السجلات</td><td>POST + تحقق CSRF وعدم وضع الرموز في URL</td></tr>
+      <tr><td>SEC-09 · 42%</td><td><code>.html(projectname)</code></td><td>Stored XSS إذا أمكن إدخال HTML غير موثوق في اسم مشروع</td><td>استخدام <code>.text()</code> وترميز JSON واختبار XSS في staging</td></tr>
+      <tr><td>SEC-10 · 28%</td><td>كشف LiteSpeed وHostinger وhPanel وPHP</td><td>تسهيل استطلاع المهاجم</td><td>إزالة الرؤوس والبصمات غير الضرورية</td></tr>
+      <tr><td>SEC-11 · 10%</td><td><code>/.well-known/security.txt</code> يعيد 404</td><td>لا قناة رسمية للإبلاغ المسؤول</td><td>نشر security.txt وفق RFC 9116</td></tr>
+    </tbody>
+  </table>
+  <span class="page-no">06</span>
+</section>
+
+<section class="page">
+  <div class="topline"></div><div class="brand">إثبات وحدود الفحص الأمني</div>
+  <h2>إثبات آمن لقابلية Clickjacking</h2>
+  <figure class="shot-landscape"><img src="../audit-assets/screenshots/clickjacking-proof.png" alt="صفحة التبرع تعمل داخل إطار خارجي"><figcaption>الدليل الأمني 02 — صفحة اختبار محلية مستقلة استطاعت عرض صفحة التبرع الحية داخل iframe. لم يُنفذ نقر أو نموذج أو دفع.</figcaption></figure>
+  <div class="grid2" style="margin-top:5mm">
+    <div class="good"><b>ضوابط نجحت في الفحص</b><ul><li>TLS 1.0 و1.1 مرفوضان، وTLS 1.2 و1.3 يعملان.</li><li>HTTP يتحول إلى HTTPS والشهادة صالحة.</li><li>الجلسة Secure وHttpOnly وSameSite=Lax.</li><li>نماذج POST المرصودة تحتوي CSRF token.</li><li>CORS لم يسمح بالأصل الخارجي التجريبي.</li><li>‎.env و‎.git محظوران، والمسارات الحساسة المحدودة أعادت 403/404.</li></ul></div>
+    <div class="note"><b>لم يُختبر على الموقع الحي</b><ul><li>SQLi وRCE وSSRF وXXE ورفع الملفات.</li><li>تجاوز الدخول والصلاحيات وIDOR ولوحة الإدارة.</li><li>التلاعب بالمبالغ وcallback وإعادة إرسال الدفع.</li><li>قواعد WAF وrate limiting والأسرار وقاعدة البيانات.</li><li>النسخ الاحتياطي والاستعادة والسجلات والاستجابة للحوادث.</li></ul></div>
+  </div>
+  <div class="verdict"><b>الحد المهني:</b> إثبات هذه البنود يحتاج نسخة staging معزولة، حسابات اختبار، وصولاً للشفرة والخادم، وتفويضاً مكتوباً. تنفيذ استغلال على الإنتاج قد يضر المتبرعين أو البيانات ولا يدخل ضمن هذا الفحص.</div>
+  <span class="page-no">07</span>
+</section>
+
+<section class="page">
+  <div class="topline"></div><div class="brand">سلامة البيانات والثقة</div>
+  <div class="eyebrow">سلامة المعلومات المنشورة</div>
+  <h2>المستخدم يرى أرقاماً مختلفة لنفس المؤشر</h2>
+  <table>
+    <thead><tr><th>المؤشر</th><th>أعلى صفحة الإحصائيات</th><th>قسم الانتشار</th><th>ملخص الرئيسية</th><th>صفحة الإنجازات</th></tr></thead>
+    <tbody>
+      <tr><td>التبرعات (د.ك)</td><td>10,232,925.64</td><td>9,478,601.22</td><td>10,007,285</td><td>10,310,361.65</td></tr>
+      <tr><td>المستفيدون</td><td>5,839,468</td><td>7,890,827</td><td>5,839,468</td><td>10,290,538</td></tr>
+      <tr><td>المشاريع</td><td>—</td><td>—</td><td>2,235</td><td>3,370+</td></tr>
+    </tbody>
+  </table>
+  <div class="shots">
+    <figure><img src="../audit-assets/screenshots/alhikma-statistics-mobile-evidence.png" alt="أعلى صفحة الإحصائيات"><figcaption>الدليل 01 — أعلى الصفحة يعرض 10,232,926 د.ك و5,839,468 مستفيداً.</figcaption></figure>
+    <figure><img src="../audit-assets/screenshots/alhikma-statistics-conflicting-totals-mobile-evidence.png" alt="ملخص أرقام الصفحة الرئيسية"><figcaption>الدليل 02 — أسفل الصفحة نفسها يعرض 10,007,285 د.ك و2,235 مشروعاً و300 دولة.</figcaption></figure>
+  </div>
+  <div class="verdict"><b>الأثر:</b> تضارب الأرقام في موقع خيري يمس المصداقية والحوكمة وقد يخلق مخاطرة تدقيق وتقارير، حتى لو كان سببه مصادر تحديث مختلفة فقط.</div>
+  <h3>المعالجة المطلوبة</h3>
+  <ol>
+    <li>اعتماد رقم مركزي واحد لكل مؤشر، مع توضيح طريقة احتسابه والجهة المسؤولة عنه.</li>
+    <li>تشغيل فحص آلي قبل النشر يوقف التحديث إذا اختلف الرقم بين صفحات الموقع.</li>
+    <li>إظهار «آخر تحديث» ونطاق البيانات (مباشر/تقارير/سنوي).</li>
+    <li>إضافة اختبارات برمجية تقارن استجابة API بالأرقام المعروضة في جميع الصفحات.</li>
+  </ol>
+  <span class="page-no">08</span>
+</section>
+
+<section class="page">
+  <div class="topline"></div><div class="brand">المحتوى والجودة</div>
+  <h2>بيانات اختبارية منشورة في صفحات رسمية</h2>
+  <div class="shots">
+    <figure><img src="../audit-assets/screenshots/alhikma-faq-test-content-mobile-evidence.png" alt="صفحة الأسئلة الشائعة التجريبية"><figcaption>الدليل 03 — Question (AR) وsdfs وdfgdg ظاهرة على صفحة الأسئلة الشائعة.</figcaption></figure>
+    <figure><img src="../audit-assets/screenshots/alhikma-achievements-placeholder-mobile-evidence.png" alt="Lorem Ipsum في الإنجازات"><figcaption>الدليل 04 — وصف الإنجازات يحتوي Lorem Ipsum، مع صفحة تعرض أرقاماً مختلفة عن الرئيسية.</figcaption></figure>
+  </div>
+  <table class="compact">
+    <thead><tr><th>الصفحة</th><th>المشكلة</th><th>الأولوية</th></tr></thead>
+    <tbody>
+      <tr><td>الأسئلة الشائعة</td><td>أسئلة وأجوبة تجريبية وعشوائية باللغة الإنجليزية.</td><td><span class="sev p1">P1</span></td></tr>
+      <tr><td>الأخبار والتقارير</td><td>Lorem Ipsum بدل محتوى الجمعية.</td><td><span class="sev p1">P1</span></td></tr>
+      <tr><td>الإنجازات</td><td>Lorem Ipsum + أرقام غير متسقة.</td><td><span class="sev p1">P1</span></td></tr>
+      <tr><td>اتصل بنا</td><td>Lorem Ipsum في صفحة الثقة والتواصل.</td><td><span class="sev p1">P1</span></td></tr>
+      <tr><td>مجلس الإدارة</td><td>لا يعرض أسماء أو أدوار أعضاء المجلس.</td><td><span class="sev p2">P2</span></td></tr>
+      <tr><td>المعرض الإعلامي</td><td>صفحة فارغة تقريباً.</td><td><span class="sev p2">P2</span></td></tr>
+      <tr><td>النصوص</td><td>المبترع، تسحيل، الإهدائات، الأستثمارية، اطلب مشروع الخيري.</td><td><span class="sev p2">P2</span></td></tr>
+      <tr><td>التذييل</td><td>حقوق 2023 رغم نشاط 2026.</td><td><span class="sev p3">P3</span></td></tr>
+    </tbody>
+  </table>
+  <div class="note"><b>إجراء 24 ساعة:</b> إخفاء الصفحات غير الجاهزة من التنقل والفهرسة إلى أن يعتمد المحتوى، بدلاً من ترك نصوص اختبار في الإنتاج.</div>
+  <span class="page-no">09</span>
+</section>
+
+<section class="page">
+  <div class="topline"></div><div class="brand">التصميم والجوال</div>
+  <h2>الرئيسية تعرض عناصر أكثر مما يستطيع الزائر استيعابه سريعاً</h2>
+  <div class="shots">
+    <figure class="shot-wide"><img src="../audit-assets/screenshots/alhikma-donation-mobile-top-evidence.png" alt="الرئيسية على الجوال"><figcaption>الدليل التصميمي 01 — أرقام وأزرار وشريط جانبي وأسهم ونقاط تنقل فوق صورة واحدة، ثم مشروع مكتمل يستهلك معظم الشاشة التالية.</figcaption></figure>
+    <figure class="shot-wide"><img src="../audit-assets/screenshots/alhikma-statistics-mobile-evidence.png" alt="قسم الإحصائيات على الجوال"><figcaption>الدليل التصميمي 02 — الشريط الجانبي يغطي النص، والأرقام الكبيرة تتنافس مع العنوان والزر والتبويبات على شاشة ضيقة.</figcaption></figure>
+  </div>
+  <h3>مشكلات الصفحة الرئيسية المثبتة</h3>
+  <table class="compact">
+    <thead><tr><th>المشكلة المرئية</th><th>الأثر على الزائر</th><th>التعديل المطلوب</th></tr></thead>
+    <tbody>
+      <tr><td>البطل الرئيسي يجمع أرقاماً وبطاقة شفافة وزرين وأسهماً ونقاطاً وشريطاً جانبياً</td><td>لا يعرف الزائر أين ينظر أو ما الخطوة الأولى.</td><td>رسالة واحدة وزر «تبرع الآن» واحد؛ نقل الأرقام إلى قسم مستقل.</td></tr>
+      <tr><td>الأرقام نفسها تظهر داخل أكثر من بطاقة في الشاشة الأولى</td><td>تبدو البيانات مكررة وتزاحم رسالة الحملة.</td><td>ملخص رقمي واحد بثلاثة مؤشرات ثابتة ومصدر واضح.</td></tr>
+      <tr><td>الشريط الجانبي «التبرع السريع» يغطي النصوص والأزرار</td><td>يمنع القراءة والضغط، خصوصاً على الجوال.</td><td>تحويله إلى زر سفلي لا يغطي المحتوى أو دمجه داخل الهيدر.</td></tr>
+      <tr><td>مشاريع مكتملة بنسبة 100% تظهر قبل المشاريع المحتاجة للدعم</td><td>أول مشروع يراه المتبرع لا يحتاج تمويلاً جديداً.</td><td>ترتيب النشطة والعاجلة أولاً ونقل المكتملة إلى «إنجازاتنا».</td></tr>
+      <tr><td>بطاقة المشروع المكتمل ما زالت تعرض دعوة إجراء كبيرة</td><td>العبارة لا توضّح هل يمكن التبرع أم مشاهدة الأثر.</td><td>زر واضح «شاهد أثر المشروع» وإزالة لغة التبرع من المكتمل.</td></tr>
+      <tr><td>البطاقة الواحدة تستهلك معظم ارتفاع شاشة الجوال</td><td>يلزم تمرير طويل لمقارنة مشروعين فقط.</td><td>بطاقات مختصرة وصورة بنسبة ثابتة مع أهم ثلاثة بيانات.</td></tr>
+      <tr><td>الهيدر يعرض قائمة وسلة وحساباً وشعاراً دون زر تبرع رئيسي واضح</td><td>الأيقونات تتنافس بينما الهدف الرئيسي غير بارز.</td><td>زر تبرع مميز مع إبقاء السلة والحساب كأدوات ثانوية.</td></tr>
+      <tr><td>الصور والنصوص الداكنة والذهبية متراكبة في طبقات متعددة</td><td>تنخفض القراءة ويبدو القسم مزدحماً.</td><td>خلفية أبسط وتباين ثابت واختبار النصوص فوق الصور.</td></tr>
+    </tbody>
+  </table>
+  <span class="page-no">10</span>
+</section>
+
+<section class="page">
+  <div class="topline"></div><div class="brand">التصميم والجوال · النماذج</div>
+  <h2>العناصر العائمة تحجب حقولاً وخيارات دفع فعلية</h2>
+  <div class="shots">
+    <figure class="shot-wide"><img src="../audit-assets/screenshots/alhikma-zakat-translation-key-mobile-evidence.png" alt="حاسبة الزكاة على الجوال"><figcaption>الدليل التصميمي 03 — تبويبات ضيقة، نص برمجي غير مترجم، ومساحة الدفع محجوبة جزئياً بزر WhatsApp وشريط المساعدة.</figcaption></figure>
+    <figure class="shot-wide"><img src="../audit-assets/screenshots/alhikma-project-request-personal-data-mobile-evidence.png" alt="نموذج طلب المشروع على الجوال"><figcaption>الدليل التصميمي 04 — الشريط الجانبي يغطي عنوان حقل، وWhatsApp ورسالة المساعدة يغطيان منطقة الهاتف وبقية النموذج.</figcaption></figure>
+  </div>
+  <h3>مشكلات النماذج وحاسبة الزكاة</h3>
+  <table class="compact">
+    <thead><tr><th>المشكلة المرئية</th><th>الأثر</th><th>التعديل</th></tr></thead>
+    <tbody>
+      <tr><td>WhatsApp ورسالة المساعدة فوق الحقول وخيارات الدفع</td><td>قد يضغط المستخدم أداة الدعم بدلاً من الحقل أو طريقة الدفع.</td><td>احترام مساحة آمنة أسفل الشاشة وإخفاء الأدوات أثناء الإدخال.</td></tr>
+      <tr><td>الشريط الجانبي يغطي أسماء الحقول</td><td>لا يستطيع المستخدم معرفة المطلوب في الحقل المحجوب.</td><td>إلغاء الوضع fixed على الجوال ووضع التبرع السريع داخل الصفحة.</td></tr>
+      <tr><td>تبويبات أنواع الزكاة كثيرة وصغيرة في صف واحد</td><td>صعوبة القراءة واللمس واحتمال اختيار نوع خاطئ.</td><td>شبكة 2×3 أو قائمة اختيار كبيرة مع وصف مختصر.</td></tr>
+      <tr><td>اختيار «الفضة» يظهر بالأحمر بينما بقية الهوية خضراء</td><td>الأحمر يُفهم عادة كخطأ لا كحالة اختيار.</td><td>حالة active ثابتة بالأخضر الداكن مع علامة واضحة.</td></tr>
+      <tr><td>بطاقة الحاسبة تحتوي مساحة فارغة كبيرة وتوزيعاً غير متوازن</td><td>تبدو الواجهة غير مكتملة وتزيد طول الصفحة.</td><td>تقليل الارتفاع وترتيب المدخل والقيمة والأزرار في صف منطقي.</td></tr>
+      <tr><td>العنوان والـplaceholder يكرران النص نفسه</td><td>ضوضاء بصرية دون مساعدة إضافية.</td><td>عنوان ثابت ومثال عملي داخل الحقل.</td></tr>
+      <tr><td>لا تظهر علامات واضحة للحقول الإلزامية أو نصوص مساعدة</td><td>قد يكتشف المستخدم المطلوب بعد الإرسال فقط.</td><td>علامة إلزام ووصف قصير والتحقق أثناء الكتابة.</td></tr>
+      <tr><td>الحقول متتابعة بلا مجموعات أو مراحل</td><td>يبدو النموذج طويلاً وصعباً قبل البدء.</td><td>بيانات المشروع، التواصل، ثم المراجعة والموافقة.</td></tr>
+      <tr><td>مسافة كبيرة بين الهيدر وعنوان الصفحة</td><td>يهدر أول شاشة ويؤخر ظهور الحقول.</td><td>تقليل padding الرأسي وتوحيد المسافات.</td></tr>
+      <tr><td>تباين النصوص الرمادية والـplaceholders منخفض</td><td>القراءة أصعب لكبار السن وعلى الشاشات الساطعة.</td><td>رفع التباين والحجم وفق WCAG AA.</td></tr>
+    </tbody>
+  </table>
+  <span class="page-no">11</span>
+</section>
+
+<section class="page">
+  <div class="topline"></div><div class="brand">التصميم والجوال · الصفحات الداخلية</div>
+  <h2>التخطيط والمحتوى التجريبي يضعفان المصداقية البصرية</h2>
+  <div class="shots">
+    <figure class="shot-wide"><img src="../audit-assets/screenshots/alhikma-faq-test-content-mobile-evidence.png" alt="الأسئلة الشائعة على الجوال"><figcaption>الدليل التصميمي 05 — تبويبات مزدحمة ومغطاة جزئياً، أسئلة تجريبية مختلطة اللغة، وفراغ طويل قبل التذييل.</figcaption></figure>
+    <figure class="shot-wide"><img src="../audit-assets/screenshots/alhikma-achievements-placeholder-mobile-evidence.png" alt="صفحة الإنجازات على الجوال"><figcaption>الدليل التصميمي 06 — نص طويل منخفض التباين فوق صورة عامة، مع شريط جانبي يغطي النص وWhatsApp يغطي البطاقة التالية.</figcaption></figure>
+  </div>
+  <h3>مشكلات الصفحات الداخلية</h3>
+  <table class="compact">
+    <thead><tr><th>المشكلة المرئية</th><th>الأثر</th><th>التعديل</th></tr></thead>
+    <tbody>
+      <tr><td>تبويبات FAQ طويلة ومتقاربة ويغطي الشريط أحدها</td><td>يصعب اكتشاف الأقسام والتنقل بينها.</td><td>تبويبات قابلة للتمرير أو قائمة منسدلة على الجوال.</td></tr>
+      <tr><td>الأسئلة تظهر بالعربية والإنجليزية ونصوص عشوائية</td><td>الصفحة تبدو تجريبية وغير موثوقة.</td><td>محتوى عربي حقيقي ونسخة إنجليزية مستقلة.</td></tr>
+      <tr><td>مساحة بيضاء طويلة بين آخر سؤال والتذييل</td><td>تبدو الصفحة مكسورة أو ناقصة.</td><td>تقليل min-height وإضافة دعوة مناسبة للتواصل.</td></tr>
+      <tr><td>أسهم الـaccordion بعيدة عن نص السؤال</td><td>العلاقة بين السهم والسؤال أقل وضوحاً.</td><td>تقريب الأيقونة وتكبير منطقة الضغط كاملة.</td></tr>
+      <tr><td>صفحة الإنجازات تبدأ بصورة بطول شاشة تقريباً</td><td>لا يرى الزائر إنجازات قابلة للمقارنة قبل التمرير.</td><td>مقدمة قصيرة ثم شبكة إنجازات موثقة.</td></tr>
+      <tr><td>فقرة طويلة بيضاء فوق مناطق فاتحة من الصورة</td><td>أجزاء من النص صعبة القراءة.</td><td>لوحة نصية صلبة أو طبقة داكنة ثابتة.</td></tr>
+      <tr><td>صورة كأس عامة لا تثبت أثراً ميدانياً</td><td>لا تربط الإنجاز بنتيجة حقيقية.</td><td>صور مشاريع حقيقية مع المكان والتاريخ والنتيجة.</td></tr>
+      <tr><td>عنوان «إنجازاتنا» مكرر مرتين متتاليتين</td><td>تسلسل هرمي ضعيف ومحتوى يبدو مكرراً.</td><td>عنوان واحد ثم تصنيفات أو بطاقات.</td></tr>
+      <tr><td>العناصر العائمة ثابتة بنفس الموضع في كل الصفحات</td><td>تغطي محتوى مختلفاً ولا تراعي سياق الصفحة.</td><td>قواعد responsive لكل قالب وإخفاؤها عند التعارض.</td></tr>
+      <tr><td>التذييل يبدأ بعد فراغ أو بطاقة مقطوعة</td><td>نهاية الصفحة لا تبدو مقصودة بصرياً.</td><td>قسم ختامي ومسافات معيارية قبل التذييل.</td></tr>
+    </tbody>
+  </table>
+  <span class="page-no">12</span>
+</section>
+
+<section class="page">
+  <div class="topline"></div><div class="brand">نظام التصميم ومسار التبرع</div>
+  <h2>المشكلة ليست لوناً واحداً؛ بل غياب قواعد موحدة للواجهة</h2>
+  <table class="compact">
+    <thead><tr><th>المحور</th><th>المشكلة المرصودة</th><th>الأثر</th><th>قاعدة التصميم المطلوبة</th></tr></thead>
+    <tbody>
+      <tr><td>الخطوط</td><td>أوزان وأحجام ومحاذاة متعددة بين العناوين والحقول والبطاقات</td><td>واجهة غير متماسكة</td><td>مقياس خط من 6 مستويات وخط عربي واحد</td></tr>
+      <tr><td>الألوان</td><td>أخضر وذهبي وأحمر دون معنى ثابت</td><td>لا يُفهم المختار من الخطأ</td><td>ألوان دلالية: أساسي ونجاح وتحذير وخطأ ومحايد</td></tr>
+      <tr><td>الأزرار</td><td>دائرية ومستطيلة وممتلئة ومحددة وبأيقونات مختلفة</td><td>يصعب تمييز الإجراء الرئيسي</td><td>Primary وSecondary وText فقط</td></tr>
+      <tr><td>البطاقات</td><td>زوايا وظلال وحدود وارتفاعات غير متجانسة</td><td>المقارنة بين المشاريع أبطأ</td><td>قالب موحد وصورة بنسبة ثابتة ومحتوى مختصر</td></tr>
+      <tr><td>الأيقونات</td><td>حساب وسلة وأزرار صغيرة بلا نص دائم</td><td>المعنى غير واضح لبعض الزوار</td><td>تسمية مرئية ومساحة لمس 44×44 بكسل</td></tr>
+      <tr><td>الحركة</td><td>Carousel وحركات دخول 2–5 ثوانٍ وعناصر عائمة</td><td>تشتت وحساسية حركة</td><td>تقليل الحركة واحترام prefers-reduced-motion</td></tr>
+      <tr><td>الصور</td><td>صور عامة ونسب قص مختلفة ونصوص فوقها</td><td>هوية ضعيفة وقراءة متفاوتة</td><td>دليل تصوير ميداني ونسب 16:9 و4:3</td></tr>
+      <tr><td>المسافات</td><td>ازدحام في البطل مقابل فراغات كبيرة في صفحات أخرى</td><td>إيقاع بصري متناقض</td><td>شبكة مسافات 4/8 بكسل وحدود لكل قسم</td></tr>
+      <tr><td>الجوال</td><td>تصغير مكونات المكتب وإضافة طبقات fixed</td><td>تداخل وقص وتمرير طويل</td><td>Mobile-first واختبار 320–412 بكسل</td></tr>
+      <tr><td>التنقل</td><td>القائمة والحساب والسلة والتبرع السريع تتنافس</td><td>تأخر الوصول للمشروع</td><td>خمسة أقسام رئيسية وزر تبرع واضح</td></tr>
+      <tr><td>الحالات</td><td>المكتمل والنشط والمختار والخطأ بلا لغة ثابتة</td><td>قرارات خاطئة أو تردد</td><td>شارات موحدة مع نص، لا لون وحده</td></tr>
+      <tr><td>الثقة</td><td>الأثر والتقارير وسياسات الدفع بعيدة عن قرار التبرع</td><td>الزائر يبحث عن الإثبات</td><td>ملخص أثر وسياسات قرب CTA والدفع</td></tr>
+    </tbody>
+  </table>
+  <div class="good"><b>المسار المقترح:</b> اختيار مشروع نشط وفهم أثره ← اختيار المبلغ والبيانات الضرورية فقط ← مراجعة المشروع والمبلغ والسياسات ← الدفع ← تأكيد وإيصال ومتابعة الأثر.</div>
+  <div class="note"><b>قاعدة القبول:</b> لا يجوز لأي عنصر fixed أن يغطي نصاً أو حقلاً أو زر دفع عند عروض 320–412 بكسل، ويجب أن يبقى الإجراء الرئيسي واحداً وواضحاً في كل شاشة.</div>
+  <span class="page-no">13</span>
+</section>
+
+<section class="page">
+  <div class="topline"></div><div class="brand">اختبار الاستجابة للمقاسات</div>
+  <h2>عند 320 و390 بكسل تنكمش الصفحة وتترك معظم الشاشة فارغاً</h2>
+  <div class="responsive-proof">
+    <figure><img src="../audit-assets/screenshots/alhikma-mobile-320-responsive-failure-evidence.png" alt="فشل تخطيط الصفحة عند 320 بكسل"><figcaption>الدليل التصميمي 07 — اختبار 320 بكسل: المحتوى ينكمش إلى عمود صغير وتبقى غالبية مساحة العرض بيضاء.</figcaption></figure>
+    <figure><img src="../audit-assets/screenshots/alhikma-mobile-390-responsive-failure-evidence.png" alt="فشل تخطيط الصفحة عند 390 بكسل"><figcaption>الدليل التصميمي 08 — النتيجة نفسها عند 390 بكسل؛ المشكلة ليست جهازاً واحداً.</figcaption></figure>
+    <figure><img src="../audit-assets/screenshots/alhikma-desktop-homepage-full-evidence.png" alt="الهيدر والواجهة الرئيسية على سطح المكتب"><figcaption>الدليل التصميمي 09 — سطح المكتب يعرض هيدراً كثيفاً وقائمة طويلة ونصوصاً صغيرة، ثم بطاقة أرقام فوق صورة مزدحمة.</figcaption></figure>
+  </div>
+  <table class="compact" style="margin-top:4mm">
+    <thead><tr><th>المشكلة المثبتة</th><th>الأثر</th><th>المعالجة</th></tr></thead>
+    <tbody>
+      <tr><td>عرض المحتوى الفعلي جزء صغير من شاشة 320 و390 بكسل</td><td>يظن المستخدم أن الموقع معطل أو غير داعم لجهازه.</td><td>إصلاح viewport والشبكة والأعمدة، ومنع أي عرض ثابت يتجاوز الحاوية.</td></tr>
+      <tr><td><code>overflow-x: hidden</code> يخفي التجاوز بدلاً من إصلاح سببه</td><td>قد تختفي عناصر خارج الشاشة دون إمكانية الوصول إليها.</td><td>تحديد العنصر المتجاوز وإصلاح width/min-width ثم إزالة الإخفاء العام.</td></tr>
+      <tr><td>الهيدر المكتبي يجمع التواصل والشبكات والقائمة واللغة والعملة</td><td>النص يصبح صغيراً ومتلاصقاً ويبطئ العثور على المشاريع.</td><td>شريط واحد مختصر وقائمة من 5–6 عناصر ونقل التفاصيل للتذييل.</td></tr>
+      <tr><td>بطاقة الأرقام فوق صورة الهيرو تقصّ بعض القيم</td><td>المؤشرات المهمة لا تُقرأ كاملة وتبدو غير مستقرة.</td><td>قسم إحصائيات مستقل بأرقام متجاوبة دون طبقات فوق الصورة.</td></tr>
+      <tr><td>فشل المقاسات الصغيرة يصيب الشاشة الأولى ومسار التبرع معاً</td><td>خسارة محتملة للمتبرعين قبل رؤية المشاريع النشطة.</td><td>اختبار بصري آلي لكل إصدار عند 320 و360 و390 و412 و768 و1440 بكسل.</td></tr>
+    </tbody>
+  </table>
+  <div class="verdict"><b>الأولوية:</b> هذا عيب P1 مرتفع، وليس تحسيناً جمالياً؛ لأنه يمنع الاستخدام الطبيعي لفئة كاملة من الشاشات.</div>
+  <span class="page-no">14</span>
+</section>
+
+<section class="page">
+  <div class="topline"></div><div class="brand">الخصوصية وأمن البريد</div>
+  <h2>بيانات حساسة وتتبع إعلاني دون سياق موافقة كافٍ</h2>
+  <div class="grid2">
+    <figure class="shot-wide"><img src="../audit-assets/screenshots/alhikma-project-request-personal-data-mobile-evidence.png" alt="نموذج طلب المشروع"><figcaption>الدليل 07 — النموذج يجمع اسم المتبرع، رقم الهوية، الهاتف، الملاحظات والتوقيع. لا يظهر إشعار غرض/احتفاظ أو موافقة بجانب الحقول في اللقطة.</figcaption></figure>
+    <div>
+      <h3>التتبع المرصود</h3>
+      <ul>
+        <li>أدوات Google لقياس الزيارات وإدارة أكواد التتبع.</li>
+        <li>أداة Snapchat الإعلانية واتصالات إلى خوادمها.</li>
+        <li>خدمة Tapad التي تساعد على ربط هوية المستخدم بين الأجهزة.</li>
+        <li>رُصدت خمسة ملفات ارتباط تابعة لجهات خارجية.</li>
+      </ul>
+      <h3>البريد</h3>
+      <ul>
+        <li><code>DMARC: v=DMARC1; p=none</code></li>
+        <li><code>SPF: include:_spf.mail.hostinger.com ~all</code></li>
+        <li>DKIM لم يُثبت لأن selector الفعلي غير معروف في الفحص الخارجي.</li>
+      </ul>
+      <div class="verdict"><b>الخطر بلغة مبسطة:</b> إعداد البريد الحالي يراقب محاولات الانتحال لكنه لا يرفضها تلقائياً؛ لذلك قد تُرسل رسائل مزيفة باسم الجمعية. يجب تشديد الإعداد تدريجياً بعد التأكد من جميع خدمات الإرسال الرسمية.</div>
+    </div>
+  </div>
+  <h3>المعالجة</h3>
+  <ol>
+    <li>منصة موافقة تمنع الوسوم غير الضرورية حتى اختيار المستخدم.</li>
+    <li>سياسة خصوصية واضحة عالمياً، وسياسة تبرع واسترجاع وشروط دفع في التذييل وقبل الإرسال.</li>
+    <li>إشعار سياقي قرب الهوية والتوقيع يشرح الغرض والأساس والاحتفاظ والجهة المتلقية.</li>
+    <li>تقليل البيانات، تشفيرها، صلاحيات أقل امتيازاً، وسجل وصول/حذف.</li>
+    <li>تفعيل DKIM وتلقي تقارير DMARC، ثم quarantine تدريجياً وصولاً إلى reject.</li>
+  </ol>
+  <span class="page-no">15</span>
+</section>
+
+<section class="page">
+  <div class="topline"></div><div class="brand">الوصولية</div>
+  <h2>نتيجة 65/100 تعني أن مساراً خيرياً يستبعد بعض المستخدمين</h2>
+  <div class="kpis">
+    <div class="kpi bad"><b>7</b><span>أزرار بلا اسم</span></div>
+    <div class="kpi bad"><b>6</b><span>حقول بلا label</span></div>
+    <div class="kpi warn"><b>14</b><span>هدف لمس صغير</span></div>
+    <div class="kpi warn"><b>6</b><span>Progressbar بلا اسم</span></div>
+  </div>
+  <table>
+    <thead><tr><th>المشكلة</th><th>الدليل</th><th>الأثر</th><th>معيار القبول</th></tr></thead>
+    <tbody>
+      <tr><td>أسماء الأزرار والروابط</td><td>7 أزرار ورابطان بلا وصف مفهوم لقارئ الشاشة</td><td>يسمع المستخدم كلمة «زر» دون معرفة وظيفته</td><td>إضافة اسم واضح لكل زر وأيقونة</td></tr>
+      <tr><td>عناوين الحقول</td><td>6 حقول غير مرتبطة بعنوان يشرح المطلوب</td><td>لا يعرف المستخدم ماذا يكتب أو كيف يصحح الخطأ</td><td>عنوان وتعليمات ورسالة خطأ واضحة لكل حقل</td></tr>
+      <tr><td>حجم مناطق اللمس</td><td>14 عنصراً صغيراً أو متقارباً</td><td>تزداد أخطاء الضغط على الجوال</td><td>مساحة لمس لا تقل عن 44×44 بكسل مع تباعد مناسب</td></tr>
+      <tr><td>البنية البرمجية للوصولية</td><td>أدوار وعلاقات ARIA غير صحيحة وأشرطة تقدم بلا أسماء</td><td>قارئ الشاشة لا يفهم ترتيب الصفحة أو معنى نسبة التقدم</td><td>تصحيح الأدوار والأسماء والقيم وفق WCAG</td></tr>
+      <tr><td>العناوين</td><td>قفزات H1/H6 وH1 متعدد/مخفي</td><td>تنقل مربك</td><td>H1 واحد وتسلسل منطقي</td></tr>
+      <tr><td>التباين</td><td>3 حالات فشلت آلياً</td><td>صعوبة قراءة النص والأزرار</td><td>WCAG AA: 4.5:1 للنص العادي</td></tr>
+      <tr><td>بنية الصفحة البرمجية</td><td>7 معرّفات مكررة وعناصر مخفية يقرأها قارئ الشاشة</td><td>قد ترتبط عناوين الحقول والنوافذ بالعناصر الخطأ</td><td>معرّف فريد لكل عنصر وإخفاء صحيح للعناصر غير الظاهرة</td></tr>
+    </tbody>
+  </table>
+  <div class="note"><b>لا يكفي Lighthouse:</b> يجب إكمال اختبار لوحة مفاتيح، قارئ شاشة عربي، تكبير 200%، واتجاه RTL في رحلة التبرع كاملة.</div>
+  <span class="page-no">16</span>
+</section>
+
+<section class="page">
+  <div class="topline"></div><div class="brand">SEO والروابط والتوطين</div>
+  <h2>الروابط «تعمل» تقنياً، لكن بعض وجهاتها خاطئة دلالياً</h2>
+  <div class="grid2">
+    <div class="card">
+      <h3>ما تم التحقق منه</h3>
+      <ul>
+        <li>82 رابطاً ظاهراً أعادت HTTP 200 وقت الفحص.</li>
+        <li>الخرائط وInstagram وX قابلة للوصول.</li>
+        <li>الرئيسية بلا slash تتحول إلى النسخة القياسية.</li>
+        <li>404 الحقيقي يعيد 404، لكنه قالب Hostinger عام.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>الوجهات غير الصحيحة</h3>
+      <ul>
+        <li><code>/donation/en</code> يعيد إلى الرئيسية العربية؛ لا نسخة إنجليزية فعلية.</li>
+        <li><code>/donation/ar</code> يعيد إلى الرئيسية العامة.</li>
+        <li><code>/donation/ar/33</code> يعيد إلى الرئيسية بدل مشروع صالح.</li>
+        <li>روابط <code>#</code> و<code>javascript:void(0)</code> غير قابلة للزحف.</li>
+      </ul>
+    </div>
+  </div>
+  <h3>نتيجة SEO: 67/100</h3>
+  <table>
+    <thead><tr><th>العنصر</th><th>الحالة</th><th>الإجراء</th></tr></thead>
+    <tbody>
+      <tr><td>robots.txt</td><td>404</td><td>ملف صالح يعلن sitemap</td></tr>
+      <tr><td>sitemap.xml</td><td>404</td><td>توليد آلي للمشاريع والتقارير والصفحات</td></tr>
+      <tr><td>Meta description</td><td>غير موجود في الرئيسية</td><td>وصف فريد 140–160 حرفاً</td></tr>
+      <tr><td>Canonical</td><td>غير موجود</td><td>ذاتي مع توحيد slash والمعلمات</td></tr>
+      <tr><td>Open Graph</td><td>لا وسوم مشاركة</td><td>عنوان ووصف وصورة 1200×630</td></tr>
+      <tr><td>JSON-LD</td><td>غير موجود</td><td>Organization/Breadcrumb/DonateAction</td></tr>
+      <tr><td>hreflang</td><td>غير موجود والإنجليزية لا تعمل</td><td>ar-KW/en-KW متبادل بعد اكتمال النسخة</td></tr>
+      <tr><td>العناوين</td><td>عنوان الصفحة نفسه على صفحات متعددة</td><td>عنوان فريد حسب المشروع/الصفحة</td></tr>
+    </tbody>
+  </table>
+  <span class="page-no">17</span>
+</section>
+
+<section class="page">
+  <div class="topline"></div><div class="brand">سجل المشكلات</div>
+  <h2>المصفوفة التنفيذية — الجزء الأول</h2>
+  <table class="compact">
+    <thead><tr><th>#</th><th>المشكلة</th><th>المجال</th><th>الأولوية</th><th>الأثر</th></tr></thead>
+    <tbody>
+      <tr><td>F01</td><td>تعارض إجماليات التبرعات والمستفيدين والمشاريع</td><td>بيانات</td><td><span class="sev p1">P1</span></td><td>ثقة/حوكمة</td></tr>
+      <tr><td>F02</td><td>الأسئلة الشائعة والأخبار والإنجازات والاتصال تحتوي بيانات اختبار</td><td>محتوى</td><td><span class="sev p1">P1</span></td><td>السمعة وإكمال التبرع</td></tr>
+      <tr><td>F03</td><td>أداء الجوال 25؛ LCP 21.6ث وTTI 30.7ث</td><td>أداء</td><td><span class="sev p1">P1</span></td><td>فقد متبرعين</td></tr>
+      <tr><td>F04</td><td>PHP 8.1.34 منتهي الدعم</td><td>خادم</td><td><span class="sev p1">P1</span></td><td>صيانة/أمان</td></tr>
+      <tr><td>F05</td><td>CSP شكلية ورؤوس حماية أساسية غائبة</td><td>أمان</td><td><span class="sev p1">P1</span></td><td>تقليل دفاعات المتصفح</td></tr>
+      <tr><td>F06</td><td>تتبع Snapchat/Tapad/Google قبل موافقة ظاهرة</td><td>خصوصية</td><td><span class="sev p1">P1</span></td><td>امتثال/سمعة</td></tr>
+      <tr><td>F07</td><td>جمع هوية وهاتف وتوقيع دون إشعار سياقي</td><td>خصوصية</td><td><span class="sev p1">P1</span></td><td>بيانات شخصية</td></tr>
+      <tr><td>F08</td><td>النسخة الإنجليزية تعيد للعربية</td><td>توطين</td><td><span class="sev p1">P1</span></td><td>مسار مكسور</td></tr>
+      <tr><td>F09</td><td>DMARC p=none وSPF softfail</td><td>بريد</td><td><span class="sev p1">P1</span></td><td>انتحال/تصيد</td></tr>
+      <tr><td>F10</td><td>jQuery 3.2.1 ضمن نطاق CVE-2020-11022/11023</td><td>اعتماديات</td><td><span class="sev p1">P1</span></td><td>تعرض مشروط لـXSS</td></tr>
+      <tr><td>F11</td><td>أداء سطح المكتب 33 وCLS 0.347</td><td>أداء</td><td><span class="sev p2">P2</span></td><td>بطء وعدم استقرار</td></tr>
+      <tr><td>F12</td><td>no-cache/private لصفحة عامة</td><td>خادم</td><td><span class="sev p2">P2</span></td><td>حمل وTTFB</td></tr>
+      <tr><td>F13</td><td>50 صورة؛ 7 lazy؛ لا WebP/AVIF</td><td>واجهة</td><td><span class="sev p2">P2</span></td><td>بيانات/سرعة</td></tr>
+      <tr><td>F14</td><td>Font Awesome 403 وطلب service worker 404 في Lighthouse</td><td>اعتماديات</td><td><span class="sev p2">P2</span></td><td>أيقونات/Console</td></tr>
+      <tr><td>F15</td><td>عرض الجوال مكسور: فراغات كبيرة وعناصر تتجاوز الشاشة</td><td>تصميم</td><td><span class="sev p2">P2</span></td><td>قابلية الاستخدام</td></tr>
+      <tr><td>F16</td><td>أزرار وروابط بلا أسماء وصولية</td><td>وصولية</td><td><span class="sev p2">P2</span></td><td>قارئ الشاشة</td></tr>
+      <tr><td>F17</td><td>حقول بلا عناوين مرتبطة تشرح المطلوب</td><td>وصولية</td><td><span class="sev p2">P2</span></td><td>إدخال وأخطاء</td></tr>
+    </tbody>
+  </table>
+  <span class="page-no">18</span>
+</section>
+
+<section class="page">
+  <div class="topline"></div><div class="brand">سجل المشكلات</div>
+  <h2>المصفوفة التنفيذية — الجزء الثاني</h2>
+  <table class="compact">
+    <thead><tr><th>#</th><th>المشكلة</th><th>المجال</th><th>الأولوية</th><th>الأثر</th></tr></thead>
+    <tbody>
+      <tr><td>F18</td><td>14 هدف لمس صغير/متقارب</td><td>وصولية</td><td><span class="sev p2">P2</span></td><td>أخطاء لمس</td></tr>
+      <tr><td>F19</td><td>ARIA غير صحيحة و7 IDs مكررة وتسلسل عناوين ضعيف</td><td>DOM</td><td><span class="sev p2">P2</span></td><td>صيانة/وصولية</td></tr>
+      <tr><td>F20</td><td>غياب meta/canonical/OG/JSON-LD/hreflang</td><td>SEO</td><td><span class="sev p2">P2</span></td><td>اكتشاف/مشاركة</td></tr>
+      <tr><td>F21</td><td>robots.txt وsitemap.xml يعيدان 404</td><td>SEO</td><td><span class="sev p2">P2</span></td><td>زحف وفهرسة</td></tr>
+      <tr><td>F22</td><td>العنوان نفسه على صفحات متعددة</td><td>SEO</td><td><span class="sev p2">P2</span></td><td>تمييز النتائج</td></tr>
+      <tr><td>F23</td><td>مجلس الإدارة بلا أعضاء والمعرض شبه فارغ</td><td>محتوى</td><td><span class="sev p2">P2</span></td><td>شفافية</td></tr>
+      <tr><td>F24</td><td>روابط 200 لكن وجهاتها خاطئة (/en و/ar/33)</td><td>روابط</td><td><span class="sev p2">P2</span></td><td>ثقة/تنقل</td></tr>
+      <tr><td>F25</td><td>translation.Grams وPay وأخطاء عربية</td><td>توطين</td><td><span class="sev p2">P2</span></td><td>احترافية</td></tr>
+      <tr><td>F26</td><td>لا روابط عالمية واضحة للشروط/الخصوصية/الاسترجاع</td><td>قانوني</td><td><span class="sev p1">P1</span></td><td>ثقة/امتثال</td></tr>
+      <tr><td>F27</td><td>email/phone كـtext وautocomplete غير مفعل</td><td>نماذج</td><td><span class="sev p3">P3</span></td><td>إدخال الجوال</td></tr>
+      <tr><td>F28</td><td>عارض صور وأدوات عائمة كثيرة قبل المشاريع النشطة</td><td>تجربة المستخدم</td><td><span class="sev p2">P2</span></td><td>تشتت المتبرع</td></tr>
+      <tr><td>F29</td><td>حقوق النشر 2023</td><td>محتوى</td><td><span class="sev p3">P3</span></td><td>انطباع الصيانة</td></tr>
+      <tr><td>F30</td><td>كشف PHP والمزود واللوحة والخادم</td><td>خادم</td><td><span class="sev p3">P3</span></td><td>بصمات تقنية</td></tr>
+      <tr><td>F31</td><td>بريد Gmail بدل نطاق الجمعية</td><td>ثقة</td><td><span class="sev p3">P3</span></td><td>هوية مؤسسية</td></tr>
+      <tr><td>F32</td><td>105 طلبات وطلبات تتبع/خدمة فاشلة</td><td>تشغيل</td><td><span class="sev p2">P2</span></td><td>ضوضاء وفشل جزئي</td></tr>
+      <tr><td>F33</td><td>لا دليل خارجي على RUM/APM/SLO/اختبار استعادة</td><td>تشغيل</td><td><span class="sev p3">P3</span></td><td>يتطلب تحققاً داخلياً</td></tr>
+    </tbody>
+  </table>
+  <div class="note"><b>تعريف الأولويات:</b> P1 خلال 72 ساعة؛ P2 خلال أول دورتين للتطوير؛ P3 ضمن خطة التحسين. لا توجد نتيجة P0 لأن الفحص لم يثبت اختراقاً أو فشلاً شاملاً في الدفع.</div>
+  <span class="page-no">19</span>
+</section>
+
+<section class="page">
+  <div class="topline"></div><div class="brand">خارطة الطريق</div>
+  <h2>خطة إصلاح من 72 ساعة إلى 12 أسبوعاً</h2>
+  <div class="road"><div class="when">0–72<br>ساعة</div><div class="work"><h3>إزالة المشكلات التي يراها الجمهور فوراً</h3><p>إخفاء صفحات الاختبار، توحيد الأرقام، إصلاح النسخة الإنجليزية أو تعطيلها مؤقتاً، إضافة صفحات الخصوصية والشروط، إيقاف التتبع قبل الموافقة، والبدء بترقية PHP.</p><span class="small">المسؤولون: إدارة المنتج، البرمجة الخلفية، المحتوى، الأمن، والشؤون القانونية</span></div></div>
+  <div class="road"><div class="when">1–2<br>أسبوع</div><div class="work"><h3>تحسين الثقة وسهولة الاستخدام</h3><p>إضافة حماية المتصفح، تحديث المكتبات، إصلاح عرض الجوال والوصولية والترجمة، وتجهيز ملفات محركات البحث مع اختبارات آلية للروابط والأرقام والنماذج.</p><span class="small">المسؤولون: الواجهة، البرمجة الخلفية، ضمان الجودة، محركات البحث، والأمن</span></div></div>
+  <div class="road"><div class="when">3–6<br>أسابيع</div><div class="work"><h3>تسريع الموقع وتبسيط التبرع</h3><p>ضغط الصور وتحميلها بالحجم المناسب، إزالة الملفات غير الضرورية، تسريع المحتوى العام، ترتيب الحملات النشطة أولاً، وتقليل رحلة التبرع إلى خطوات واضحة مع قياس نسبة الإكمال.</p><span class="small">المسؤولون: تجربة المستخدم، الواجهة، تشغيل الخوادم، والتحليلات</span></div></div>
+  <div class="road"><div class="when">7–12<br>أسبوعاً</div><div class="work"><h3>بناء تشغيل مؤسسي مستمر</h3><p>مراقبة الأداء والأعطال، حماية الخادم، نسخ احتياطي مع اختبار استعادة، دخول متعدد العوامل، صلاحيات وسجل تغييرات، وفحوص أمنية تلقائية قبل النشر.</p><span class="small">المسؤولون: تشغيل الخوادم، الأمن، وإدارة الجمعية</span></div></div>
+  <h3>مؤشرات نجاح أسبوعية</h3>
+  <table class="compact">
+    <thead><tr><th>المؤشر</th><th>خط الأساس</th><th>هدف 30 يوماً</th><th>هدف 90 يوماً</th></tr></thead>
+    <tbody>
+      <tr><td>Lighthouse Performance Mobile</td><td>25</td><td>≥75</td><td>≥90</td></tr>
+      <tr><td>زمن ظهور المحتوى الرئيسي على الجوال (LCP)</td><td>21.6ث مختبري</td><td>≤4ث</td><td>≤2.5ث لدى 75% من الزوار الحقيقيين</td></tr>
+      <tr><td>أخطاء المحتوى P1</td><td>4+ صفحات</td><td>0</td><td>0 مع بوابة نشر</td></tr>
+      <tr><td>تعارض المؤشرات</td><td>متعدد</td><td>0</td><td>اختبار آلي دائم</td></tr>
+      <tr><td>الوصولية</td><td>65</td><td>≥85</td><td>≥95 + اختبار يدوي</td></tr>
+      <tr><td>نسبة إكمال التبرع</td><td>غير متاحة</td><td>خط أساس</td><td>تحسن مثبت بـA/B</td></tr>
+    </tbody>
+  </table>
+  <span class="page-no">20</span>
+</section>
+
+<section class="page">
+  <div class="topline"></div><div class="brand">معايير القبول والتسليم</div>
+  <h2>متى نعتبر المنصة جاهزة؟</h2>
+  <div class="grid2">
+    <div>
+      <h3>المنتج والمحتوى</h3>
+      <div class="check"><b>01</b><span>مصدر بيانات واحد واختبار اتساق لكل رقم.</span></div>
+      <div class="check"><b>02</b><span>صفر Lorem Ipsum أو نصوص اختبار أو أخطاء ترجمة.</span></div>
+      <div class="check"><b>03</b><span>صفحة مجلس وإدارة واتصال وFAQ معتمدة.</span></div>
+      <div class="check"><b>04</b><span>عربية وإنجليزية مستقلتان أو تعطيل الخيار غير الجاهز.</span></div>
+      <div class="check"><b>05</b><span>خصوصية وشروط تبرع واسترجاع متاحة قبل الدفع.</span></div>
+      <h3>الجودة</h3>
+      <div class="check"><b>06</b><span>اختبار آلي كامل لرحلة السلة والصدقة والزكاة والاستقطاع والكفالة.</span></div>
+      <div class="check"><b>07</b><span>اختبار KNET وVisa في البيئة التجريبية: نجاح، إلغاء، فشل، انقطاع، وعودة النتيجة للموقع.</span></div>
+      <div class="check"><b>08</b><span>اختبار الجوال بعروض 320 و360 و390 و412 بكسل، وسطح المكتب والاتجاه العربي.</span></div>
+    </div>
+    <div>
+      <h3>الأمن والتشغيل</h3>
+      <div class="check"><b>09</b><span>إصدار PHP مدعوم، وفحص تلقائي للمكتبات يمنع الإصدارات عالية الخطورة.</span></div>
+      <div class="check"><b>10</b><span>CSP وHSTS وframe protection وnosniff فعالة.</span></div>
+      <div class="check"><b>11</b><span>التتبع محجوب قبل الموافقة مع سجل موافقة.</span></div>
+      <div class="check"><b>12</b><span>DMARC تدريجي بعد DKIM وتغطية كل المرسلين.</span></div>
+      <div class="check"><b>13</b><span>تنبيه عند بطء استجابة الخادم، أخطاء الخادم، أو فشل الدفع وعودة نتيجته.</span></div>
+      <div class="check"><b>14</b><span>نسخة احتياطية مشفرة + اختبار استعادة موثق.</span></div>
+      <div class="check"><b>15</b><span>MFA وصلاحيات أقل امتيازاً وسجل تغييرات المحتوى.</span></div>
+      <div class="check"><b>16</b><span>مراجعة أمنية نهائية قبل الإطلاق.</span></div>
+    </div>
+  </div>
+  <h3>ملفات الأدلة المرفقة</h3>
+  <table class="compact">
+    <thead><tr><th>المجلد/الملف</th><th>المحتوى</th></tr></thead>
+    <tbody>
+      <tr><td><code>audit-assets/screenshots/</code></td><td>لقطات الجوال والمحتوى والنماذج، ودليل الرؤوس والمكتبات، وإثبات Clickjacking الآمن.</td></tr>
+      <tr><td><code>audit-assets/technical/security-findings.json</code></td><td>سجل المخاطر الأمنية: الدليل، الأثر، النسبة، المعالجة، وحدود الاستنتاج.</td></tr>
+      <tr><td><code>audit-assets/technical/security-safe-scan.json</code></td><td>نتائج TLS وCORS والرؤوس والمسارات الحساسة وفحص SRI غير الهدّام.</td></tr>
+      <tr><td><code>audit-assets/technical/lighthouse-*.json</code></td><td>تقارير Lighthouse الخام للجوال وسطح المكتب.</td></tr>
+      <tr><td><code>audit-assets/technical/links-check.json</code></td><td>82 رابطاً وحالات HTTP والوجهات النهائية.</td></tr>
+      <tr><td><code>audit-assets/technical/assets.json</code></td><td>67 مورداً وحجمها وحالاتها.</td></tr>
+      <tr><td><code>audit-assets/technical/summary.json</code></td><td>HTTP وcookies والـredirects وrobots/sitemap.</td></tr>
+      <tr><td><code>audit-assets/technical/tls.json</code></td><td>الشهادة والبروتوكول والتشفير.</td></tr>
+    </tbody>
+  </table>
+  <div class="note"><b>إخلاء مهني:</b> هذا تدقيق خارجي للجودة والمخاطر وليس شهادة امتثال قانوني أو PCI DSS، ولا بديلاً عن اختبار اختراق مصرح به ومراجعة داخلية للبنية وقاعدة البيانات وبوابة الدفع.</div>
+  <span class="page-no">21</span>
+</section>
+
+<section class="page cover">
+  <div>
+    <img class="cover-logo" src="brand/kat-logo-color-horizontal.png" alt="شعار الكويت للتقدم التكنولوجي">
+    <div class="cover-rule"></div>
+    <h1>ابدؤوا بالثقة،<br>ثم السرعة،<br>ثم الشكل.</h1>
+    <p class="lead">خلال 72 ساعة يمكن إزالة أخطر مؤشرات عدم الجاهزية. بعد ذلك تُقاس كل دفعة تحسين بأثرها على اكتمال التبرع، لا بعدد الصفحات التي تغيّر لونها.</p>
+  </div>
+  <div>
+    <p><b>الكويت للتقدم التكنولوجي</b><br>katkw.com · info@katkw.com · +965 6778 5888</p>
+    <p class="small">أُعد هذا التقرير من أدلة قابلة لإعادة الاختبار بتاريخ 15 سبتمبر 2026. جميع القياسات لحظية وقد تتغير بعد تحديث الموقع أو الخادم.</p>
+  </div>
+  <span class="page-no">22</span>
+</section>
+
+</body>
+</html>

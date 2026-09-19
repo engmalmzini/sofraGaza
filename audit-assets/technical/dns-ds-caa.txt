@@ -1,0 +1,19 @@
+﻿### DS
+
+### CAA
+nslookup.exe : Non-authoritative answer:
+At C:\Users\MSI GF63\AppData\Local\Temp\ps-script-68c5a2ea-b15d-4c2a-b470-7dc4c3348ad0.ps1:90 char:169
++ ... ### CAA'; $out += (& nslookup -type=CAA alhikmakw.org.kw 2>&1 | Out-S ...
++                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Non-authoritative answer::String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+
+Server:  UnKnown
+Address:  10.2.0.1
+
+Name:    alhikmakw.org.kw
+Address:  185.97.145.39
+
+unknown query type: CAA
+

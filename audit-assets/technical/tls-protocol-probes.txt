@@ -1,0 +1,35 @@
+﻿TLS 1.0
+curl.exe : curl: (35) schannel: next InitializeSecurityContext failed: SEC_E_UNSUPPORTED_FUNCTION (0x80090302) - The 
+function requested is not supported
+At C:\Users\MSI GF63\AppData\Local\Temp\ps-script-6560f02a-7ace-4c8b-ab03-9ea62f1190ab.ps1:72 char:82
++ ... "; $out += (& curl.exe -sS --tlsv$v --tls-max $v -o NUL -w "http=%{ht ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (curl: (35) scha...s not supported:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+http=000 verify=0 remote=
+
+TLS 1.1
+curl.exe : curl: (35) schannel: next InitializeSecurityContext failed: SEC_E_UNSUPPORTED_FUNCTION (0x80090302) - The 
+function requested is not supported
+At C:\Users\MSI GF63\AppData\Local\Temp\ps-script-6560f02a-7ace-4c8b-ab03-9ea62f1190ab.ps1:72 char:82
++ ... "; $out += (& curl.exe -sS --tlsv$v --tls-max $v -o NUL -w "http=%{ht ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (curl: (35) scha...s not supported:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+http=000 verify=0 remote=
+
+TLS 1.2
+http=200 verify=0 remote=185.97.145.39
+
+TLS 1.3
+curl.exe : curl: (35) schannel: TLS 1.3 not supported on Windows prior to 11
+At C:\Users\MSI GF63\AppData\Local\Temp\ps-script-6560f02a-7ace-4c8b-ab03-9ea62f1190ab.ps1:72 char:82
++ ... "; $out += (& curl.exe -sS --tlsv$v --tls-max $v -o NUL -w "http=%{ht ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (curl: (35) scha...ows prior to 11:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+http=000 verify=0 remote=
+

@@ -1,0 +1,291 @@
+{
+  "html_attributes": {
+    "lang": "ar",
+    "dir": "rtl"
+  },
+  "title": "جمعية الحكمة الكويتية الخيرية",
+  "metas": [
+    {
+      "charset": "utf-8"
+    },
+    {
+      "name": "viewport",
+      "content": "width=device-width, initial-scale=1"
+    }
+  ],
+  "link_tags": [
+    {
+      "rel": "stylesheet",
+      "href": "https://alhikmakw.org.kw/donation/assets/css/style_ar.css"
+    },
+    {
+      "href": "https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css",
+      "rel": "stylesheet",
+      "integrity": "sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65",
+      "crossorigin": "anonymous"
+    },
+    {
+      "rel": "stylesheet",
+      "href": "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
+    },
+    {
+      "rel": "stylesheet",
+      "href": "https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
+    },
+    {
+      "rel": "stylesheet",
+      "href": "https://unpkg.com/aos@next/dist/aos.css"
+    },
+    {
+      "rel": "stylesheet",
+      "href": "https://alhikmakw.org.kw/donation/assets/css/whatsapp-chat-support.css"
+    },
+    {
+      "rel": "shortcut icon",
+      "href": "https://alhikmakw.org.kw/donation/assets/img/favicon-16x16.png"
+    },
+    {
+      "rel": "preconnect",
+      "href": "https://fonts.googleapis.com"
+    },
+    {
+      "rel": "preconnect",
+      "href": "https://fonts.gstatic.com",
+      "crossorigin": null
+    },
+    {
+      "href": "https://fonts.googleapis.com/css2?family=Tajawal:wght@300;700;800;900&display=swap",
+      "rel": "stylesheet"
+    },
+    {
+      "rel": "stylesheet",
+      "type": "text/css",
+      "href": "https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css"
+    },
+    {
+      "rel": "stylesheet",
+      "href": "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.1/css/all.min.css",
+      "integrity": "sha512-5Hs3dF2AEPkpNAR7UiOHba+lRSJNeM2ECkwxUIxC1Q/FLycGTbNapWXB4tP889k5T5Ju8fs4b1P5z/iB4nMfSQ==",
+      "crossorigin": "anonymous",
+      "referrerpolicy": "no-referrer"
+    },
+    {
+      "href": "https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css",
+      "rel": "stylesheet"
+    },
+    {
+      "rel": "stylesheet",
+      "href": "https://alhikmakw.org.kw/donation/assets/css/payment-methods-polish.css?v=20260808b"
+    }
+  ],
+  "headings": [
+    {
+      "tag": "h5",
+      "text": "60627111"
+    },
+    {
+      "tag": "h5",
+      "text": "alhikma.kuw@gmail.com"
+    },
+    {
+      "tag": "h5",
+      "text": "العقيلة - ق5 - قسيمة 86 - مجمع أوتاد - الدور 8 - مكتب 2 - 18759533, العقيلة -"
+    },
+    {
+      "tag": "h1",
+      "text": "حسابي"
+    },
+    {
+      "tag": "h5",
+      "text": "تسجيل دخول المبترع لصفحته الشخصية"
+    },
+    {
+      "tag": "h5",
+      "text": "من خلال إنشاء حساب على موقع الجمعية ، ستتمكن من التبرع بشكل أسرع ، وأن تكون محدثًا على حالة التبرعات والتقارير ، وتتبع التبرعات التي قدمتها سابقًا."
+    },
+    {
+      "tag": "h1",
+      "text": "حسابي"
+    },
+    {
+      "tag": "h5",
+      "text": "تسجيل دخول المبترع لصفحته الشخصية"
+    },
+    {
+      "tag": "h5",
+      "text": "من خلال إنشاء حساب على موقع الجمعية ، ستتمكن من التبرع بشكل أسرع ، وأن تكون محدثًا على حالة التبرعات والتقارير ، وتتبع التبرعات التي قدمتها سابقًا."
+    },
+    {
+      "tag": "h1",
+      "text": "Project Name"
+    },
+    {
+      "tag": "h2",
+      "text": "مشاريع اكتملت"
+    },
+    {
+      "tag": "h3",
+      "text": "مشروع افطار صائم"
+    },
+    {
+      "tag": "h1",
+      "text": "مشروع الزكاة والصدقات"
+    },
+    {
+      "tag": "h2",
+      "text": "نستقبل زكاتكم"
+    },
+    {
+      "tag": "h2",
+      "text": "نستقبل صدقتكم"
+    },
+    {
+      "tag": "h6",
+      "text": "مشروع دعم مرضى السرطان"
+    },
+    {
+      "tag": "h6",
+      "text": "مشروع بناء 10 مساجد"
+    },
+    {
+      "tag": "h6",
+      "text": "مشروع سنابل الخير"
+    },
+    {
+      "tag": "h6",
+      "text": "مشروع وقف الأجر العظيم"
+    },
+    {
+      "tag": "h6",
+      "text": "مشروع كفالة الأيتام"
+    },
+    {
+      "tag": "h6",
+      "text": "مشروع سداد الرسوم الدراسية – داخل الكويت"
+    },
+    {
+      "tag": "h6",
+      "text": "مشروع صدقة السر"
+    },
+    {
+      "tag": "h6",
+      "text": "مشروع برد عليهم للأسر المتعففة"
+    },
+    {
+      "tag": "h6",
+      "text": "مشروع توزيع الخبز على الأسر الفقيرة"
+    },
+    {
+      "tag": "h6",
+      "text": "مشروع عون ورحمة لأهلنا بالسودان"
+    },
+    {
+      "tag": "h6",
+      "text": "مشروع حفر الآبار خارج الكويت"
+    },
+    {
+      "tag": "h6",
+      "text": "مشروع عمليات العيون في اليمن وموريتانيا"
+    },
+    {
+      "tag": "h6",
+      "text": "مشروع سقيا الماء"
+    },
+    {
+      "tag": "h6",
+      "text": "مشروع توزيع حليب الأطفال"
+    },
+    {
+      "tag": "h6",
+      "text": "مساعدة أهل غزة لتوفير احتياجاتهم الغذائية الضرورية"
+    },
+    {
+      "tag": "h6",
+      "text": "مشروع سقيا الماء"
+    },
+    {
+      "tag": "h6",
+      "text": "مشروع توزيع حليب الأطفال"
+    },
+    {
+      "tag": "h6",
+      "text": "مشروع اطعام الطعام باليمن"
+    },
+    {
+      "tag": "h6",
+      "text": "مشروع توزيع الحقيبة المدرسية للاسر المتعففة – داخل الكويت"
+    },
+    {
+      "tag": "h1",
+      "text": "أثر الجمعية"
+    },
+    {
+      "tag": "h3",
+      "text": "مشروع سقيا الماء"
+    },
+    {
+      "tag": "h3",
+      "text": "بناء المساجد"
+    },
+    {
+      "tag": "h3",
+      "text": "مشروع توزيع السلة الغذائية"
+    },
+    {
+      "tag": "h3",
+      "text": "مشروع توزيع حليب الأطفال"
+    },
+    {
+      "tag": "h3",
+      "text": "الإغاثة العامة"
+    },
+    {
+      "tag": "h3",
+      "text": "مشروع افطار صائم"
+    },
+    {
+      "tag": "h3",
+      "text": "مشروع صدقة السر"
+    },
+    {
+      "tag": "h3",
+      "text": "كفالة الأيتام"
+    },
+    {
+      "tag": "h3",
+      "text": "مشروع اطعام الطعام باليمن"
+    },
+    {
+      "tag": "h3",
+      "text": "مشروع سداد الرسوم الدراسية – داخل الكويت"
+    },
+    {
+      "tag": "h3",
+      "text": "إفطار صائم"
+    },
+    {
+      "tag": "h3",
+      "text": "مشروع حفر الآبار خارج الكويت"
+    },
+    {
+      "tag": "h1",
+      "text": "مشروع دفء الشتاء للنازحين"
+    },
+    {
+      "tag": "h6",
+      "text": "روابط سريعة"
+    },
+    {
+      "tag": "h6",
+      "text": "عن الجمعية"
+    },
+    {
+      "tag": "h6",
+      "text": "اتصل بنا"
+    }
+  ],
+  "images_total": 50,
+  "images_missing_alt": 23,
+  "images_empty_alt": 22,
+  "json_ld_raw": []
+}

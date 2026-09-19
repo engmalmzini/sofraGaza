@@ -1,0 +1,134 @@
+{
+  "methodology": {
+    "type": "Non-destructive external security review",
+    "risk_score_note": "The percentage is a prioritization estimate based on potential impact and likelihood observed externally; it is not a CVSS score.",
+    "limitations": "No exploitation, authentication bypass, credential testing, form submission, payment, file upload, SQL injection payload, XSS payload, or destructive action was performed against production."
+  },
+  "findings": [
+    {
+      "id": "SEC-01",
+      "title": "Unsupported PHP runtime disclosed by the server",
+      "status": "Confirmed exposure; exploitability not tested",
+      "severity": "High",
+      "risk_percent": 85,
+      "evidence": "X-Powered-By: PHP/8.1.34. PHP 8.1 reached end of life on 2025-12-31.",
+      "impact": "Future and known defects may remain unpatched, increasing the chance of server compromise if the application reaches a vulnerable runtime path.",
+      "remediation": "Upgrade after compatibility tests to PHP 8.4 or 8.5, patch the framework and extensions, and remove X-Powered-By."
+    },
+    {
+      "id": "SEC-02",
+      "title": "Old jQuery and jQuery UI versions in the donation page",
+      "status": "Affected versions confirmed; vulnerable data flow not proven",
+      "severity": "High (conditional)",
+      "risk_percent": 80,
+      "evidence": "jquery 3.2.1 and jquery-ui 1.12.1 are loaded. Their affected ranges include CVE-2020-11022, CVE-2020-11023, CVE-2021-41182, CVE-2021-41183, CVE-2021-41184, and CVE-2022-31160.",
+      "impact": "If untrusted content reaches affected HTML or widget APIs, JavaScript may execute in the donor's browser, allowing page manipulation or theft of data available to the session.",
+      "remediation": "Upgrade jQuery to a supported current release and jQuery UI to at least 1.13.2, test all donation flows, and review DOM sinks before deployment."
+    },
+    {
+      "id": "SEC-03",
+      "title": "Weak CSP combined with unverified third-party scripts",
+      "status": "Confirmed security-control gap",
+      "severity": "High",
+      "risk_percent": 78,
+      "evidence": "CSP contains only upgrade-insecure-requests. The page loads 19 external resources; 16 have no SRI, including 10 scripts. Some URLs use floating versions such as aos@next, sweetalert2@8, and toastify-js.",
+      "impact": "A compromised CDN, dependency, or tag-management account could inject code into the donation page and alter content or collect browser-accessible data.",
+      "remediation": "Self-host or pin immutable versions, add SRI where applicable, reduce third parties, and deploy a nonce/hash CSP through Report-Only before enforcement."
+    },
+    {
+      "id": "SEC-04",
+      "title": "Email anti-spoofing policy is monitoring rather than blocking",
+      "status": "Confirmed DNS configuration",
+      "severity": "High",
+      "risk_percent": 75,
+      "evidence": "DMARC is v=DMARC1; p=none and SPF ends with ~all. DKIM could not be proven externally without the active selector.",
+      "impact": "Attackers may have a better chance of delivering phishing messages that impersonate the association and target donors or employees.",
+      "remediation": "Inventory every sender, validate DKIM alignment, monitor reports, then move DMARC gradually to quarantine and reject."
+    },
+    {
+      "id": "SEC-05",
+      "title": "Donation page can be embedded by another site (clickjacking)",
+      "status": "Confirmed with a non-interactive iframe proof",
+      "severity": "Medium",
+      "risk_percent": 68,
+      "evidence": "No X-Frame-Options and no CSP frame-ancestors. The live donation page rendered inside an independent local iframe.",
+      "impact": "A malicious page can place deceptive layers above the donation interface and trick a visitor into clicking unintended controls.",
+      "remediation": "Set CSP frame-ancestors 'self' (or 'none' if framing is unnecessary) and X-Frame-Options: SAMEORIGIN for legacy clients."
+    },
+    {
+      "id": "SEC-06",
+      "title": "No HSTS policy",
+      "status": "Confirmed missing header",
+      "severity": "Medium",
+      "risk_percent": 55,
+      "evidence": "HTTP redirects to HTTPS, but Strict-Transport-Security is absent.",
+      "impact": "The first visit is not protected by a browser-persisted HTTPS-only policy, leaving a downgrade opportunity on a hostile network.",
+      "remediation": "After validating all subdomains, deploy HSTS with a staged max-age and then consider includeSubDomains/preload."
+    },
+    {
+      "id": "SEC-07",
+      "title": "Additional browser security headers are missing",
+      "status": "Confirmed hardening gap",
+      "severity": "Medium",
+      "risk_percent": 48,
+      "evidence": "X-Content-Type-Options, Referrer-Policy, Permissions-Policy, COOP, and CORP are absent.",
+      "impact": "The browser has fewer restrictions against MIME guessing, referrer leakage, unnecessary device features, and cross-origin interaction.",
+      "remediation": "Add nosniff, a strict referrer policy, a minimal Permissions-Policy, and test COOP/CORP compatibility with payment providers."
+    },
+    {
+      "id": "SEC-08",
+      "title": "State-changing cart request uses GET",
+      "status": "Confirmed implementation pattern; business impact not tested",
+      "severity": "Medium-Low",
+      "risk_percent": 45,
+      "evidence": "The addtocart JavaScript function sends method: get to add-cart-project and includes a token in query data.",
+      "impact": "Cross-site requests, browser prefetching, logs, or copied URLs may unexpectedly modify a visitor's cart or expose query parameters.",
+      "remediation": "Use POST with server-side CSRF validation, keep tokens out of URLs, validate amount and project identifiers server-side, and return no-store."
+    },
+    {
+      "id": "SEC-09",
+      "title": "HTML insertion sink requires a stored-XSS review",
+      "status": "Code indicator only; not exploited or confirmed vulnerable",
+      "severity": "Medium-Low",
+      "risk_percent": 42,
+      "evidence": "donatenow() uses $('#donatenowmodal_porjectname').html(projectname). Current values appear server-generated.",
+      "impact": "If a project name or related value can contain attacker-controlled HTML, script-capable markup could execute for donors.",
+      "remediation": "Use textContent/jQuery .text() for names, build option elements with DOM APIs, encode data in JSON safely, and add automated XSS tests in staging."
+    },
+    {
+      "id": "SEC-10",
+      "title": "Technology and hosting fingerprints are disclosed",
+      "status": "Confirmed information disclosure",
+      "severity": "Low",
+      "risk_percent": 28,
+      "evidence": "Server responses disclose LiteSpeed, Hostinger, hPanel, and PHP/8.1.34.",
+      "impact": "This shortens attacker reconnaissance and helps target version-specific probes, but does not provide access by itself.",
+      "remediation": "Remove unnecessary response headers and custom platform/panel headers; use generic error pages."
+    },
+    {
+      "id": "SEC-11",
+      "title": "No security.txt disclosure channel",
+      "status": "Confirmed missing file",
+      "severity": "Informational",
+      "risk_percent": 10,
+      "evidence": "/.well-known/security.txt returns 404.",
+      "impact": "Researchers have no clear official route for responsibly reporting vulnerabilities.",
+      "remediation": "Publish an RFC 9116 security.txt with contact, expiry, languages, policy, and acknowledgement details."
+    }
+  ],
+  "positive_controls": [
+    "TLS 1.0 and 1.1 were rejected; TLS 1.2 and 1.3 were accepted.",
+    "HTTP redirects to HTTPS and the certificate was valid during testing.",
+    "The session cookie uses Secure, HttpOnly, and SameSite=Lax.",
+    "Both observed POST donation forms contain CSRF tokens.",
+    "The tested CORS preflight did not return Access-Control-Allow-Origin and advertised only GET,HEAD.",
+    ".env and .git/HEAD returned 403; tested backup, log, composer, debug, and server-status paths returned 404; uploads directory listing returned 403."
+  ],
+  "not_verified_without_authorized_staging_and_internal_access": [
+    "SQL injection, command injection, SSRF, XXE, unsafe deserialization, file-upload bypass, and remote code execution.",
+    "Authentication bypass, IDOR, role escalation, admin-panel security, MFA, password policy, and account recovery.",
+    "Payment callback validation, amount tampering, replay protection, webhook signatures, and PCI DSS scope.",
+    "Database encryption, secrets management, WAF rules, rate limiting, backups, restore testing, logs, and incident response.",
+    "Whether the identified client-side CVE paths receive attacker-controlled data in the real application."
+  ]
+}

@@ -1,0 +1,28 @@
+HTTP/1.1 301 Moved Permanently
+Connection: Keep-Alive
+Keep-Alive: timeout=5, max=100
+Content-Type: text/html
+Content-Length: 795
+Date: Tue, 15 Sep 2026 13:12:08 GMT
+Server: LiteSpeed
+Location: https://alhikmakw.org.kw/donation/
+platform: hostinger
+panel: hpanel
+Content-Security-Policy: upgrade-insecure-requests
+
+HTTP/1.1 200 OK
+Connection: Keep-Alive
+Keep-Alive: timeout=5, max=100
+X-Powered-By: PHP/8.1.34
+Content-Type: text/html; charset=UTF-8
+Cache-Control: no-cache, private
+set-cookie: XSRF-TOKEN=eyJpdiI6Ik1uMFFKSGpGQ3dSOUZJZGFNN0lDb3c9PSIsInZhbHVlIjoiMHEyc0Q1bndKanNub1NEZldkR2REZEY0ZnVVVkJsM0FxR2hFKzBPWU11d2p5VjRFOXdLcXdVeDZrR0EvRjVXdWFUREVMcE4xZklCRS9PK0tka2crUFllbkMrYTlod2lQQTB4aExPZEwwVWNabDNhYUJPWVpLNEF0Q2pDRUtqNjYiLCJtYWMiOiIzNTg0MzZkNzNjZDdiODNjYWY1NjVhMWYwYmQ1NDE0Yjg3OWQ0ZTIzYTkwMmM4ZWMwZjdhY2Y5MjExZWE2MTM1IiwidGFnIjoiIn0%3D; expires=Tue, 15 Sep 2026 15:12:13 GMT; Max-Age=7200; path=/; samesite=lax; secure
+set-cookie: alhikmakw_session=eyJpdiI6IlJjandsSzN1am8wT0c5YjlkdlVoWEE9PSIsInZhbHVlIjoiT2s0MjVsSkhLdFJ2TE8vU1pkRzBjaldiaG91SllyU1lUcnZuR3V6dG9DN3JyYzA0SWR0ME1pQUVHQXRDSjhzSFlxZFd5b2s1a0R6OG5ZUCtJblgzd0tjQ0xSRDJORUtubWkrNWlZQUhMZ0NCM0NtUGRvMVFYWG9nUnA0ZCtQUlQiLCJtYWMiOiI0Y2UwZGJiNmZmOTY0ZGRmYWU5NTc1YjNhOWFjMjFlMDZkYjlmYzAwMzA5OTg3MDg2YjQ4MDViODljMzI3ZTM3IiwidGFnIjoiIn0%3D; expires=Tue, 15 Sep 2026 15:12:13 GMT; Max-Age=7200; path=/; httponly; samesite=lax; secure
+Transfer-Encoding: chunked
+Date: Tue, 15 Sep 2026 13:12:13 GMT
+Server: LiteSpeed
+platform: hostinger
+panel: hpanel
+Content-Security-Policy: upgrade-insecure-requests
+alt-svc: h3=":443"; ma=2592000, h3-29=":443"; ma=2592000
+

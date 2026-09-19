@@ -1,0 +1,14 @@
+HTTP/1.1 404 Not Found
+Connection: Keep-Alive
+Keep-Alive: timeout=5, max=100
+Content-Type: text/html
+Last-Modified: Tue, 22 Apr 2025 07:41:12 GMT
+Etag: "119f-68074818-638e4bf10148973d;;;"
+Accept-Ranges: bytes
+Content-Length: 4511
+Date: Tue, 15 Sep 2026 13:12:19 GMT
+Server: LiteSpeed
+platform: hostinger
+panel: hpanel
+alt-svc: h3=":443"; ma=2592000, h3-29=":443"; ma=2592000
+

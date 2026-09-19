@@ -1,0 +1,549 @@
+{
+  "fetch_time": "2026-09-15T13:13:49.232Z",
+  "requested_url": "https://alhikmakw.org.kw/donation/",
+  "final_url": "https://alhikmakw.org.kw/donation/",
+  "lighthouse_version": "13.4.1",
+  "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/152.0.0.0 Safari/537.36",
+  "config_settings": {
+    "output": [
+      "json",
+      "html"
+    ],
+    "maxWaitForFcp": 30000,
+    "maxWaitForLoad": 45000,
+    "pauseAfterFcpMs": 1000,
+    "pauseAfterLoadMs": 1000,
+    "networkQuietThresholdMs": 1000,
+    "cpuQuietThresholdMs": 1000,
+    "formFactor": "mobile",
+    "throttling": {
+      "rttMs": 150,
+      "throughputKbps": 1638.4,
+      "requestLatencyMs": 562.5,
+      "downloadThroughputKbps": 1474.5600000000002,
+      "uploadThroughputKbps": 675,
+      "cpuSlowdownMultiplier": 4
+    },
+    "throttlingMethod": "simulate",
+    "screenEmulation": {
+      "mobile": true,
+      "width": 412,
+      "height": 823,
+      "deviceScaleFactor": 1.75,
+      "disabled": false
+    },
+    "emulatedUserAgent": "Mozilla/5.0 (Linux; Android 11; moto g power (2022)) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Mobile Safari/537.36",
+    "auditMode": false,
+    "gatherMode": false,
+    "clearStorageTypes": [
+      "file_systems",
+      "shader_cache",
+      "service_workers",
+      "cache_storage"
+    ],
+    "disableStorageReset": false,
+    "debugNavigation": false,
+    "channel": "cli",
+    "usePassiveGathering": false,
+    "disableFullPageScreenshot": false,
+    "skipAboutBlank": false,
+    "blankPage": "about:blank",
+    "ignoreStatusCode": false,
+    "locale": "en-US",
+    "blockedUrlPatterns": null,
+    "additionalTraceCategories": null,
+    "extraHeaders": null,
+    "precomputedLanternData": null,
+    "onlyAudits": null,
+    "onlyCategories": null,
+    "skipAudits": null
+  },
+  "category_scores": {
+    "performance": 25,
+    "accessibility": 65,
+    "best-practices": 65,
+    "seo": 67,
+    "agentic-browsing": 33
+  },
+  "metrics": {
+    "first-contentful-paint": {
+      "id": "first-contentful-paint",
+      "score": 0,
+      "numeric_value": 10940.1785,
+      "numeric_unit": "millisecond",
+      "display_value": "10.9 s",
+      "title": "First Contentful Paint",
+      "item_count": 0
+    },
+    "largest-contentful-paint": {
+      "id": "largest-contentful-paint",
+      "score": 0,
+      "numeric_value": 21590.050500000005,
+      "numeric_unit": "millisecond",
+      "display_value": "21.6 s",
+      "title": "Largest Contentful Paint",
+      "item_count": 0
+    },
+    "speed-index": {
+      "id": "speed-index",
+      "score": 0,
+      "numeric_value": 28927.32384611554,
+      "numeric_unit": "millisecond",
+      "display_value": "28.9 s",
+      "title": "Speed Index",
+      "item_count": 0
+    },
+    "total-blocking-time": {
+      "id": "total-blocking-time",
+      "score": 0,
+      "numeric_value": 11964.854,
+      "numeric_unit": "millisecond",
+      "display_value": "11,960 ms",
+      "title": "Total Blocking Time",
+      "item_count": 0
+    },
+    "cumulative-layout-shift": {
+      "id": "cumulative-layout-shift",
+      "score": 1,
+      "numeric_value": 0.007593740329639445,
+      "numeric_unit": "unitless",
+      "display_value": "0.008",
+      "title": "Cumulative Layout Shift",
+      "item_count": 1
+    },
+    "interactive": {
+      "id": "interactive",
+      "score": 0,
+      "numeric_value": 30700.082500000004,
+      "numeric_unit": "millisecond",
+      "display_value": "30.7 s",
+      "title": "Time to Interactive",
+      "item_count": 0
+    },
+    "server-response-time": {
+      "id": "server-response-time",
+      "score": 0,
+      "numeric_value": 814,
+      "numeric_unit": "millisecond",
+      "display_value": "Root document took 810 ms",
+      "title": "Reduce initial server response time",
+      "item_count": 1
+    },
+    "total-byte-weight": {
+      "id": "total-byte-weight",
+      "score": 0.5,
+      "numeric_value": 3599450,
+      "numeric_unit": "byte",
+      "display_value": "Total size was 3,515 KiB",
+      "title": "Avoid enormous network payloads",
+      "item_count": 10
+    },
+    "network-requests": {
+      "id": "network-requests",
+      "score": 1,
+      "numeric_value": null,
+      "numeric_unit": null,
+      "display_value": null,
+      "title": "Network Requests",
+      "item_count": 105
+    },
+    "dom-size": {
+      "id": "dom-size",
+      "score": null,
+      "numeric_value": null,
+      "numeric_unit": null,
+      "display_value": null,
+      "title": null,
+      "item_count": 0
+    }
+  },
+  "opportunities": {
+    "render-blocking-resources": {
+      "id": "render-blocking-resources",
+      "score": null,
+      "numeric_value": null,
+      "numeric_unit": null,
+      "display_value": null,
+      "title": null,
+      "item_count": 0
+    },
+    "unused-css-rules": {
+      "id": "unused-css-rules",
+      "score": 0.5,
+      "numeric_value": 0,
+      "numeric_unit": "millisecond",
+      "display_value": "Est savings of 59 KiB",
+      "title": "Reduce unused CSS",
+      "item_count": 3
+    },
+    "unused-javascript": {
+      "id": "unused-javascript",
+      "score": 0,
+      "numeric_value": 250,
+      "numeric_unit": "millisecond",
+      "display_value": "Est savings of 175 KiB",
+      "title": "Reduce unused JavaScript",
+      "item_count": 3
+    },
+    "uses-long-cache-ttl": {
+      "id": "uses-long-cache-ttl",
+      "score": null,
+      "numeric_value": null,
+      "numeric_unit": null,
+      "display_value": null,
+      "title": null,
+      "item_count": 0
+    },
+    "modern-image-formats": {
+      "id": "modern-image-formats",
+      "score": null,
+      "numeric_value": null,
+      "numeric_unit": null,
+      "display_value": null,
+      "title": null,
+      "item_count": 0
+    },
+    "uses-responsive-images": {
+      "id": "uses-responsive-images",
+      "score": null,
+      "numeric_value": null,
+      "numeric_unit": null,
+      "display_value": null,
+      "title": null,
+      "item_count": 0
+    },
+    "offscreen-images": {
+      "id": "offscreen-images",
+      "score": null,
+      "numeric_value": null,
+      "numeric_unit": null,
+      "display_value": null,
+      "title": null,
+      "item_count": 0
+    },
+    "unminified-css": {
+      "id": "unminified-css",
+      "score": 0.5,
+      "numeric_value": 0,
+      "numeric_unit": "millisecond",
+      "display_value": "Est savings of 3 KiB",
+      "title": "Minify CSS",
+      "item_count": 1
+    },
+    "unminified-javascript": {
+      "id": "unminified-javascript",
+      "score": 1,
+      "numeric_value": 0,
+      "numeric_unit": "millisecond",
+      "display_value": "",
+      "title": "Minify JavaScript",
+      "item_count": 0
+    },
+    "uses-text-compression": {
+      "id": "uses-text-compression",
+      "score": null,
+      "numeric_value": null,
+      "numeric_unit": null,
+      "display_value": null,
+      "title": null,
+      "item_count": 0
+    }
+  },
+  "weighted_failures": {
+    "performance": [
+      {
+        "id": "first-contentful-paint",
+        "score": 0,
+        "numeric_value": 10940.1785,
+        "numeric_unit": "millisecond",
+        "display_value": "10.9 s",
+        "title": "First Contentful Paint",
+        "item_count": 0
+      },
+      {
+        "id": "largest-contentful-paint",
+        "score": 0,
+        "numeric_value": 21590.050500000005,
+        "numeric_unit": "millisecond",
+        "display_value": "21.6 s",
+        "title": "Largest Contentful Paint",
+        "item_count": 0
+      },
+      {
+        "id": "total-blocking-time",
+        "score": 0,
+        "numeric_value": 11964.854,
+        "numeric_unit": "millisecond",
+        "display_value": "11,960 ms",
+        "title": "Total Blocking Time",
+        "item_count": 0
+      },
+      {
+        "id": "speed-index",
+        "score": 0,
+        "numeric_value": 28927.32384611554,
+        "numeric_unit": "millisecond",
+        "display_value": "28.9 s",
+        "title": "Speed Index",
+        "item_count": 0
+      }
+    ],
+    "accessibility": [
+      {
+        "id": "aria-progressbar-name",
+        "score": 0,
+        "numeric_value": null,
+        "numeric_unit": null,
+        "display_value": null,
+        "title": "ARIA `progressbar` elements do not have accessible names.",
+        "item_count": 6
+      },
+      {
+        "id": "aria-required-children",
+        "score": 0,
+        "numeric_value": null,
+        "numeric_unit": null,
+        "display_value": null,
+        "title": "Elements with an ARIA `[role]` that require children to contain a specific `[role]` are missing some or all of those required children.",
+        "item_count": 1
+      },
+      {
+        "id": "aria-required-parent",
+        "score": 0,
+        "numeric_value": null,
+        "numeric_unit": null,
+        "display_value": null,
+        "title": "`[role]`s are not contained by their required parent element",
+        "item_count": 3
+      },
+      {
+        "id": "button-name",
+        "score": 0,
+        "numeric_value": null,
+        "numeric_unit": null,
+        "display_value": null,
+        "title": "Buttons do not have an accessible name",
+        "item_count": 7
+      },
+      {
+        "id": "color-contrast",
+        "score": 0,
+        "numeric_value": null,
+        "numeric_unit": null,
+        "display_value": null,
+        "title": "Background and foreground colors do not have a sufficient contrast ratio.",
+        "item_count": 3
+      },
+      {
+        "id": "heading-order",
+        "score": 0,
+        "numeric_value": null,
+        "numeric_unit": null,
+        "display_value": null,
+        "title": "Heading elements are not in a sequentially-descending order",
+        "item_count": 3
+      },
+      {
+        "id": "image-alt",
+        "score": 0,
+        "numeric_value": null,
+        "numeric_unit": null,
+        "display_value": null,
+        "title": "Image elements do not have `[alt]` attributes",
+        "item_count": 1
+      },
+      {
+        "id": "label",
+        "score": 0,
+        "numeric_value": null,
+        "numeric_unit": null,
+        "display_value": null,
+        "title": "Form elements do not have associated labels",
+        "item_count": 6
+      },
+      {
+        "id": "link-name",
+        "score": 0,
+        "numeric_value": null,
+        "numeric_unit": null,
+        "display_value": null,
+        "title": "Links do not have a discernible name",
+        "item_count": 2
+      },
+      {
+        "id": "target-size",
+        "score": 0,
+        "numeric_value": null,
+        "numeric_unit": null,
+        "display_value": null,
+        "title": "Touch targets do not have sufficient size or spacing.",
+        "item_count": 14
+      }
+    ],
+    "best-practices": [
+      {
+        "id": "image-aspect-ratio",
+        "score": 0,
+        "numeric_value": null,
+        "numeric_unit": null,
+        "display_value": null,
+        "title": "Displays images with incorrect aspect ratio",
+        "item_count": 1
+      },
+      {
+        "id": "image-size-responsive",
+        "score": 0,
+        "numeric_value": null,
+        "numeric_unit": null,
+        "display_value": null,
+        "title": "Serves images with low resolution",
+        "item_count": 1
+      },
+      {
+        "id": "third-party-cookies",
+        "score": 0,
+        "numeric_value": null,
+        "numeric_unit": null,
+        "display_value": "5 cookies found",
+        "title": "Uses third-party cookies",
+        "item_count": 5
+      },
+      {
+        "id": "errors-in-console",
+        "score": 0,
+        "numeric_value": null,
+        "numeric_unit": null,
+        "display_value": null,
+        "title": "Browser errors were logged to the console",
+        "item_count": 2
+      },
+      {
+        "id": "inspector-issues",
+        "score": 0,
+        "numeric_value": null,
+        "numeric_unit": null,
+        "display_value": null,
+        "title": "Issues were logged in the `Issues` panel in Chrome Devtools",
+        "item_count": 1
+      }
+    ],
+    "seo": [
+      {
+        "id": "meta-description",
+        "score": 0,
+        "numeric_value": null,
+        "numeric_unit": null,
+        "display_value": null,
+        "title": "Document does not have a meta description",
+        "item_count": 0
+      },
+      {
+        "id": "crawlable-anchors",
+        "score": 0,
+        "numeric_value": null,
+        "numeric_unit": null,
+        "display_value": null,
+        "title": "Links are not crawlable",
+        "item_count": 9
+      },
+      {
+        "id": "robots-txt",
+        "score": 0,
+        "numeric_value": null,
+        "numeric_unit": null,
+        "display_value": null,
+        "title": "robots.txt is not valid",
+        "item_count": 0
+      },
+      {
+        "id": "image-alt",
+        "score": 0,
+        "numeric_value": null,
+        "numeric_unit": null,
+        "display_value": null,
+        "title": "Image elements do not have `[alt]` attributes",
+        "item_count": 1
+      }
+    ]
+  },
+  "network_summary": {
+    "request_count": 105,
+    "transfer_size_bytes": 3599492,
+    "resource_size_bytes": 6274118,
+    "status_counts": {
+      "200": 96,
+      "302": 5,
+      "403": 1,
+      "-1": 1,
+      "204": 1,
+      "404": 1
+    },
+    "failed_requests": [
+      {
+        "url": "https://kit.fontawesome.com/2809a67eba.js",
+        "status": 403,
+        "resource_type": "Script"
+      },
+      {
+        "url": "https://alhikmakw.org.kw/donation/ar/jpHMyNsqgA/_/service_worker/6920/sw_iframe.html?origin=https%3A%2F%2Falhikmakw.org.kw&1p=1&path=%2Fdonation%2Far%2FjpHMyNsqgA",
+        "status": 404,
+        "resource_type": "Document"
+      }
+    ]
+  },
+  "console_errors": [
+    {
+      "source": "network",
+      "description": "Failed to load resource: the server responded with a status of 403 ()",
+      "sourceLocation": {
+        "type": "source-location",
+        "url": "https://kit.fontawesome.com/2809a67eba.js",
+        "urlProvider": "network",
+        "line": 0,
+        "column": 0
+      }
+    },
+    {
+      "source": "network",
+      "description": "Failed to load resource: the server responded with a status of 404 ()",
+      "sourceLocation": {
+        "type": "source-location",
+        "url": "https://alhikmakw.org.kw/donation/ar/jpHMyNsqgA/_/service_worker/6920/sw_iframe.html?origin=https%3A%2F%2Falhikmakw.org.kw&1p=1&path=%2Fdonation%2Far%2FjpHMyNsqgA",
+        "urlProvider": "network",
+        "line": 0,
+        "column": 0
+      }
+    }
+  ],
+  "inspector_issues": [
+    {
+      "issueType": "Cookie",
+      "subItems": {
+        "type": "subitems",
+        "items": [
+          {
+            "url": "https://sc-static.net/scevent.min.js"
+          },
+          {
+            "url": "https://tr.snapchat.com/cm/i?pid=c1fcc435-e16f-49b4-a734-275322f10d7c&u_scsid=98980108-7137-4ec7-b18e-6cd52629b9cf&u_sclid=0c5e7878-70eb-4113-aaa1-7469e4f0c9de"
+          },
+          {
+            "url": "https://tr.snapchat.com/p"
+          },
+          {
+            "url": "https://tr.snapchat.com/cm/s?bt=1d53c387&pnid=140&cb=1789478044880&u_scsid=9577ddf8-97a0-41a7-96dc-6e5e9585ad70&u_sclid=24cf9cfd-3151-4fa7-9ee4-5896453ae5ab"
+          },
+          {
+            "url": "https://pixel.tapad.com/idsync/ex/push?partner_id=2884&partner_url=https%3A%2F%2Ftr.snapchat.com%2Fcm%2Fp%3Frand%3D1789471452392%26pnid%3D140%26pcid%3D%24%7BTA_DEVICE_ID%7D"
+          },
+          {
+            "url": "https://pixel.tapad.com/idsync/ex/push/check?partner_id=2884&partner_url=https%3A%2F%2Ftr.snapchat.com%2Fcm%2Fp%3Frand%3D1789471452392%26pnid%3D140%26pcid%3D%24%7BTA_DEVICE_ID%7D"
+          },
+          {
+            "url": "https://tr.snapchat.com/cm/p?rand=1789471452392&pnid=140&pcid=ce6cc14b-6bc3-4871-8a23-fc4b1b9894b4"
+          }
+        ]
+      }
+    }
+  ]
+}

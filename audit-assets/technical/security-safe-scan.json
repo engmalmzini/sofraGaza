@@ -1,0 +1,479 @@
+{
+  "scope": "Non-destructive external verification; no exploits, login attempts, form submissions, or sensitive bodies.",
+  "target": "https://alhikmakw.org.kw/donation/",
+  "homepage": {
+    "url": "https://alhikmakw.org.kw/donation/",
+    "final_url": "https://alhikmakw.org.kw/donation/",
+    "method": "HEAD",
+    "status": 200,
+    "headers": {
+      "Content-Security-Policy": "upgrade-insecure-requests",
+      "Server": "LiteSpeed",
+      "X-Powered-By": "PHP/8.1.34",
+      "platform": "hostinger",
+      "panel": "hpanel"
+    },
+    "content_type": "text/html; charset=UTF-8",
+    "content_length": null
+  },
+  "cors_preflight": {
+    "url": "https://alhikmakw.org.kw/donation/",
+    "final_url": "https://alhikmakw.org.kw/donation/",
+    "method": "OPTIONS",
+    "status": 200,
+    "headers": {
+      "Content-Security-Policy": "upgrade-insecure-requests",
+      "Allow": "GET,HEAD",
+      "Server": "LiteSpeed",
+      "X-Powered-By": "PHP/8.1.34",
+      "platform": "hostinger",
+      "panel": "hpanel"
+    },
+    "content_type": "text/html; charset=UTF-8",
+    "content_length": "3"
+  },
+  "limited_head_checks": [
+    {
+      "url": "https://alhikmakw.org.kw/.env",
+      "final_url": "https://alhikmakw.org.kw/.env",
+      "method": "HEAD",
+      "status": 403,
+      "headers": {
+        "Server": "LiteSpeed"
+      },
+      "content_type": null,
+      "content_length": null
+    },
+    {
+      "url": "https://alhikmakw.org.kw/.git/HEAD",
+      "final_url": "https://alhikmakw.org.kw/.git/HEAD",
+      "method": "HEAD",
+      "status": 403,
+      "headers": {
+        "Server": "LiteSpeed"
+      },
+      "content_type": null,
+      "content_length": null
+    },
+    {
+      "url": "https://alhikmakw.org.kw/composer.json",
+      "final_url": "https://alhikmakw.org.kw/composer.json",
+      "method": "HEAD",
+      "status": 404,
+      "headers": {
+        "Server": "LiteSpeed",
+        "platform": "hostinger",
+        "panel": "hpanel"
+      },
+      "content_type": "text/html",
+      "content_length": "4511"
+    },
+    {
+      "url": "https://alhikmakw.org.kw/composer.lock",
+      "final_url": "https://alhikmakw.org.kw/composer.lock",
+      "method": "HEAD",
+      "status": 404,
+      "headers": {
+        "Server": "LiteSpeed",
+        "platform": "hostinger",
+        "panel": "hpanel"
+      },
+      "content_type": "text/html",
+      "content_length": "4511"
+    },
+    {
+      "url": "https://alhikmakw.org.kw/phpinfo.php",
+      "final_url": "https://alhikmakw.org.kw/phpinfo.php",
+      "method": "HEAD",
+      "status": 404,
+      "headers": {
+        "Content-Security-Policy": "upgrade-insecure-requests",
+        "Server": "LiteSpeed",
+        "platform": "hostinger",
+        "panel": "hpanel"
+      },
+      "content_type": "text/html",
+      "content_length": "4511"
+    },
+    {
+      "url": "https://alhikmakw.org.kw/server-status",
+      "final_url": "https://alhikmakw.org.kw/server-status",
+      "method": "HEAD",
+      "status": 404,
+      "headers": {
+        "Server": "LiteSpeed",
+        "platform": "hostinger",
+        "panel": "hpanel"
+      },
+      "content_type": "text/html",
+      "content_length": "4511"
+    },
+    {
+      "url": "https://alhikmakw.org.kw/storage/logs/laravel.log",
+      "final_url": "https://alhikmakw.org.kw/storage/logs/laravel.log",
+      "method": "HEAD",
+      "status": 404,
+      "headers": {
+        "Server": "LiteSpeed",
+        "platform": "hostinger",
+        "panel": "hpanel"
+      },
+      "content_type": "text/html",
+      "content_length": "4511"
+    },
+    {
+      "url": "https://alhikmakw.org.kw/vendor/",
+      "final_url": "https://alhikmakw.org.kw/vendor/",
+      "method": "HEAD",
+      "status": 404,
+      "headers": {
+        "Server": "LiteSpeed",
+        "platform": "hostinger",
+        "panel": "hpanel"
+      },
+      "content_type": "text/html",
+      "content_length": "4511"
+    },
+    {
+      "url": "https://alhikmakw.org.kw/telescope",
+      "final_url": "https://alhikmakw.org.kw/telescope",
+      "method": "HEAD",
+      "status": 404,
+      "headers": {
+        "Server": "LiteSpeed",
+        "platform": "hostinger",
+        "panel": "hpanel"
+      },
+      "content_type": "text/html",
+      "content_length": "4511"
+    },
+    {
+      "url": "https://alhikmakw.org.kw/_ignition/health-check",
+      "final_url": "https://alhikmakw.org.kw/_ignition/health-check",
+      "method": "HEAD",
+      "status": 404,
+      "headers": {
+        "Server": "LiteSpeed",
+        "platform": "hostinger",
+        "panel": "hpanel"
+      },
+      "content_type": "text/html",
+      "content_length": "4511"
+    },
+    {
+      "url": "https://alhikmakw.org.kw/backup.zip",
+      "final_url": "https://alhikmakw.org.kw/backup.zip",
+      "method": "HEAD",
+      "status": 404,
+      "headers": {
+        "Server": "LiteSpeed",
+        "platform": "hostinger",
+        "panel": "hpanel"
+      },
+      "content_type": "text/html",
+      "content_length": "4511"
+    },
+    {
+      "url": "https://alhikmakw.org.kw/database.sql",
+      "final_url": "https://alhikmakw.org.kw/database.sql",
+      "method": "HEAD",
+      "status": 404,
+      "headers": {
+        "Server": "LiteSpeed",
+        "platform": "hostinger",
+        "panel": "hpanel"
+      },
+      "content_type": "text/html",
+      "content_length": "4511"
+    },
+    {
+      "url": "https://alhikmakw.org.kw/donation/uploads/",
+      "final_url": "https://alhikmakw.org.kw/donation/uploads/",
+      "method": "HEAD",
+      "status": 403,
+      "headers": {
+        "Content-Security-Policy": "upgrade-insecure-requests",
+        "Server": "LiteSpeed",
+        "platform": "hostinger",
+        "panel": "hpanel"
+      },
+      "content_type": null,
+      "content_length": null
+    },
+    {
+      "url": "https://alhikmakw.org.kw/.well-known/security.txt",
+      "final_url": "https://alhikmakw.org.kw/.well-known/security.txt",
+      "method": "HEAD",
+      "status": 404,
+      "headers": {
+        "Server": "LiteSpeed",
+        "platform": "hostinger",
+        "panel": "hpanel"
+      },
+      "content_type": "text/html",
+      "content_length": "4511"
+    }
+  ],
+  "tls_protocols": [
+    {
+      "protocol": "TLS 1.0",
+      "accepted": false,
+      "error": "[SSL: TLSV1_ALERT_PROTOCOL_VERSION] tlsv1 alert protocol version (_ssl.c:1081)"
+    },
+    {
+      "protocol": "TLS 1.1",
+      "accepted": false,
+      "error": "[SSL: TLSV1_ALERT_PROTOCOL_VERSION] tlsv1 alert protocol version (_ssl.c:1081)"
+    },
+    {
+      "protocol": "TLS 1.2",
+      "accepted": true,
+      "negotiated": "TLSv1.2",
+      "cipher": [
+        "ECDHE-ECDSA-AES128-GCM-SHA256",
+        "TLSv1.2",
+        128
+      ]
+    },
+    {
+      "protocol": "TLS 1.3",
+      "accepted": true,
+      "negotiated": "TLSv1.3",
+      "cipher": [
+        "TLS_AES_256_GCM_SHA384",
+        "TLSv1.3",
+        256
+      ]
+    }
+  ],
+  "offline_html_analysis": {
+    "external_resources": [
+      {
+        "type": "stylesheet",
+        "url": "https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css",
+        "integrity": "sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65",
+        "crossorigin": "anonymous"
+      },
+      {
+        "type": "stylesheet",
+        "url": "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css",
+        "integrity": null,
+        "crossorigin": null
+      },
+      {
+        "type": "stylesheet",
+        "url": "https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css",
+        "integrity": null,
+        "crossorigin": null
+      },
+      {
+        "type": "stylesheet",
+        "url": "https://unpkg.com/aos@next/dist/aos.css",
+        "integrity": null,
+        "crossorigin": null
+      },
+      {
+        "type": "stylesheet",
+        "url": "https://fonts.googleapis.com/css2?family=Tajawal:wght@300;700;800;900&display=swap",
+        "integrity": null,
+        "crossorigin": null
+      },
+      {
+        "type": "stylesheet",
+        "url": "https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css",
+        "integrity": null,
+        "crossorigin": null
+      },
+      {
+        "type": "stylesheet",
+        "url": "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.1/css/all.min.css",
+        "integrity": "sha512-5Hs3dF2AEPkpNAR7UiOHba+lRSJNeM2ECkwxUIxC1Q/FLycGTbNapWXB4tP889k5T5Ju8fs4b1P5z/iB4nMfSQ==",
+        "crossorigin": "anonymous"
+      },
+      {
+        "type": "script",
+        "url": "https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js",
+        "integrity": null,
+        "crossorigin": null
+      },
+      {
+        "type": "script",
+        "url": "https://cdnjs.cloudflare.com/ajax/libs/waypoints/4.0.1/jquery.waypoints.min.js",
+        "integrity": null,
+        "crossorigin": null
+      },
+      {
+        "type": "script",
+        "url": "https://kit.fontawesome.com/2809a67eba.js",
+        "integrity": null,
+        "crossorigin": "anonymous"
+      },
+      {
+        "type": "script",
+        "url": "https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js",
+        "integrity": "sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4",
+        "crossorigin": "anonymous"
+      },
+      {
+        "type": "script",
+        "url": "https://unpkg.com/aos@next/dist/aos.js",
+        "integrity": null,
+        "crossorigin": null
+      },
+      {
+        "type": "script",
+        "url": "https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js",
+        "integrity": null,
+        "crossorigin": null
+      },
+      {
+        "type": "script",
+        "url": "https://cdn.jsdelivr.net/npm/sweetalert2@8",
+        "integrity": null,
+        "crossorigin": null
+      },
+      {
+        "type": "script",
+        "url": "https://cdn.jsdelivr.net/npm/toastify-js",
+        "integrity": null,
+        "crossorigin": null
+      },
+      {
+        "type": "script",
+        "url": "https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js",
+        "integrity": null,
+        "crossorigin": null
+      },
+      {
+        "type": "script",
+        "url": "https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.43/moment-timezone-with-data.min.js",
+        "integrity": null,
+        "crossorigin": null
+      },
+      {
+        "type": "stylesheet",
+        "url": "https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css",
+        "integrity": null,
+        "crossorigin": null
+      },
+      {
+        "type": "script",
+        "url": "https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js",
+        "integrity": null,
+        "crossorigin": null
+      }
+    ],
+    "external_resource_count": 19,
+    "external_resources_without_sri": [
+      {
+        "type": "stylesheet",
+        "url": "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css",
+        "integrity": null,
+        "crossorigin": null
+      },
+      {
+        "type": "stylesheet",
+        "url": "https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css",
+        "integrity": null,
+        "crossorigin": null
+      },
+      {
+        "type": "stylesheet",
+        "url": "https://unpkg.com/aos@next/dist/aos.css",
+        "integrity": null,
+        "crossorigin": null
+      },
+      {
+        "type": "stylesheet",
+        "url": "https://fonts.googleapis.com/css2?family=Tajawal:wght@300;700;800;900&display=swap",
+        "integrity": null,
+        "crossorigin": null
+      },
+      {
+        "type": "stylesheet",
+        "url": "https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css",
+        "integrity": null,
+        "crossorigin": null
+      },
+      {
+        "type": "script",
+        "url": "https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js",
+        "integrity": null,
+        "crossorigin": null
+      },
+      {
+        "type": "script",
+        "url": "https://cdnjs.cloudflare.com/ajax/libs/waypoints/4.0.1/jquery.waypoints.min.js",
+        "integrity": null,
+        "crossorigin": null
+      },
+      {
+        "type": "script",
+        "url": "https://kit.fontawesome.com/2809a67eba.js",
+        "integrity": null,
+        "crossorigin": "anonymous"
+      },
+      {
+        "type": "script",
+        "url": "https://unpkg.com/aos@next/dist/aos.js",
+        "integrity": null,
+        "crossorigin": null
+      },
+      {
+        "type": "script",
+        "url": "https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js",
+        "integrity": null,
+        "crossorigin": null
+      },
+      {
+        "type": "script",
+        "url": "https://cdn.jsdelivr.net/npm/sweetalert2@8",
+        "integrity": null,
+        "crossorigin": null
+      },
+      {
+        "type": "script",
+        "url": "https://cdn.jsdelivr.net/npm/toastify-js",
+        "integrity": null,
+        "crossorigin": null
+      },
+      {
+        "type": "script",
+        "url": "https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js",
+        "integrity": null,
+        "crossorigin": null
+      },
+      {
+        "type": "script",
+        "url": "https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.43/moment-timezone-with-data.min.js",
+        "integrity": null,
+        "crossorigin": null
+      },
+      {
+        "type": "stylesheet",
+        "url": "https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css",
+        "integrity": null,
+        "crossorigin": null
+      },
+      {
+        "type": "script",
+        "url": "https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js",
+        "integrity": null,
+        "crossorigin": null
+      }
+    ],
+    "external_without_sri_count": 16,
+    "forms": [
+      {
+        "method": "POST",
+        "action": "https://alhikmakw.org.kw/donation/ar/knet/fastdonation_request",
+        "csrf_token_present": true
+      },
+      {
+        "method": "POST",
+        "action": "https://alhikmakw.org.kw/donation/ar/knet/request",
+        "csrf_token_present": true
+      }
+    ]
+  }
+}

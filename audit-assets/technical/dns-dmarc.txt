@@ -1,0 +1,35 @@
+﻿
+
+QueryType    : TXT
+Text         : {v=DMARC1; p=none}
+Strings      : {v=DMARC1; p=none}
+Name         : _dmarc.alhikmakw.org.kw
+Type         : TXT
+CharacterSet : Unicode
+Section      : Answer
+DataLength   : 16
+TTL          : 2903
+
+QueryType    : NS
+Server       : ns1.dns-parking.com
+NameHost     : ns1.dns-parking.com
+Name         : alhikmakw.org.kw
+Type         : NS
+CharacterSet : Unicode
+Section      : Authority
+DataLength   : 8
+TTL          : 203
+
+QueryType    : NS
+Server       : ns2.dns-parking.com
+NameHost     : ns2.dns-parking.com
+Name         : alhikmakw.org.kw
+Type         : NS
+CharacterSet : Unicode
+Section      : Authority
+DataLength   : 8
+TTL          : 203
+
+
+
+

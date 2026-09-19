@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <title>دليل الرؤوس والمكتبات الأمنية</title>
+  <style>
+    *{box-sizing:border-box}
+    body{margin:0;background:#eef1f5;color:#172033;font-family:"Simplified Arabic","Segoe UI",Arial,sans-serif}
+    main{width:1180px;margin:34px auto;background:#fff;border:1px solid #d0d5dd;padding:34px}
+    h1{margin:0 0 8px;font-size:34px;color:#183153}
+    .meta{color:#667085;margin-bottom:24px}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+    .box{border:1px solid #d0d5dd;padding:20px;min-height:280px}
+    h2{font-size:22px;margin:0 0 14px;color:#183153}
+    pre{direction:ltr;text-align:left;white-space:pre-wrap;background:#101828;color:#f2f4f7;padding:18px;font:16px/1.65 Consolas,monospace;margin:0}
+    ul{margin:0;padding-right:24px;font-size:19px;line-height:1.8}
+    .risk{margin-top:22px;border-right:6px solid #b42318;background:#fee4e2;padding:16px 20px;font-size:20px}
+    .ok{color:#067647}.bad{color:#b42318;font-weight:700}
+    footer{margin-top:20px;color:#667085;font-size:15px}
+  </style>
+</head>
+<body>
+<main>
+  <h1>دليل أمني خارجي — الرؤوس والمكتبات</h1>
+  <div class="meta">الهدف: https://alhikmakw.org.kw/donation/ · فحص قراءة غير هدّام · 15 سبتمبر 2026</div>
+  <div class="grid">
+    <section class="box">
+      <h2>الرؤوس التي أعادها الخادم</h2>
+      <pre>HTTP 200
+Server: LiteSpeed
+X-Powered-By: PHP/8.1.34
+platform: hostinger
+panel: hpanel
+Content-Security-Policy: upgrade-insecure-requests
+
+Missing:
+Strict-Transport-Security
+X-Frame-Options
+X-Content-Type-Options
+Referrer-Policy
+Permissions-Policy
+CSP frame-ancestors</pre>
+    </section>
+    <section class="box">
+      <h2>مكتبات تعمل داخل صفحة التبرع</h2>
+      <pre>jquery/3.2.1/jquery.min.js
+jqueryui/1.12.1/jquery-ui.min.js
+sweetalert2@8
+unpkg.com/aos@next
+toastify-js
+moment.js/2.29.4
+select2@4.1.0-rc.0
+
+19 external resources
+16 without integrity (SRI)
+10 external scripts without SRI</pre>
+    </section>
+  </div>
+  <div class="risk"><b>الخلاصة:</b> إصدار PHP منتهي الدعم، ومكتبات قديمة تقع ضمن نطاق نشرات أمنية، وسياسة CSP لا تمنع حقن السكربتات أو تضمين الصفحة. وجود الإصدار المتأثر لا يثبت وحده إمكانية الاستغلال؛ يلزم تحليل الاستخدام واختبار آمن في بيئة تجريبية.</div>
+  <footer>المصدر: security-safe-scan.json، الصفحة الفعلية المحفوظة page.html، PHP Supported Versions، GitHub/NVD، وإرشادات OWASP.</footer>
+</main>
+</body>
+</html>

@@ -1,0 +1,672 @@
+[
+  {
+    "url": "https://alhikmakw.org.kw/donation/assets/css/style_ar.css",
+    "status": 200,
+    "error": null,
+    "content_type": "text/css",
+    "content_length": "91756",
+    "cache_control": "public, max-age=604800",
+    "content_encoding": null,
+    "elapsed_ms": 286.7
+  },
+  {
+    "url": "https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css",
+    "status": 200,
+    "error": null,
+    "content_type": "text/css; charset=utf-8",
+    "content_length": "194901",
+    "cache_control": "public, max-age=31536000, s-maxage=31536000, immutable",
+    "content_encoding": null,
+    "elapsed_ms": 284.3
+  },
+  {
+    "url": "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css",
+    "status": 200,
+    "error": null,
+    "content_type": "text/css; charset=utf-8",
+    "content_length": "93734",
+    "cache_control": "public, max-age=31536000, s-maxage=31536000, immutable",
+    "content_encoding": null,
+    "elapsed_ms": 217.5
+  },
+  {
+    "url": "https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css",
+    "status": 200,
+    "error": null,
+    "content_type": "text/css; charset=utf-8",
+    "content_length": null,
+    "cache_control": "no-transform, public, s-maxage=30672000, max-age=30672000, immutable",
+    "content_encoding": null,
+    "elapsed_ms": 113.7
+  },
+  {
+    "url": "https://unpkg.com/aos@next/dist/aos.css",
+    "status": 200,
+    "error": null,
+    "content_type": "text/css; charset=utf-8",
+    "content_length": null,
+    "cache_control": "public, max-age=31536000",
+    "content_encoding": null,
+    "elapsed_ms": 405.1
+  },
+  {
+    "url": "https://alhikmakw.org.kw/donation/assets/css/whatsapp-chat-support.css",
+    "status": 200,
+    "error": null,
+    "content_type": "text/css",
+    "content_length": "25961",
+    "cache_control": "public, max-age=604800",
+    "content_encoding": null,
+    "elapsed_ms": 375.4
+  },
+  {
+    "url": "https://alhikmakw.org.kw/donation/assets/img/favicon-16x16.png",
+    "status": 200,
+    "error": null,
+    "content_type": "image/png",
+    "content_length": "1126",
+    "cache_control": "public, max-age=604800",
+    "content_encoding": null,
+    "elapsed_ms": 311.4
+  },
+  {
+    "url": "https://fonts.googleapis.com",
+    "status": 404,
+    "error": null,
+    "content_type": "text/html; charset=utf-8",
+    "content_length": "0",
+    "cache_control": "no-cache, no-store, max-age=0, must-revalidate",
+    "content_encoding": null,
+    "elapsed_ms": 243.2
+  },
+  {
+    "url": "https://fonts.gstatic.com",
+    "status": 404,
+    "error": null,
+    "content_type": "text/html; charset=UTF-8",
+    "content_length": "1561",
+    "cache_control": null,
+    "content_encoding": null,
+    "elapsed_ms": 193.5
+  },
+  {
+    "url": "https://fonts.googleapis.com/css2?family=Tajawal:wght@300;700;800;900&display=swap",
+    "status": 200,
+    "error": null,
+    "content_type": "text/css; charset=utf-8",
+    "content_length": "0",
+    "cache_control": "private, max-age=86400",
+    "content_encoding": null,
+    "elapsed_ms": 255.3
+  },
+  {
+    "url": "https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css",
+    "status": 200,
+    "error": null,
+    "content_type": "text/css; charset=utf-8",
+    "content_length": "1523",
+    "cache_control": "public, max-age=604800, s-maxage=43200",
+    "content_encoding": null,
+    "elapsed_ms": 229.5
+  },
+  {
+    "url": "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.1/css/all.min.css",
+    "status": 200,
+    "error": null,
+    "content_type": "text/css; charset=utf-8",
+    "content_length": null,
+    "cache_control": "no-transform, public, s-maxage=30672000, max-age=30672000, immutable",
+    "content_encoding": null,
+    "elapsed_ms": 269.7
+  },
+  {
+    "url": "https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js",
+    "status": 200,
+    "error": null,
+    "content_type": "application/javascript; charset=utf-8",
+    "content_length": null,
+    "cache_control": "no-transform, public, s-maxage=30672000, max-age=30672000, immutable",
+    "content_encoding": null,
+    "elapsed_ms": 61.8
+  },
+  {
+    "url": "https://cdnjs.cloudflare.com/ajax/libs/waypoints/4.0.1/jquery.waypoints.min.js",
+    "status": 200,
+    "error": null,
+    "content_type": "application/javascript; charset=utf-8",
+    "content_length": null,
+    "cache_control": "no-transform, public, s-maxage=30672000, max-age=30672000, immutable",
+    "content_encoding": null,
+    "elapsed_ms": 68.9
+  },
+  {
+    "url": "https://alhikmakw.org.kw/donation/assets/js/main.js",
+    "status": 200,
+    "error": null,
+    "content_type": "application/x-javascript",
+    "content_length": "660",
+    "cache_control": "public, max-age=604800",
+    "content_encoding": null,
+    "elapsed_ms": 276.5
+  },
+  {
+    "url": "https://alhikmakw.org.kw/donation/assets/js/jquery.countup.js",
+    "status": 200,
+    "error": null,
+    "content_type": "application/x-javascript",
+    "content_length": "2935",
+    "cache_control": "public, max-age=604800",
+    "content_encoding": null,
+    "elapsed_ms": 296.8
+  },
+  {
+    "url": "https://kit.fontawesome.com/2809a67eba.js",
+    "status": 403,
+    "error": null,
+    "content_type": null,
+    "content_length": "9",
+    "cache_control": "max-age=0, private, must-revalidate",
+    "content_encoding": null,
+    "elapsed_ms": 1311.1
+  },
+  {
+    "url": "https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js",
+    "status": 200,
+    "error": null,
+    "content_type": "application/javascript; charset=utf-8",
+    "content_length": "80420",
+    "cache_control": "public, max-age=31536000, s-maxage=31536000, immutable",
+    "content_encoding": null,
+    "elapsed_ms": 227.9
+  },
+  {
+    "url": "https://unpkg.com/aos@next/dist/aos.js",
+    "status": 200,
+    "error": null,
+    "content_type": "text/javascript; charset=utf-8",
+    "content_length": null,
+    "cache_control": "public, max-age=31536000",
+    "content_encoding": null,
+    "elapsed_ms": 175.9
+  },
+  {
+    "url": "https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js",
+    "status": 200,
+    "error": null,
+    "content_type": "application/javascript; charset=utf-8",
+    "content_length": null,
+    "cache_control": "no-transform, public, s-maxage=30672000, max-age=30672000, immutable",
+    "content_encoding": null,
+    "elapsed_ms": 110.6
+  },
+  {
+    "url": "https://alhikmakw.org.kw/donation/assets/js/jquery.validate.min.js",
+    "status": 200,
+    "error": null,
+    "content_type": "application/x-javascript",
+    "content_length": "24383",
+    "cache_control": "public, max-age=604800",
+    "content_encoding": null,
+    "elapsed_ms": 249.4
+  },
+  {
+    "url": "https://alhikmakw.org.kw/donation/assets/js/whatsapp_SC.js",
+    "status": 200,
+    "error": null,
+    "content_type": "application/x-javascript",
+    "content_length": "5848",
+    "cache_control": "public, max-age=604800",
+    "content_encoding": null,
+    "elapsed_ms": 308.6
+  },
+  {
+    "url": "https://alhikmakw.org.kw/donation/assets/js/whatsapp-chat-support.js",
+    "status": 200,
+    "error": null,
+    "content_type": "application/x-javascript",
+    "content_length": "12539",
+    "cache_control": "public, max-age=604800",
+    "content_encoding": null,
+    "elapsed_ms": 259.9
+  },
+  {
+    "url": "https://cdn.jsdelivr.net/npm/sweetalert2@8",
+    "status": 200,
+    "error": null,
+    "content_type": "application/javascript; charset=utf-8",
+    "content_length": "64443",
+    "cache_control": "public, max-age=604800, s-maxage=43200",
+    "content_encoding": null,
+    "elapsed_ms": 219.7
+  },
+  {
+    "url": "https://cdn.jsdelivr.net/npm/toastify-js",
+    "status": 200,
+    "error": null,
+    "content_type": "application/javascript; charset=utf-8",
+    "content_length": "6776",
+    "cache_control": "public, max-age=604800, s-maxage=43200",
+    "content_encoding": null,
+    "elapsed_ms": 244.9
+  },
+  {
+    "url": "https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js",
+    "status": 200,
+    "error": null,
+    "content_type": "application/javascript; charset=utf-8",
+    "content_length": null,
+    "cache_control": "no-transform, public, s-maxage=30672000, max-age=30672000, immutable",
+    "content_encoding": null,
+    "elapsed_ms": 53.0
+  },
+  {
+    "url": "https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.43/moment-timezone-with-data.min.js",
+    "status": 200,
+    "error": null,
+    "content_type": "application/javascript; charset=utf-8",
+    "content_length": null,
+    "cache_control": "no-transform, public, s-maxage=30672000, max-age=30672000, immutable",
+    "content_encoding": null,
+    "elapsed_ms": 57.7
+  },
+  {
+    "url": "https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css",
+    "status": 200,
+    "error": null,
+    "content_type": "text/css; charset=utf-8",
+    "content_length": "16264",
+    "cache_control": "public, max-age=31536000, s-maxage=31536000, immutable",
+    "content_encoding": null,
+    "elapsed_ms": 220.7
+  },
+  {
+    "url": "https://www.googletagmanager.com/ns.html?id=GTM-NZJRBBC",
+    "status": 200,
+    "error": null,
+    "content_type": "text/html; charset=UTF-8",
+    "content_length": null,
+    "cache_control": "no-cache, no-store, must-revalidate",
+    "content_encoding": null,
+    "elapsed_ms": 216.7
+  },
+  {
+    "url": "https://alhikmakw.org.kw/donation/uploads/contact/logo/1701783589_1701782759_logoar.png",
+    "status": 200,
+    "error": null,
+    "content_type": "image/png",
+    "content_length": "14598",
+    "cache_control": "public, max-age=604800",
+    "content_encoding": null,
+    "elapsed_ms": 351.9
+  },
+  {
+    "url": "https://alhikmakw.org.kw/donation/assets/img/logo.png",
+    "status": 200,
+    "error": null,
+    "content_type": "image/png",
+    "content_length": "9067",
+    "cache_control": "public, max-age=604800",
+    "content_encoding": null,
+    "elapsed_ms": 389.2
+  },
+  {
+    "url": "https://alhikmakw.org.kw/donation/assets/css/payment-methods-polish.css?v=20260808b",
+    "status": 200,
+    "error": null,
+    "content_type": "text/css",
+    "content_length": "3454",
+    "cache_control": "public, max-age=604800",
+    "content_encoding": null,
+    "elapsed_ms": 518.1
+  },
+  {
+    "url": "https://alhikmakw.org.kw/donation/assets/img/kn.png",
+    "status": 200,
+    "error": null,
+    "content_type": "image/png",
+    "content_length": "8897",
+    "cache_control": "public, max-age=604800",
+    "content_encoding": null,
+    "elapsed_ms": 435.3
+  },
+  {
+    "url": "https://alhikmakw.org.kw/donation/assets/img/vm.png",
+    "status": 200,
+    "error": null,
+    "content_type": "image/png",
+    "content_length": "4342",
+    "cache_control": "public, max-age=604800",
+    "content_encoding": null,
+    "elapsed_ms": 536.2
+  },
+  {
+    "url": "https://portal.myfatoorah.com/imgs/payment-methods/vm.png",
+    "status": 200,
+    "error": null,
+    "content_type": "image/png",
+    "content_length": "14300",
+    "cache_control": "public, max-age=14400",
+    "content_encoding": null,
+    "elapsed_ms": 104.3
+  },
+  {
+    "url": "https://portal.myfatoorah.com/imgs/payment-methods/s.png",
+    "status": 200,
+    "error": null,
+    "content_type": "image/png",
+    "content_length": "14300",
+    "cache_control": "public, max-age=14400",
+    "content_encoding": null,
+    "elapsed_ms": 59.9
+  },
+  {
+    "url": "https://portal.myfatoorah.com/imgs/payment-methods/uaecc.png",
+    "status": 200,
+    "error": null,
+    "content_type": "image/png",
+    "content_length": "14300",
+    "cache_control": "public, max-age=14400",
+    "content_encoding": null,
+    "elapsed_ms": 74.7
+  },
+  {
+    "url": "https://portal.myfatoorah.com/imgs/payment-methods/ap.png",
+    "status": 200,
+    "error": null,
+    "content_type": "image/png",
+    "content_length": "2149",
+    "cache_control": "public, max-age=14400",
+    "content_encoding": null,
+    "elapsed_ms": 169.1
+  },
+  {
+    "url": "https://alhikmakw.org.kw/donation/assets/img/gpay.png",
+    "status": 200,
+    "error": null,
+    "content_type": "image/png",
+    "content_length": "14234",
+    "cache_control": "public, max-age=604800",
+    "content_encoding": null,
+    "elapsed_ms": 338.9
+  },
+  {
+    "url": "https://alhikmakw.org.kw/donation/assets/img/samsungpay.png",
+    "status": 200,
+    "error": null,
+    "content_type": "image/png",
+    "content_length": "2641",
+    "cache_control": "public, max-age=604800",
+    "content_encoding": null,
+    "elapsed_ms": 290.1
+  },
+  {
+    "url": "https://alhikmakw.org.kw/donation/assets/img/apay.png",
+    "status": 200,
+    "error": null,
+    "content_type": "image/png",
+    "content_length": "41837",
+    "cache_control": "public, max-age=604800",
+    "content_encoding": null,
+    "elapsed_ms": 261.0
+  },
+  {
+    "url": "https://alhikmakw.org.kw/donation/uploads/BannerImg/1721576918_photo_2024-07-21_18-48-14.jpg",
+    "status": 200,
+    "error": null,
+    "content_type": "image/jpeg",
+    "content_length": "155955",
+    "cache_control": "public, max-age=604800",
+    "content_encoding": null,
+    "elapsed_ms": 588.5
+  },
+  {
+    "url": "https://alhikmakw.org.kw/donation/uploads/BannerImg/1721577001_photo_2024-07-21_18-48-08.jpg",
+    "status": 200,
+    "error": null,
+    "content_type": "image/jpeg",
+    "content_length": "174582",
+    "cache_control": "public, max-age=604800",
+    "content_encoding": null,
+    "elapsed_ms": 289.6
+  },
+  {
+    "url": "https://alhikmakw.org.kw/donation/uploads/BannerImg/1721577033_photo_2024-07-21_18-48-11.jpg",
+    "status": 200,
+    "error": null,
+    "content_type": "image/jpeg",
+    "content_length": "161443",
+    "cache_control": "public, max-age=604800",
+    "content_encoding": null,
+    "elapsed_ms": 389.7
+  },
+  {
+    "url": "https://alhikmakw.org.kw/donation/uploads/projectimage/1785740272_WhatsApp Image 2026-08-03 at 9.25.56 AM (1).jpeg",
+    "status": 200,
+    "error": null,
+    "content_type": "image/jpeg",
+    "content_length": "132017",
+    "cache_control": "public, max-age=604800",
+    "content_encoding": null,
+    "elapsed_ms": 361.3
+  },
+  {
+    "url": "https://alhikmakw.org.kw/donation/uploads/homeimage/image/1724752741_4014651.png",
+    "status": 200,
+    "error": null,
+    "content_type": "image/png",
+    "content_length": "839076",
+    "cache_control": "public, max-age=604800",
+    "content_encoding": null,
+    "elapsed_ms": 251.2
+  },
+  {
+    "url": "https://alhikmakw.org.kw/donation/uploads/projectimage/1772834372_c03ce321-20d6-4531-9ab2-8e6447a71426.jpeg",
+    "status": 200,
+    "error": null,
+    "content_type": "image/jpeg",
+    "content_length": "223756",
+    "cache_control": "public, max-age=604800",
+    "content_encoding": null,
+    "elapsed_ms": 318.3
+  },
+  {
+    "url": "https://alhikmakw.org.kw/donation/uploads/projectimage/1772148262_photo_2026-02-27_02-24-05.jpg",
+    "status": 200,
+    "error": null,
+    "content_type": "image/jpeg",
+    "content_length": "105789",
+    "cache_control": "public, max-age=604800",
+    "content_encoding": null,
+    "elapsed_ms": 532.2
+  },
+  {
+    "url": "https://alhikmakw.org.kw/donation/uploads/projectimage/1788120445_IMG-20260830-WA0038.jpg",
+    "status": 200,
+    "error": null,
+    "content_type": "image/jpeg",
+    "content_length": "197653",
+    "cache_control": "public, max-age=604800",
+    "content_encoding": null,
+    "elapsed_ms": 250.2
+  },
+  {
+    "url": "https://alhikmakw.org.kw/donation/uploads/projectimage/1760341599_photo_2025-10-13_10-46-17.jpg",
+    "status": 200,
+    "error": null,
+    "content_type": "image/jpeg",
+    "content_length": "196480",
+    "cache_control": "public, max-age=604800",
+    "content_encoding": null,
+    "elapsed_ms": 410.7
+  },
+  {
+    "url": "https://alhikmakw.org.kw/donation/uploads/projectimage/1756108796_photo_2025-08-25_10-59-35.jpg",
+    "status": 200,
+    "error": null,
+    "content_type": "image/jpeg",
+    "content_length": "135859",
+    "cache_control": "public, max-age=604800",
+    "content_encoding": null,
+    "elapsed_ms": 365.8
+  },
+  {
+    "url": "https://alhikmakw.org.kw/donation/uploads/projectimage/1787266345_WhatsApp Image 2026-08-21 at 1.52.03 AM.jpeg",
+    "status": 200,
+    "error": null,
+    "content_type": "image/jpeg",
+    "content_length": "220982",
+    "cache_control": "public, max-age=604800",
+    "content_encoding": null,
+    "elapsed_ms": 458.4
+  },
+  {
+    "url": "https://alhikmakw.org.kw/donation/uploads/projectimage/1789163826_WhatsApp Image 2026-09-09 at 2.57.51 PM.jpeg",
+    "status": 200,
+    "error": null,
+    "content_type": "image/jpeg",
+    "content_length": "164012",
+    "cache_control": "public, max-age=604800",
+    "content_encoding": null,
+    "elapsed_ms": 322.9
+  },
+  {
+    "url": "https://alhikmakw.org.kw/donation/uploads/projectimage/1786644193_aec97416-ab26-4215-8818-8ed36679f8d9.jpeg",
+    "status": 200,
+    "error": null,
+    "content_type": "image/jpeg",
+    "content_length": "270741",
+    "cache_control": "public, max-age=604800",
+    "content_encoding": null,
+    "elapsed_ms": 487.0
+  },
+  {
+    "url": "https://alhikmakw.org.kw/donation/uploads/projectimage/1772363676_7ddf5d58-4dce-485c-bbad-e6c477a9403e.jpeg",
+    "status": 200,
+    "error": null,
+    "content_type": "image/jpeg",
+    "content_length": "218583",
+    "cache_control": "public, max-age=604800",
+    "content_encoding": null,
+    "elapsed_ms": 323.0
+  },
+  {
+    "url": "https://alhikmakw.org.kw/donation/uploads/projectimage/1772061700_photo_2026-02-26_02-16-44.jpg",
+    "status": 200,
+    "error": null,
+    "content_type": "image/jpeg",
+    "content_length": "166104",
+    "cache_control": "public, max-age=604800",
+    "content_encoding": null,
+    "elapsed_ms": 735.4
+  },
+  {
+    "url": "https://alhikmakw.org.kw/donation/uploads/projectimage/1764243292_photo_2025-11-27_14-34-44.jpg",
+    "status": 200,
+    "error": null,
+    "content_type": "image/jpeg",
+    "content_length": "157669",
+    "cache_control": "public, max-age=604800",
+    "content_encoding": null,
+    "elapsed_ms": 378.4
+  },
+  {
+    "url": "https://alhikmakw.org.kw/donation/uploads/projectimage/1770301493_photo_2026-02-05_17-19-57.jpg",
+    "status": 200,
+    "error": null,
+    "content_type": "image/jpeg",
+    "content_length": "162185",
+    "cache_control": "public, max-age=604800",
+    "content_encoding": null,
+    "elapsed_ms": 276.4
+  },
+  {
+    "url": "https://alhikmakw.org.kw/donation/uploads/projectimage/1771750289_photo_2026-02-22_11-51-11.jpg",
+    "status": 200,
+    "error": null,
+    "content_type": "image/jpeg",
+    "content_length": "155582",
+    "cache_control": "public, max-age=604800",
+    "content_encoding": null,
+    "elapsed_ms": 340.2
+  },
+  {
+    "url": "https://alhikmakw.org.kw/donation/uploads/projectimage/1784820638_92cb4de2-8b0b-44a2-a358-ed8b67e21cbf.jpeg",
+    "status": 200,
+    "error": null,
+    "content_type": "image/jpeg",
+    "content_length": "215140",
+    "cache_control": "public, max-age=604800",
+    "content_encoding": null,
+    "elapsed_ms": 298.8
+  },
+  {
+    "url": "https://alhikmakw.org.kw/donation/uploads/projectimage/1771975093_photo_2026-02-25_02-17-48.jpg",
+    "status": 200,
+    "error": null,
+    "content_type": "image/jpeg",
+    "content_length": "145302",
+    "cache_control": "public, max-age=604800",
+    "content_encoding": null,
+    "elapsed_ms": 393.9
+  },
+  {
+    "url": "https://alhikmakw.org.kw/donation/uploads/projectimage/1785956509_WhatsApp Image 2026-08-05 at 9.58.34 PM.jpeg",
+    "status": 200,
+    "error": null,
+    "content_type": "image/jpeg",
+    "content_length": "198847",
+    "cache_control": "public, max-age=604800",
+    "content_encoding": null,
+    "elapsed_ms": 604.8
+  },
+  {
+    "url": "https://alhikmakw.org.kw/donation/assets/img/completeproject.png",
+    "status": 200,
+    "error": null,
+    "content_type": "image/png",
+    "content_length": "142233",
+    "cache_control": "public, max-age=604800",
+    "content_encoding": null,
+    "elapsed_ms": 391.6
+  },
+  {
+    "url": "https://alhikmakw.org.kw/donation/uploads/projectimage/1787228409_54564.jpeg",
+    "status": 200,
+    "error": null,
+    "content_type": "image/jpeg",
+    "content_length": "247308",
+    "cache_control": "public, max-age=604800",
+    "content_encoding": null,
+    "elapsed_ms": 753.5
+  },
+  {
+    "url": "https://alhikmakw.org.kw/donation/uploads/homepagepopupimage/1730614133_المشاريع  (2).png",
+    "status": 200,
+    "error": null,
+    "content_type": "image/png",
+    "content_length": "1146728",
+    "cache_control": "public, max-age=604800",
+    "content_encoding": null,
+    "elapsed_ms": 641.8
+  },
+  {
+    "url": "https://alhikmakw.org.kw/donation/public/MinisterLogo.jpg",
+    "status": 200,
+    "error": null,
+    "content_type": "image/jpeg",
+    "content_length": "31760",
+    "cache_control": "public, max-age=604800",
+    "content_encoding": null,
+    "elapsed_ms": 654.1
+  },
+  {
+    "url": "https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js",
+    "status": 200,
+    "error": null,
+    "content_type": "application/javascript; charset=utf-8",
+    "content_length": "73163",
+    "cache_control": "public, max-age=31536000, s-maxage=31536000, immutable",
+    "content_encoding": null,
+    "elapsed_ms": 378.6
+  }
+]

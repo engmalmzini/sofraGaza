@@ -1,0 +1,158 @@
+{
+  "audit_started_utc": "2026-09-15T13:08:33.933886+00:00",
+  "target": "https://alhikmakw.org.kw/donation/",
+  "requests": {
+    "donation": {
+      "requested_url": "https://alhikmakw.org.kw/donation/",
+      "final_url": "https://alhikmakw.org.kw/donation/",
+      "status": 200,
+      "reason": "OK",
+      "elapsed_ms": 12151.6,
+      "headers": {
+        "Connection": "close",
+        "X-Powered-By": "PHP/8.1.34",
+        "Content-Type": "text/html; charset=UTF-8",
+        "Cache-Control": "no-cache, private",
+        "set-cookie": "alhikmakw_session=eyJpdiI6Ii9HcHBteTZZQkk5VDFhNDU1OVV4cXc9PSIsInZhbHVlIjoickZZRDFNUnZUTTA3Y29DQ3NGSDFrU2M0cWF4TEMxKzZWQ0tzbHJONzg2SHN6S0MyZFNQKzdqUVF1VWQyeEFYZGZjYlIvMmZCa1g5cUMyL0YyUHRQK1V5U0dYT0kzOGx5TThFanpJMkE2N3BWQU5abFM4YzZLb0J5aER3Nm52SVoiLCJtYWMiOiJkMDliODhlYWFmZDRiNjY2MmZhM2U5NjMyZDgzNThkODQzYzVmMWM4ZWM4ZmQ5YWZiMzA0OGJmN2U5ZGFlMWExIiwidGFnIjoiIn0%3D; expires=Tue, 15 Sep 2026 15:08:41 GMT; Max-Age=7200; path=/; httponly; samesite=lax; secure",
+        "Transfer-Encoding": "chunked",
+        "Date": "Tue, 15 Sep 2026 13:08:41 GMT",
+        "Server": "LiteSpeed",
+        "platform": "hostinger",
+        "panel": "hpanel",
+        "Content-Security-Policy": "upgrade-insecure-requests",
+        "alt-svc": "h3=\":443\"; ma=2592000, h3-29=\":443\"; ma=2592000"
+      },
+      "set_cookie": [
+        "XSRF-TOKEN=eyJpdiI6IkhKQUJXUncxUE41aHZYaTlXTnRIRkE9PSIsInZhbHVlIjoiQWNQZ3JIZzRNamZtem1YRUlZbHBmald1ZUhBd1M2cm14S1dXNUpvNFJvYTZJMUNBbWtMV1RuVkJMZW5tWXlYM0lJbUtINCtGaWtaN2pGN3I2MnQ4cFIyNUgvVlJIMHJsWUJVcjFoU3ZJdXpJeWlxc1hBWHpCSWNVY0pLU0d3aHUiLCJtYWMiOiJkZjFiOWRiYWJjOThiZTc3ODJkMDU2NDdjYWVhYTc3YzdhZTU1NDNlYTNiZTUxZGYyODQ2MmQzOTg4ZTRjM2VhIiwidGFnIjoiIn0%3D; expires=Tue, 15 Sep 2026 15:08:41 GMT; Max-Age=7200; path=/; samesite=lax; secure",
+        "alhikmakw_session=eyJpdiI6Ii9HcHBteTZZQkk5VDFhNDU1OVV4cXc9PSIsInZhbHVlIjoickZZRDFNUnZUTTA3Y29DQ3NGSDFrU2M0cWF4TEMxKzZWQ0tzbHJONzg2SHN6S0MyZFNQKzdqUVF1VWQyeEFYZGZjYlIvMmZCa1g5cUMyL0YyUHRQK1V5U0dYT0kzOGx5TThFanpJMkE2N3BWQU5abFM4YzZLb0J5aER3Nm52SVoiLCJtYWMiOiJkMDliODhlYWFmZDRiNjY2MmZhM2U5NjMyZDgzNThkODQzYzVmMWM4ZWM4ZmQ5YWZiMzA0OGJmN2U5ZGFlMWExIiwidGFnIjoiIn0%3D; expires=Tue, 15 Sep 2026 15:08:41 GMT; Max-Age=7200; path=/; httponly; samesite=lax; secure"
+      ],
+      "body_bytes": 200458
+    },
+    "root": {
+      "requested_url": "https://alhikmakw.org.kw/",
+      "final_url": "https://alhikmakw.org.kw/donation/",
+      "status": 200,
+      "reason": "OK",
+      "elapsed_ms": 4900.9,
+      "headers": {
+        "Connection": "close",
+        "X-Powered-By": "PHP/8.1.34",
+        "Content-Type": "text/html; charset=UTF-8",
+        "Cache-Control": "no-cache, private",
+        "set-cookie": "alhikmakw_session=eyJpdiI6ImZXdFFGQWN5S0NVMUZkN2kyVWtPU0E9PSIsInZhbHVlIjoiaFhKbVg5THBIMXkvU2RVVXJpZ2wweXE3MTlXemhqZXdMblUyUnBGNXNyamQ2a0EwNXFON3lVb1hWVEF1STZIc1RzV25RWWlFRWhjODBrQThjcWlMd2xoZmdXc2Q5eHp0ZGdtdjhNRVRvL2pzc0hEeitSSHZuZjhNcmJxK3VRZVMiLCJtYWMiOiJhYTk3NjZhZTkwOTVjNjg2MjdkNWJjZjFkNjQ3YzYyZTQ1OGE5YmU0M2Y1YTBhZTRkMjZjZjgyNjM1MjM3MDk5IiwidGFnIjoiIn0%3D; expires=Tue, 15 Sep 2026 15:08:47 GMT; Max-Age=7200; path=/; httponly; samesite=lax; secure",
+        "Transfer-Encoding": "chunked",
+        "Date": "Tue, 15 Sep 2026 13:08:47 GMT",
+        "Server": "LiteSpeed",
+        "platform": "hostinger",
+        "panel": "hpanel",
+        "Content-Security-Policy": "upgrade-insecure-requests",
+        "alt-svc": "h3=\":443\"; ma=2592000, h3-29=\":443\"; ma=2592000"
+      },
+      "set_cookie": [
+        "XSRF-TOKEN=eyJpdiI6IlJSTWVlT0VYemJtZEVOc05rZWZPRFE9PSIsInZhbHVlIjoia1B2eDJDVysySzNzVXFwUW9DNk5EcnhhcklCamR4dHRtWWVoWXN3NDQwZVRZSlVsNWRSNW45Q3VDdnluNzUzWE50V29Wb0MvMERzNElhUGNSSTR0YkQ0bUMrTndVQkE3aFlFNW4zT0lJU3FQN1lVb01DSDh0dXBaMldvVUN6OTgiLCJtYWMiOiJhNzUzZGZiMDJjNmY2NTYwNzhhMzJkNzkwM2RjOTEwNzE4ZjExY2I1MWIzYjRiNmQ4MmE4NTZlNTI0NzhiYTY0IiwidGFnIjoiIn0%3D; expires=Tue, 15 Sep 2026 15:08:47 GMT; Max-Age=7200; path=/; samesite=lax; secure",
+        "alhikmakw_session=eyJpdiI6ImZXdFFGQWN5S0NVMUZkN2kyVWtPU0E9PSIsInZhbHVlIjoiaFhKbVg5THBIMXkvU2RVVXJpZ2wweXE3MTlXemhqZXdMblUyUnBGNXNyamQ2a0EwNXFON3lVb1hWVEF1STZIc1RzV25RWWlFRWhjODBrQThjcWlMd2xoZmdXc2Q5eHp0ZGdtdjhNRVRvL2pzc0hEeitSSHZuZjhNcmJxK3VRZVMiLCJtYWMiOiJhYTk3NjZhZTkwOTVjNjg2MjdkNWJjZjFkNjQ3YzYyZTQ1OGE5YmU0M2Y1YTBhZTRkMjZjZjgyNjM1MjM3MDk5IiwidGFnIjoiIn0%3D; expires=Tue, 15 Sep 2026 15:08:47 GMT; Max-Age=7200; path=/; httponly; samesite=lax; secure"
+      ],
+      "body_bytes": 200458
+    },
+    "http_donation": {
+      "requested_url": "http://alhikmakw.org.kw/donation/",
+      "final_url": "https://alhikmakw.org.kw/donation/",
+      "status": 200,
+      "reason": "OK",
+      "elapsed_ms": 3034.2,
+      "headers": {
+        "Connection": "close",
+        "X-Powered-By": "PHP/8.1.34",
+        "Content-Type": "text/html; charset=UTF-8",
+        "Cache-Control": "no-cache, private",
+        "set-cookie": "alhikmakw_session=eyJpdiI6IlBEWENFNDhLTzVhVFlZU3FZT211cmc9PSIsInZhbHVlIjoiZytjSGxUK0k4ZG1TL0JpK2VrV3F5Uk5ZL01GaHl6aW50cm0ydFc2c3kyT3ZORUMzWVFRZFlLYmhvR2g3UDhNM1o5d3RjMmpHMVlKd1hWUG9BUDBNYVZKU0hxcDg3UXVWOXBVcUc2Ry9pRUUyMjkyVU55Si9vQTl5dlU2cjlBb0oiLCJtYWMiOiIwZjg0NWRmOWRhNWY3YmE1OTVlZjMxZWRjMjU3NTFhY2Q4ODAwYmZiMTc1ODI5OTcwZjE1Mjc0OTZhNTdhMDFmIiwidGFnIjoiIn0%3D; expires=Tue, 15 Sep 2026 15:08:52 GMT; Max-Age=7200; path=/; httponly; samesite=lax; secure",
+        "Transfer-Encoding": "chunked",
+        "Date": "Tue, 15 Sep 2026 13:08:52 GMT",
+        "Server": "LiteSpeed",
+        "platform": "hostinger",
+        "panel": "hpanel",
+        "Content-Security-Policy": "upgrade-insecure-requests",
+        "alt-svc": "h3=\":443\"; ma=2592000, h3-29=\":443\"; ma=2592000"
+      },
+      "set_cookie": [
+        "XSRF-TOKEN=eyJpdiI6InFwUVFxckJjQ0FLNkU4Kzh2L3Q1ZWc9PSIsInZhbHVlIjoib3Q5YkFVMEttRG1NSHIwRUpUVkVYWmk0VVl4WmNoWC85eHJzVC9WL0VBeDRqeFYwdWhtTE9MV0dvSTdHLzB1elozVkVqOVdzRStVQWk0MHJ2UkZnVVYyY1VJMzBQc3VYaFhHNmpkSG0yMXFWckN2S1NoNkhJK0FoM1UzRTBoMjEiLCJtYWMiOiJlMjBhMmM5NTQ4OTlmMzlmMWE0ZTdmNmQyNTVkYzAzZDQ4ZGM1MGQ4YTk4MDNmYzhlZTg3N2RjOTFmMWMxZjhmIiwidGFnIjoiIn0%3D; expires=Tue, 15 Sep 2026 15:08:52 GMT; Max-Age=7200; path=/; samesite=lax; secure",
+        "alhikmakw_session=eyJpdiI6IlBEWENFNDhLTzVhVFlZU3FZT211cmc9PSIsInZhbHVlIjoiZytjSGxUK0k4ZG1TL0JpK2VrV3F5Uk5ZL01GaHl6aW50cm0ydFc2c3kyT3ZORUMzWVFRZFlLYmhvR2g3UDhNM1o5d3RjMmpHMVlKd1hWUG9BUDBNYVZKU0hxcDg3UXVWOXBVcUc2Ry9pRUUyMjkyVU55Si9vQTl5dlU2cjlBb0oiLCJtYWMiOiIwZjg0NWRmOWRhNWY3YmE1OTVlZjMxZWRjMjU3NTFhY2Q4ODAwYmZiMTc1ODI5OTcwZjE1Mjc0OTZhNTdhMDFmIiwidGFnIjoiIn0%3D; expires=Tue, 15 Sep 2026 15:08:52 GMT; Max-Age=7200; path=/; httponly; samesite=lax; secure"
+      ],
+      "body_bytes": 200458
+    },
+    "robots": {
+      "requested_url": "https://alhikmakw.org.kw/robots.txt",
+      "final_url": "https://alhikmakw.org.kw/robots.txt",
+      "status": 404,
+      "reason": "Not Found",
+      "elapsed_ms": 378.5,
+      "headers": {
+        "Connection": "close",
+        "Content-Type": "text/html",
+        "Last-Modified": "Tue, 22 Apr 2025 07:41:12 GMT",
+        "Etag": "\"119f-68074818-638e4bf10148973d;;;\"",
+        "Accept-Ranges": "bytes",
+        "Content-Length": "4511",
+        "Date": "Tue, 15 Sep 2026 13:08:54 GMT",
+        "Server": "LiteSpeed",
+        "platform": "hostinger",
+        "panel": "hpanel",
+        "alt-svc": "h3=\":443\"; ma=2592000, h3-29=\":443\"; ma=2592000"
+      },
+      "set_cookie": [],
+      "body_bytes": 4511
+    },
+    "sitemap": {
+      "requested_url": "https://alhikmakw.org.kw/sitemap.xml",
+      "final_url": "https://alhikmakw.org.kw/sitemap.xml",
+      "status": 404,
+      "reason": "Not Found",
+      "elapsed_ms": 380.4,
+      "headers": {
+        "Connection": "close",
+        "Content-Type": "text/html",
+        "Last-Modified": "Tue, 22 Apr 2025 07:41:12 GMT",
+        "Etag": "\"119f-68074818-638e4bf10148973d;;;\"",
+        "Accept-Ranges": "bytes",
+        "Content-Length": "4511",
+        "Date": "Tue, 15 Sep 2026 13:08:54 GMT",
+        "Server": "LiteSpeed",
+        "platform": "hostinger",
+        "panel": "hpanel",
+        "alt-svc": "h3=\":443\"; ma=2592000, h3-29=\":443\"; ma=2592000"
+      },
+      "set_cookie": [],
+      "body_bytes": 4511
+    },
+    "404": {
+      "requested_url": "https://alhikmakw.org.kw/__audit_nonexistent_1789477713__",
+      "final_url": "https://alhikmakw.org.kw/__audit_nonexistent_1789477713__",
+      "status": 404,
+      "reason": "Not Found",
+      "elapsed_ms": 305.1,
+      "headers": {
+        "Connection": "close",
+        "Content-Type": "text/html",
+        "Last-Modified": "Tue, 22 Apr 2025 07:41:12 GMT",
+        "Etag": "\"119f-68074818-638e4bf10148973d;;;\"",
+        "Accept-Ranges": "bytes",
+        "Content-Length": "4511",
+        "Date": "Tue, 15 Sep 2026 13:08:54 GMT",
+        "Server": "LiteSpeed",
+        "platform": "hostinger",
+        "panel": "hpanel",
+        "alt-svc": "h3=\":443\"; ma=2592000, h3-29=\":443\"; ma=2592000"
+      },
+      "set_cookie": [],
+      "body_bytes": 4511
+    }
+  },
+  "counts": {
+    "links_discovered": 82,
+    "links_checked": 82,
+    "assets_discovered": 67,
+    "assets_checked": 67,
+    "forms": 2
+  },
+  "audit_finished_utc": "2026-09-15T13:10:09.456696+00:00"
+}

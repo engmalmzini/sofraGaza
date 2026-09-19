@@ -1,0 +1,60 @@
+{
+  "host": "alhikmakw.org.kw",
+  "port": 443,
+  "protocol": "TLSv1.3",
+  "cipher": [
+    "TLS_AES_256_GCM_SHA384",
+    "TLSv1.3",
+    256
+  ],
+  "peer_certificate": {
+    "subject": [
+      [
+        [
+          "commonName",
+          "alhikmakw.org.kw"
+        ]
+      ]
+    ],
+    "issuer": [
+      [
+        [
+          "countryName",
+          "US"
+        ]
+      ],
+      [
+        [
+          "organizationName",
+          "Let's Encrypt"
+        ]
+      ],
+      [
+        [
+          "commonName",
+          "YE1"
+        ]
+      ]
+    ],
+    "version": 3,
+    "serialNumber": "06BBFC915101A7AA1687F663387D8FFB6C58",
+    "notBefore": "Aug  5 01:23:58 2026 GMT",
+    "notAfter": "Nov  3 01:23:57 2026 GMT",
+    "subjectAltName": [
+      [
+        "DNS",
+        "alhikmakw.org.kw"
+      ],
+      [
+        "DNS",
+        "www.alhikmakw.org.kw"
+      ]
+    ],
+    "caIssuers": [
+      "http://ye1.i.lencr.org/"
+    ],
+    "crlDistributionPoints": [
+      "http://ye1.c.lencr.org/89.crl"
+    ]
+  }
+}
