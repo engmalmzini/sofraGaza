@@ -1,6 +1,6 @@
 @extends('layouts.partner')
 
-@section('title', 'تعديل طبق')
+@section('title', 'تعديل صنف')
 
 @section('content')
 <form method="POST" action="{{ route('partner.menu-items.update', $menuItem) }}" enctype="multipart/form-data" class="admin-card admin-form">

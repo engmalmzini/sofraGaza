@@ -14,7 +14,7 @@
 <div>
     <label class="mb-1 block text-sm font-bold">مضاعف النقاط</label>
     <input type="number" step="0.01" name="points_multiplier" value="{{ old('points_multiplier', $m->points_multiplier ?? 1) }}" class="w-full rounded-xl border px-3 py-3">
-    <p class="mt-1 text-xs text-olive/60">1 = نقطة لكل 10<span class="ils">₪</span>، 1.25 للعضوية الأساسية، 1.5 للمميزة.</p>
+    <p class="mt-1 text-xs text-olive/60">1 = نقطة لكل شيكل، 1.25 للعضوية الأساسية، 1.5 للمميزة.</p>
 </div>
 <div>
     <label class="mb-1 block text-sm font-bold">الوصف</label>

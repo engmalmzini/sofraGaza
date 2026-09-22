@@ -3,11 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\Restaurant;
+use App\Services\PointsService;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class RestaurantController extends Controller
 {
+    public function __construct(private PointsService $points) {}
     public function index(Request $request): View
     {
         $restrictToDeliveryArea = true;
@@ -35,7 +37,7 @@ class RestaurantController extends Controller
         }
 
         if ($request->filled('cuisine') && array_key_exists($request->string('cuisine')->toString(), config('brand.cuisines', []))) {
-            $query->where('cuisine', $request->string('cuisine')->toString());
+            $query->matchingCuisine($request->string('cuisine')->toString());
         }
 
         if ($request->filled('q')) {
@@ -77,7 +79,7 @@ class RestaurantController extends Controller
             'restaurant' => $restaurant,
             'menuSections' => $menuSections,
             'restaurantCart' => $restaurantCart,
-            'rewards' => collect(config('brand.rewards', []))->where('locked', false)->take(2)->values(),
+            'rewards' => $this->points->rewardsForRestaurant($restaurant, 4),
             'membership' => auth()->user()?->activeMembership(),
             'pointsBalance' => (int) (auth()->user()->points_balance ?? 0),
             'rating' => number_format(4.6 + ($restaurant->id % 4) * 0.1, 1),

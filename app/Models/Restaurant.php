@@ -90,6 +90,32 @@ class Restaurant extends Model
         return $query->where('verification_status', self::VERIFICATION_PENDING);
     }
 
+    public function scopeMatchingCuisine(Builder $query, string $cuisine): Builder
+    {
+        $keywords = array_values(array_filter(config('brand.cuisine_keywords.'.$cuisine, [])));
+
+        return $query->where(function (Builder $inner) use ($cuisine, $keywords) {
+            $inner->where('cuisine', $cuisine);
+
+            if ($cuisine === 'cafe') {
+                $inner->orWhere('type', 'cafe');
+            }
+
+            foreach ($keywords as $keyword) {
+                $like = '%'.$keyword.'%';
+                $inner->orWhere('name', 'like', $like)
+                    ->orWhere('description', 'like', $like)
+                    ->orWhereHas('menuItems', function (Builder $items) use ($like) {
+                        $items->where(function (Builder $item) use ($like) {
+                            $item->where('name', 'like', $like)
+                                ->orWhere('category', 'like', $like)
+                                ->orWhere('description', 'like', $like);
+                        });
+                    });
+            }
+        });
+    }
+
     public function scopeInDeliveryArea(Builder $query): Builder
     {
         $areaKey = session('delivery_area.key');
@@ -170,7 +196,7 @@ class Restaurant extends Model
         return [
             [
                 'key' => 'profile',
-                'label' => 'بيانات المطعم الأساسية',
+                'label' => 'بيانات '.$this->venueNoun().' الأساسية',
                 'done' => filled($this->description) && filled($this->address) && filled($this->phone),
             ],
             [
@@ -210,6 +236,40 @@ class Restaurant extends Model
     public function typeLabel(): string
     {
         return $this->type === 'cafe' ? 'كافي' : 'مطعم';
+    }
+
+    public function venueNoun(): string
+    {
+        return $this->type === 'cafe' ? 'الكافي' : 'المطعم';
+    }
+
+    public function venueNounYours(): string
+    {
+        return $this->type === 'cafe' ? 'كافيك' : 'مطعمك';
+    }
+
+    public function panelTitle(): string
+    {
+        return $this->type === 'cafe' ? 'لوحة الكافي' : 'لوحة المطعم';
+    }
+
+    public function defaultMenuCategories(): array
+    {
+        return $this->type === 'cafe'
+            ? ['مشروبات ساخنة', 'مشروبات باردة', 'حلويات', 'معجنات', 'وجبات خفيفة']
+            : ['وجبات', 'مشروبات', 'مقبلات', 'حلويات'];
+    }
+
+    public function menuCategories(): array
+    {
+        $used = $this->menuItems()
+            ->whereNotNull('category')
+            ->where('category', '!=', '')
+            ->distinct()
+            ->pluck('category')
+            ->all();
+
+        return array_values(array_unique([...$this->defaultMenuCategories(), ...$used]));
     }
 
     public function imageUrl(): ?string

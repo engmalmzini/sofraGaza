@@ -4,8 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\MenuItem;
 use App\Models\Restaurant;
-use App\Models\Setting;
 use App\Services\OrderService;
+use App\Services\PointsService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -13,14 +13,16 @@ use RuntimeException;
 
 class RedemptionController extends Controller
 {
-    public function __construct(private OrderService $orders) {}
+    public function __construct(
+        private OrderService $orders,
+        private PointsService $points,
+    ) {}
 
     public function create(Request $request): View
     {
-        $drinkPoints = (int) Setting::value('drink_points', 20);
-        $mealPoints = (int) Setting::value('meal_points', 50);
         $restaurants = Restaurant::query()->visible()->orderBy('name')->get();
         $selected = $request->integer('restaurant_id') ?: $restaurants->first()?->id;
+        $earnRate = $this->points->shekelsPerPoint();
 
         $items = collect();
         if ($selected) {
@@ -30,8 +32,8 @@ class RedemptionController extends Controller
                 ->orderBy('category')
                 ->orderBy('name')
                 ->get()
-                ->map(function (MenuItem $item) use ($drinkPoints, $mealPoints) {
-                    $item->redeem_cost = $item->category === 'مشروبات' ? $drinkPoints : $mealPoints;
+                ->map(function (MenuItem $item) {
+                    $item->redeem_cost = $this->points->redeemCost($item);
 
                     return $item;
                 });
@@ -47,8 +49,7 @@ class RedemptionController extends Controller
         }
 
         return view('redeem.create', [
-            'drinkPoints' => $drinkPoints,
-            'mealPoints' => $mealPoints,
+            'earnRate' => $earnRate,
             'restaurants' => $restaurants,
             'selected' => $selected,
             'items' => $items,

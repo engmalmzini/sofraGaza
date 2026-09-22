@@ -23,7 +23,9 @@
                     <span class="material-symbols-outlined text-[16px]">verified</span>
                     <span>مختارات قطاع الضيافة المعتمدة</span>
                 </div>
-                <h1 class="font-headline-md text-2xl lg:text-[28px] font-bold text-stone-900 tracking-tight">المطاعم والكافيهات المختارة</h1>
+                <h1 class="font-headline-md text-2xl lg:text-[28px] font-bold text-stone-900 tracking-tight">
+                    {{ $selectedCuisine && isset(config('brand.cuisines')[$selectedCuisine]) ? config('brand.cuisines')[$selectedCuisine] : 'المطاعم والكافيهات المختارة' }}
+                </h1>
             </div>
         </div>
 

@@ -14,6 +14,11 @@ class DashboardController extends Controller
         $latestOrders = $restaurant->orders()->with('user')->latest()->take(6)->get();
         $checklist = $restaurant->setupChecklist();
         $readyCount = collect($checklist)->where('done', true)->count();
+        $categoryStats = $restaurant->menuItems()
+            ->selectRaw('category, count(*) as items_count')
+            ->groupBy('category')
+            ->pluck('items_count', 'category');
+        $menuByCategory = $restaurant->menuItems()->orderBy('name')->get()->groupBy('category');
 
         return view('partner.dashboard', [
             'restaurant' => $restaurant,
@@ -22,6 +27,8 @@ class DashboardController extends Controller
             'latestOrders' => $latestOrders,
             'checklist' => $checklist,
             'readyCount' => $readyCount,
+            'categoryStats' => $categoryStats,
+            'menuByCategory' => $menuByCategory,
         ]);
     }
 }

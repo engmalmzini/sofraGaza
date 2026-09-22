@@ -47,6 +47,7 @@ class AppNotification extends Model
 
         return match (true) {
             str_contains($haystack, 'طلب') => 'receipt_long',
+            str_contains($haystack, 'بطاقة') => 'credit_card',
             str_contains($haystack, 'عضوية') || str_contains($haystack, 'اشتراك') => 'workspace_premium',
             str_contains($haystack, 'نقاط') || str_contains($haystack, 'استبدال') => 'stars',
             str_contains($haystack, 'مطعم') || str_contains($haystack, 'انضمام') || str_contains($haystack, 'تحقق') || str_contains($haystack, 'مراجعة') => 'storefront',

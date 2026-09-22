@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\EnsureUserIsAdmin;
+use App\Http\Middleware\EnsureUserIsCourier;
 use App\Http\Middleware\EnsureUserIsRestaurantOwner;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -16,6 +17,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'admin' => EnsureUserIsAdmin::class,
             'partner' => EnsureUserIsRestaurantOwner::class,
+            'courier' => EnsureUserIsCourier::class,
         ]);
         $middleware->redirectGuestsTo(fn () => route('login'));
         $middleware->redirectUsersTo(function () {
@@ -27,6 +29,10 @@ return Application::configure(basePath: dirname(__DIR__))
 
             if ($user?->isRestaurantOwner()) {
                 return route('partner.dashboard');
+            }
+
+            if ($user?->isCourier()) {
+                return route('courier.dashboard');
             }
 
             return route('home');

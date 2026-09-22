@@ -40,9 +40,16 @@ class OrderController extends Controller
     public function show(Order $order): View
     {
         $this->authorizeOrder($order);
-        $order->load(['user', 'items', 'membership']);
+        $order->load(['user', 'restaurant', 'items', 'membership']);
 
         return view('partner.orders.show', compact('order'));
+    }
+
+    public function receipt(Order $order)
+    {
+        $this->authorizeOrder($order);
+
+        return $order->receiptResponse();
     }
 
     public function update(Request $request, Order $order): RedirectResponse

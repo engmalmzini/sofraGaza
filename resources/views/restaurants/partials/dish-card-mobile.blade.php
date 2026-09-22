@@ -1,5 +1,4 @@
 @php
-    $points = max(1, (int) floor((float) $item->price / 10));
     $popular = $popular ?? false;
 @endphp
 <article id="dish-{{ $item->id }}" class="dish-item {{ $sectionKey }} bg-surface-container-lowest p-space-sm rounded-xl flex items-center justify-between gap-space-sm shadow-sm hover:shadow-md transition-shadow scroll-mt-32" data-name="{{ $item->name }}" data-category="{{ $sectionKey }}" data-dish-id="{{ $item->id }}">
@@ -8,7 +7,6 @@
             @if($popular)
                 <span class="bg-primary-fixed text-on-primary-fixed px-1.5 py-0.5 rounded text-[10px] font-bold">الأكثر طلباً</span>
             @endif
-            <span class="font-label-sm text-[11px] text-secondary font-medium">+{{ $points }} {{ $points === 1 ? 'نقطة ولاء' : 'نقاط ولاء' }}</span>
         </div>
         <h3 class="font-label-lg text-[15px] text-on-surface font-bold truncate">{{ $item->name }}</h3>
         @if($item->description)
@@ -20,7 +18,7 @@
                 <span class="ils text-primary">₪</span>
             </div>
             @if($item->is_available)
-                <button type="button" class="font-label-sm text-[12px] text-on-surface-variant hover:text-primary underline" data-open-customizer data-item-id="{{ $item->id }}" data-item-name="{{ $item->name }}" data-item-price="{{ (float) $item->price }}" data-item-desc="{{ $item->description }}" data-item-points="{{ $points }}" data-add-url="{{ route('cart.add', $item) }}">تخصيص</button>
+                <button type="button" class="font-label-sm text-[12px] text-on-surface-variant hover:text-primary underline" data-open-customizer data-item-id="{{ $item->id }}" data-item-name="{{ $item->name }}" data-item-price="{{ (float) $item->price }}" data-item-desc="{{ $item->description }}" data-add-url="{{ route('cart.add', $item) }}">تخصيص</button>
             @endif
         </div>
     </div>

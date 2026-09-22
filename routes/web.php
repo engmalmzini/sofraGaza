@@ -6,6 +6,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\Courier;
 use App\Http\Controllers\DeliveryAreaController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\MembershipController;
@@ -43,6 +44,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
 
     Route::post('/memberships/{membership}/subscribe', [MembershipController::class, 'subscribe'])->name('memberships.subscribe');
+    Route::post('/memberships/card', [MembershipController::class, 'requestCard'])->name('memberships.card');
 
     Route::get('/redeem', [RedemptionController::class, 'create'])->name('redeem.create');
     Route::post('/redeem', [RedemptionController::class, 'store'])->name('redeem.store');
@@ -70,12 +72,15 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::resource('restaurants.menu-items', Admin\MenuItemController::class)->except(['show']);
     Route::get('orders', [Admin\OrderController::class, 'index'])->name('orders.index');
     Route::get('orders/{order}', [Admin\OrderController::class, 'show'])->name('orders.show');
+    Route::get('orders/{order}/receipt', [Admin\OrderController::class, 'receipt'])->name('orders.receipt');
     Route::patch('orders/{order}', [Admin\OrderController::class, 'update'])->name('orders.update');
     Route::resource('memberships', Admin\MembershipController::class)->except(['show']);
     Route::get('subscriptions', [Admin\SubscriptionController::class, 'index'])->name('subscriptions.index');
     Route::get('subscriptions/{subscription}', [Admin\SubscriptionController::class, 'show'])->name('subscriptions.show');
+    Route::get('subscriptions/{subscription}/receipt', [Admin\SubscriptionController::class, 'receipt'])->name('subscriptions.receipt');
     Route::post('subscriptions/{subscription}/approve', [Admin\SubscriptionController::class, 'approve'])->name('subscriptions.approve');
     Route::post('subscriptions/{subscription}/reject', [Admin\SubscriptionController::class, 'reject'])->name('subscriptions.reject');
+    Route::post('subscriptions/{subscription}/card', [Admin\SubscriptionController::class, 'markCard'])->name('subscriptions.card');
     Route::get('users', [Admin\UserController::class, 'index'])->name('users.index');
     Route::get('users/{user}', [Admin\UserController::class, 'show'])->name('users.show');
     Route::post('users/{user}/points', [Admin\UserController::class, 'adjustPoints'])->name('users.points');
@@ -94,8 +99,20 @@ Route::prefix('partner')->name('partner.')->middleware(['auth', 'partner'])->gro
     Route::resource('menu-items', Partner\MenuItemController::class)->except(['show']);
     Route::get('orders', [Partner\OrderController::class, 'index'])->name('orders.index');
     Route::get('orders/{order}', [Partner\OrderController::class, 'show'])->name('orders.show');
+    Route::get('orders/{order}/receipt', [Partner\OrderController::class, 'receipt'])->name('orders.receipt');
     Route::patch('orders/{order}', [Partner\OrderController::class, 'update'])->name('orders.update');
+    Route::get('card', [Partner\CardController::class, 'show'])->name('cards.show');
     Route::get('notifications', [Partner\NotificationController::class, 'index'])->name('notifications.index');
     Route::get('notifications/{notification}', [Partner\NotificationController::class, 'open'])->name('notifications.open');
     Route::post('notifications/read', [Partner\NotificationController::class, 'markRead'])->name('notifications.read');
+});
+
+Route::prefix('courier')->name('courier.')->middleware(['auth', 'courier'])->group(function () {
+    Route::get('/', [Courier\DashboardController::class, 'index'])->name('dashboard');
+    Route::get('orders/{order}', [Courier\OrderController::class, 'show'])->name('orders.show');
+    Route::post('orders/{order}/claim', [Courier\OrderController::class, 'claim'])->name('orders.claim');
+    Route::post('orders/{order}/complete', [Courier\OrderController::class, 'complete'])->name('orders.complete');
+    Route::get('notifications', [Courier\NotificationController::class, 'index'])->name('notifications.index');
+    Route::get('notifications/{notification}', [Courier\NotificationController::class, 'open'])->name('notifications.open');
+    Route::post('notifications/read', [Courier\NotificationController::class, 'markRead'])->name('notifications.read');
 });

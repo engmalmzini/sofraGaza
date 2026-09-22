@@ -4,36 +4,38 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'لوحة المطعم') — سفرة غزة</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-</head>
 @php
     $logoPath = public_path('images/logo.png');
     $logoSrc = file_exists($logoPath) ? asset('images/logo.png').'?v='.filemtime($logoPath) : config('brand.logo');
     $partnerRestaurant = auth()->user()->ownedRestaurant;
     $pendingOrdersCount = $partnerRestaurant?->orders()->where('status', 'pending_confirmation')->count() ?? 0;
+    $panelTitle = $partnerRestaurant?->panelTitle() ?? 'لوحة الشريك';
     $navGroups = [
         [
-            'label' => 'المطعم',
+            'label' => $partnerRestaurant?->typeLabel() ?? 'المكان',
             'items' => [
                 ['route' => 'partner.dashboard', 'icon' => 'dashboard', 'label' => 'نظرة عامة', 'match' => 'partner.dashboard'],
-                ['route' => 'partner.restaurant.edit', 'icon' => 'storefront', 'label' => 'بيانات المطعم', 'match' => 'partner.restaurant.*'],
-                ['route' => 'partner.menu-items.index', 'icon' => 'restaurant_menu', 'label' => 'المنيو والأطباق', 'match' => 'partner.menu-items.*'],
+                ['route' => 'partner.restaurant.edit', 'icon' => 'storefront', 'label' => 'بيانات '.($partnerRestaurant?->venueNoun() ?? 'المكان'), 'match' => 'partner.restaurant.*'],
+                ['route' => 'partner.menu-items.index', 'icon' => 'restaurant_menu', 'label' => 'المنيو والتصنيفات', 'match' => 'partner.menu-items.*'],
             ],
         ],
         [
             'label' => 'التشغيل',
             'items' => [
                 ['route' => 'partner.orders.index', 'icon' => 'receipt_long', 'label' => 'الطلبات', 'match' => 'partner.orders.*', 'badge' => $pendingOrdersCount],
+                ['route' => 'partner.cards.show', 'icon' => 'credit_card', 'label' => 'تحقق البطاقة', 'match' => 'partner.cards.*'],
                 ['route' => 'partner.notifications.index', 'icon' => 'notifications', 'label' => 'الإشعارات', 'match' => 'partner.notifications.*', 'badge' => $unreadNotifications],
             ],
         ],
     ];
 @endphp
+    <title>@yield('title', $panelTitle) — سفرة غزة</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+</head>
 <body class="admin-app">
     <div class="admin-bubbles" aria-hidden="true">
         <span class="admin-bubble" style="--s: 22rem; --x: 8%; --y: 12%; --d: 22s; --a: 0s;"></span>
@@ -47,7 +49,7 @@
         <a href="{{ route('partner.dashboard') }}" class="admin-brand">
             <img src="{{ $logoSrc }}" alt="سفرة غزة">
             <span>
-                <small>لوحة المطعم</small>
+                <small>{{ $panelTitle }}</small>
             </span>
         </a>
         <nav class="admin-nav">
@@ -94,7 +96,7 @@
                     </summary>
                     <div class="admin-topbar__menu">
                         <strong>{{ auth()->user()->name }}</strong>
-                        <small>{{ $partnerRestaurant?->name ?? 'صاحب مطعم' }}</small>
+                        <small>{{ $partnerRestaurant?->name ?? 'صاحب مكان' }}</small>
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
                             <button type="submit">خروج</button>
@@ -106,7 +108,7 @@
         </header>
         <main class="admin-main">
             <div class="admin-pagehead">
-                <h1>@yield('title', 'لوحة المطعم')</h1>
+                <h1>@yield('title', $panelTitle)</h1>
                 <div class="admin-pagehead__actions">@yield('actions')</div>
             </div>
             @if(session('success'))

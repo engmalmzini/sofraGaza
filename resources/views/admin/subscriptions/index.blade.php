@@ -20,6 +20,7 @@
                 <th>العضوية</th>
                 <th>المبلغ</th>
                 <th>الحالة</th>
+                <th>البطاقة</th>
                 <th></th>
             </tr>
         </thead>
@@ -30,6 +31,7 @@
                     <td>{{ $subscription->membership->name }}</td>
                     <td>{{ number_format($subscription->amount, 2) }} <span class="ils">₪</span></td>
                     <td>@include('admin.partials.pill', ['status' => $subscription->status, 'label' => $subscription->statusLabel()])</td>
+                    <td>{{ $subscription->cardStatusLabel() }}</td>
                     <td><a class="font-bold text-primary" href="{{ route('admin.subscriptions.show', $subscription) }}">مراجعة</a></td>
                 </tr>
             @endforeach

@@ -35,6 +35,16 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
+        User::query()->updateOrCreate(
+            ['phone' => '0593003003'],
+            [
+                'name' => 'سامي الدلفري',
+                'email' => 'courier@sofra.ps',
+                'password' => Hash::make('123456'),
+                'role' => 'courier',
+            ]
+        );
+
         if ($customer->pointTransactions()->doesntExist()) {
             $customer->pointTransactions()->create([
                 'type' => 'adjust',
@@ -50,7 +60,7 @@ class DatabaseSeeder extends Seeder
                 'discount_percent' => 5,
                 'free_delivery' => false,
                 'points_multiplier' => 1.25,
-                'description' => 'خصم 5% على كل طلب، ونقاط إضافية على كل 10 شيكل.',
+                'description' => 'خصم 5% على كل طلب، ونقطة إضافية على كل شيكل.',
                 'is_active' => true,
                 'sort_order' => 1,
             ]
@@ -71,7 +81,7 @@ class DatabaseSeeder extends Seeder
 
         $settings = [
             ['key' => 'delivery_fee', 'value' => '10', 'label' => 'رسوم التوصيل (شيكل)'],
-            ['key' => 'points_per_amount', 'value' => '10', 'label' => 'كل كم شيكل = نقطة واحدة'],
+            ['key' => 'points_per_amount', 'value' => '1', 'label' => 'كل كم شيكل = نقطة واحدة'],
             ['key' => 'drink_points', 'value' => '20', 'label' => 'نقاط استبدال مشروب'],
             ['key' => 'meal_points', 'value' => '50', 'label' => 'نقاط استبدال وجبة'],
             ['key' => 'restaurant_expiry_warning_days', 'value' => '7', 'label' => 'تنبيه انتهاء عرض المطعم قبل (أيام)'],
@@ -90,6 +100,8 @@ class DatabaseSeeder extends Seeder
             [
                 'name' => 'مطعم دار الياسمين',
                 'type' => 'restaurant',
+                'cuisine' => 'palestinian',
+                'area' => 'الرمال',
                 'description' => 'مأكولات فلسطينية بيتية: مقلوبة، مسخن، وقدرة على أصولها الغزية.',
                 'phone' => '0592001001',
                 'address' => 'الرمال — شارع الجلاء، غزة',
@@ -107,6 +119,8 @@ class DatabaseSeeder extends Seeder
             [
                 'name' => 'كافي تِرا',
                 'type' => 'cafe',
+                'cuisine' => 'cafe',
+                'area' => 'الرمال',
                 'description' => 'قهوة مختصة، حلويات يومية، ومكان هادئ على شارع عمر المختار.',
                 'phone' => '0592001002',
                 'address' => 'شارع عمر المختار، غزة',
@@ -124,6 +138,8 @@ class DatabaseSeeder extends Seeder
             [
                 'name' => 'مشاوي أبو العبد',
                 'type' => 'restaurant',
+                'cuisine' => 'grill',
+                'area' => 'الشجاعية',
                 'description' => 'مشاوي فحم، كباب، وكباب دجاج. أكل شوارع غزة كما يجب أن يكون.',
                 'phone' => '0592001003',
                 'address' => 'الشجاعية، دوار أبو اسكندر',
@@ -141,6 +157,8 @@ class DatabaseSeeder extends Seeder
             [
                 'name' => 'كافي زمان',
                 'type' => 'cafe',
+                'cuisine' => 'cafe',
+                'area' => 'البلدة القديمة',
                 'description' => 'مزاج غزة القديم: قهوة هيل، شاي، وأراجيل في رواق حجري.',
                 'phone' => '0592001004',
                 'address' => 'البلدة القديمة، بجوار المسجد العمري',
@@ -158,6 +176,8 @@ class DatabaseSeeder extends Seeder
             [
                 'name' => 'مطعم السمك الأزرق',
                 'type' => 'restaurant',
+                'cuisine' => 'seafood',
+                'area' => 'الميناء',
                 'description' => 'سمك غزة الطازج: مقلي، مشوي، وصيادية رز.',
                 'phone' => '0592001005',
                 'address' => 'منطقة الميناء، غزة',
@@ -172,6 +192,91 @@ class DatabaseSeeder extends Seeder
                     ['ليموناضة', 'مشروبات', 7, 'طازجة.'],
                 ],
             ],
+            [
+                'name' => 'شاورما العمدة',
+                'type' => 'restaurant',
+                'cuisine' => 'shawarma',
+                'area' => 'الرمال',
+                'description' => 'شاورما دجاج ولحمة على الصاج، خبز طازج وطحينة البيت.',
+                'phone' => '0592001006',
+                'address' => 'الرمال — شارع الوحدة، غزة',
+                'is_featured' => true,
+                'expires_in' => 70,
+                'menu' => [
+                    ['ساندوتش شاورما دجاج', 'ساندويش', 18, 'شاورما دجاج على الصاج مع ثوم وطحينة.'],
+                    ['شاورما لحم', 'ساندويش', 22, 'لحم متبل على الصاج.'],
+                    ['صحن شاورما مشكل', 'وجبات', 32, 'دجاج ولحمة مع بطاطا وخبز صاج.'],
+                    ['بطاطا شاورما', 'مقبلات', 12, 'بطاطا مع شاورما وصوص الثوم.'],
+                ],
+            ],
+            [
+                'name' => 'بيتزا ميرامار',
+                'type' => 'restaurant',
+                'cuisine' => 'pizza',
+                'area' => 'تل الهوى',
+                'description' => 'بيتزا فرن حجري وفطائر جبنة يومية.',
+                'phone' => '0592001007',
+                'address' => 'تل الهوى، شارع النفق',
+                'is_featured' => true,
+                'expires_in' => 60,
+                'menu' => [
+                    ['بيتزا مارغريتا', 'بيتزا', 28, 'صلصة بندورة وجبنة موزاريلا.'],
+                    ['بيتزا خضار', 'بيتزا', 30, 'فلفل، زيتون، ومشروم.'],
+                    ['فطيرة جبنة', 'فطائر', 14, 'عجينة طرية بالجبنة.'],
+                    ['فطيرة زعتر', 'فطائر', 10, 'زعتر بلدي وزيت زيتون.'],
+                ],
+            ],
+            [
+                'name' => 'برجر الرمال',
+                'type' => 'restaurant',
+                'cuisine' => 'burger',
+                'area' => 'الرمال',
+                'description' => 'برجر لحم ودجاج وساندويشات جاهزة للتوصيل.',
+                'phone' => '0592001008',
+                'address' => 'الرمال — شارع عمر المختار',
+                'is_featured' => false,
+                'expires_in' => 50,
+                'menu' => [
+                    ['برجر لحم كلاسيك', 'برجر', 24, 'لحم مشوي مع خس وصوص البيت.'],
+                    ['برجر دجاج مقرمش', 'برجر', 22, 'دجاج مقلي في خبز طري.'],
+                    ['ساندويش فيليه', 'ساندويش', 20, 'فيليه دجاج مع ثوم.'],
+                    ['بطاطا مقلية', 'مقبلات', 8, 'حصّة كبيرة.'],
+                ],
+            ],
+            [
+                'name' => 'حلويات الدحدوح',
+                'type' => 'restaurant',
+                'cuisine' => 'sweets',
+                'area' => 'الرمال',
+                'description' => 'كنافة نابلسية وحلويات عربية طازجة يومياً.',
+                'phone' => '0592001009',
+                'address' => 'الرمال — شارع الجلاء',
+                'is_featured' => true,
+                'expires_in' => 80,
+                'menu' => [
+                    ['كنافة نابلسية', 'حلويات', 16, 'كنافة ناعمة بالجبنة والسمن.'],
+                    ['بقلاوة', 'حلويات', 12, 'طبقات عجين مع قطر وفستق.'],
+                    ['هريسة', 'حلويات', 10, 'هريسة بالقطر.'],
+                    ['كعك العيد', 'حلويات', 8, 'حسب الموسم.'],
+                ],
+            ],
+            [
+                'name' => 'فرن البلد',
+                'type' => 'restaurant',
+                'cuisine' => 'breakfast',
+                'area' => 'النصر',
+                'description' => 'فطور غزي: مناقيش، بيض، ومعجنات من التنور.',
+                'phone' => '0592001010',
+                'address' => 'شارع النصر، غزة',
+                'is_featured' => false,
+                'expires_in' => 45,
+                'menu' => [
+                    ['مناقيش زعتر', 'فطور', 8, 'من التنور مع زيت زيتون.'],
+                    ['مناقيش جبنة', 'فطور', 10, 'عجينة طرية بالجبنة.'],
+                    ['فطور مشكل', 'فطور', 22, 'بيض، أجبان، وزيتون.'],
+                    ['كرواسون زعتر', 'معجنات', 9, 'صباحي ساخن.'],
+                ],
+            ],
         ];
 
         foreach ($places as $place) {
@@ -179,6 +284,8 @@ class DatabaseSeeder extends Seeder
                 ['name' => $place['name']],
                 [
                     'type' => $place['type'],
+                    'cuisine' => $place['cuisine'] ?? null,
+                    'area' => $place['area'] ?? null,
                     'description' => $place['description'],
                     'phone' => $place['phone'],
                     'address' => $place['address'],
@@ -186,6 +293,7 @@ class DatabaseSeeder extends Seeder
                     'expires_at' => now()->addDays($place['expires_in'])->toDateString(),
                     'is_active' => true,
                     'is_featured' => $place['is_featured'],
+                    'verification_status' => Restaurant::VERIFICATION_APPROVED,
                 ]
             );
 

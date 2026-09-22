@@ -85,9 +85,7 @@ class OrderService
             throw new RuntimeException('لا يمكن استبدال هذا الصنف حالياً.');
         }
 
-        $category = $item->category === 'مشروبات' ? 'drink' : 'meal';
-        $costKey = $category === 'drink' ? 'drink_points' : 'meal_points';
-        $cost = (int) \App\Models\Setting::value($costKey, $category === 'drink' ? 20 : 50);
+        $cost = $this->points->redeemCost($item);
 
         if ($user->points_balance < $cost) {
             throw new RuntimeException('رصيد النقاط غير كافٍ لهذا الاستبدال.');
@@ -208,6 +206,10 @@ class OrderService
 
         $order->update($payload);
 
+        if (in_array($status, ['preparing', 'delivering'], true) && ! $order->courier_id) {
+            $this->notifyCouriers($order->fresh());
+        }
+
         if ($status === 'delivered') {
             $this->points->earnForOrder($order->fresh());
         }
@@ -218,5 +220,63 @@ class OrderService
             "طلبك رقم #{$order->id} أصبح: ".$order->fresh()->statusLabel(),
             route('account.orders.show', $order)
         );
+    }
+
+    public function claimForCourier(Order $order, User $courier): void
+    {
+        if (! $courier->isCourier()) {
+            throw new RuntimeException('هذا الحساب ليس مندوب توصيل.');
+        }
+
+        DB::transaction(function () use ($order, $courier) {
+            $locked = Order::query()->whereKey($order->id)->lockForUpdate()->first();
+
+            if (! $locked || ! $locked->isAvailableForCourier()) {
+                throw new RuntimeException('الطلب مش متاح للتوصيل، أو أخذه مندوب ثاني.');
+            }
+
+            $locked->update([
+                'courier_id' => $courier->id,
+                'status' => 'delivering',
+            ]);
+        });
+
+        $order->refresh();
+
+        $this->notifications->notify(
+            $order->user,
+            'المندوب في الطريق',
+            "مندوب التوصيل أخذ طلبك رقم #{$order->id}.",
+            route('account.orders.show', $order)
+        );
+
+        $this->notifyRestaurantOwner(
+            $order,
+            'مندوب أخذ الطلب',
+            "{$courier->name} أخذ توصيل طلب #{$order->id}."
+        );
+    }
+
+    public function completeCourierDelivery(Order $order, User $courier): void
+    {
+        if ($order->courier_id !== $courier->id || $order->status !== 'delivering') {
+            throw new RuntimeException('ما تقدر تسجّل تسليم هذا الطلب.');
+        }
+
+        $this->changeStatus($order, 'delivered');
+    }
+
+    private function notifyCouriers(Order $order): void
+    {
+        $order->loadMissing('restaurant');
+
+        User::query()->where('role', 'courier')->get()->each(function (User $courier) use ($order) {
+            $this->notifications->notify(
+                $courier,
+                'طلب جاهز للتوصيل',
+                "طلب #{$order->id} من {$order->restaurant?->name} جاهز تأخذه.",
+                route('courier.orders.show', $order)
+            );
+        });
     }
 }

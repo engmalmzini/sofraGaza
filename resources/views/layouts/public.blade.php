@@ -110,17 +110,17 @@
         <p class="app-toast__text"></p>
     </div>
 
-    @if($cartCount && $cartPreview && ! View::hasSection('hideFloatingCart'))
-        <aside class="lg:hidden fixed bottom-20 inset-x-0 px-margin z-40 pointer-events-none">
+    @unless(View::hasSection('hideFloatingCart'))
+        <aside data-floating-cart class="lg:hidden fixed bottom-20 inset-x-0 px-margin z-40 pointer-events-none {{ $cartCount && $cartPreview ? '' : 'hidden' }}">
             <div class="pointer-events-auto bg-on-surface text-surface rounded-full shadow-[0_8px_24px_rgba(0,0,0,0.2)] p-2 pr-4 flex items-center justify-between">
                 <div class="flex items-center gap-2.5">
                     <div class="relative w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center">
                         <span class="material-symbols-outlined text-[18px]">shopping_bag</span>
-                        <span class="absolute -top-1 -right-1 w-4 h-4 bg-secondary text-on-secondary rounded-full text-[10px] font-bold flex items-center justify-center">{{ $cartCount }}</span>
+                        <span class="absolute -top-1 -right-1 w-4 h-4 bg-secondary text-on-secondary rounded-full text-[10px] font-bold flex items-center justify-center" data-cart-count>{{ $cartCount ?: 0 }}</span>
                     </div>
                     <div class="flex flex-col">
                         <span class="text-label-sm font-label-sm text-surface font-bold">سلّة الطلب الحالية</span>
-                        <span class="text-[11px] text-surface-container-highest">{{ $cartPreview['restaurant']->name ?? 'سلتك' }} • {{ number_format($cartPreview['total'], 0) }} شيكل</span>
+                        <span class="text-[11px] text-surface-container-highest" data-floating-cart-meta>{{ $cartPreview['restaurant']->name ?? 'سلتك' }} • {{ number_format($cartPreview['total'] ?? 0, 0) }} شيكل</span>
                     </div>
                 </div>
                 <a href="{{ route('cart.index') }}" class="bg-primary hover:bg-primary-container text-on-primary px-4 py-2 rounded-full text-label-sm font-label-sm font-bold flex items-center gap-1 shadow-md">
@@ -129,7 +129,7 @@
                 </a>
             </div>
         </aside>
-    @endif
+    @endunless
 
     <footer class="hidden lg:block w-full bg-surface-container-lowest shadow-[0_1px_8px_rgba(0,0,0,0.04)] pt-space-xl pb-space-lg">
         <div class="max-w-7xl mx-auto px-margin-desktop">

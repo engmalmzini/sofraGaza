@@ -2,7 +2,6 @@
     $logoPath = public_path('images/logo.png');
     $logoSrc = file_exists($logoPath) ? asset('images/logo.png').'?v='.filemtime($logoPath) : config('brand.logo');
     $vip = (bool) ($membership?->discount_percent);
-    $deliveryLabel = $vip || $restaurant->type !== 'cafe' ? 'مجاناً' : '5 <span class="ils">₪</span>';
     $itemCount = $menuSections->sum(fn ($section) => $section['items']->count());
     $pointsBalance = $pointsBalance ?? (auth()->user()->points_balance ?? 0);
 @endphp
@@ -72,18 +71,11 @@
                         <span class="font-label-sm text-[11px] text-on-surface-variant">دقيقة</span>
                     </div>
                 </div>
-                <div class="flex-1 flex items-center gap-1.5 bg-surface-container-low px-2 py-1.5 rounded-lg justify-center">
-                    <span class="material-symbols-outlined text-secondary text-[18px]">moped</span>
-                    <div class="flex flex-col leading-none">
-                        <span class="font-label-md text-[13px] text-secondary font-bold">{!! $deliveryLabel !!}</span>
-                        <span class="font-label-sm text-[11px] text-on-surface-variant">{{ $vip ? 'لأعضاء VIP' : 'توصيل' }}</span>
-                    </div>
-                </div>
             </div>
             <div class="mt-3 bg-primary-fixed/40 p-2.5 rounded-lg flex items-center justify-between gap-2">
                 <div class="flex items-center gap-2 min-w-0">
                     <span class="material-symbols-outlined text-primary text-[20px]">local_activity</span>
-                    <span class="font-label-sm text-[11px] text-on-primary-fixed font-semibold">خصم {{ $membership->discount_percent ?? 10 }}% فوري | +1 نقطة لكل 10 شواكل</span>
+                    <span class="font-label-sm text-[11px] text-on-primary-fixed font-semibold">خصم {{ $membership->discount_percent ?? 10 }}% فوري للأعضاء</span>
                 </div>
                 <span class="font-label-sm text-[11px] text-primary font-bold shrink-0">{{ $vip ? 'مُفعل تلقائياً' : 'للأعضاء' }}</span>
             </div>
@@ -100,7 +92,9 @@
             @foreach($menuSections as $section)
                 <button type="button" class="category-pill px-4 py-1.5 rounded-full font-label-md text-[13px] whitespace-nowrap bg-surface-container text-on-surface" data-filter="{{ $section['key'] }}">{{ $section['name'] }}</button>
             @endforeach
-            <button type="button" class="category-pill px-4 py-1.5 rounded-full font-label-md text-[13px] whitespace-nowrap bg-surface-container text-on-surface" data-filter="rewards">استبدال النقاط</button>
+            @if(count($rewards))
+                <button type="button" class="category-pill px-4 py-1.5 rounded-full font-label-md text-[13px] whitespace-nowrap bg-surface-container text-on-surface" data-filter="rewards">استبدال النقاط</button>
+            @endif
         </div>
     </div>
 
@@ -117,11 +111,12 @@
             <p class="rounded-xl bg-surface-container-lowest p-8 text-on-surface-variant text-center">لا توجد أصناف في القائمة حالياً.</p>
         @endforelse
 
+        @if(count($rewards))
         <div class="dish-item rewards bg-gradient-to-b from-tertiary-fixed/30 to-surface-container-low p-4 rounded-xl mt-2" data-name="مكافآت" data-category="rewards">
             <div class="flex items-center justify-between mb-3">
                 <div class="flex items-center gap-2">
                     <span class="material-symbols-outlined text-primary text-[22px] fill-1">stars</span>
-                    <h3 class="font-headline-sm text-[18px] text-on-surface font-bold">استبدال النقاط المجانية</h3>
+                    <h3 class="font-headline-sm text-[18px] text-on-surface font-bold">استبدال من قائمة {{ $restaurant->name }}</h3>
                 </div>
                 <div class="bg-primary text-on-primary px-2.5 py-1 rounded-full font-label-md text-[13px] font-bold">رصيدك: {{ $pointsBalance }} نقطة</div>
             </div>
@@ -133,11 +128,12 @@
                         </div>
                         <span class="font-label-md text-[13px] text-on-surface font-bold truncate">{{ $reward['name'] }}</span>
                         <span class="font-label-sm text-[11px] text-secondary font-semibold mt-0.5">مجاناً بـ {{ $reward['points'] }} نقطة</span>
-                        <a href="{{ route('redeem.create') }}" class="mt-2 w-full py-1 rounded bg-secondary text-on-secondary font-label-sm text-[11px] font-semibold text-center">استبدال الآن</a>
+                        <a href="{{ $reward['url'] ?? route('redeem.create') }}" class="mt-2 w-full py-1 rounded bg-secondary text-on-secondary font-label-sm text-[11px] font-semibold text-center">استبدال الآن</a>
                     </div>
                 @endforeach
             </div>
         </div>
+        @endif
     </div>
 </div>
 

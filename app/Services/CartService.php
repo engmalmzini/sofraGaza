@@ -118,6 +118,7 @@ class CartService
             'discount_amount' => $discountAmount,
             'delivery_fee' => $deliveryFee,
             'total' => $total,
+            'items_total' => $afterDiscount,
             'points' => $points,
             'membership' => $membership,
             'restaurant' => Restaurant::find($this->restaurantId()),
@@ -126,7 +127,7 @@ class CartService
 
     public function calculatePoints(float $amount, float $multiplier = 1): int
     {
-        $per = max(1, (float) Setting::value('points_per_amount', 10));
+        $per = max(1, (float) Setting::value('points_per_amount', 1));
 
         return (int) floor(($amount / $per) * $multiplier);
     }
@@ -142,6 +143,7 @@ class CartService
             'discount_amount' => $quote['discount_amount'],
             'delivery_fee' => $quote['delivery_fee'],
             'total' => $quote['total'],
+            'items_total' => $quote['items_total'],
             'points' => $quote['points'],
             'restaurant' => $quote['restaurant'] ? [
                 'id' => $quote['restaurant']->id,

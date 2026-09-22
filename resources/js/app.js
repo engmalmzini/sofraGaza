@@ -270,6 +270,51 @@ const setHidden = (el, hidden) => {
     }
 };
 
+const syncCartIndexPage = (cart) => {
+    const page = document.querySelector('[data-cart-page]');
+
+    if (!page) {
+        return;
+    }
+
+    if (!cart.lines?.length) {
+        window.location.reload();
+        return;
+    }
+
+    page.querySelectorAll('[data-cart-line]').forEach((row) => {
+        const id = Number(row.dataset.cartLine);
+        const line = cart.lines.find((item) => Number(item.id) === id);
+
+        if (!line) {
+            row.remove();
+            return;
+        }
+
+        const qty = row.querySelector('[name="quantity"]');
+        if (qty instanceof HTMLInputElement) {
+            qty.value = String(line.qty);
+        }
+
+        const total = row.querySelector('[data-line-total]');
+        if (total) {
+            total.innerHTML = `${money(line.line_total, 2)} ${ilsMark}`;
+        }
+    });
+
+    page.querySelectorAll('[data-cart-subtotal]').forEach((el) => {
+        el.innerHTML = `${money(cart.subtotal, 2)} ${ilsMark}`;
+    });
+
+    page.querySelectorAll('[data-cart-discount-amount]').forEach((el) => {
+        el.innerHTML = `- ${money(cart.discount_amount, 2)} ${ilsMark}`;
+    });
+
+    page.querySelectorAll('[data-cart-grand-total]').forEach((el) => {
+        el.innerHTML = `${money(cart.total, 2)} ${ilsMark}`;
+    });
+};
+
 const applyCart = (cart) => {
     if (!cart) {
         return;
@@ -288,9 +333,12 @@ const applyCart = (cart) => {
     });
 
     document.querySelectorAll('[data-cart-total], [data-cart-grand-total]').forEach((el) => {
+        const amount = el.hasAttribute('data-cart-grand-total')
+            ? (cart.items_total ?? cart.total)
+            : cart.total;
         el.innerHTML = el.hasAttribute('data-cart-grand-total')
-            ? `${money(cart.total, 1)} ${ilsMark}`
-            : money(cart.total, 1);
+            ? `${money(amount, 1)} ${ilsMark}`
+            : money(amount, 1);
     });
 
     document.querySelectorAll('[data-cart-subtotal]').forEach((el) => {
@@ -328,9 +376,16 @@ const applyCart = (cart) => {
     });
 
     setHidden(document.getElementById('mobile-cart-pill'), count === 0);
+    setHidden(document.querySelector('[data-floating-cart]'), count === 0);
     setHidden(document.querySelector('[data-desktop-cart-summary]'), count === 0);
     setHidden(document.querySelector('[data-desktop-cart-clear]'), count === 0);
     setHidden(document.querySelector('[data-drawer-summary]'), count === 0);
+
+    const floatingMeta = document.querySelector('[data-floating-cart-meta]');
+    if (floatingMeta) {
+        const name = cart.restaurant?.name || 'سلتك';
+        floatingMeta.textContent = `${name} • ${money(cart.total, 0)} شيكل`;
+    }
 
     const desktopCount = document.querySelector('[data-desktop-cart-count]');
     if (desktopCount) {
@@ -338,6 +393,7 @@ const applyCart = (cart) => {
     }
 
     renderCartLines(cart);
+    syncCartIndexPage(cart);
     widenShekels(document.body);
 };
 
@@ -385,9 +441,6 @@ const renderCartLines = (cart) => {
                     </div>
                     <div class="flex items-center justify-between">
                         ${cartLineForms(line.id, line.qty, false)}
-                        <span class="text-[11px] text-tertiary flex items-center gap-0.5 font-medium">
-                            <span class="material-symbols-outlined text-[13px]">stars</span>+${line.points} نقطة
-                        </span>
                     </div>
                 </div>
             `).join('')
@@ -1323,5 +1376,43 @@ const initListingFilter = () => {
 };
 
 initListingFilter();
+
+const initClickableRows = () => {
+    document.addEventListener('click', (event) => {
+        const row = event.target.closest('tr[data-href]');
+
+        if (!row || event.target.closest('a, button, input, textarea, select, label')) {
+            return;
+        }
+
+        window.location.assign(row.dataset.href);
+    });
+
+    document.addEventListener('keydown', (event) => {
+        if (event.key !== 'Enter' && event.key !== ' ') {
+            return;
+        }
+
+        const row = event.target.closest('tr[data-href]');
+
+        if (!row || event.target !== row) {
+            return;
+        }
+
+        event.preventDefault();
+        window.location.assign(row.dataset.href);
+    });
+};
+
+initClickableRows();
+
+document.querySelectorAll('form[data-once-submit]').forEach((form) => {
+    form.addEventListener('submit', () => {
+        form.querySelectorAll('button[type="submit"], button:not([type])').forEach((button) => {
+            button.disabled = true;
+        });
+    });
+});
+
 
 

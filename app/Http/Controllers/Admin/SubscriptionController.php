@@ -42,15 +42,20 @@ class SubscriptionController extends Controller
         return view('admin.subscriptions.show', compact('subscription'));
     }
 
+    public function receipt(MembershipSubscription $subscription)
+    {
+        return $subscription->receiptResponse();
+    }
+
     public function approve(MembershipSubscription $subscription): RedirectResponse
     {
         try {
-            $this->memberships->approve($subscription);
+            $message = $this->memberships->approve($subscription);
         } catch (RuntimeException $e) {
             return back()->with('error', $e->getMessage());
         }
 
-        return back()->with('success', 'تم تفعيل العضوية لمدة 30 يوماً.');
+        return back()->with('success', $message);
     }
 
     public function reject(Request $request, MembershipSubscription $subscription): RedirectResponse
@@ -58,11 +63,26 @@ class SubscriptionController extends Controller
         $request->validate(['rejection_reason' => ['required', 'string', 'max:500']]);
 
         try {
-            $this->memberships->reject($subscription, $request->rejection_reason);
+            $message = $this->memberships->reject($subscription, $request->rejection_reason);
         } catch (RuntimeException $e) {
             return back()->with('error', $e->getMessage());
         }
 
-        return back()->with('success', 'تم رفض طلب العضوية.');
+        return back()->with('success', $message);
+    }
+
+    public function markCard(Request $request, MembershipSubscription $subscription): RedirectResponse
+    {
+        $request->validate([
+            'card_status' => ['required', 'in:pending,ready,delivered'],
+        ]);
+
+        try {
+            $message = $this->memberships->markCard($subscription, $request->string('card_status')->toString());
+        } catch (RuntimeException $e) {
+            return back()->with('error', $e->getMessage());
+        }
+
+        return back()->with('success', $message);
     }
 }

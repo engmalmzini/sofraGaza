@@ -29,17 +29,17 @@
 
     <div class="sg-redeem__rates">
         <article>
-            <span class="material-symbols-outlined">local_cafe</span>
+            <span class="material-symbols-outlined">stars</span>
             <div>
-                <strong>مشروب</strong>
-                <em>{{ $drinkPoints }} نقطة</em>
+                <strong>تجميع النقاط</strong>
+                <em>كل {{ rtrim(rtrim(number_format($earnRate, 1), '0'), '.') }} شيكل = نقطة</em>
             </div>
         </article>
         <article>
             <span class="material-symbols-outlined">restaurant</span>
             <div>
-                <strong>وجبة</strong>
-                <em>{{ $mealPoints }} نقطة</em>
+                <strong>تكلفة الاستبدال</strong>
+                <em>سعر الطبق نفسه بالنقاط</em>
             </div>
         </article>
         <article>

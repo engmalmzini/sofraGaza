@@ -14,9 +14,13 @@ class AccountController extends Controller
 {
     use ManagesAppNotifications;
 
-    public function show(): View
+    public function show(): View|RedirectResponse
     {
         $user = auth()->user();
+
+        if ($user->isCourier()) {
+            return redirect()->route('courier.dashboard');
+        }
 
         return view('account.show', [
             'user' => $user,
@@ -101,6 +105,10 @@ class AccountController extends Controller
 
         if ($user->isRestaurantOwner() && $user->ownedRestaurant) {
             return redirect()->route('partner.notifications.index');
+        }
+
+        if ($user->isCourier()) {
+            return redirect()->route('courier.notifications.index');
         }
 
         return $this->notificationsInbox('account.notifications');

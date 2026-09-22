@@ -43,6 +43,11 @@ class OrderController extends Controller
         return view('admin.orders.show', compact('order'));
     }
 
+    public function receipt(Order $order)
+    {
+        return $order->receiptResponse();
+    }
+
     public function update(Request $request, Order $order): RedirectResponse
     {
         $request->validate([

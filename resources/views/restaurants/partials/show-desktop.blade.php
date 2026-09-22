@@ -53,10 +53,6 @@
                                 <span class="material-symbols-outlined text-[18px] text-primary">schedule</span>
                                 <span>{{ $eta[0] }} - {{ $eta[1] }} دقيقة</span>
                             </div>
-                            <div class="flex items-center gap-1 text-on-surface-variant font-label-sm text-[11px]">
-                                <span class="material-symbols-outlined text-[18px] text-secondary">moped</span>
-                                <span>@if($vip)مجاناً لأعضاء VIP @elseif($restaurant->type === 'cafe')توصيل 5 <span class="ils">₪</span>@else توصيل 10 <span class="ils">₪</span>@endif</span>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -67,7 +63,6 @@
                         </div>
                         <div class="flex flex-col">
                             <span class="font-label-md text-[13px] font-bold text-on-primary-fixed">{{ $vip ? 'أنت مؤهل لخصم '.$membership->discount_percent.'% فوري' : 'اشترك واحصل على خصم 10% فوري' }}</span>
-                            <span class="font-body-sm text-[14px] text-on-surface-variant">اكسب نقطة ولاء لكل 10 شواكل في هذا الطلب</span>
                         </div>
                     </div>
                     @if($vip)
@@ -89,10 +84,12 @@
                         <span>{{ $section['name'] }}</span>
                     </button>
                 @endforeach
-                <button type="button" class="category-btn px-4 py-2 rounded-full font-label-md text-[13px] font-medium flex items-center gap-1.5" data-section="rewards">
-                    <span class="material-symbols-outlined text-[18px] text-tertiary">stars</span>
-                    <span>استبدال النقاط</span>
-                </button>
+                @if(count($rewards))
+                    <button type="button" class="category-btn px-4 py-2 rounded-full font-label-md text-[13px] font-medium flex items-center gap-1.5" data-section="rewards">
+                        <span class="material-symbols-outlined text-[18px] text-tertiary">stars</span>
+                        <span>استبدال النقاط</span>
+                    </button>
+                @endif
             </div>
             <div class="hidden md:flex items-center bg-surface-container-low/90 rounded-full px-4 py-2 w-72 border border-surface-container focus-within:border-primary/50">
                 <span class="material-symbols-outlined text-on-surface-variant text-[18px] ml-2">search</span>
@@ -127,17 +124,18 @@
                     <p class="rounded-2xl bg-surface-container-lowest border border-stone-100 p-8 text-on-surface-variant">لا توجد أصناف في القائمة حالياً.</p>
                 @endforelse
 
+                @if(count($rewards))
                 <section class="menu-section flex flex-col gap-3 bg-surface-container-low/70 p-5 rounded-2xl border border-tertiary/20 scroll-mt-36" id="section-rewards" data-section="rewards">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-2">
                             <span class="material-symbols-outlined text-tertiary text-[20px]">stars</span>
-                            <h2 class="font-headline-sm text-base font-bold text-on-surface">مكافآت استبدال النقاط المجانية</h2>
+                            <h2 class="font-headline-sm text-base font-bold text-on-surface">استبدال النقاط من قائمة {{ $restaurant->name }}</h2>
                         </div>
                         <span class="text-xs bg-tertiary/10 text-tertiary px-3 py-1 rounded-full font-semibold flex items-center gap-1">
                             <span class="material-symbols-outlined text-[14px]">verified</span>رصيدك: {{ $pointsBalance }} نقطة
                         </span>
                     </div>
-                    <p class="text-xs text-on-surface-variant">استبدل نقاطك بطبق شهي مجاناً 100% دون أي رسوم إضافية.</p>
+                    <p class="text-xs text-on-surface-variant">هذه الأصناف من منيو هذا المطعم فقط. سعر الاستبدال = سعر الطبق بالنقاط.</p>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
                         @foreach($rewards as $reward)
                             <div class="bg-surface-container-lowest rounded-xl p-3 border border-slate-200/60 shadow-xs flex items-center justify-between gap-3">
@@ -148,11 +146,12 @@
                                         <span class="text-xs text-tertiary font-medium">مجاناً بـ {{ $reward['points'] }} نقطة</span>
                                     </div>
                                 </div>
-                                <a href="{{ route('redeem.create') }}" class="px-3.5 py-1.5 rounded-full bg-tertiary/10 text-tertiary hover:bg-tertiary hover:text-white text-xs font-semibold shrink-0 transition-colors">استبدال</a>
+                                <a href="{{ $reward['url'] ?? route('redeem.create') }}" class="px-3.5 py-1.5 rounded-full bg-tertiary/10 text-tertiary hover:bg-tertiary hover:text-white text-xs font-semibold shrink-0 transition-colors">استبدال</a>
                             </div>
                         @endforeach
                     </div>
                 </section>
+                @endif
             </div>
 
             <aside class="lg:col-span-4 w-full">
@@ -176,7 +175,6 @@
 
                         <div data-desktop-cart-lines class="p-3.5 flex flex-col gap-2.5 max-h-[320px] overflow-y-auto no-scrollbar">
                             @forelse($restaurantCart['lines'] ?? [] as $line)
-                                @php $linePoints = max(1, (int) floor($line['line_total'] / 10)); @endphp
                                 <div class="pt-2 first:pt-0 flex flex-col gap-1.5 border-t border-slate-100 first:border-0" data-line-id="{{ $line['item']->id }}">
                                     <div class="flex items-start justify-between gap-2">
                                         <span class="text-[13px] font-semibold text-on-surface truncate">{{ $line['item']->name }}</span>
@@ -191,9 +189,6 @@
                                             <span class="text-xs font-semibold px-1">{{ $line['qty'] }}</span>
                                             <button type="submit" name="quantity" value="{{ $line['qty'] + 1 }}" class="w-4 h-4 flex items-center justify-center text-slate-500 text-xs font-bold">+</button>
                                         </form>
-                                        <span class="text-[11px] text-tertiary flex items-center gap-0.5 font-medium">
-                                            <span class="material-symbols-outlined text-[13px]">stars</span>+{{ $linePoints }} نقطة
-                                        </span>
                                     </div>
                                 </div>
                             @empty
@@ -202,13 +197,6 @@
                         </div>
 
                         <div data-desktop-cart-summary class="{{ $restaurantCart ? '' : 'hidden' }}">
-                            <div class="mx-3.5 my-1 bg-tertiary/5 border border-tertiary/15 rounded-xl px-3 py-2 flex items-center justify-between text-xs">
-                                <div class="flex items-center gap-1.5 text-tertiary font-medium">
-                                    <span class="material-symbols-outlined text-[16px]">military_tech</span>
-                                    <span>ستكسب من هذا الطلب:</span>
-                                </div>
-                                <span data-cart-points class="font-bold text-tertiary">+ {{ $restaurantCart['points'] ?? 0 }} نقطة ولاء</span>
-                            </div>
                             <div class="p-3.5 bg-surface-container-low/40 flex flex-col gap-2 border-t border-slate-200/60 text-xs">
                                 <div class="flex items-center justify-between text-slate-500">
                                     <span>المجموع الفرعي</span>
@@ -220,20 +208,10 @@
                                     </span>
                                     <span data-cart-discount-amount class="font-semibold">- {{ number_format($restaurantCart['discount_amount'] ?? 0, 1) }} <span class="ils">₪</span></span>
                                 </div>
-                                <div class="flex items-center justify-between text-slate-500">
-                                    <span>التوصيل</span>
-                                    <span data-cart-delivery class="{{ ($restaurantCart['delivery_fee'] ?? 1) == 0 ? 'text-secondary font-semibold' : 'font-semibold text-on-surface' }}">
-                                        @if(($restaurantCart['delivery_fee'] ?? 0) == 0)
-                                            مجاناً
-                                        @else
-                                            {{ number_format($restaurantCart['delivery_fee'] ?? 0, 0) }} <span class="ils">₪</span>
-                                        @endif
-                                    </span>
-                                </div>
                                 <div class="h-px bg-slate-200/60 my-0.5"></div>
                                 <div class="flex items-center justify-between pt-0.5">
                                     <span class="text-sm font-bold text-on-surface">المجموع الإجمالي</span>
-                                    <span data-cart-grand-total class="text-lg font-bold text-primary">{{ number_format($restaurantCart['total'] ?? 0, 1) }} <span class="ils">₪</span></span>
+                                    <span data-cart-grand-total class="text-lg font-bold text-primary">{{ number_format($restaurantCart['items_total'] ?? $restaurantCart['subtotal'] ?? 0, 1) }} <span class="ils">₪</span></span>
                                 </div>
                             </div>
                             <div class="p-3.5 pt-1 bg-surface-container-low/40">

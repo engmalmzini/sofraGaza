@@ -1,10 +1,5 @@
 @extends('layouts.admin')
 
-@section('title', 'إضافة عضوية')
-
-@section('content')
-@extends('layouts.admin')
-
 @section('kicker', 'الزبائن')
 @section('title', 'إضافة عضوية')
 
@@ -14,5 +9,4 @@
     @include('admin.memberships._form')
     <button class="admin-btn admin-btn--primary w-fit">حفظ</button>
 </form>
-@endsection
 @endsection

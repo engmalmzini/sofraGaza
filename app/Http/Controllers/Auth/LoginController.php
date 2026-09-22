@@ -46,6 +46,10 @@ class LoginController extends Controller
             return redirect()->intended(route('partner.dashboard'));
         }
 
+        if ($user->isCourier()) {
+            return redirect()->intended(route('courier.dashboard'));
+        }
+
         return redirect()->intended(route('home'));
     }
 

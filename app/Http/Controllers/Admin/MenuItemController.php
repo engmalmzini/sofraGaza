@@ -82,14 +82,19 @@ class MenuItemController extends Controller
         $data = $request->validate([
             'name' => ['required', 'string', 'max:150'],
             'category' => ['required', 'string', 'max:50'],
+            'category_custom' => ['required_if:category,__custom__', 'nullable', 'string', 'max:50'],
             'description' => ['nullable', 'string'],
             'price' => ['required', 'numeric', 'min:0'],
             'image' => ['nullable', 'image', 'max:4096'],
             'is_available' => ['nullable'],
         ]);
 
+        if ($data['category'] === '__custom__') {
+            $data['category'] = trim((string) $data['category_custom']);
+        }
+
         $data['is_available'] = $request->boolean('is_available');
-        unset($data['image']);
+        unset($data['image'], $data['category_custom']);
 
         return $data;
     }

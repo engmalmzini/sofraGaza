@@ -1,5 +1,4 @@
 @php
-    $points = max(1, (int) floor((float) $item->price / 10));
     $popular = $popular ?? false;
 @endphp
 <article class="dish-item group bg-surface-container-lowest rounded-2xl p-3.5 border border-slate-200/70 hover:border-slate-300 hover:shadow-md transition-all duration-200 flex items-stretch justify-between gap-3 scroll-mt-36" data-name="{{ $item->name }}" data-category="{{ $sectionKey }}" data-dish-id="{{ $item->id }}">
@@ -13,12 +12,9 @@
         <div class="flex items-center justify-between pt-3">
             <div class="flex items-center gap-1.5">
                 <span class="text-base font-bold text-on-surface">{{ number_format((float) $item->price, 0) }} <span class="ils">₪</span></span>
-                <span class="text-[11px] text-tertiary font-medium bg-tertiary-fixed/30 px-1.5 py-0.5 rounded flex items-center gap-0.5">
-                    <span class="material-symbols-outlined text-[12px]">stars</span>+{{ $points }} نقطة
-                </span>
             </div>
             @if($item->is_available)
-                <button type="button" class="text-xs text-slate-500 hover:text-primary font-medium flex items-center gap-0.5 transition-colors" data-open-customizer data-item-id="{{ $item->id }}" data-item-name="{{ $item->name }}" data-item-price="{{ (float) $item->price }}" data-item-desc="{{ $item->description }}" data-item-points="{{ $points }}" data-add-url="{{ route('cart.add', $item) }}">
+                <button type="button" class="text-xs text-slate-500 hover:text-primary font-medium flex items-center gap-0.5 transition-colors" data-open-customizer data-item-id="{{ $item->id }}" data-item-name="{{ $item->name }}" data-item-price="{{ (float) $item->price }}" data-item-desc="{{ $item->description }}" data-add-url="{{ route('cart.add', $item) }}">
                     <span>تخصيص</span>
                     <span class="material-symbols-outlined text-[14px]">tune</span>
                 </button>

@@ -108,7 +108,7 @@
             </div>
             <div class="flex items-center gap-space-md overflow-x-auto no-scrollbar scroll-smooth pb-space-xs" id="categories-scroll">
                 @foreach($categories as $category)
-                    <a href="{{ route('restaurants.index', ['q' => $category['name']]) }}" class="group flex flex-col items-center gap-space-xs shrink-0 p-space-sm rounded-xl bg-surface-container-lowest hover:bg-primary-fixed/30 transition-all w-28 text-center shadow-sm">
+                    <a href="{{ route('restaurants.index', ['cuisine' => $category['key'], 'area' => '']) }}" class="group flex flex-col items-center gap-space-xs shrink-0 p-space-sm rounded-xl bg-surface-container-lowest hover:bg-primary-fixed/30 transition-all w-28 text-center shadow-sm">
                         <div class="w-16 h-16 rounded-full overflow-hidden bg-surface-container-high flex items-center justify-center">
                             <img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" alt="{{ $category['name'] }}" src="{{ $category['image'] }}">
                         </div>
@@ -193,10 +193,6 @@
                                 <span class="material-symbols-outlined text-[15px] text-stone-400">schedule</span>
                                 <span>{{ $eta }}</span>
                             </div>
-                            <span class="text-stone-300">•</span>
-                            <span class="{{ $restaurant->type === 'cafe' ? 'text-stone-700 font-medium' : 'text-secondary font-semibold' }}">
-                                {{ $restaurant->type === 'cafe' ? 'توصيل 5 ' : 'توصيل مجاني' }}@if($restaurant->type === 'cafe')<span class="ils">₪</span>@endif
-                            </span>
                         </div>
                     </div>
                 </a>
@@ -215,7 +211,7 @@
                         <span>مكافآت برنامج الولاء</span>
                     </div>
                     <h2 class="font-headline-md text-xl sm:text-2xl font-bold text-stone-900 tracking-tight">أطباق بمكافآت النقاط</h2>
-                    <p class="font-body-sm text-stone-500 text-[13px] mt-0.5">استبدل نقاطك التراكمية مباشرة بأطباق طازجة ومجانية بالكامل</p>
+                    <p class="font-body-sm text-stone-500 text-[13px] mt-0.5">كل شيكل تجميعه نقطة، والاستبدال بسعر الطبق نفسه بالنقاط</p>
                 </div>
                 <div class="flex items-center gap-2.5 self-start sm:self-auto">
                     <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-50 border border-amber-200/70 text-amber-900">
@@ -228,14 +224,14 @@
                     </a>
                 </div>
             </div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                @foreach($rewards as $reward)
-                    <article class="group rounded-2xl bg-surface-container-lowest p-2.5 border border-stone-200/80 hover:border-amber-200 shadow-2xs hover:shadow-md transition-all duration-200 flex flex-col justify-between {{ !empty($reward['locked']) ? 'opacity-90' : '' }}">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                @forelse($rewards as $reward)
+                    <article class="group rounded-2xl bg-surface-container-lowest p-2.5 border border-stone-200/80 hover:border-amber-200 shadow-2xs hover:shadow-md transition-all duration-200 flex flex-col justify-between">
                         <div>
                             <div class="relative h-36 w-full rounded-xl overflow-hidden bg-stone-100 mb-2.5">
-                                <img alt="{{ $reward['name'] }}" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105 {{ !empty($reward['locked']) ? 'grayscale-[25%]' : '' }}" src="{{ $reward['image'] }}">
+                                <img alt="{{ $reward['name'] }}" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" src="{{ $reward['image'] }}">
                                 <div class="absolute top-2 right-2 px-2 py-0.5 rounded-full bg-stone-900/80 backdrop-blur-sm text-white font-label-sm text-[11px] font-semibold flex items-center gap-1">
-                                    <span class="material-symbols-outlined text-amber-400 text-[13px]">{{ !empty($reward['locked']) ? 'lock' : 'stars' }}</span>
+                                    <span class="material-symbols-outlined text-amber-400 text-[13px]">stars</span>
                                     <span>{{ $reward['points'] }} نقطة</span>
                                 </div>
                             </div>
@@ -245,20 +241,15 @@
                             </div>
                         </div>
                         <div class="pt-3 px-1">
-                            @if(!empty($reward['locked']))
-                                <div class="w-full py-2 rounded-xl bg-stone-100 text-stone-500 font-label-md text-[12px] font-medium flex items-center justify-center gap-1.5 border border-stone-200/60">
-                                    <span class="material-symbols-outlined text-[15px] text-stone-400">lock_clock</span>
-                                    <span>متبقي {{ $reward['need'] }} نقطة للفتح</span>
-                                </div>
-                            @else
-                                <a href="{{ route('redeem.create') }}" class="w-full py-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200/70 font-label-md text-[12px] font-semibold transition-all flex items-center justify-center gap-1.5">
-                                    <span class="material-symbols-outlined text-[16px] text-amber-700">redeem</span>
-                                    <span>استبدال مجاناً</span>
-                                </a>
-                            @endif
+                            <a href="{{ $reward['url'] ?? route('redeem.create') }}" class="w-full py-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200/70 font-label-md text-[12px] font-semibold transition-all flex items-center justify-center gap-1.5">
+                                <span class="material-symbols-outlined text-[16px] text-amber-700">redeem</span>
+                                <span>استبدال مجاناً</span>
+                            </a>
                         </div>
                     </article>
-                @endforeach
+                @empty
+                    <p class="col-span-full rounded-2xl bg-white p-8 text-stone-500">لا توجد أطباق متاحة للاستبدال حالياً.</p>
+                @endforelse
             </div>
         </div>
     </section>

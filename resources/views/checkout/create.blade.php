@@ -50,7 +50,7 @@
             <div class="mt-2 flex justify-between"><span>الخصم {{ $quote['discount_percent'] }}%</span><span>{{ number_format($quote['discount_amount'], 2) }} <span class="ils">₪</span></span></div>
             <div class="mt-2 flex justify-between"><span>التوصيل</span><span>{{ $quote['delivery_fee'] ?: 'مجاني' }}</span></div>
             <div class="mt-4 flex justify-between text-lg font-bold"><span>المطلوب تحويله</span><span>{{ number_format($quote['total'], 2) }} <span class="ils">₪</span></span></div>
-            <p class="mt-3 text-tertiary-fixed font-medium">نقاط متوقعة بعد التسليم: {{ $quote['points'] }}</p>
+            <p class="mt-3 text-tertiary-fixed font-medium">ستحصل على {{ $quote['points'] }} نقطة من هذه الطلبية بعد التسليم</p>
         </div>
     </aside>
 </div>

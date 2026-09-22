@@ -1,6 +1,6 @@
 @extends('layouts.partner')
 
-@section('title', 'بيانات المطعم')
+@section('title', 'بيانات '.$restaurant->venueNoun())
 
 @section('content')
 <form method="POST" action="{{ route('partner.restaurant.update') }}" enctype="multipart/form-data" class="admin-card admin-form admin-form--wide">
@@ -8,7 +8,7 @@
     @method('PUT')
     <div class="grid gap-3 md:grid-cols-2">
         <div class="md:col-span-2">
-            <label class="mb-1 block text-sm font-bold">اسم المطعم</label>
+            <label class="mb-1 block text-sm font-bold">اسم {{ $restaurant->venueNoun() }}</label>
             <input name="name" value="{{ old('name', $restaurant->name) }}">
         </div>
         <div>
@@ -27,7 +27,7 @@
             </select>
         </div>
         <div>
-            <label class="mb-1 block text-sm font-bold">هاتف المطعم</label>
+            <label class="mb-1 block text-sm font-bold">هاتف {{ $restaurant->venueNoun() }}</label>
             <input name="phone" value="{{ old('phone', $restaurant->phone) }}" inputmode="numeric" minlength="10" maxlength="15" pattern="{{ \App\Support\PalestinianPhone::HTML_PATTERN }}" placeholder="059XXXXXXXX">
         </div>
         <div>
@@ -73,7 +73,7 @@
     @if($restaurant->isApproved())
         <label class="flex items-center gap-2">
             <input type="checkbox" name="is_active" value="1" @checked(old('is_active', $restaurant->is_active))>
-            استقبال الطلبات وظهور المطعم للزبائن
+            استقبال الطلبات وظهور {{ $restaurant->venueNoun() }} للزبائن
         </label>
     @endif
     <button class="admin-btn admin-btn--primary w-fit">حفظ التفاصيل</button>

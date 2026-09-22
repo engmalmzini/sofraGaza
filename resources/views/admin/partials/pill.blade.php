@@ -6,7 +6,8 @@
         'preparing' => 'run',
         'delivering' => 'run',
         'delivered' => 'ok',
-        'approved' => 'ok',
+        'ready' => 'ok',
+        'delivered' => 'ok',
         'rejected' => 'off',
         'cancelled' => 'off',
     ][$status ?? ''] ?? 'off';

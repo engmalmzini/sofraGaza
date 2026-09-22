@@ -54,14 +54,10 @@
                         <span>خصم خاص <span data-cart-discount-percent>{{ $restaurantCart['discount_percent'] ?? 0 }}</span>% (VIP)</span>
                         <span data-cart-discount-amount>- {{ number_format($restaurantCart['discount_amount'] ?? 0, 1) }} <span class="ils">₪</span></span>
                     </div>
-                    <div class="flex justify-between text-on-surface-variant">
-                        <span>رسوم التوصيل</span>
-                        <span data-cart-delivery>@if(($restaurantCart['delivery_fee'] ?? 0) == 0)0.0 <span class="ils">₪</span> (مجاناً)@else{{ number_format($restaurantCart['delivery_fee'] ?? 0, 1) }} <span class="ils">₪</span>@endif</span>
-                    </div>
                     <div class="h-px bg-outline/30 my-1"></div>
                     <div class="flex justify-between text-on-surface font-headline-sm text-[20px] font-bold">
                         <span>الإجمالي النهائي</span>
-                        <span data-cart-grand-total class="text-primary">{{ number_format($restaurantCart['total'] ?? 0, 1) }} <span class="ils">₪</span></span>
+                        <span data-cart-grand-total class="text-primary">{{ number_format($restaurantCart['items_total'] ?? $restaurantCart['subtotal'] ?? 0, 1) }} <span class="ils">₪</span></span>
                     </div>
                 </div>
                 <a href="{{ auth()->check() ? route('checkout.create') : route('login') }}" class="mt-4 w-full bg-primary text-on-primary py-3.5 rounded-full font-label-lg text-[15px] font-bold flex items-center justify-center gap-2 shadow-lg">

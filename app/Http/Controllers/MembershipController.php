@@ -41,4 +41,19 @@ class MembershipController extends Controller
         return redirect()->route('memberships.index')
             ->with('success', 'تم إرسال طلب العضوية وهو بانتظار مراجعة الحوالة.');
     }
+
+    public function requestCard(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'card_note' => ['nullable', 'string', 'max:255'],
+        ]);
+
+        try {
+            $message = $this->memberships->requestCard($request->user(), $request->input('card_note'));
+        } catch (RuntimeException $e) {
+            return back()->with('error', $e->getMessage());
+        }
+
+        return back()->with('success', $message);
+    }
 }

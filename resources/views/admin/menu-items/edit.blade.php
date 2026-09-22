@@ -1,10 +1,5 @@
 @extends('layouts.admin')
 
-@section('title', 'تعديل صنف')
-
-@section('content')
-@extends('layouts.admin')
-
 @section('kicker', 'التشغيل')
 @section('title', 'تعديل صنف')
 
@@ -15,5 +10,4 @@
     @include('admin.menu-items._form')
     <button class="admin-btn admin-btn--primary w-fit">تحديث</button>
 </form>
-@endsection
 @endsection

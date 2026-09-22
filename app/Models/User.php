@@ -47,6 +47,11 @@ class User extends Authenticatable
         return $this->role === 'restaurant_owner';
     }
 
+    public function isCourier(): bool
+    {
+        return $this->role === 'courier';
+    }
+
     public function ownedRestaurant(): HasOne
     {
         return $this->hasOne(Restaurant::class, 'owner_id');
@@ -60,6 +65,11 @@ class User extends Authenticatable
     public function orders(): HasMany
     {
         return $this->hasMany(Order::class)->latest();
+    }
+
+    public function deliveries(): HasMany
+    {
+        return $this->hasMany(Order::class, 'courier_id')->latest();
     }
 
     public function pointTransactions(): HasMany
@@ -105,6 +115,10 @@ class User extends Authenticatable
 
         if ($this->isRestaurantOwner() && $this->ownedRestaurant) {
             return route('partner.notifications.index');
+        }
+
+        if ($this->isCourier()) {
+            return route('courier.notifications.index');
         }
 
         return route('account.notifications');

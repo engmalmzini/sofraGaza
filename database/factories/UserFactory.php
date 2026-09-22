@@ -44,4 +44,9 @@ class UserFactory extends Factory
     {
         return $this->state(fn () => ['role' => 'restaurant_owner']);
     }
+
+    public function courier(): static
+    {
+        return $this->state(fn () => ['role' => 'courier']);
+    }
 }

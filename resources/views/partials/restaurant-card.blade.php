@@ -29,10 +29,6 @@
                 <span class="material-symbols-outlined text-[15px] text-stone-400">schedule</span>
                 <span>{{ $eta }}</span>
             </div>
-            <span class="text-stone-300">•</span>
-            <span class="{{ $restaurant->type === 'cafe' ? 'text-stone-700 font-medium' : 'text-secondary font-semibold' }}">
-                {{ $restaurant->type === 'cafe' ? 'توصيل 5 ' : 'توصيل مجاني' }}@if($restaurant->type === 'cafe')<span class="ils">₪</span>@endif
-            </span>
         </div>
     </div>
 </a>

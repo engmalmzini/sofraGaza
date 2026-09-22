@@ -4,10 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Models\Membership;
 use App\Models\Restaurant;
+use App\Services\PointsService;
 use Illuminate\View\View;
 
 class HomeController extends Controller
 {
+    public function __construct(private PointsService $points) {}
+
     public function index(): View
     {
         $restaurants = Restaurant::query()
@@ -26,7 +29,7 @@ class HomeController extends Controller
             'restaurantCount' => $restaurantCount,
             'memberships' => $memberships,
             'categories' => config('brand.categories'),
-            'rewards' => config('brand.rewards'),
+            'rewards' => $this->points->featuredRewards(3),
             'heroImage' => config('brand.hero'),
         ]);
     }

@@ -2,13 +2,15 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasStoredReceipt;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Support\Facades\Storage;
 
 class Order extends Model
 {
+    use HasStoredReceipt;
+
     public const STATUSES = [
         'pending_confirmation' => 'بانتظار التأكيد',
         'confirmed' => 'مؤكد',
@@ -22,6 +24,7 @@ class Order extends Model
     protected $fillable = [
         'user_id',
         'restaurant_id',
+        'courier_id',
         'membership_id',
         'type',
         'status',
@@ -63,6 +66,11 @@ class Order extends Model
         return $this->belongsTo(Restaurant::class);
     }
 
+    public function courier(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'courier_id');
+    }
+
     public function membership(): BelongsTo
     {
         return $this->belongsTo(Membership::class);
@@ -78,16 +86,15 @@ class Order extends Model
         return self::STATUSES[$this->status] ?? $this->status;
     }
 
-    public function receiptUrl(): ?string
-    {
-        return $this->transfer_receipt_path
-            ? Storage::disk('public')->url($this->transfer_receipt_path)
-            : null;
-    }
-
     public function canCancel(): bool
     {
         return $this->status === 'pending_confirmation';
+    }
+
+    public function isAvailableForCourier(): bool
+    {
+        return $this->courier_id === null
+            && in_array($this->status, ['preparing', 'delivering'], true);
     }
 
     public function nextStatuses(): array

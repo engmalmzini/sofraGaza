@@ -83,12 +83,15 @@
             </thead>
             <tbody>
                 @forelse($latestOrders as $order)
-                    <tr>
+                    <tr class="admin-click-row" data-href="{{ route('admin.orders.show', $order) }}" role="link" tabindex="0">
                         <td><a class="font-bold text-primary" href="{{ route('admin.orders.show', $order) }}">{{ $order->id }}</a></td>
                         <td>{{ $order->user->name }}</td>
                         <td>{{ $order->restaurant->name }}</td>
                         <td>{{ number_format($order->total, 2) }} <span class="ils">₪</span></td>
-                        <td>@include('admin.partials.pill', ['status' => $order->status, 'label' => $order->statusLabel()])</td>
+                        <td>
+                            @include('admin.partials.pill', ['status' => $order->status, 'label' => $order->statusLabel()])
+                            <span class="material-symbols-outlined admin-click-row__open" aria-hidden="true">chevron_left</span>
+                        </td>
                     </tr>
                 @empty
                     <tr><td colspan="5">لا توجد طلبات بعد.</td></tr>
