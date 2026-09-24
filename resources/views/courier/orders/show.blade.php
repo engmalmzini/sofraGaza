@@ -5,10 +5,7 @@
     $mapsPickup = 'https://www.google.com/maps/search/?api=1&query='.urlencode($pickup);
     $mapsDrop = 'https://www.google.com/maps/search/?api=1&query='.urlencode($order->address_details);
     $restaurantPhone = $order->restaurant->phone;
-    $backTab = 'ready';
-    if ($order->courier_id === auth()->id()) {
-        $backTab = $order->status === 'delivered' ? 'done' : 'mine';
-    }
+    $backTab = $order->status === 'delivered' ? 'done' : 'mine';
 @endphp
 
 @section('title', 'طلب #'.$order->id)
@@ -71,11 +68,6 @@
     </section>
 </article>
 
-@if($order->isAvailableForCourier())
-    <form method="POST" action="{{ route('courier.orders.claim', $order) }}" class="courier-sticky">
-        @csrf
-        <button class="courier-btn courier-btn--block">أخذ التوصيل</button>
-    </form>
 @elseif($order->courier_id === auth()->id() && $order->status === 'delivering')
     <form method="POST" action="{{ route('courier.orders.complete', $order) }}" class="courier-sticky">
         @csrf

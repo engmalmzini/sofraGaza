@@ -5,6 +5,20 @@
 @section('content')
 <div class="mx-auto max-w-5xl px-margin lg:px-margin-desktop py-5 lg:py-10">
     <h1 class="font-headline-md text-2xl font-bold text-stone-900">مرحباً {{ $user->name }}</h1>
+
+    @if($subscription?->isExpiringSoon())
+        <p class="mt-4 rounded-2xl bg-tertiary-fixed text-tertiary px-4 py-3 text-sm font-medium">
+            عضويتك تنتهي خلال {{ $subscription->daysRemaining() }} أيام. جدّد الاشتراك حتى لا تفقد الخصم والنقاط الإضافية.
+            <a href="{{ route('memberships.index') }}" class="font-bold underline">تجديد الآن</a>
+        </p>
+    @endif
+
+    @if($subscription)
+        <div class="mt-6 max-w-xl">
+            @include('partials.membership-card', ['subscription' => $subscription, 'holder' => $user])
+        </div>
+    @endif
+
     <div class="mt-6 grid gap-4 md:grid-cols-3">
         <a href="{{ route('account.points') }}" class="rounded-2xl bg-secondary-fixed text-on-secondary-fixed p-5">
             <div class="text-sm opacity-80">رصيد النقاط</div>

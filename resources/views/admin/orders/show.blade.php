@@ -34,6 +34,35 @@
                 @endforeach
             @endif
         </section>
+        <section class="admin-card">
+            <h2>التوصيل</h2>
+            <div class="mt-2 text-sm leading-7">
+                <div>المندوب: {{ $order->courier?->name ?: 'بدون مندوب' }}</div>
+                @if($order->courier)
+                    <div>هاتف المندوب: <span dir="ltr">{{ $order->courier->phone }}</span></div>
+                @endif
+            </div>
+            @if(in_array($order->status, ['preparing', 'delivering'], true))
+                <form method="POST" action="{{ route('admin.delivery.assign', $order) }}" class="mt-3 space-y-2">
+                    @csrf
+                    <select name="courier_id" required>
+                        <option value="">تعيين مندوب</option>
+                        @foreach(\App\Models\User::query()->where('role', 'courier')->where(function ($query) {
+                            $query->where('courier_status', \App\Models\User::COURIER_APPROVED)->orWhereNull('courier_status');
+                        })->orderBy('name')->get() as $courier)
+                            <option value="{{ $courier->id }}" @selected($order->courier_id === $courier->id)>{{ $courier->name }} — {{ $courier->isCourierBusy() ? 'مشغول' : 'فاضي' }}</option>
+                        @endforeach
+                    </select>
+                    <button class="admin-btn admin-btn--secondary w-full">تعيين / نقل الطلب</button>
+                </form>
+                @if($order->courier_id)
+                    <form method="POST" action="{{ route('admin.delivery.unassign', $order) }}" class="mt-2">
+                        @csrf
+                        <button class="admin-btn admin-btn--ghost w-full">إلغاء التعيين</button>
+                    </form>
+                @endif
+            @endif
+        </section>
     </div>
 </div>
 @endsection

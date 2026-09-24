@@ -41,9 +41,9 @@
         <span class="material-symbols-outlined">storefront</span>
         صاحب مطعم
     </a>
-    <a href="{{ route('login') }}" class="auth-social">
-        <span class="material-symbols-outlined">login</span>
-        تسجيل الدخول
+    <a href="{{ route('courier.register') }}" class="auth-social">
+        <span class="material-symbols-outlined">moped</span>
+        مندوب توصيل
     </a>
 </div>
 <p class="auth-legal">بإنشاء الحساب فإنك توافق على شروط الخدمة في سفرة غزة.</p>

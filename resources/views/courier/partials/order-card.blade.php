@@ -31,12 +31,7 @@
             <span class="material-symbols-outlined">call</span>
             اتصال
         </a>
-        @if($order->isAvailableForCourier())
-            <form method="POST" action="{{ route('courier.orders.claim', $order) }}">
-                @csrf
-                <button class="courier-btn">أخذ التوصيل</button>
-            </form>
-        @elseif($order->courier_id === auth()->id() && $order->status === 'delivering')
+        @if($order->courier_id === auth()->id() && $order->status === 'delivering')
             <form method="POST" action="{{ route('courier.orders.complete', $order) }}">
                 @csrf
                 <button class="courier-btn courier-btn--ok">تم التسليم</button>

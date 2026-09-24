@@ -15,6 +15,8 @@
                 <th>الصنف</th>
                 <th>التصنيف</th>
                 <th>السعر</th>
+                <th>اكتساب</th>
+                <th>استبدال</th>
                 <th>التوفر</th>
                 <th></th>
             </tr>
@@ -25,6 +27,8 @@
                     <td class="font-bold">{{ $item->name }}</td>
                     <td>{{ $item->category }}</td>
                     <td>{{ number_format($item->price, 2) }} <span class="ils">₪</span></td>
+                    <td>{{ $item->earn_points !== null ? $item->earn_points.' نقطة' : 'حسب السعر' }}</td>
+                    <td>{{ $item->redeem_points !== null ? $item->redeem_points.' نقطة' : 'حسب السعر' }}</td>
                     <td>@include('admin.partials.pill', ['status' => $item->is_available ? 'approved' : 'cancelled', 'label' => $item->is_available ? 'متوفر' : 'غير متوفر'])</td>
                     <td class="whitespace-nowrap space-x-2 space-x-reverse">
                         <a href="{{ route('admin.restaurants.menu-items.edit', [$restaurant, $item]) }}">تعديل</a>

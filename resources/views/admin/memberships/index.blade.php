@@ -5,7 +5,7 @@
 
 @section('content')
 <div class="admin-toolbar">
-    <p class="text-sm text-on-surface-variant">باقات الولاء الظاهرة للزبائن.</p>
+                <p class="text-sm text-on-surface-variant">باقات الولاء: أضف عضوية، عدّل السعر والمزايا والنسب، أو أوقف ظهورها للزبائن.</p>
     <a href="{{ route('admin.memberships.create') }}" class="admin-btn admin-btn--primary">عضوية جديدة</a>
 </div>
 <div class="admin-grid-2">
@@ -21,8 +21,12 @@
                     <li>{{ $benefit }}</li>
                 @endforeach
             </ul>
-            <div class="mt-4 flex gap-3 text-sm">
-                <a class="font-bold text-primary" href="{{ route('admin.memberships.edit', $membership) }}">تعديل</a>
+            <div class="mt-4 flex flex-wrap gap-3 text-sm">
+                <a class="font-bold text-primary" href="{{ route('admin.memberships.edit', $membership) }}">تعديل الأسعار والمزايا</a>
+                <form method="POST" action="{{ route('admin.memberships.toggle', $membership) }}">
+                    @csrf
+                    <button class="font-bold text-on-surface-variant">{{ $membership->is_active ? 'إيقاف' : 'تفعيل' }}</button>
+                </form>
                 <form method="POST" action="{{ route('admin.memberships.destroy', $membership) }}" onsubmit="return confirm('حذف العضوية؟')">@csrf @method('DELETE')<button class="text-primary">حذف</button></form>
             </div>
         </article>

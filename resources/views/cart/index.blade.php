@@ -32,12 +32,12 @@
             @endforeach
         </div>
         <aside class="mt-6 rounded-2xl bg-surface-container-lowest border border-slate-100 p-5 shadow-xs">
-            <div class="flex justify-between text-sm text-on-surface-variant"><span>المجموع</span><span data-cart-subtotal>{{ number_format($quote['subtotal'], 2) }} <span class="ils">₪</span></span></div>
+            <div class="flex justify-between text-sm text-on-surface-variant"><span>السعر الأصلي</span><span data-cart-subtotal>{{ number_format($quote['subtotal'], 2) }} <span class="ils">₪</span></span></div>
             @if($quote['discount_percent'])
-                <div class="mt-2 flex justify-between text-sm text-secondary font-semibold"><span>خصم العضوية {{ $quote['discount_percent'] }}%</span><span data-cart-discount-amount>- {{ number_format($quote['discount_amount'], 2) }} <span class="ils">₪</span></span></div>
+                <div class="mt-2 flex justify-between text-sm text-secondary font-semibold"><span>نسبة الخصم {{ $quote['discount_percent'] }}%</span><span data-cart-discount-amount>- {{ number_format($quote['discount_amount'], 2) }} <span class="ils">₪</span></span></div>
             @endif
             <div class="mt-2 flex justify-between text-sm text-on-surface-variant"><span>التوصيل</span><span>@if($quote['delivery_fee']){{ number_format($quote['delivery_fee'], 2) }} <span class="ils">₪</span>@else مجاني @endif</span></div>
-            <div class="mt-4 flex justify-between text-lg font-bold text-on-surface"><span>النهائي</span><span data-cart-grand-total>{{ number_format($quote['total'], 2) }} <span class="ils">₪</span></span></div>
+            <div class="mt-4 flex justify-between text-lg font-bold text-on-surface"><span>السعر النهائي</span><span data-cart-grand-total>{{ number_format($quote['total'], 2) }} <span class="ils">₪</span></span></div>
             <div class="mt-5 flex flex-wrap gap-3">
                 <a href="{{ route('checkout.create') }}" class="inline-flex items-center gap-1 rounded-full bg-primary hover:bg-primary-container text-on-primary px-5 py-3 font-semibold">
                     إتمام الطلب

@@ -42,6 +42,8 @@ class DatabaseSeeder extends Seeder
                 'email' => 'courier@sofra.ps',
                 'password' => Hash::make('123456'),
                 'role' => 'courier',
+                'courier_status' => User::COURIER_APPROVED,
+                'bike_type' => User::BIKE_BICYCLE,
             ]
         );
 
@@ -60,7 +62,7 @@ class DatabaseSeeder extends Seeder
                 'discount_percent' => 5,
                 'free_delivery' => false,
                 'points_multiplier' => 1.25,
-                'description' => 'خصم 5% على كل طلب، ونقطة إضافية على كل شيكل.',
+                'description' => 'خصم 5% على كل طلب، ونقاط إضافية بمعدل 1.25 نقطة بدل نقطة واحدة.',
                 'is_active' => true,
                 'sort_order' => 1,
             ]
@@ -73,7 +75,7 @@ class DatabaseSeeder extends Seeder
                 'discount_percent' => 10,
                 'free_delivery' => true,
                 'points_multiplier' => 1.50,
-                'description' => 'خصم 10% على كل طلب، توصيل مجاني، ونقاط إضافية أعلى.',
+                'description' => 'خصم 10% على كل طلب، توصيل مجاني، ونقاط إضافية بمعدل 1.5 نقطة بدل نقطة واحدة.',
                 'is_active' => true,
                 'sort_order' => 2,
             ]
@@ -81,7 +83,9 @@ class DatabaseSeeder extends Seeder
 
         $settings = [
             ['key' => 'delivery_fee', 'value' => '10', 'label' => 'رسوم التوصيل (شيكل)'],
-            ['key' => 'points_per_amount', 'value' => '1', 'label' => 'كل كم شيكل = نقطة واحدة'],
+            ['key' => 'points_per_amount', 'value' => '1', 'label' => 'كل كم شيكل = نقطة اكتساب واحدة (عام لكل المطاعم)'],
+            ['key' => 'points_redeem_per_amount', 'value' => '1', 'label' => 'كل كم شيكل = نقطة استبدال واحدة (عام)'],
+            ['key' => 'points_include_delivery', 'value' => '1', 'label' => 'احتساب التوصيل في اكتساب النقاط (1 نعم / 0 لا)'],
             ['key' => 'drink_points', 'value' => '20', 'label' => 'نقاط استبدال مشروب'],
             ['key' => 'meal_points', 'value' => '50', 'label' => 'نقاط استبدال وجبة'],
             ['key' => 'restaurant_expiry_warning_days', 'value' => '7', 'label' => 'تنبيه انتهاء عرض المطعم قبل (أيام)'],

@@ -168,6 +168,7 @@
                     <ul class="flex flex-col gap-space-xs font-body-sm text-body-sm text-on-surface-variant">
                         <li><a class="hover:text-primary transition-colors" href="{{ route('memberships.index') }}">العضويات والمكافآت</a></li>
                         <li><a class="hover:text-primary transition-colors" href="{{ route('partner.register') }}">انضم كشريك مطعم</a></li>
+                        <li><a class="hover:text-primary transition-colors" href="{{ route('courier.register') }}">انضم كمندوب توصيل</a></li>
                         <li><a class="hover:text-primary transition-colors" href="{{ route('register') }}">إنشاء حساب جديد</a></li>
                         <li><a class="hover:text-primary transition-colors" href="{{ route('login') }}">تسجيل الدخول</a></li>
                     </ul>

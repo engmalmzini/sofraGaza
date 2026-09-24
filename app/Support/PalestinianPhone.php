@@ -13,6 +13,42 @@ class PalestinianPhone
         return preg_replace('/\D+/', '', (string) $value) ?? '';
     }
 
+    public static function international(?string $value): ?string
+    {
+        $digits = self::digits($value);
+
+        if ($digits === '') {
+            return null;
+        }
+
+        if (str_starts_with($digits, '00')) {
+            $digits = substr($digits, 2);
+        }
+
+        if (str_starts_with($digits, '0')) {
+            $digits = '972'.substr($digits, 1);
+        }
+
+        return $digits;
+    }
+
+    public static function whatsappUrl(?string $phone, ?string $text = null): ?string
+    {
+        $intl = self::international($phone);
+
+        if (! $intl) {
+            return null;
+        }
+
+        $url = 'https://wa.me/'.$intl;
+
+        if ($text) {
+            $url .= '?text='.rawurlencode($text);
+        }
+
+        return $url;
+    }
+
     public static function rules(bool $uniqueUser = false): array
     {
         $rules = ['required', 'string', 'min:10', 'max:15', 'regex:'.self::PATTERN];

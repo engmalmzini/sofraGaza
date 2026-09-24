@@ -47,6 +47,15 @@ class MembershipController extends Controller
         return redirect()->route('admin.memberships.index')->with('success', 'تم تعديل العضوية.');
     }
 
+    public function toggle(Membership $membership): RedirectResponse
+    {
+        $membership->update(['is_active' => ! $membership->is_active]);
+
+        return back()->with('success', $membership->is_active
+            ? 'تم تفعيل العضوية وستظهر للزبائن.'
+            : 'تم إيقاف العضوية ولن تظهر للزبائن الجدد.');
+    }
+
     public function destroy(Membership $membership): RedirectResponse
     {
         $membership->delete();

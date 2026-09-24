@@ -10,25 +10,18 @@
             <span>برنامج الولاء</span>
         </div>
         <h1 class="font-headline-md text-2xl lg:text-[28px] font-bold text-stone-900">العضويات والمكافآت</h1>
-        <p class="text-sm text-on-surface-variant mt-1">اشترك لتحصل على خصم فوري على المنصة، وبطاقة تبرزها داخل أي مطعم مشترك معنا ليطبّقوا الخصم حسب عضويتك.</p>
+        <p class="text-sm text-on-surface-variant mt-1">اشترك بتحويل شهري ثم أرفق إشعار الحوالة. بعد موافقة الإدارة تُفعَّل بطاقة رقمية في ملفك الشخصي، ويُطبَّق الخصم تلقائياً عند الدفع.</p>
     </div>
+
+    @if($current?->isExpiringSoon())
+        <p class="mb-4 rounded-2xl bg-tertiary-fixed text-tertiary px-4 py-3 text-sm font-medium">
+            باقي {{ $current->daysRemaining() }} أيام على انتهاء عضويتك. جدّد من الأسفل حتى لا تفقد الخصم.
+        </p>
+    @endif
 
     @if($current)
         <section class="mb-6 grid gap-4 lg:grid-cols-[1.15fr_0.85fr]">
-            <article class="sg-member-card">
-                <div class="sg-member-card__top">
-                    <span>بطاقة سفرة غزة</span>
-                    <strong>{{ $current->cardNumber() }}</strong>
-                </div>
-                <h2>{{ $current->membership->name }}</h2>
-                <p class="sg-member-card__name">{{ auth()->user()->name }}</p>
-                <p class="sg-member-card__discount">خصم {{ $current->membership->discount_percent }}% داخل المطاعم المشتركة</p>
-                <dl class="sg-member-card__meta">
-                    <div><dt>البداية</dt><dd>{{ $current->starts_at?->format('Y/m/d') ?? '—' }}</dd></div>
-                    <div><dt>الانتهاء</dt><dd>{{ $current->ends_at?->format('Y/m/d') ?? '—' }}</dd></div>
-                    <div><dt>المتبقي</dt><dd>{{ $current->daysRemaining() }} يوم</dd></div>
-                </dl>
-            </article>
+            @include('partials.membership-card', ['subscription' => $current, 'holder' => auth()->user()])
             <article class="rounded-2xl bg-surface-container-lowest border border-slate-100 p-5 shadow-xs">
                 <h2 class="text-lg font-bold text-on-surface">تفاصيل اشتراكك</h2>
                 <ul class="mt-3 space-y-2 text-sm text-on-surface-variant">
@@ -45,9 +38,10 @@
                 </ul>
 
                 <div class="mt-5 rounded-xl bg-surface-container-low px-4 py-3 text-sm">
-                    <div class="font-bold text-on-surface">بطاقة المطعم</div>
-                    <p class="mt-1 text-on-surface-variant">أبرز هذه البطاقة داخل أي مطعم مشترك معنا. الطاقم يدخل رقم البطاقة ويطبّق خصم {{ $current->membership->discount_percent }}%.</p>
-                    <p class="mt-2 font-semibold text-on-surface">الحالة: {{ $current->cardStatusLabel() }}</p>
+                    <div class="font-bold text-on-surface">البطاقة الرقمية</div>
+                    <p class="mt-1 text-on-surface-variant">بطاقة حسابك ظاهرة أعلاه وفي الملف الشخصي بعد تفعيل الأدمن للحوالة. الخصم يُطبَّق تلقائياً عند الدفع على المنصة.</p>
+                    <p class="mt-2 text-on-surface-variant">للمطاعم المشتركة: يمكن للطاقم التحقق برقم {{ $current->cardNumber() }}.</p>
+                    <p class="mt-2 font-semibold text-on-surface">بطاقة المطعم البلاستيكية: {{ $current->cardStatusLabel() }}</p>
                     @if($current->card_note)
                         <p class="mt-1 text-xs text-on-surface-variant">ملاحظة الاستلام: {{ $current->card_note }}</p>
                     @endif

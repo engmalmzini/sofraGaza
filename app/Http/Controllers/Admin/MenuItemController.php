@@ -87,6 +87,8 @@ class MenuItemController extends Controller
             'price' => ['required', 'numeric', 'min:0'],
             'image' => ['nullable', 'image', 'max:4096'],
             'is_available' => ['nullable'],
+            'earn_points' => ['nullable', 'integer', 'min:0'],
+            'redeem_points' => ['nullable', 'integer', 'min:0'],
         ]);
 
         if ($data['category'] === '__custom__') {
@@ -94,6 +96,8 @@ class MenuItemController extends Controller
         }
 
         $data['is_available'] = $request->boolean('is_available');
+        $data['earn_points'] = $request->filled('earn_points') ? (int) $data['earn_points'] : null;
+        $data['redeem_points'] = $request->filled('redeem_points') ? (int) $data['redeem_points'] : null;
         unset($data['image'], $data['category_custom']);
 
         return $data;

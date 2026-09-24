@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\PointsService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
@@ -42,8 +43,21 @@ class Membership extends Model
             $benefits[] = 'توصيل مجاني';
         }
 
-        $benefits[] = 'نقاط إضافية (×'.$this->points_multiplier.')';
+        $benefits[] = $this->extraPointsLabel();
 
         return $benefits;
+    }
+
+    public function extraPointsLabel(): string
+    {
+        $points = app(PointsService::class);
+        $per = $points->formatShekelRate($points->shekelsPerEarnPoint());
+        $rate = rtrim(rtrim(number_format((float) $this->points_multiplier, 2, '.', ''), '0'), '.');
+
+        if ((float) $this->points_multiplier <= 1) {
+            return 'نقطة واحدة لكل '.$per.' شيكل';
+        }
+
+        return $rate.' نقطة لكل '.$per.' شيكل بدل نقطة واحدة';
     }
 }

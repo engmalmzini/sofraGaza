@@ -15,6 +15,8 @@
     $logoPath = public_path('images/logo.png');
     $logoSrc = file_exists($logoPath) ? asset('images/logo.png').'?v='.filemtime($logoPath) : config('brand.logo');
     $pendingOrdersCount = \App\Models\Order::query()->where('status', 'pending_confirmation')->count();
+    $pendingCourierCount = \App\Models\User::query()->where('role', 'courier')->where('courier_status', \App\Models\User::COURIER_PENDING)->count();
+    $waitingDeliveryCount = \App\Models\Order::query()->whereNull('courier_id')->whereIn('status', ['preparing', 'delivering'])->count() + $pendingCourierCount;
     $pendingSubsCount = \App\Models\MembershipSubscription::query()->where('status', 'pending')->count();
     $pendingRestaurantsCount = \App\Models\Restaurant::query()->pendingVerification()->count();
     $adminSearch = [
@@ -73,6 +75,14 @@
             'restaurant_id' => null,
             'filter' => true,
         ];
+    } elseif (request()->routeIs('admin.delivery.*')) {
+        $adminSearch = [
+            'scope' => 'couriers',
+            'action' => route('admin.delivery.index'),
+            'placeholder' => 'ابحث برقم الطلب أو اسم المندوب',
+            'restaurant_id' => null,
+            'filter' => true,
+        ];
     } elseif (request()->routeIs('admin.settings.*')) {
         $adminSearch = [
             'scope' => 'settings',
@@ -94,6 +104,7 @@
             'label' => 'التشغيل',
             'items' => [
                 ['route' => 'admin.orders.index', 'icon' => 'receipt_long', 'label' => 'الطلبات', 'match' => 'admin.orders.*', 'badge' => $pendingOrdersCount],
+                ['route' => 'admin.delivery.index', 'icon' => 'moped', 'label' => 'التوصيل والمندوبون', 'match' => 'admin.delivery.*', 'badge' => $waitingDeliveryCount],
                 ['route' => 'admin.restaurants.index', 'icon' => 'storefront', 'label' => 'المطاعم والكوفيهات', 'match' => 'admin.restaurants.*', 'badge' => $pendingRestaurantsCount],
             ],
         ],
@@ -171,6 +182,9 @@
                 <form class="admin-topbar__search" action="{{ $adminSearch['action'] }}" method="GET" role="search">
                     @if($adminSearch['filter'] && request('status'))
                         <input type="hidden" name="status" value="{{ request('status') }}">
+                    @endif
+                    @if($adminSearch['filter'] && request('tab'))
+                        <input type="hidden" name="tab" value="{{ request('tab') }}">
                     @endif
                     <input
                         name="q"

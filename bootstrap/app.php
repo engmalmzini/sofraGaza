@@ -3,6 +3,8 @@
 use App\Http\Middleware\EnsureUserIsAdmin;
 use App\Http\Middleware\EnsureUserIsCourier;
 use App\Http\Middleware\EnsureUserIsRestaurantOwner;
+use App\Services\ExpiryNoticeService;
+use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -37,6 +39,9 @@ return Application::configure(basePath: dirname(__DIR__))
 
             return route('home');
         });
+    })
+    ->withSchedule(function (Schedule $schedule): void {
+        $schedule->call(fn () => app(ExpiryNoticeService::class)->dispatch())->daily();
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

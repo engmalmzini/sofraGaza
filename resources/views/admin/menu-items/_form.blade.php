@@ -29,6 +29,22 @@
     <label class="mb-1 block text-sm font-bold">السعر (<span class="ils">₪</span>)</label>
     <input type="number" step="0.01" name="price" value="{{ old('price', $item->price ?? '') }}" class="w-full rounded-xl border px-3 py-3">
 </div>
+@if(request()->routeIs('admin.*'))
+<div class="rounded-2xl border border-dashed border-olive/20 p-4 space-y-3">
+    <h3 class="text-sm font-extrabold">تخصيص النقاط لهذا الصنف</h3>
+    <p class="text-xs leading-6 text-on-surface-variant">فارغ = حسب سعر الصنف وسعر المطعم أو الإعداد العام. رقم ثابت يتجاوز السعر.</p>
+    <div class="grid gap-3 md:grid-cols-2">
+        <div>
+            <label class="mb-1 block text-sm font-bold">نقاط مكتسبة لكل وحدة</label>
+            <input type="number" min="0" step="1" name="earn_points" value="{{ old('earn_points', $item->earn_points ?? '') }}" placeholder="حسب السعر" class="w-full rounded-xl border px-3 py-3">
+        </div>
+        <div>
+            <label class="mb-1 block text-sm font-bold">تكلفة الاستبدال بالنقاط</label>
+            <input type="number" min="0" step="1" name="redeem_points" value="{{ old('redeem_points', $item->redeem_points ?? '') }}" placeholder="حسب السعر" class="w-full rounded-xl border px-3 py-3">
+        </div>
+    </div>
+</div>
+@endif
 <div>
     <label class="mb-1 block text-sm font-bold">صورة</label>
     <input type="file" name="image" accept="image/*">

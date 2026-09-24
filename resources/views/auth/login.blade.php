@@ -30,10 +30,10 @@
         <span class="material-symbols-outlined">person_add</span>
         حساب زبون
     </a>
-    <a href="{{ route('partner.register') }}" class="auth-social">
-        <span class="material-symbols-outlined">storefront</span>
-        صاحب مطعم
+    <a href="{{ route('courier.register') }}" class="auth-social">
+        <span class="material-symbols-outlined">moped</span>
+        مندوب توصيل
     </a>
 </div>
-<p class="auth-legal">مندوب التوصيل يدخل بنفس الصفحة برقم هاتفه. الدخول مطلوب قبل إرسال أي طلب من المنصة.</p>
+<p class="auth-legal">مندوب التوصيل يسجّل من صفحة خاصة، وبعد القبول يدخل بنفس رقم الهاتف.</p>
 @endsection

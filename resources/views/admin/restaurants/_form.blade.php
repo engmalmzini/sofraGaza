@@ -40,3 +40,17 @@
 </div>
 <label class="flex items-center gap-2"><input type="checkbox" name="is_active" value="1" @checked(old('is_active', $restaurant->is_active ?? true))> ظاهر على المنصة</label>
 <label class="flex items-center gap-2"><input type="checkbox" name="is_featured" value="1" @checked(old('is_featured', $restaurant->is_featured ?? false))> مميز في الرئيسية</label>
+<div class="rounded-2xl border border-dashed border-olive/20 p-4 space-y-3">
+    <h3 class="text-sm font-extrabold">سعر النقاط لهذا المطعم</h3>
+    <p class="text-xs leading-6 text-on-surface-variant">اترك الحقل فارغاً لاستخدام السعر العام من إعدادات المنصة. القيمة تعني: كل كم شيكل = نقطة واحدة.</p>
+    <div class="grid gap-3 md:grid-cols-2">
+        <div>
+            <label class="mb-1 block text-sm font-bold">اكتساب النقاط</label>
+            <input type="number" step="0.01" min="0.01" name="points_per_amount" value="{{ old('points_per_amount', $restaurant->points_per_amount ?? '') }}" placeholder="عام" class="w-full rounded-xl border px-3 py-3">
+        </div>
+        <div>
+            <label class="mb-1 block text-sm font-bold">استبدال النقاط</label>
+            <input type="number" step="0.01" min="0.01" name="points_redeem_per_amount" value="{{ old('points_redeem_per_amount', $restaurant->points_redeem_per_amount ?? '') }}" placeholder="عام" class="w-full rounded-xl border px-3 py-3">
+        </div>
+    </div>
+</div>

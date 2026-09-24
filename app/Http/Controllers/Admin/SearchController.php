@@ -33,6 +33,7 @@ class SearchController extends Controller
             'memberships' => $this->memberships($q, 8),
             'subscriptions' => $this->subscriptions($q, 8),
             'settings' => $this->settings($q, 8),
+            'couriers' => $this->couriers($q, 8)->concat($this->orders($q, 4)),
             default => $this->global($q),
         };
 
@@ -46,7 +47,8 @@ class SearchController extends Controller
             ->concat($this->users($q, 2))
             ->concat($this->memberships($q, 1))
             ->concat($this->subscriptions($q, 1))
-            ->concat($this->settings($q, 1));
+            ->concat($this->settings($q, 1))
+            ->concat($this->couriers($q, 2));
     }
 
     private function orders(string $q, int $limit): Collection
@@ -185,6 +187,24 @@ class SearchController extends Controller
                 'settings',
                 $q,
                 $setting->label,
+            ));
+    }
+
+    private function couriers(string $q, int $limit): Collection
+    {
+        return User::query()
+            ->where('role', 'courier')
+            ->where(fn ($builder) => $builder->where('name', 'like', "%{$q}%")->orWhere('phone', 'like', "%{$q}%"))
+            ->latest()
+            ->limit($limit)
+            ->get()
+            ->map(fn (User $user) => $this->row(
+                $user->name,
+                $user->phone.' • '.($user->isCourierBusy() ? 'مشغول' : 'فاضي'),
+                route('admin.delivery.show', $user),
+                'moped',
+                $q,
+                $user->name,
             ));
     }
 

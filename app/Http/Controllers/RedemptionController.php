@@ -22,17 +22,18 @@ class RedemptionController extends Controller
     {
         $restaurants = Restaurant::query()->visible()->orderBy('name')->get();
         $selected = $request->integer('restaurant_id') ?: $restaurants->first()?->id;
-        $earnRate = $this->points->shekelsPerPoint();
+        $selectedRestaurant = $restaurants->firstWhere('id', $selected);
 
         $items = collect();
-        if ($selected) {
+        if ($selectedRestaurant) {
             $items = MenuItem::query()
-                ->where('restaurant_id', $selected)
+                ->where('restaurant_id', $selectedRestaurant->id)
                 ->where('is_available', true)
                 ->orderBy('category')
                 ->orderBy('name')
                 ->get()
-                ->map(function (MenuItem $item) {
+                ->map(function (MenuItem $item) use ($selectedRestaurant) {
+                    $item->setRelation('restaurant', $selectedRestaurant);
                     $item->redeem_cost = $this->points->redeemCost($item);
 
                     return $item;
@@ -49,7 +50,8 @@ class RedemptionController extends Controller
         }
 
         return view('redeem.create', [
-            'earnRate' => $earnRate,
+            'earnRateLabel' => $this->points->earnRateLabel($selectedRestaurant),
+            'redeemRateLabel' => $this->points->redeemRateLabel($selectedRestaurant),
             'restaurants' => $restaurants,
             'selected' => $selected,
             'items' => $items,

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Concerns\HasStoredReceipt;
+use App\Support\PalestinianPhone;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -70,6 +71,44 @@ class MembershipSubscription extends Model
         }
 
         return max(0, (int) now()->diffInDays($this->ends_at, false));
+    }
+
+    public function warningDays(): int
+    {
+        return max(1, (int) Setting::value('membership_expiry_warning_days', 3));
+    }
+
+    public function isExpiringSoon(): bool
+    {
+        $remaining = $this->daysRemaining();
+
+        return $this->status === 'approved'
+            && $remaining > 0
+            && $remaining <= $this->warningDays();
+    }
+
+    public function digitalCardMessage(): string
+    {
+        $this->loadMissing(['user', 'membership']);
+
+        return implode("\n", array_filter([
+            'بطاقة عضوية سفرة غزة',
+            'الزبون: '.$this->user?->name,
+            'النوع: '.$this->membership?->name,
+            'رقم العضوية: '.$this->cardNumber(),
+            'البداية: '.($this->starts_at?->format('Y/m/d') ?? '—'),
+            'الانتهاء: '.($this->ends_at?->format('Y/m/d') ?? '—'),
+        ]));
+    }
+
+    public function whatsappCardUrl(): ?string
+    {
+        $this->loadMissing('user');
+
+        return PalestinianPhone::whatsappUrl(
+            $this->user?->phone,
+            $this->digitalCardMessage()
+        );
     }
 
     public function cardNumber(): string

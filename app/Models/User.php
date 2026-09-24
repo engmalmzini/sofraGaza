@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Storage;
 
 class User extends Authenticatable
 {
@@ -20,6 +21,12 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'photo_path',
+        'bike_photo_path',
+        'bike_type',
+        'courier_status',
+        'courier_rejection_reason',
+        'courier_verified_at',
         'points_balance',
     ];
 
@@ -34,8 +41,16 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'points_balance' => 'integer',
+            'courier_verified_at' => 'datetime',
         ];
     }
+
+    public const COURIER_PENDING = 'pending';
+    public const COURIER_APPROVED = 'approved';
+    public const COURIER_REJECTED = 'rejected';
+
+    public const BIKE_BICYCLE = 'bicycle';
+    public const BIKE_ELECTRIC = 'electric';
 
     public function isAdmin(): bool
     {
@@ -50,6 +65,49 @@ class User extends Authenticatable
     public function isCourier(): bool
     {
         return $this->role === 'courier';
+    }
+
+    public function isCourierPending(): bool
+    {
+        return $this->isCourier() && $this->courier_status === self::COURIER_PENDING;
+    }
+
+    public function isCourierRejected(): bool
+    {
+        return $this->isCourier() && $this->courier_status === self::COURIER_REJECTED;
+    }
+
+    public function isCourierApproved(): bool
+    {
+        return $this->isCourier() && ! $this->isCourierPending() && ! $this->isCourierRejected();
+    }
+
+    public function courierStatusLabel(): string
+    {
+        return match ($this->courier_status) {
+            self::COURIER_PENDING => 'جاري التحقق',
+            self::COURIER_REJECTED => 'مرفوض',
+            default => 'مقبول',
+        };
+    }
+
+    public function bikeTypeLabel(): string
+    {
+        return match ($this->bike_type) {
+            self::BIKE_ELECTRIC => 'دراجة كهربائية',
+            self::BIKE_BICYCLE => 'دراجة هوائية',
+            default => 'غير محدد',
+        };
+    }
+
+    public function photoUrl(): ?string
+    {
+        return $this->photo_path ? Storage::disk('public')->url($this->photo_path) : null;
+    }
+
+    public function bikePhotoUrl(): ?string
+    {
+        return $this->bike_photo_path ? Storage::disk('public')->url($this->bike_photo_path) : null;
     }
 
     public function ownedRestaurant(): HasOne
@@ -70,6 +128,24 @@ class User extends Authenticatable
     public function deliveries(): HasMany
     {
         return $this->hasMany(Order::class, 'courier_id')->latest();
+    }
+
+    public function isCourierBusy(): bool
+    {
+        if ($this->relationLoaded('deliveries')) {
+            return $this->deliveries->contains(fn (Order $order) => $order->status === 'delivering');
+        }
+
+        return $this->deliveries()->where('status', 'delivering')->exists();
+    }
+
+    public function activeDelivery(): ?Order
+    {
+        if ($this->relationLoaded('deliveries')) {
+            return $this->deliveries->first(fn (Order $order) => $order->status === 'delivering');
+        }
+
+        return $this->deliveries()->where('status', 'delivering')->first();
     }
 
     public function pointTransactions(): HasMany

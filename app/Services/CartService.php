@@ -11,6 +11,10 @@ use RuntimeException;
 
 class CartService
 {
+    public function __construct(
+        private PointsService $points,
+    ) {}
+
     public function restaurantId(): ?int
     {
         $id = Session::get('cart.restaurant_id');
@@ -109,7 +113,15 @@ class CartService
             : (float) Setting::value('delivery_fee', 10);
         $total = $afterDiscount + $deliveryFee;
         $multiplier = (float) ($membership?->points_multiplier ?? 1);
-        $points = $this->calculatePoints($afterDiscount, $multiplier);
+        $restaurant = Restaurant::find($this->restaurantId());
+        $points = $this->points->previewEarn(
+            $restaurant,
+            $lines,
+            $subtotal,
+            $discountAmount,
+            $deliveryFee,
+            $multiplier,
+        );
 
         return [
             'lines' => $lines,
@@ -121,13 +133,13 @@ class CartService
             'items_total' => $afterDiscount,
             'points' => $points,
             'membership' => $membership,
-            'restaurant' => Restaurant::find($this->restaurantId()),
+            'restaurant' => $restaurant,
         ];
     }
 
-    public function calculatePoints(float $amount, float $multiplier = 1): int
+    public function calculatePoints(float $amount, float $multiplier = 1, ?Restaurant $restaurant = null): int
     {
-        $per = max(1, (float) Setting::value('points_per_amount', 1));
+        $per = $this->points->shekelsPerEarnPoint($restaurant);
 
         return (int) floor(($amount / $per) * $multiplier);
     }
@@ -159,7 +171,7 @@ class CartService
                     'qty' => (int) $line['qty'],
                     'price' => (float) $item->price,
                     'line_total' => $lineTotal,
-                    'points' => max(1, (int) floor($lineTotal / 10)),
+                    'points' => $this->points->previewLineEarn($item, (int) $line['qty']),
                 ];
             }, $quote['lines']),
         ];

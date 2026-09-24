@@ -16,6 +16,8 @@ class MenuItem extends Model
         'price',
         'image_path',
         'is_available',
+        'earn_points',
+        'redeem_points',
     ];
 
     protected function casts(): array
@@ -23,6 +25,8 @@ class MenuItem extends Model
         return [
             'price' => 'decimal:2',
             'is_available' => 'boolean',
+            'earn_points' => 'integer',
+            'redeem_points' => 'integer',
         ];
     }
 

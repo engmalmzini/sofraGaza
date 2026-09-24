@@ -35,6 +35,8 @@ Route::middleware('guest')->group(function () {
     Route::post('/register', [RegisterController::class, 'store']);
     Route::get('/partners/register', [Partner\RegisterController::class, 'create'])->name('partner.register');
     Route::post('/partners/register', [Partner\RegisterController::class, 'store']);
+    Route::get('/couriers/register', [Courier\RegisterController::class, 'create'])->name('courier.register');
+    Route::post('/couriers/register', [Courier\RegisterController::class, 'store']);
 });
 
 Route::post('/logout', [LoginController::class, 'destroy'])->middleware('auth')->name('logout');
@@ -74,6 +76,15 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::get('orders/{order}', [Admin\OrderController::class, 'show'])->name('orders.show');
     Route::get('orders/{order}/receipt', [Admin\OrderController::class, 'receipt'])->name('orders.receipt');
     Route::patch('orders/{order}', [Admin\OrderController::class, 'update'])->name('orders.update');
+    Route::get('delivery', [Admin\DeliveryController::class, 'index'])->name('delivery.index');
+    Route::post('delivery', [Admin\DeliveryController::class, 'store'])->name('delivery.store');
+    Route::post('delivery/orders/{order}/assign', [Admin\DeliveryController::class, 'assign'])->name('delivery.assign');
+    Route::post('delivery/orders/{order}/unassign', [Admin\DeliveryController::class, 'unassign'])->name('delivery.unassign');
+    Route::post('delivery/{courier}/approve', [Admin\DeliveryController::class, 'approve'])->name('delivery.approve');
+    Route::post('delivery/{courier}/reject', [Admin\DeliveryController::class, 'reject'])->name('delivery.reject');
+    Route::get('delivery/{courier}', [Admin\DeliveryController::class, 'show'])->name('delivery.show');
+    Route::put('delivery/{courier}', [Admin\DeliveryController::class, 'update'])->name('delivery.update');
+    Route::post('memberships/{membership}/toggle', [Admin\MembershipController::class, 'toggle'])->name('memberships.toggle');
     Route::resource('memberships', Admin\MembershipController::class)->except(['show']);
     Route::get('subscriptions', [Admin\SubscriptionController::class, 'index'])->name('subscriptions.index');
     Route::get('subscriptions/{subscription}', [Admin\SubscriptionController::class, 'show'])->name('subscriptions.show');
@@ -110,7 +121,6 @@ Route::prefix('partner')->name('partner.')->middleware(['auth', 'partner'])->gro
 Route::prefix('courier')->name('courier.')->middleware(['auth', 'courier'])->group(function () {
     Route::get('/', [Courier\DashboardController::class, 'index'])->name('dashboard');
     Route::get('orders/{order}', [Courier\OrderController::class, 'show'])->name('orders.show');
-    Route::post('orders/{order}/claim', [Courier\OrderController::class, 'claim'])->name('orders.claim');
     Route::post('orders/{order}/complete', [Courier\OrderController::class, 'complete'])->name('orders.complete');
     Route::get('notifications', [Courier\NotificationController::class, 'index'])->name('notifications.index');
     Route::get('notifications/{notification}', [Courier\NotificationController::class, 'open'])->name('notifications.open');

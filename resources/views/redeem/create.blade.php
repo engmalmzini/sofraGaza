@@ -32,14 +32,14 @@
             <span class="material-symbols-outlined">stars</span>
             <div>
                 <strong>تجميع النقاط</strong>
-                <em>كل {{ rtrim(rtrim(number_format($earnRate, 1), '0'), '.') }} شيكل = نقطة</em>
+                <em>{{ $earnRateLabel }}</em>
             </div>
         </article>
         <article>
             <span class="material-symbols-outlined">restaurant</span>
             <div>
                 <strong>تكلفة الاستبدال</strong>
-                <em>سعر الطبق نفسه بالنقاط</em>
+                <em>{{ $redeemRateLabel }}</em>
             </div>
         </article>
         <article>

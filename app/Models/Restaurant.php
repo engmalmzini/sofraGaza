@@ -38,6 +38,8 @@ class Restaurant extends Model
         'expires_at',
         'is_active',
         'is_featured',
+        'points_per_amount',
+        'points_redeem_per_amount',
         'verification_status',
         'rejection_reason',
         'verified_at',
@@ -52,6 +54,8 @@ class Restaurant extends Model
             'verified_at' => 'datetime',
             'is_active' => 'boolean',
             'is_featured' => 'boolean',
+            'points_per_amount' => 'decimal:2',
+            'points_redeem_per_amount' => 'decimal:2',
         ];
     }
 
@@ -114,6 +118,42 @@ class Restaurant extends Model
                     });
             }
         });
+    }
+
+    public static function homeCategories(): array
+    {
+        $base = static::query()->visible();
+
+        return array_map(function (array $category) use ($base) {
+            $count = (clone $base)->matchingCuisine($category['key'])->count();
+            $category['places'] = $count;
+            $category['count'] = static::formatPlaceCount($count, $category['key']);
+
+            return $category;
+        }, config('brand.categories', []));
+    }
+
+    public static function formatPlaceCount(int $count, string $categoryKey): string
+    {
+        $kind = match ($categoryKey) {
+            'cafe' => 'cafe',
+            'sweets' => 'shop',
+            default => 'restaurant',
+        };
+
+        $forms = match ($kind) {
+            'cafe' => ['zero' => 'لا كافيهات', 'one' => 'كافيه واحد', 'dual' => 'كافيهان', 'few' => 'كافيهات', 'many' => 'كافيه'],
+            'shop' => ['zero' => 'لا متاجر', 'one' => 'متجر واحد', 'dual' => 'متجران', 'few' => 'متاجر', 'many' => 'متجراً'],
+            default => ['zero' => 'لا مطاعم', 'one' => 'مطعم واحد', 'dual' => 'مطعمان', 'few' => 'مطاعم', 'many' => 'مطعماً'],
+        };
+
+        return match (true) {
+            $count <= 0 => $forms['zero'],
+            $count === 1 => $forms['one'],
+            $count === 2 => $forms['dual'],
+            $count <= 10 => $count.' '.$forms['few'],
+            default => $count.' '.$forms['many'],
+        };
     }
 
     public function scopeInDeliveryArea(Builder $query): Builder

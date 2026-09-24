@@ -47,9 +47,11 @@
         </ul>
         <div class="mt-4 border-t border-white/15 pt-4 text-sm">
             <div class="flex justify-between"><span>السعر الأصلي</span><span>{{ number_format($quote['subtotal'], 2) }} <span class="ils">₪</span></span></div>
-            <div class="mt-2 flex justify-between"><span>الخصم {{ $quote['discount_percent'] }}%</span><span>{{ number_format($quote['discount_amount'], 2) }} <span class="ils">₪</span></span></div>
-            <div class="mt-2 flex justify-between"><span>التوصيل</span><span>{{ $quote['delivery_fee'] ?: 'مجاني' }}</span></div>
-            <div class="mt-4 flex justify-between text-lg font-bold"><span>المطلوب تحويله</span><span>{{ number_format($quote['total'], 2) }} <span class="ils">₪</span></span></div>
+            @if($quote['discount_percent'])
+                <div class="mt-2 flex justify-between"><span>نسبة الخصم {{ $quote['discount_percent'] }}%</span><span>− {{ number_format($quote['discount_amount'], 2) }} <span class="ils">₪</span></span></div>
+            @endif
+            <div class="mt-2 flex justify-between"><span>التوصيل</span><span>@if($quote['delivery_fee']){{ number_format($quote['delivery_fee'], 2) }} <span class="ils">₪</span>@else مجاني @endif</span></div>
+            <div class="mt-4 flex justify-between text-lg font-bold"><span>السعر النهائي</span><span>{{ number_format($quote['total'], 2) }} <span class="ils">₪</span></span></div>
             <p class="mt-3 text-tertiary-fixed font-medium">ستحصل على {{ $quote['points'] }} نقطة من هذه الطلبية بعد التسليم</p>
         </div>
     </aside>

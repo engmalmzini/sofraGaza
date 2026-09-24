@@ -7,6 +7,7 @@
 @section('tabs')
     <a href="{{ route('register') }}" class="auth-tab">إنشاء حساب</a>
     <a href="{{ route('partner.register') }}" class="auth-tab is-active">مطعم</a>
+    <a href="{{ route('courier.register') }}" class="auth-tab">توصيل</a>
 @endsection
 
 @section('content')

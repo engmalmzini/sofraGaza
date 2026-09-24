@@ -67,7 +67,7 @@
                     <div class="flex flex-wrap items-center gap-y-2 gap-x-6 text-stone-600 font-label-sm text-[13px] pt-1">
                         <div class="flex items-center gap-1.5">
                             <span class="material-symbols-outlined text-primary text-[18px]">storefront</span>
-                            <span class="font-medium"><strong class="font-bold text-stone-900">+{{ max(140, $restaurantCount) }}</strong> مطعم وكافيه مختار</span>
+                            <span class="font-medium"><strong class="font-bold text-stone-900">{{ $restaurantCount }}</strong> مطعم وكافيه مختار</span>
                         </div>
                         <span class="text-stone-300">•</span>
                         <div class="flex items-center gap-1.5">
@@ -211,7 +211,7 @@
                         <span>مكافآت برنامج الولاء</span>
                     </div>
                     <h2 class="font-headline-md text-xl sm:text-2xl font-bold text-stone-900 tracking-tight">أطباق بمكافآت النقاط</h2>
-                    <p class="font-body-sm text-stone-500 text-[13px] mt-0.5">كل شيكل تجميعه نقطة، والاستبدال بسعر الطبق نفسه بالنقاط</p>
+                    <p class="font-body-sm text-stone-500 text-[13px] mt-0.5">{{ $pointsEarnLabel }}، و{{ $pointsRedeemLabel }}</p>
                 </div>
                 <div class="flex items-center gap-2.5 self-start sm:self-auto">
                     <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-50 border border-amber-200/70 text-amber-900">

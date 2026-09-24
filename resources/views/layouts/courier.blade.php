@@ -16,11 +16,11 @@
 </head>
 @php
     $courierUser = auth()->user();
-    $navReady = \App\Models\Order::query()->whereNull('courier_id')->whereIn('status', ['preparing', 'delivering'])->count();
-    $navMine = $courierUser->deliveries()->where('status', 'delivering')->count();
+    $navMine = $courierUser->deliveries()->whereIn('status', ['preparing', 'delivering'])->count();
     $navDone = $courierUser->deliveries()->where('status', 'delivered')->whereDate('delivered_at', today())->count();
     $onDash = request()->routeIs('courier.dashboard');
-    $tab = request('tab', 'ready');
+    $tab = request('tab', 'mine');
+    $approved = $courierUser->isCourierApproved();
 @endphp
 <body class="courier-app">
     <div class="courier-shell">
@@ -65,15 +65,11 @@
         @yield('content')
     </main>
 
+    @if($approved)
     <nav class="courier-nav" aria-label="تنقل التوصيل">
-        <a href="{{ route('courier.dashboard', ['tab' => 'ready']) }}" class="{{ $onDash && $tab === 'ready' ? 'is-active' : '' }}">
-            <span class="material-symbols-outlined">inventory_2</span>
-            جاهز
-            @if($navReady)<i>{{ $navReady }}</i>@endif
-        </a>
         <a href="{{ route('courier.dashboard', ['tab' => 'mine']) }}" class="{{ $onDash && $tab === 'mine' ? 'is-active' : '' }}">
             <span class="material-symbols-outlined">delivery_dining</span>
-            توصيلي
+            طلباتي
             @if($navMine)<i>{{ $navMine }}</i>@endif
         </a>
         <a href="{{ route('courier.dashboard', ['tab' => 'done']) }}" class="{{ $onDash && $tab === 'done' ? 'is-active' : '' }}">
@@ -81,7 +77,13 @@
             اليوم
             @if($navDone)<i>{{ $navDone }}</i>@endif
         </a>
+        <a href="{{ route('courier.notifications.index') }}" class="{{ request()->routeIs('courier.notifications.*') ? 'is-active' : '' }}">
+            <span class="material-symbols-outlined">notifications</span>
+            تنبيهات
+            @if($unreadNotifications)<i>{{ $unreadNotifications > 9 ? '9+' : $unreadNotifications }}</i>@endif
+        </a>
     </nav>
+    @endif
     </div>
 </body>
 </html>

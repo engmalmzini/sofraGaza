@@ -42,6 +42,20 @@ class CuisineFilterTest extends TestCase
         $this->assertTrue($unrelated->isVisible());
     }
 
+    public function test_home_category_counts_come_from_visible_restaurants(): void
+    {
+        $this->visibleRestaurant('شاورما العمدة', ['cuisine' => 'shawarma']);
+        $this->visibleRestaurant('كافي تِرا', ['type' => 'cafe', 'cuisine' => 'cafe']);
+
+        $this->get(route('home'))
+            ->assertOk()
+            ->assertSee('مطعم واحد', false)
+            ->assertSee('كافيه واحد', false)
+            ->assertDontSee('24 مطعماً', false)
+            ->assertDontSee('31 كافيه', false)
+            ->assertDontSee('+140', false);
+    }
+
     private function visibleRestaurant(string $name, array $extra = []): Restaurant
     {
         return Restaurant::query()->create(array_merge([

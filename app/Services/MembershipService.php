@@ -68,11 +68,11 @@ class MembershipService
         $this->notifications->notify(
             $subscription->user,
             'تم تفعيل عضويتك',
-            "تم تفعيل عضوية {$subscription->membership->name} حتى ".$subscription->ends_at->translatedFormat('d F Y').'.',
-            route('memberships.index')
+            "تم تفعيل عضوية {$subscription->membership->name} حتى ".$subscription->ends_at->translatedFormat('d F Y').'. بطاقتك الرقمية ظاهرة الآن في ملفك الشخصي.',
+            route('account.show')
         );
 
-        return 'تم تفعيل العضوية لمدة 30 يوماً.';
+        return 'تم تفعيل العضوية لمدة 30 يوماً. البطاقة الرقمية ظهرت في حساب الزبون — أرسل نسخة واتساب يدوياً كتأكيد إضافي.';
     }
 
     public function reject(MembershipSubscription $subscription, string $reason): string

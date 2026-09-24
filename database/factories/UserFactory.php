@@ -47,6 +47,10 @@ class UserFactory extends Factory
 
     public function courier(): static
     {
-        return $this->state(fn () => ['role' => 'courier']);
+        return $this->state(fn () => [
+            'role' => 'courier',
+            'courier_status' => User::COURIER_APPROVED,
+            'bike_type' => User::BIKE_BICYCLE,
+        ]);
     }
 }

@@ -30,6 +30,7 @@
                         <img class="w-full h-full object-cover rounded-full" alt="{{ $category['name'] }}" src="{{ $category['image'] }}">
                     </div>
                     <span class="text-label-sm font-label-sm {{ $loop->first ? 'font-bold text-primary' : 'font-medium text-on-surface' }}">{{ $category['name'] }}</span>
+                    <span class="text-[11px] text-on-surface-variant">{{ $category['count'] }}</span>
                 </a>
             @endforeach
         </div>
@@ -125,7 +126,7 @@
                     <span class="material-symbols-outlined text-[18px]">military_tech</span>
                     <h3 class="text-headline-sm font-headline-sm text-on-surface">مكافآت نقاطك الغذائية</h3>
                 </div>
-                <span class="text-label-sm font-label-sm text-on-surface-variant">كل شيكل = نقطة، والسعر بالنقاط يساوي سعر الطبق</span>
+                <span class="text-label-sm font-label-sm text-on-surface-variant">{{ $pointsEarnLabel }}، و{{ $pointsRedeemLabel }}</span>
             </div>
             <div class="flex items-center gap-1 bg-secondary-fixed text-on-secondary-fixed px-3 py-1 rounded-full shadow-sm">
                 <span class="material-symbols-outlined text-[15px]">stars</span>

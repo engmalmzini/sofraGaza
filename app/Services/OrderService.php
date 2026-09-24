@@ -207,7 +207,7 @@ class OrderService
         $order->update($payload);
 
         if (in_array($status, ['preparing', 'delivering'], true) && ! $order->courier_id) {
-            $this->notifyCouriers($order->fresh());
+            // الطلبات لا تُعرض لكل المندوبين؛ الإدارة تعيّن مندوباً بعينه.
         }
 
         if ($status === 'delivered') {
@@ -224,15 +224,26 @@ class OrderService
 
     public function claimForCourier(Order $order, User $courier): void
     {
-        if (! $courier->isCourier()) {
-            throw new RuntimeException('هذا الحساب ليس مندوب توصيل.');
+        throw new RuntimeException('الطلبات لا تُؤخذ من القائمة العامة. الإدارة ترسل الطلب لمندوب محدد.');
+    }
+
+    public function assignCourier(Order $order, User $courier): void
+    {
+        if (! $courier->isCourierApproved()) {
+            throw new RuntimeException('يمكن تعيين المندوبين المقبولين فقط.');
         }
+
+        if (! in_array($order->status, ['preparing', 'delivering'], true)) {
+            throw new RuntimeException('الطلب ليس جاهزاً للتعيين على التوصيل بعد.');
+        }
+
+        $previousId = $order->courier_id;
 
         DB::transaction(function () use ($order, $courier) {
             $locked = Order::query()->whereKey($order->id)->lockForUpdate()->first();
 
-            if (! $locked || ! $locked->isAvailableForCourier()) {
-                throw new RuntimeException('الطلب مش متاح للتوصيل، أو أخذه مندوب ثاني.');
+            if (! $locked || ! in_array($locked->status, ['preparing', 'delivering'], true)) {
+                throw new RuntimeException('تعذر تعيين المندوب على هذا الطلب.');
             }
 
             $locked->update([
@@ -241,20 +252,53 @@ class OrderService
             ]);
         });
 
-        $order->refresh();
+        $order->refresh()->loadMissing('restaurant');
+
+        if ($previousId && $previousId !== $courier->id) {
+            $previous = User::query()->find($previousId);
+            if ($previous) {
+                $this->notifications->notify(
+                    $previous,
+                    'أُلغي تعيين طلب',
+                    "طلب #{$order->id} نُقل لمندوب آخر.",
+                    route('courier.dashboard')
+                );
+            }
+        }
+
+        $this->notifications->notify(
+            $courier,
+            'تعيين توصيل',
+            "الإدارة أرسلت لك طلب #{$order->id} من {$order->restaurant?->name}. افتح لوحتك وتابع التوصيل.",
+            route('courier.orders.show', $order)
+        );
 
         $this->notifications->notify(
             $order->user,
             'المندوب في الطريق',
-            "مندوب التوصيل أخذ طلبك رقم #{$order->id}.",
+            "مندوب التوصيل {$courier->name} معيّن على طلبك رقم #{$order->id}.",
             route('account.orders.show', $order)
         );
+    }
 
-        $this->notifyRestaurantOwner(
-            $order,
-            'مندوب أخذ الطلب',
-            "{$courier->name} أخذ توصيل طلب #{$order->id}."
-        );
+    public function unassignCourier(Order $order): void
+    {
+        if (! $order->courier_id || $order->status === 'delivered') {
+            throw new RuntimeException('لا يوجد مندوب لإلغاء تعيينه على هذا الطلب.');
+        }
+
+        $previous = $order->courier;
+
+        $order->update(['courier_id' => null]);
+
+        if ($previous) {
+            $this->notifications->notify(
+                $previous,
+                'أُلغي تعيين طلب',
+                "طلب #{$order->id} عاد لقائمة الانتظار.",
+                route('courier.dashboard')
+            );
+        }
     }
 
     public function completeCourierDelivery(Order $order, User $courier): void
@@ -264,19 +308,5 @@ class OrderService
         }
 
         $this->changeStatus($order, 'delivered');
-    }
-
-    private function notifyCouriers(Order $order): void
-    {
-        $order->loadMissing('restaurant');
-
-        User::query()->where('role', 'courier')->get()->each(function (User $courier) use ($order) {
-            $this->notifications->notify(
-                $courier,
-                'طلب جاهز للتوصيل',
-                "طلب #{$order->id} من {$order->restaurant?->name} جاهز تأخذه.",
-                route('courier.orders.show', $order)
-            );
-        });
     }
 }

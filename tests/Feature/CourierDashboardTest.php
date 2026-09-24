@@ -19,10 +19,11 @@ class CourierDashboardTest extends TestCase
             ->assertForbidden();
     }
 
-    public function test_courier_sees_ready_orders_and_can_claim_then_deliver(): void
+    public function test_courier_does_not_see_unassigned_orders_until_admin_sends_them(): void
     {
         $courier = User::factory()->courier()->create();
         $other = User::factory()->courier()->create();
+        $admin = User::factory()->admin()->create();
         $customer = User::factory()->create(['name' => 'ليلى الغزي']);
         $restaurant = Restaurant::query()->create([
             'name' => 'مطعم الكرم',
@@ -52,27 +53,30 @@ class CourierDashboardTest extends TestCase
         $this->actingAs($courier)
             ->get(route('courier.dashboard'))
             ->assertOk()
-            ->assertSee('طلبات جاهزة', false)
+            ->assertSee('لا طلبات مرسلة لك الآن', false)
+            ->assertDontSee('مطعم الكرم', false);
+
+        $this->actingAs($other)
+            ->get(route('courier.dashboard'))
+            ->assertDontSee('مطعم الكرم', false);
+
+        $this->actingAs($admin)
+            ->post(route('admin.delivery.assign', $order), ['courier_id' => $courier->id])
+            ->assertRedirect();
+
+        $this->actingAs($courier)
+            ->get(route('courier.dashboard'))
+            ->assertOk()
             ->assertSee('مطعم الكرم', false)
             ->assertSee('تل الهوى عمارة النور', false);
 
-        $this->actingAs($courier)
-            ->post(route('courier.orders.claim', $order))
-            ->assertRedirect(route('courier.orders.show', $order));
-
-        $order->refresh();
-        $this->assertSame('delivering', $order->status);
-        $this->assertSame($courier->id, $order->courier_id);
+        $this->actingAs($other)
+            ->get(route('courier.dashboard'))
+            ->assertDontSee('مطعم الكرم', false);
 
         $this->actingAs($other)
-            ->post(route('courier.orders.claim', $order))
-            ->assertRedirect();
-        $this->assertSame($courier->id, $order->fresh()->courier_id);
-
-        $this->actingAs($courier)
-            ->get(route('courier.dashboard', ['tab' => 'mine']))
-            ->assertOk()
-            ->assertSee('مطعم الكرم', false);
+            ->get(route('courier.orders.show', $order))
+            ->assertNotFound();
 
         $this->actingAs($courier)
             ->post(route('courier.orders.complete', $order))
