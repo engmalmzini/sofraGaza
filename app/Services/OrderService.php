@@ -74,8 +74,6 @@ class OrderService
             route('admin.orders.show', $order)
         );
 
-        $this->notifyRestaurantOwner($order, 'طلب جديد على مطعمك', "طلب #{$order->id} من {$user->name} بقيمة {$order->total} ₪.");
-
         return $order;
     }
 
@@ -125,26 +123,7 @@ class OrderService
             route('admin.orders.show', $order)
         );
 
-        $this->notifyRestaurantOwner($order, 'طلب استبدال نقاط', "{$user->name} استبدل {$order->points_spent} نقطة من مطعمك.");
-
         return $order;
-    }
-
-    private function notifyRestaurantOwner(Order $order, string $title, string $body): void
-    {
-        $order->loadMissing('restaurant.owner');
-        $owner = $order->restaurant?->owner;
-
-        if (! $owner) {
-            return;
-        }
-
-        $this->notifications->notify(
-            $owner,
-            $title,
-            $body,
-            route('partner.orders.show', $order)
-        );
     }
 
     public function changeStatus(Order $order, string $status, ?string $reason = null): void

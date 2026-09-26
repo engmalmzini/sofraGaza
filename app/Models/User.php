@@ -62,6 +62,17 @@ class User extends Authenticatable
         return $this->role === 'restaurant_owner';
     }
 
+    public function partnerPanelRoute(): string
+    {
+        $restaurant = $this->ownedRestaurant;
+
+        if ($restaurant && ! $restaurant->hasPaidAccess()) {
+            return route('partner.subscription.index');
+        }
+
+        return route('partner.dashboard');
+    }
+
     public function isCourier(): bool
     {
         return $this->role === 'courier';

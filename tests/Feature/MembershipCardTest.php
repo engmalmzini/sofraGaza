@@ -243,7 +243,7 @@ class MembershipCardTest extends TestCase
             'ends_at' => now()->addDays(29),
         ]);
 
-        Restaurant::query()->create([
+        $restaurant = Restaurant::query()->create([
             'owner_id' => $owner->id,
             'name' => 'مشاوي أبو العبد',
             'type' => 'restaurant',
@@ -252,6 +252,7 @@ class MembershipCardTest extends TestCase
             'is_active' => true,
             'verification_status' => Restaurant::VERIFICATION_APPROVED,
         ]);
+        $this->grantPaidListing($restaurant);
 
         $this->actingAs($owner)
             ->get(route('partner.cards.show', ['q' => $subscription->cardNumber()]))

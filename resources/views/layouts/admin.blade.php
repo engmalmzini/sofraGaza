@@ -18,7 +18,8 @@
     $pendingCourierCount = \App\Models\User::query()->where('role', 'courier')->where('courier_status', \App\Models\User::COURIER_PENDING)->count();
     $waitingDeliveryCount = \App\Models\Order::query()->whereNull('courier_id')->whereIn('status', ['preparing', 'delivering'])->count() + $pendingCourierCount;
     $pendingSubsCount = \App\Models\MembershipSubscription::query()->where('status', 'pending')->count();
-    $pendingRestaurantsCount = \App\Models\Restaurant::query()->pendingVerification()->count();
+    $pendingListingCount = \App\Models\RestaurantSubscription::query()->where('status', 'pending')->count();
+    $pendingRestaurantsCount = \App\Models\Restaurant::query()->pendingVerification()->count() + $pendingListingCount;
     $adminSearch = [
         'scope' => 'global',
         'action' => route('admin.dashboard'),
@@ -48,6 +49,14 @@
             'scope' => 'restaurants',
             'action' => route('admin.restaurants.index'),
             'placeholder' => 'ابحث عن مطعم أو كوفي',
+            'restaurant_id' => null,
+            'filter' => true,
+        ];
+    } elseif (request()->routeIs('admin.listings.*')) {
+        $adminSearch = [
+            'scope' => 'listings',
+            'action' => route('admin.listings.index'),
+            'placeholder' => 'ابحث في اشتراكات المطاعم',
             'restaurant_id' => null,
             'filter' => true,
         ];
@@ -106,6 +115,7 @@
                 ['route' => 'admin.orders.index', 'icon' => 'receipt_long', 'label' => 'الطلبات', 'match' => 'admin.orders.*', 'badge' => $pendingOrdersCount],
                 ['route' => 'admin.delivery.index', 'icon' => 'moped', 'label' => 'التوصيل والمندوبون', 'match' => 'admin.delivery.*', 'badge' => $waitingDeliveryCount],
                 ['route' => 'admin.restaurants.index', 'icon' => 'storefront', 'label' => 'المطاعم والكوفيهات', 'match' => 'admin.restaurants.*', 'badge' => $pendingRestaurantsCount],
+                ['route' => 'admin.listings.index', 'icon' => 'receipt_long', 'label' => 'اشتراكات المطاعم', 'match' => 'admin.listings.*', 'badge' => $pendingListingCount],
             ],
         ],
         [

@@ -40,7 +40,7 @@
                 <a class="flex items-center gap-2 text-on-surface" href="{{ route('account.addresses') }}"><span class="material-symbols-outlined text-primary text-[18px]">location_on</span> العناوين</a>
                 <a class="flex items-center gap-2 text-on-surface" href="{{ $user->notificationsInboxRoute() }}"><span class="material-symbols-outlined text-primary text-[18px]">notifications</span> الإشعارات ({{ $unreadNotifications }})</a>
                 @if($user->isRestaurantOwner())
-                    <a class="flex items-center gap-2 text-on-surface" href="{{ route('partner.dashboard') }}"><span class="material-symbols-outlined text-primary text-[18px]">storefront</span> لوحة المطعم</a>
+                    <a class="flex items-center gap-2 text-on-surface" href="{{ auth()->user()->partnerPanelRoute() }}"><span class="material-symbols-outlined text-primary text-[18px]">storefront</span> لوحة المطعم</a>
                 @endif
                 <a class="flex items-center gap-2 text-on-surface" href="{{ route('redeem.create') }}"><span class="material-symbols-outlined text-primary text-[18px]">redeem</span> استبدال النقاط</a>
             </div>

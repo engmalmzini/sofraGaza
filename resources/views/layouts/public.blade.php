@@ -82,7 +82,7 @@
                                 <span class="material-symbols-outlined">admin_panel_settings</span>
                             </a>
                         @elseif(auth()->user()->isRestaurantOwner())
-                            <a href="{{ route('partner.dashboard') }}" class="header-icon-btn header-icon-btn--desktop" title="لوحة المطعم">
+                            <a href="{{ auth()->user()->partnerPanelRoute() }}" class="header-icon-btn header-icon-btn--desktop" title="لوحة المطعم">
                                 <span class="material-symbols-outlined">storefront</span>
                             </a>
                         @endif

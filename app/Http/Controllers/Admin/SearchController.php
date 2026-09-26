@@ -32,6 +32,7 @@ class SearchController extends Controller
             'users' => $this->users($q, 8),
             'memberships' => $this->memberships($q, 8),
             'subscriptions' => $this->subscriptions($q, 8),
+            'listings' => $this->restaurants($q, 8),
             'settings' => $this->settings($q, 8),
             'couriers' => $this->couriers($q, 8)->concat($this->orders($q, 4)),
             default => $this->global($q),

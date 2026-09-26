@@ -12,6 +12,8 @@ use Illuminate\View\View;
 
 class RestaurantController extends Controller
 {
+    public function __construct(private NotificationService $notifications) {}
+
     public function edit(): View
     {
         return view('partner.restaurant.edit', [
@@ -30,16 +32,18 @@ class RestaurantController extends Controller
             $data['image_path'] = $request->file('image')->store('restaurants', 'public');
         }
 
-        if ($restaurant->isApproved()) {
-            $data['is_active'] = $request->boolean('is_active');
-        }
-
         $restaurant->update($data);
 
-        return back()->with('success', 'تم حفظ تفاصيل المطعم.');
+        $this->notifications->notifyAdmins(
+            'تعديل بيانات مطعم يحتاج مراجعة',
+            auth()->user()->name." عدّل بيانات {$restaurant->name}. راجع الصفحة وأيّد التعديل.",
+            route('admin.restaurants.show', $restaurant)
+        );
+
+        return back()->with('success', 'تم حفظ التفاصيل. وصل إشعار للإدارة لمراجعة التعديل.');
     }
 
-    public function resubmit(NotificationService $notifications): RedirectResponse
+    public function resubmit(): RedirectResponse
     {
         $restaurant = $this->restaurant();
 
@@ -51,7 +55,7 @@ class RestaurantController extends Controller
             'is_active' => false,
         ]);
 
-        $notifications->notifyAdmins(
+        $this->notifications->notifyAdmins(
             'إعادة إرسال مطعم للمراجعة',
             "{$restaurant->name} أعاد إرسال بياناته بعد الرفض وهو بانتظار التحقق.",
             route('admin.restaurants.show', $restaurant)

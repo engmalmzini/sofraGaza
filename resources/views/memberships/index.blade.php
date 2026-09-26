@@ -20,7 +20,7 @@
     @endif
 
     @if($current)
-        <section class="mb-6 grid gap-4 lg:grid-cols-[1.15fr_0.85fr]">
+        <section class="mb-6 grid items-start gap-4 lg:grid-cols-[1.15fr_0.85fr]">
             @include('partials.membership-card', ['subscription' => $current, 'holder' => auth()->user()])
             <article class="rounded-2xl bg-surface-container-lowest border border-slate-100 p-5 shadow-xs">
                 <h2 class="text-lg font-bold text-on-surface">تفاصيل اشتراكك</h2>

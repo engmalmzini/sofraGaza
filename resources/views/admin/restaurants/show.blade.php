@@ -42,7 +42,13 @@
             <h2>حالة التحقق</h2>
             <div class="mt-2">@include('admin.partials.pill', ['status' => $restaurant->verification_status, 'label' => $restaurant->verificationLabel()])</div>
             <p class="mt-2 text-sm text-on-surface-variant">
-                {{ $restaurant->isVisible() ? 'ظاهر حالياً للزبائن.' : 'غير منشور على الصفحة الرئيسية.' }}
+                @if($restaurant->panel_suspended)
+                    اللوحة موقوفة — المطعم مخفي عن الموقع والبيانات محفوظة.
+                @elseif($restaurant->isVisible())
+                    ظاهر حالياً للزبائن.
+                @else
+                    غير منشور على الصفحة الرئيسية.
+                @endif
             </p>
             @if($restaurant->verified_at)
                 <p class="mt-1 text-xs text-on-surface-variant">آخر تحقق: {{ $restaurant->verified_at->format('Y-m-d') }}{{ $restaurant->verifier ? ' بواسطة '.$restaurant->verifier->name : '' }}</p>
@@ -55,7 +61,7 @@
                     @csrf
                     <label class="block text-sm font-bold">مدة العرض بعد الموافقة (يوم)</label>
                     <input type="number" name="listing_days" min="7" max="365" value="{{ \App\Models\Setting::value('restaurant_listing_days', 90) }}">
-                    <button class="admin-btn admin-btn--secondary w-full">الموافقة ونشر المطعم</button>
+                    <button class="admin-btn admin-btn--secondary w-full">الموافقة على البيانات</button>
                 </form>
                 <form method="POST" action="{{ route('admin.restaurants.reject', $restaurant) }}" class="mt-3 space-y-2">
                     @csrf
@@ -63,6 +69,38 @@
                     <button class="admin-btn admin-btn--danger w-full">رفض الطلب</button>
                 </form>
             @endif
+            @if($restaurant->panel_suspended)
+                <form method="POST" action="{{ route('admin.restaurants.unsuspend', $restaurant) }}" class="mt-4" data-once-submit>
+                    @csrf
+                    <button class="admin-btn admin-btn--secondary w-full">إعادة فتح اللوحة</button>
+                </form>
+            @else
+                <form method="POST" action="{{ route('admin.restaurants.suspend', $restaurant) }}" class="mt-4" data-once-submit>
+                    @csrf
+                    <button class="admin-btn admin-btn--danger w-full">إيقاف اللوحة وإخفاء المطعم</button>
+                </form>
+            @endif
+        </section>
+        <section class="admin-card">
+            <h2>اشتراك الظهور</h2>
+            @php $activeListing = $restaurant->activeListing(); @endphp
+            @if($activeListing)
+                <p class="mt-2 text-sm">{{ $activeListing->plan->name }} · باقي {{ $activeListing->daysRemaining() }} يوم</p>
+                <p class="text-xs text-on-surface-variant">حتى {{ $activeListing->ends_at->format('Y-m-d') }}</p>
+            @else
+                <p class="mt-2 text-sm text-on-surface-variant">لا يوجد اشتراك ساري.</p>
+            @endif
+            <div class="mt-3 space-y-2 text-sm">
+                @foreach($restaurant->listingSubscriptions as $listing)
+                    <div class="admin-row">
+                        <span>
+                            {{ $listing->plan->name }} · {{ number_format($listing->amount, 0) }} ₪
+                            <a class="text-primary font-bold" href="{{ route('admin.listings.show', $listing) }}">مراجعة</a>
+                        </span>
+                        @include('admin.partials.pill', ['status' => $listing->status, 'label' => $listing->statusLabel()])
+                    </div>
+                @endforeach
+            </div>
         </section>
     </div>
 </div>

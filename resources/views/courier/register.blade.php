@@ -5,7 +5,7 @@
 @section('card_class', 'auth-card--wide auth-card--wizard')
 
 @section('tabs')
-    <a href="{{ route('register') }}" class="auth-tab">إنشاء حساب</a>
+    <a href="{{ route('register') }}" class="auth-tab">زبون</a>
     <a href="{{ route('partner.register') }}" class="auth-tab">مطعم</a>
     <a href="{{ route('courier.register') }}" class="auth-tab is-active">توصيل</a>
 @endsection
@@ -38,7 +38,7 @@
 @endphp
 
 <div class="partner-wizard" data-partner-wizard data-start-step="{{ $startStep }}">
-    <ol class="partner-wizard__nav" aria-label="خطوات تسجيل المندوب">
+    <ol class="partner-wizard__nav" style="--wizard-steps: {{ count($steps) }}" aria-label="خطوات تسجيل المندوب">
         @foreach($steps as $item)
             <li>
                 <button

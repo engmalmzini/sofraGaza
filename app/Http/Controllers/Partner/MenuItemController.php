@@ -3,12 +3,15 @@
 namespace App\Http\Controllers\Partner;
 
 use App\Models\MenuItem;
+use App\Services\NotificationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class MenuItemController extends Controller
 {
+    public function __construct(private NotificationService $notifications) {}
+
     public function index(Request $request): View
     {
         $restaurant = $this->restaurant();
@@ -53,10 +56,12 @@ class MenuItemController extends Controller
             $data['image_path'] = $request->file('image')->store('menu', 'public');
         }
 
-        $restaurant->menuItems()->create($data);
+        $item = $restaurant->menuItems()->create($data);
+
+        $this->notifyMenuChange($restaurant->name, "أُضيف الصنف «{$item->name}» إلى المنيو.");
 
         return redirect()->route('partner.menu-items.index')
-            ->with('success', 'تمت إضافة الصنف إلى المنيو.');
+            ->with('success', 'تمت إضافة الصنف. وصل إشعار للإدارة لمراجعة التعديل.');
     }
 
     public function edit(MenuItem $menuItem): View
@@ -81,16 +86,21 @@ class MenuItemController extends Controller
 
         $menuItem->update($data);
 
+        $this->notifyMenuChange($this->restaurant()->name, "عُدّل الصنف «{$menuItem->name}» في المنيو.");
+
         return redirect()->route('partner.menu-items.index')
-            ->with('success', 'تم تحديث الصنف.');
+            ->with('success', 'تم تحديث الصنف. وصل إشعار للإدارة لمراجعة التعديل.');
     }
 
     public function destroy(MenuItem $menuItem): RedirectResponse
     {
         $this->authorizeItem($menuItem);
+        $name = $menuItem->name;
         $menuItem->delete();
 
-        return back()->with('success', 'تم حذف الصنف.');
+        $this->notifyMenuChange($this->restaurant()->name, "حُذف الصنف «{$name}» من المنيو.");
+
+        return back()->with('success', 'تم حذف الصنف. وصل إشعار للإدارة.');
     }
 
     private function authorizeItem(MenuItem $menuItem): void
@@ -118,5 +128,14 @@ class MenuItemController extends Controller
         unset($data['image'], $data['category_custom']);
 
         return $data;
+    }
+
+    private function notifyMenuChange(string $restaurantName, string $body): void
+    {
+        $this->notifications->notifyAdmins(
+            'تعديل منيو يحتاج مراجعة',
+            "{$restaurantName}: {$body}",
+            route('admin.restaurants.show', $this->restaurant())
+        );
     }
 }

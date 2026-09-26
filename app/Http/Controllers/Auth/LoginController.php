@@ -43,7 +43,7 @@ class LoginController extends Controller
         }
 
         if ($user->isRestaurantOwner()) {
-            return redirect()->intended(route('partner.dashboard'));
+            return redirect()->intended($user->partnerPanelRoute());
         }
 
         if ($user->isCourier()) {

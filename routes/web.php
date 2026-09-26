@@ -39,7 +39,7 @@ Route::middleware('guest')->group(function () {
     Route::post('/couriers/register', [Courier\RegisterController::class, 'store']);
 });
 
-Route::post('/logout', [LoginController::class, 'destroy'])->middleware('auth')->name('logout');
+Route::match(['get', 'post'], '/logout', [LoginController::class, 'destroy'])->name('logout');
 
 Route::middleware('auth')->group(function () {
     Route::get('/checkout', [CheckoutController::class, 'create'])->name('checkout.create');
@@ -71,6 +71,13 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::get('restaurants/{restaurant}', [Admin\RestaurantController::class, 'show'])->name('restaurants.show');
     Route::post('restaurants/{restaurant}/approve', [Admin\RestaurantController::class, 'approve'])->name('restaurants.approve');
     Route::post('restaurants/{restaurant}/reject', [Admin\RestaurantController::class, 'reject'])->name('restaurants.reject');
+    Route::post('restaurants/{restaurant}/suspend', [Admin\RestaurantController::class, 'suspend'])->name('restaurants.suspend');
+    Route::post('restaurants/{restaurant}/unsuspend', [Admin\RestaurantController::class, 'unsuspend'])->name('restaurants.unsuspend');
+    Route::get('listings', [Admin\ListingController::class, 'index'])->name('listings.index');
+    Route::get('listings/{listing}', [Admin\ListingController::class, 'show'])->name('listings.show');
+    Route::get('listings/{listing}/receipt', [Admin\ListingController::class, 'receipt'])->name('listings.receipt');
+    Route::post('listings/{listing}/approve', [Admin\ListingController::class, 'approve'])->name('listings.approve');
+    Route::post('listings/{listing}/reject', [Admin\ListingController::class, 'reject'])->name('listings.reject');
     Route::resource('restaurants.menu-items', Admin\MenuItemController::class)->except(['show']);
     Route::get('orders', [Admin\OrderController::class, 'index'])->name('orders.index');
     Route::get('orders/{order}', [Admin\OrderController::class, 'show'])->name('orders.show');
@@ -102,16 +109,14 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::post('notifications/read', [Admin\NotificationController::class, 'markRead'])->name('notifications.read');
 });
 
-Route::prefix('partner')->name('partner.')->middleware(['auth', 'partner'])->group(function () {
+Route::prefix('partner')->name('partner.')->middleware(['auth', 'partner', 'partner.listing'])->group(function () {
     Route::get('/', [Partner\DashboardController::class, 'index'])->name('dashboard');
+    Route::get('subscription', [Partner\SubscriptionController::class, 'index'])->name('subscription.index');
+    Route::post('subscription/{plan}', [Partner\SubscriptionController::class, 'store'])->name('subscription.store');
     Route::get('restaurant', [Partner\RestaurantController::class, 'edit'])->name('restaurant.edit');
     Route::put('restaurant', [Partner\RestaurantController::class, 'update'])->name('restaurant.update');
     Route::post('restaurant/resubmit', [Partner\RestaurantController::class, 'resubmit'])->name('restaurant.resubmit');
     Route::resource('menu-items', Partner\MenuItemController::class)->except(['show']);
-    Route::get('orders', [Partner\OrderController::class, 'index'])->name('orders.index');
-    Route::get('orders/{order}', [Partner\OrderController::class, 'show'])->name('orders.show');
-    Route::get('orders/{order}/receipt', [Partner\OrderController::class, 'receipt'])->name('orders.receipt');
-    Route::patch('orders/{order}', [Partner\OrderController::class, 'update'])->name('orders.update');
     Route::get('card', [Partner\CardController::class, 'show'])->name('cards.show');
     Route::get('notifications', [Partner\NotificationController::class, 'index'])->name('notifications.index');
     Route::get('notifications/{notification}', [Partner\NotificationController::class, 'open'])->name('notifications.open');

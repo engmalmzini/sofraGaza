@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\Membership;
 use App\Models\MenuItem;
 use App\Models\Restaurant;
+use App\Models\RestaurantPlan;
 use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Database\Seeder;
@@ -80,6 +81,8 @@ class DatabaseSeeder extends Seeder
                 'sort_order' => 2,
             ]
         );
+
+        RestaurantPlan::seedDefaults();
 
         $settings = [
             ['key' => 'delivery_fee', 'value' => '10', 'label' => 'رسوم التوصيل (شيكل)'],

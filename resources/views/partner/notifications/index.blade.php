@@ -24,11 +24,11 @@
 </div>
 
 <section class="admin-card mt-4">
-    <p class="sg-inbox__panel-lead">حالة التحقق، الطلبات الجديدة، وأي رسالة من إدارة المنصة.</p>
+    <p class="sg-inbox__panel-lead">حالة التحقق، وملاحظات الإدارة على صفحتك ومنيوك.</p>
     @include('partials.notification-inbox', [
         'tone' => 'partner',
         'showHero' => false,
-        'empty' => 'لا إشعارات لمطعمك الآن. سنخبرك هنا عند مراجعة طلبك أو وصول طلب جديد.',
+        'empty' => 'لا إشعارات لمطعمك الآن. سنخبرك هنا عند مراجعة صفحتك أو المنيو.',
         'notifications' => $notifications,
         'unreadCount' => $unreadCount,
         'openRoute' => $openRoute,

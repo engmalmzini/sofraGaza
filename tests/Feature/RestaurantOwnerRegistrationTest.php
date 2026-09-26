@@ -4,21 +4,26 @@ namespace Tests\Feature;
 
 use App\Models\MenuItem;
 use App\Models\Restaurant;
+use App\Models\RestaurantPlan;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class RestaurantOwnerRegistrationTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_restaurant_owner_can_register_and_reach_dashboard_while_pending(): void
+    public function test_restaurant_owner_must_subscribe_before_menu_and_listing(): void
     {
         $admin = User::factory()->admin()->create();
+        RestaurantPlan::seedDefaults();
+        Storage::fake('public');
 
         $response = $this->post(route('partner.register'), $this->payload());
 
-        $response->assertRedirect(route('partner.dashboard'));
+        $response->assertRedirect(route('partner.subscription.index'));
         $this->assertAuthenticated();
 
         $owner = User::query()->where('phone', '0598887777')->first();
@@ -29,14 +34,65 @@ class RestaurantOwnerRegistrationTest extends TestCase
         $this->assertTrue($restaurant->isPending());
         $this->assertFalse($restaurant->is_active);
         $this->assertFalse($restaurant->isVisible());
+        $this->assertFalse($restaurant->hasPaidAccess());
 
         $this->get(route('home'))->assertDontSee('مطعم الكرم الغزي', false);
         $this->get(route('restaurants.show', $restaurant))->assertNotFound();
 
         $this->actingAs($owner)
             ->get(route('partner.dashboard'))
+            ->assertRedirect(route('partner.subscription.index'));
+
+        $this->actingAs($owner)
+            ->get(route('partner.subscription.index'))
             ->assertOk()
-            ->assertSee('جاري التحقق', false);
+            ->assertSee('لازم تشترك', false)
+            ->assertSee('باقة شهر', false)
+            ->assertSee('باقة 6 أشهر', false)
+            ->assertSee('باقة سنة', false);
+
+        $this->actingAs($owner)->post(route('partner.menu-items.store'), [
+            'name' => 'مسخن دجاج',
+            'category' => 'وجبات',
+            'description' => 'مسخن على أصوله',
+            'price' => 22,
+            'is_available' => 1,
+        ])->assertRedirect(route('partner.subscription.index'));
+
+        $this->assertDatabaseMissing('menu_items', [
+            'restaurant_id' => $restaurant->id,
+            'name' => 'مسخن دجاج',
+        ]);
+
+        $plan = RestaurantPlan::query()->where('duration_days', 30)->first();
+
+        $this->actingAs($owner)
+            ->post(route('partner.subscription.store', $plan), [
+                'receipt' => UploadedFile::fake()->image('receipt.jpg'),
+            ])
+            ->assertRedirect(route('partner.subscription.index'));
+
+        $this->actingAs($admin)
+            ->post(route('admin.restaurants.approve', $restaurant), ['listing_days' => 90])
+            ->assertRedirect(route('admin.restaurants.index'));
+
+        $restaurant->refresh();
+        $this->assertTrue($restaurant->isApproved());
+        $this->assertFalse($restaurant->isVisible());
+
+        $listing = $restaurant->pendingListing();
+        $this->actingAs($admin)
+            ->post(route('admin.listings.approve', $listing))
+            ->assertRedirect();
+
+        $restaurant->refresh();
+        $this->assertTrue($restaurant->hasPaidAccess());
+        $this->assertTrue($restaurant->isVisible());
+
+        $this->actingAs($owner)
+            ->get(route('partner.dashboard'))
+            ->assertOk()
+            ->assertSee('باقة شهر', false);
 
         $this->actingAs($owner)->post(route('partner.menu-items.store'), [
             'name' => 'مسخن دجاج',
@@ -46,23 +102,8 @@ class RestaurantOwnerRegistrationTest extends TestCase
             'is_available' => 1,
         ])->assertRedirect(route('partner.menu-items.index'));
 
-        $this->assertDatabaseHas('menu_items', [
-            'restaurant_id' => $restaurant->id,
-            'name' => 'مسخن دجاج',
-        ]);
-
-        $this->actingAs($admin)
-            ->post(route('admin.restaurants.approve', $restaurant), ['listing_days' => 90])
-            ->assertRedirect(route('admin.restaurants.index'));
-
-        $restaurant->refresh();
-        $this->assertTrue($restaurant->isApproved());
-        $this->assertTrue($restaurant->is_active);
-        $this->assertTrue($restaurant->isVisible());
-
         $this->get(route('home'))->assertSee('مطعم الكرم الغزي', false);
         $this->get(route('restaurants.show', $restaurant))->assertOk();
-        $this->assertDatabaseHas('menu_items', ['name' => 'مسخن دجاج']);
         $this->assertTrue(MenuItem::query()->where('name', 'مسخن دجاج')->exists());
     }
 
@@ -103,7 +144,7 @@ class RestaurantOwnerRegistrationTest extends TestCase
         unset($retry['password'], $retry['password_confirmation']);
 
         $this->post(route('partner.register'), $retry)
-            ->assertRedirect(route('partner.dashboard'));
+            ->assertRedirect(route('partner.subscription.index'));
 
         $this->assertAuthenticated();
         $this->assertDatabaseHas('users', ['phone' => '0598887777']);

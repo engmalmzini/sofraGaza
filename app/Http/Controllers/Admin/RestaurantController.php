@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Restaurant;
 use App\Models\Setting;
 use App\Services\NotificationService;
+use App\Services\RestaurantListingService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -32,8 +33,9 @@ class RestaurantController extends Controller
 
         $restaurants = $query->paginate(15)->withQueryString();
         $pendingCount = Restaurant::query()->pendingVerification()->count();
+        $pendingListingCount = \App\Models\RestaurantSubscription::query()->where('status', 'pending')->count();
 
-        return view('admin.restaurants.index', compact('restaurants', 'pendingCount'));
+        return view('admin.restaurants.index', compact('restaurants', 'pendingCount', 'pendingListingCount'));
     }
 
     public function create(): View
@@ -60,7 +62,7 @@ class RestaurantController extends Controller
 
     public function show(Restaurant $restaurant): View
     {
-        $restaurant->load(['owner', 'verifier'])->loadCount('menuItems');
+        $restaurant->load(['owner', 'verifier', 'listingSubscriptions.plan'])->loadCount('menuItems');
 
         return view('admin.restaurants.show', compact('restaurant'));
     }
@@ -90,12 +92,18 @@ class RestaurantController extends Controller
         $days = (int) ($request->integer('listing_days') ?: Setting::value('restaurant_listing_days', 90));
         $days = max(7, min(365, $days));
 
+        $hasListing = $restaurant->activeListing() && ! $restaurant->panel_suspended;
+
         $restaurant->update([
             'verification_status' => Restaurant::VERIFICATION_APPROVED,
             'rejection_reason' => null,
-            'is_active' => true,
-            'starts_at' => now()->toDateString(),
-            'expires_at' => now()->addDays($days)->toDateString(),
+            'is_active' => $hasListing,
+            'starts_at' => $hasListing
+                ? $restaurant->activeListing()->starts_at?->toDateString()
+                : now()->toDateString(),
+            'expires_at' => $hasListing
+                ? $restaurant->activeListing()->ends_at?->toDateString()
+                : now()->addDays($days)->toDateString(),
             'verified_at' => now(),
             'verified_by' => $request->user()->id,
         ]);
@@ -104,13 +112,17 @@ class RestaurantController extends Controller
             $notifications->notify(
                 $restaurant->owner,
                 'تم قبول مطعمك',
-                "تمت الموافقة على {$restaurant->name}. أصبح مطعمك ظاهراً للزبائن في الصفحة الرئيسية.",
-                route('partner.dashboard')
+                $hasListing
+                    ? "تمت الموافقة على {$restaurant->name}. أصبح مطعمك ظاهراً للزبائن في الصفحة الرئيسية."
+                    : "تمت مراجعة بيانات {$restaurant->name}. لازم تشترك وتأكيد الحوالة حتى تظهر الصفحة وتُفتح اللوحة.",
+                $hasListing ? route('partner.dashboard') : route('partner.subscription.index')
             );
         }
 
         return redirect()->route('admin.restaurants.index')
-            ->with('success', "تمت الموافقة على {$restaurant->name} ونُشر على المنصة.");
+            ->with('success', $hasListing
+                ? "تمت الموافقة على {$restaurant->name} ونُشر على المنصة."
+                : "تمت مراجعة {$restaurant->name}. لن يُنشر قبل تأكيد اشتراك الظهور.");
     }
 
     public function reject(Request $request, Restaurant $restaurant, NotificationService $notifications): RedirectResponse
@@ -141,6 +153,20 @@ class RestaurantController extends Controller
 
         return redirect()->route('admin.restaurants.index')
             ->with('success', 'تم رفض الطلب مع إرسال السبب لصاحب المطعم.');
+    }
+
+    public function suspend(Restaurant $restaurant, RestaurantListingService $listings): RedirectResponse
+    {
+        return back()->with('success', $listings->suspend($restaurant));
+    }
+
+    public function unsuspend(Restaurant $restaurant, RestaurantListingService $listings): RedirectResponse
+    {
+        try {
+            return back()->with('success', $listings->unsuspend($restaurant));
+        } catch (\RuntimeException $e) {
+            return back()->with('error', $e->getMessage());
+        }
     }
 
     public function destroy(Restaurant $restaurant): RedirectResponse

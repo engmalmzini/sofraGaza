@@ -68,7 +68,7 @@
     </section>
 </article>
 
-@elseif($order->courier_id === auth()->id() && $order->status === 'delivering')
+@if($order->courier_id === auth()->id() && $order->status === 'delivering')
     <form method="POST" action="{{ route('courier.orders.complete', $order) }}" class="courier-sticky">
         @csrf
         <button class="courier-btn courier-btn--ok courier-btn--block">تم التسليم</button>

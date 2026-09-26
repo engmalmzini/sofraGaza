@@ -8,10 +8,7 @@ class DashboardController extends Controller
 {
     public function index(): View
     {
-        $restaurant = $this->restaurant()->loadCount(['menuItems', 'orders']);
-        $pendingOrders = $restaurant->orders()->where('status', 'pending_confirmation')->count();
-        $todayOrders = $restaurant->orders()->whereDate('created_at', today())->count();
-        $latestOrders = $restaurant->orders()->with('user')->latest()->take(6)->get();
+        $restaurant = $this->restaurant()->loadCount('menuItems');
         $checklist = $restaurant->setupChecklist();
         $readyCount = collect($checklist)->where('done', true)->count();
         $categoryStats = $restaurant->menuItems()
@@ -19,16 +16,15 @@ class DashboardController extends Controller
             ->groupBy('category')
             ->pluck('items_count', 'category');
         $menuByCategory = $restaurant->menuItems()->orderBy('name')->get()->groupBy('category');
+        $listing = $restaurant->activeListing();
 
         return view('partner.dashboard', [
             'restaurant' => $restaurant,
-            'pendingOrders' => $pendingOrders,
-            'todayOrders' => $todayOrders,
-            'latestOrders' => $latestOrders,
             'checklist' => $checklist,
             'readyCount' => $readyCount,
             'categoryStats' => $categoryStats,
             'menuByCategory' => $menuByCategory,
+            'listing' => $listing,
         ]);
     }
 }

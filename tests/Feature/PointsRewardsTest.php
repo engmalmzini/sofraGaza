@@ -289,6 +289,7 @@ class PointsRewardsTest extends TestCase
             'is_active' => true,
             'verification_status' => Restaurant::VERIFICATION_APPROVED,
         ]);
+        $this->grantPaidListing($restaurant);
         $item = MenuItem::query()->create([
             'restaurant_id' => $restaurant->id,
             'name' => 'شاورما',

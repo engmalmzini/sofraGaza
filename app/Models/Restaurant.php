@@ -37,6 +37,7 @@ class Restaurant extends Model
         'starts_at',
         'expires_at',
         'is_active',
+        'panel_suspended',
         'is_featured',
         'points_per_amount',
         'points_redeem_per_amount',
@@ -53,6 +54,7 @@ class Restaurant extends Model
             'expires_at' => 'date',
             'verified_at' => 'datetime',
             'is_active' => 'boolean',
+            'panel_suspended' => 'boolean',
             'is_featured' => 'boolean',
             'points_per_amount' => 'decimal:2',
             'points_redeem_per_amount' => 'decimal:2',
@@ -79,11 +81,53 @@ class Restaurant extends Model
         return $this->hasMany(Order::class);
     }
 
+    public function listingSubscriptions(): HasMany
+    {
+        return $this->hasMany(RestaurantSubscription::class)->latest();
+    }
+
+    public function activeListing(): ?RestaurantSubscription
+    {
+        return $this->listingSubscriptions()
+            ->with('plan')
+            ->where('status', 'approved')
+            ->where('ends_at', '>=', now())
+            ->orderByDesc('ends_at')
+            ->first();
+    }
+
+    public function pendingListing(): ?RestaurantSubscription
+    {
+        return $this->listingSubscriptions()
+            ->with('plan')
+            ->where('status', 'pending')
+            ->first();
+    }
+
+    public function hasPaidAccess(): bool
+    {
+        return ! $this->panel_suspended && $this->activeListing() !== null;
+    }
+
+    public function panelLockMessage(): string
+    {
+        if ($this->panel_suspended) {
+            return 'تم إيقاف لوحة '.$this->venueNounYours().'. جدّد الاشتراك حتى نعيد تفعيلها. بياناتك محفوظة.';
+        }
+
+        if ($this->listingSubscriptions()->where('status', 'approved')->exists()) {
+            return 'انتهى اشتراكك. قم بتجديد الاشتراك لفتح اللوحة وإعادة ظهور '.$this->venueNounYours().' على الموقع.';
+        }
+
+        return 'لازم تشترك أولاً. اختر الباقة وأرفق إشعار الحوالة. بعد تأكيد الإدارة تقدر تضيف المنيو وتظهر صفحتك.';
+    }
+
     public function scopeVisible(Builder $query): Builder
     {
         $today = now()->toDateString();
 
         return $query->where('is_active', true)
+            ->where('panel_suspended', false)
             ->where('verification_status', self::VERIFICATION_APPROVED)
             ->whereDate('starts_at', '<=', $today)
             ->whereDate('expires_at', '>=', $today);
@@ -185,6 +229,7 @@ class Restaurant extends Model
 
         return $this->isApproved()
             && $this->is_active
+            && ! $this->panel_suspended
             && $this->starts_at
             && $this->expires_at
             && $this->starts_at->lte($today)
@@ -253,6 +298,11 @@ class Restaurant extends Model
                 'key' => 'menu',
                 'label' => 'إضافة أصناف للمنيو',
                 'done' => $menuCount > 0,
+            ],
+            [
+                'key' => 'listing',
+                'label' => 'اشتراك الظهور على المنصة',
+                'done' => $this->hasPaidAccess(),
             ],
         ];
     }

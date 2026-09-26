@@ -15,6 +15,9 @@
                 @endif
             </a>
         @endforeach
+        @if($pendingListingCount)
+            <a class="admin-chip" href="{{ route('admin.listings.index', ['status' => 'pending']) }}">حوالات بانتظار التأكيد ({{ $pendingListingCount }})</a>
+        @endif
     </div>
     <a href="{{ route('admin.restaurants.create') }}" class="admin-btn admin-btn--primary">إضافة مطعم / كافي</a>
 </div>
@@ -28,6 +31,7 @@
                 <th>ينتهي</th>
                 <th>التحقق</th>
                 <th>الظهور</th>
+                <th>اللوحة</th>
                 <th></th>
             </tr>
         </thead>
@@ -50,6 +54,7 @@
                     </td>
                     <td>@include('admin.partials.pill', ['status' => $restaurant->verification_status, 'label' => $restaurant->verificationLabel()])</td>
                     <td>@include('admin.partials.pill', ['status' => $restaurant->isVisible() ? 'approved' : 'cancelled', 'label' => $restaurant->isVisible() ? 'ظاهر' : 'غير منشور'])</td>
+                    <td>@include('admin.partials.pill', ['status' => $restaurant->panel_suspended ? 'rejected' : 'approved', 'label' => $restaurant->panel_suspended ? 'موقوفة' : 'مفتوحة'])</td>
                     <td class="space-x-2 space-x-reverse whitespace-nowrap">
                         <a class="font-bold text-primary" href="{{ route('admin.restaurants.show', $restaurant) }}">مراجعة</a>
                         <a href="{{ route('admin.restaurants.menu-items.index', $restaurant) }}">المنيو</a>
@@ -57,7 +62,7 @@
                     </td>
                 </tr>
             @empty
-                <tr><td colspan="7">لا توجد مطاعم مطابقة.</td></tr>
+                <tr><td colspan="8">لا توجد مطاعم مطابقة.</td></tr>
             @endforelse
         </tbody>
     </table>

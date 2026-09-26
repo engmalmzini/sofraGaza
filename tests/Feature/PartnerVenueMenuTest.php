@@ -93,6 +93,33 @@ class PartnerVenueMenuTest extends TestCase
             ->assertSee('مناقيش زعتر', false);
     }
 
+    public function test_owner_dashboard_has_no_orders_and_edits_notify_admin(): void
+    {
+        $admin = User::factory()->admin()->create();
+        [$owner, $restaurant] = $this->makeVenue('مشاوي أبو العبد', 'restaurant');
+
+        $this->actingAs($owner)
+            ->get(route('partner.dashboard'))
+            ->assertOk()
+            ->assertDontSee('آخر الطلبات', false)
+            ->assertDontSee('طلبات بانتظار التأكيد', false)
+            ->assertSee('عرض صفحة', false);
+
+        $this->actingAs($owner)
+            ->post(route('partner.menu-items.store'), [
+                'name' => 'كباب',
+                'category' => 'مشاوي',
+                'price' => 25,
+                'is_available' => 1,
+            ])
+            ->assertRedirect(route('partner.menu-items.index'));
+
+        $this->assertDatabaseHas('app_notifications', [
+            'user_id' => $admin->id,
+            'title' => 'تعديل منيو يحتاج مراجعة',
+        ]);
+    }
+
     /**
      * @return array{0: User, 1: Restaurant}
      */
@@ -108,6 +135,7 @@ class PartnerVenueMenuTest extends TestCase
             'is_active' => true,
             'verification_status' => Restaurant::VERIFICATION_APPROVED,
         ]);
+        $this->grantPaidListing($restaurant);
 
         return [$owner, $restaurant];
     }

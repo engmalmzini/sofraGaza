@@ -8,21 +8,20 @@
     $logoPath = public_path('images/logo.png');
     $logoSrc = file_exists($logoPath) ? asset('images/logo.png').'?v='.filemtime($logoPath) : config('brand.logo');
     $partnerRestaurant = auth()->user()->ownedRestaurant;
-    $pendingOrdersCount = $partnerRestaurant?->orders()->where('status', 'pending_confirmation')->count() ?? 0;
     $panelTitle = $partnerRestaurant?->panelTitle() ?? 'لوحة الشريك';
     $navGroups = [
         [
             'label' => $partnerRestaurant?->typeLabel() ?? 'المكان',
             'items' => [
                 ['route' => 'partner.dashboard', 'icon' => 'dashboard', 'label' => 'نظرة عامة', 'match' => 'partner.dashboard'],
+                ['route' => 'partner.subscription.index', 'icon' => 'workspace_premium', 'label' => 'الاشتراك', 'match' => 'partner.subscription.*'],
                 ['route' => 'partner.restaurant.edit', 'icon' => 'storefront', 'label' => 'بيانات '.($partnerRestaurant?->venueNoun() ?? 'المكان'), 'match' => 'partner.restaurant.*'],
                 ['route' => 'partner.menu-items.index', 'icon' => 'restaurant_menu', 'label' => 'المنيو والتصنيفات', 'match' => 'partner.menu-items.*'],
             ],
         ],
         [
-            'label' => 'التشغيل',
+            'label' => 'الحساب',
             'items' => [
-                ['route' => 'partner.orders.index', 'icon' => 'receipt_long', 'label' => 'الطلبات', 'match' => 'partner.orders.*', 'badge' => $pendingOrdersCount],
                 ['route' => 'partner.cards.show', 'icon' => 'credit_card', 'label' => 'تحقق البطاقة', 'match' => 'partner.cards.*'],
                 ['route' => 'partner.notifications.index', 'icon' => 'notifications', 'label' => 'الإشعارات', 'match' => 'partner.notifications.*', 'badge' => $unreadNotifications],
             ],

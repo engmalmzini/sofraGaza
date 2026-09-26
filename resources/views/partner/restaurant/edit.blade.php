@@ -70,13 +70,8 @@
             <input type="file" name="image" accept="image/*">
         </div>
     </div>
-    @if($restaurant->isApproved())
-        <label class="flex items-center gap-2">
-            <input type="checkbox" name="is_active" value="1" @checked(old('is_active', $restaurant->is_active))>
-            استقبال الطلبات وظهور {{ $restaurant->venueNoun() }} للزبائن
-        </label>
-    @endif
-    <button class="admin-btn admin-btn--primary w-fit">حفظ التفاصيل</button>
+    <p class="mt-4 text-sm text-on-surface-variant">أي تعديل على الصفحة العامة يُحفظ من هنا، ويصل إشعار للإدارة للمراجعة والتأكيد. ظهور الصفحة للزبائن يبقى بيد الإدارة.</p>
+    <button class="admin-btn admin-btn--primary w-fit mt-4">حفظ التفاصيل</button>
 </form>
 @if($restaurant->isRejected())
     <form method="POST" action="{{ route('partner.restaurant.resubmit') }}" class="mt-4">

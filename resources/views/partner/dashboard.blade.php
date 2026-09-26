@@ -20,8 +20,35 @@
     </div>
 @else
     <div class="admin-alert admin-alert--ok">
-        {{ $restaurant->venueNounYours() }} موثّق وظاهر للزبائن{{ $restaurant->is_active ? ' في الصفحة الرئيسية' : '، لكنه متوقف مؤقتاً عن استقبال الطلبات' }}.
+        {{ $restaurant->venueNounYours() }} موثّق{{ $restaurant->isVisible() ? ' وظاهر للزبائن في الصفحة الرئيسية' : '' }}. الطلبات تُدار من الإدارة فقط.
     </div>
+@endif
+
+@if($listing)
+    <section class="admin-card mb-4">
+        <div class="admin-toolbar">
+            <h2>اشتراكك</h2>
+            <a class="admin-btn admin-btn--ghost" href="{{ route('partner.subscription.index') }}">تفاصيل وتجديد</a>
+        </div>
+        @if($listing->isExpiringSoon())
+            <p class="mt-2 text-sm text-primary">تنبيه: باقي {{ $listing->daysRemaining() }} أيام على انتهاء الباقة.</p>
+        @endif
+        <div class="admin-metrics mt-3">
+            <article class="admin-metric admin-metric--accent">
+                <span>الباقة</span>
+                <strong class="!text-xl">{{ $listing->plan->name }}</strong>
+            </article>
+            <article class="admin-metric">
+                <span>المدة</span>
+                <strong class="!text-xl">{{ $listing->plan->durationLabel() }}</strong>
+            </article>
+            <article class="admin-metric">
+                <span>باقي</span>
+                <strong class="!text-xl">{{ $listing->daysRemaining() }} يوم</strong>
+            </article>
+        </div>
+        <p class="mt-2 text-sm text-on-surface-variant">من {{ $listing->starts_at?->format('Y-m-d') }} إلى {{ $listing->ends_at?->format('Y-m-d') }}</p>
+    </section>
 @endif
 
 <div class="admin-metrics">
@@ -34,12 +61,8 @@
         <strong>{{ $restaurant->menu_items_count }}</strong>
     </article>
     <article class="admin-metric">
-        <span>طلبات بانتظار التأكيد</span>
-        <strong>{{ $pendingOrders }}</strong>
-    </article>
-    <article class="admin-metric">
-        <span>طلبات اليوم</span>
-        <strong>{{ $todayOrders }}</strong>
+        <span>الظهور للزبائن</span>
+        <strong class="!text-xl">{{ $restaurant->isVisible() ? 'ظاهر' : 'قيد المراجعة' }}</strong>
     </article>
 </div>
 
@@ -123,41 +146,9 @@
         </div>
         @if($restaurant->isVisible())
             <a class="mt-4 inline-flex admin-btn admin-btn--ghost" href="{{ route('restaurants.show', $restaurant) }}">عرض صفحة {{ $restaurant->venueNoun() }}</a>
+        @else
+            <p class="mt-4 text-sm text-on-surface-variant">الصفحة العامة تظهر للزبائن بعد موافقة الإدارة.</p>
         @endif
     </section>
 </div>
-
-<section class="admin-card">
-    <div class="admin-toolbar">
-        <h2>آخر الطلبات</h2>
-        <a class="admin-btn admin-btn--ghost" href="{{ route('partner.orders.index') }}">عرض الكل</a>
-    </div>
-    <div class="admin-table-wrap">
-        <table>
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>الزبون</th>
-                    <th>المبلغ</th>
-                    <th>الحالة</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse($latestOrders as $order)
-                    <tr class="admin-click-row" data-href="{{ route('partner.orders.show', $order) }}" role="link" tabindex="0">
-                        <td><a class="font-bold text-primary" href="{{ route('partner.orders.show', $order) }}">{{ $order->id }}</a></td>
-                        <td>{{ $order->user->name }}</td>
-                        <td>{{ number_format($order->total, 2) }} <span class="ils">₪</span></td>
-                        <td>
-                            @include('admin.partials.pill', ['status' => $order->status, 'label' => $order->statusLabel()])
-                            <span class="material-symbols-outlined admin-click-row__open" aria-hidden="true">chevron_left</span>
-                        </td>
-                    </tr>
-                @empty
-                    <tr><td colspan="4">لا توجد طلبات بعد. ستظهر هنا بعد النشر واستقبال الزبائن.</td></tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
-</section>
 @endsection
