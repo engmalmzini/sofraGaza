@@ -135,6 +135,11 @@
         </div>
         @endif
     </div>
+
+    {{-- Customer Reviews --}}
+    <div class="px-margin mt-6 mb-24">
+        @include('partials.restaurant-reviews')
+    </div>
 </div>
 
     <div id="mobile-cart-pill" class="fixed bottom-20 inset-x-4 z-40 {{ $restaurantCart ? '' : 'hidden' }}">

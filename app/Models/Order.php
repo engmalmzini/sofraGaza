@@ -26,8 +26,12 @@ class Order extends Model
         'restaurant_id',
         'courier_id',
         'membership_id',
+        'coupon_id',
+        'coupon_code',
         'type',
+        'payment_method',
         'status',
+        'delivery_area',
         'address_details',
         'phone',
         'notes',
@@ -88,13 +92,48 @@ class Order extends Model
 
     public function canCancel(): bool
     {
-        return $this->status === 'pending_confirmation';
+        return in_array($this->status, ['pending_confirmation', 'confirmed'], true) && $this->courier_id === null;
     }
 
     public function isAvailableForCourier(): bool
     {
         return $this->courier_id === null
             && in_array($this->status, ['preparing', 'delivering'], true);
+    }
+
+    public function deliveryAreaLabel(): ?string
+    {
+        if (! $this->delivery_area) {
+            return null;
+        }
+
+        $area = collect(Setting::allAreas())->firstWhere('key', $this->delivery_area);
+
+        return $area['label'] ?? $this->delivery_area;
+    }
+
+    public function review(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(Review::class);
+    }
+
+    public function coupon(): BelongsTo
+    {
+        return $this->belongsTo(Coupon::class);
+    }
+
+    public function isPaidWithWallet(): bool
+    {
+        return $this->payment_method === 'wallet';
+    }
+
+    public function paymentMethodLabel(): string
+    {
+        return match ($this->payment_method) {
+            'wallet' => 'رصيد المحفظة',
+            'receipt' => 'حوالة بنكية / جوال باي',
+            default => $this->payment_method ?: 'حوالة',
+        };
     }
 
     public function nextStatuses(): array

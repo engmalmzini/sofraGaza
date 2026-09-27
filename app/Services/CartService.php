@@ -73,12 +73,57 @@ class CartService
         Session::forget('cart');
     }
 
+    public function appliedCoupon(): ?\App\Models\Coupon
+    {
+        $code = Session::get('cart.coupon_code');
+        if (! $code) {
+            return null;
+        }
+
+        $coupon = \App\Models\Coupon::active()->where('code', $code)->first();
+        if (! $coupon) {
+            Session::forget('cart.coupon_code');
+
+            return null;
+        }
+
+        return $coupon;
+    }
+
+    public function applyCoupon(string $code, float $subtotal): array
+    {
+        $normalized = strtoupper(trim($code));
+        $coupon = \App\Models\Coupon::where('code', $normalized)->first();
+
+        if (! $coupon) {
+            return ['success' => false, 'message' => 'كود الخصم غير موجود أو غير صحيح.'];
+        }
+
+        $validation = $coupon->validateForSubtotal($subtotal);
+        if (! $validation['valid']) {
+            return ['success' => false, 'message' => $validation['message']];
+        }
+
+        Session::put('cart.coupon_code', $coupon->code);
+
+        return [
+            'success' => true,
+            'message' => 'تم تفعيل كود الخصم بنجاح!',
+            'coupon' => $coupon,
+        ];
+    }
+
+    public function removeCoupon(): void
+    {
+        Session::forget('cart.coupon_code');
+    }
+
     public function count(): int
     {
         return (int) array_sum($this->items());
     }
 
-    public function quote(?User $user = null): array
+    public function quote(?User $user = null, ?string $areaKey = null, ?string $couponCode = null): array
     {
         $quantities = $this->items();
         $menuItems = MenuItem::query()
@@ -105,12 +150,33 @@ class CartService
         }
 
         $membership = $user?->activeMembership();
-        $discountPercent = (int) ($membership?->discount_percent ?? 0);
-        $discountAmount = round($subtotal * ($discountPercent / 100), 2);
-        $afterDiscount = $subtotal - $discountAmount;
+        $vipPercent = (int) ($membership?->discount_percent ?? 0);
+        $vipDiscount = round($subtotal * ($vipPercent / 100), 2);
+
+        // Check for applied coupon
+        $coupon = null;
+        $couponDiscount = 0.0;
+        $codeToUse = $couponCode ?: Session::get('cart.coupon_code');
+
+        if ($codeToUse) {
+            $candidate = \App\Models\Coupon::active()->where('code', strtoupper(trim($codeToUse)))->first();
+            if ($candidate) {
+                $validation = $candidate->validateForSubtotal($subtotal);
+                if ($validation['valid']) {
+                    $coupon = $candidate;
+                    $couponDiscount = $candidate->calculateDiscount($subtotal);
+                }
+            }
+        }
+
+        $discountAmount = min($subtotal, round($vipDiscount + $couponDiscount, 2));
+        $discountPercent = $subtotal > 0 ? (int) round(($discountAmount / $subtotal) * 100) : 0;
+        $afterDiscount = max(0.0, $subtotal - $discountAmount);
+
+        $resolvedAreaKey = $areaKey ?: (session('delivery_area')['key'] ?? null);
         $deliveryFee = $membership?->free_delivery
             ? 0.0
-            : (float) Setting::value('delivery_fee', 10);
+            : (float) Setting::deliveryFeeForArea($resolvedAreaKey);
         $total = $afterDiscount + $deliveryFee;
         $multiplier = (float) ($membership?->points_multiplier ?? 1);
         $restaurant = Restaurant::find($this->restaurantId());
@@ -123,17 +189,25 @@ class CartService
             $multiplier,
         );
 
+        $currentArea = collect(Setting::allAreas())->firstWhere('key', $resolvedAreaKey)
+            ?? ['key' => $resolvedAreaKey, 'label' => $resolvedAreaKey ?: 'المنطقة المحددة'];
+
         return [
             'lines' => $lines,
             'subtotal' => $subtotal,
             'discount_percent' => $discountPercent,
             'discount_amount' => $discountAmount,
             'delivery_fee' => $deliveryFee,
+            'delivery_area' => $currentArea,
             'total' => $total,
             'items_total' => $afterDiscount,
             'points' => $points,
             'membership' => $membership,
             'restaurant' => $restaurant,
+            'coupon' => $coupon,
+            'coupon_code' => $coupon?->code,
+            'coupon_discount' => $couponDiscount,
+            'vip_discount' => $vipDiscount,
         ];
     }
 
@@ -144,9 +218,9 @@ class CartService
         return (int) floor(($amount / $per) * $multiplier);
     }
 
-    public function payload(?User $user = null): array
+    public function payload(?User $user = null, ?string $areaKey = null): array
     {
-        $quote = $this->quote($user);
+        $quote = $this->quote($user, $areaKey);
 
         return [
             'count' => $this->count(),
@@ -154,6 +228,7 @@ class CartService
             'discount_percent' => $quote['discount_percent'],
             'discount_amount' => $quote['discount_amount'],
             'delivery_fee' => $quote['delivery_fee'],
+            'delivery_area' => $quote['delivery_area'],
             'total' => $quote['total'],
             'items_total' => $quote['items_total'],
             'points' => $quote['points'],

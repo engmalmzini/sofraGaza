@@ -152,6 +152,9 @@
                     </div>
                 </section>
                 @endif
+
+                {{-- Real Customer Reviews & Ratings --}}
+                @include('partials.restaurant-reviews')
             </div>
 
             <aside class="lg:col-span-4 w-full">

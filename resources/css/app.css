@@ -1581,6 +1581,11 @@ input, select, textarea {
     max-width: 52rem;
 }
 
+.admin-form--full {
+    max-width: 100%;
+    width: 100%;
+}
+
 .admin-metrics {
     display: grid;
     gap: 1.15rem;

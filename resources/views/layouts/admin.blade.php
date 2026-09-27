@@ -20,6 +20,7 @@
     $pendingSubsCount = \App\Models\MembershipSubscription::query()->where('status', 'pending')->count();
     $pendingListingCount = \App\Models\RestaurantSubscription::query()->where('status', 'pending')->count();
     $pendingRestaurantsCount = \App\Models\Restaurant::query()->pendingVerification()->count() + $pendingListingCount;
+    $pendingTopupsCount = \App\Models\WalletTopup::query()->where('status', 'pending')->count();
     $adminSearch = [
         'scope' => 'global',
         'action' => route('admin.dashboard'),
@@ -119,11 +120,14 @@
             ],
         ],
         [
-            'label' => 'الزبائن',
+            'label' => 'الزبائن والمحفظة',
             'items' => [
                 ['route' => 'admin.users.index', 'icon' => 'group', 'label' => 'الزبائن والنقاط', 'match' => 'admin.users.*'],
+                ['route' => 'admin.wallet-topups.index', 'icon' => 'account_balance_wallet', 'label' => 'شحن الرصيد', 'match' => 'admin.wallet-topups.*', 'badge' => $pendingTopupsCount],
                 ['route' => 'admin.memberships.index', 'icon' => 'workspace_premium', 'label' => 'العضويات', 'match' => 'admin.memberships.*'],
                 ['route' => 'admin.subscriptions.index', 'icon' => 'verified', 'label' => 'الاشتراكات', 'match' => 'admin.subscriptions.*', 'badge' => $pendingSubsCount],
+                ['route' => 'admin.reviews.index', 'icon' => 'star', 'label' => 'التقييمات والآراء', 'match' => 'admin.reviews.*'],
+                ['route' => 'admin.coupons.index', 'icon' => 'local_offer', 'label' => 'أكواد الخصم', 'match' => 'admin.coupons.*'],
             ],
         ],
         [

@@ -36,7 +36,7 @@
             @if($quote['discount_percent'])
                 <div class="mt-2 flex justify-between text-sm text-secondary font-semibold"><span>نسبة الخصم {{ $quote['discount_percent'] }}%</span><span data-cart-discount-amount>- {{ number_format($quote['discount_amount'], 2) }} <span class="ils">₪</span></span></div>
             @endif
-            <div class="mt-2 flex justify-between text-sm text-on-surface-variant"><span>التوصيل</span><span>@if($quote['delivery_fee']){{ number_format($quote['delivery_fee'], 2) }} <span class="ils">₪</span>@else مجاني @endif</span></div>
+            <div class="mt-2 flex justify-between text-sm text-on-surface-variant"><span>التوصيل ({{ $quote['delivery_area']['label'] ?? ($deliveryArea['label'] ?? 'المنطقة المحددة') }})</span><span data-cart-delivery>@if($quote['delivery_fee']){{ number_format($quote['delivery_fee'], 2) }} <span class="ils">₪</span>@else مجاني @endif</span></div>
             <div class="mt-4 flex justify-between text-lg font-bold text-on-surface"><span>السعر النهائي</span><span data-cart-grand-total>{{ number_format($quote['total'], 2) }} <span class="ils">₪</span></span></div>
             <div class="mt-5 flex flex-wrap gap-3">
                 <a href="{{ route('checkout.create') }}" class="inline-flex items-center gap-1 rounded-full bg-primary hover:bg-primary-container text-on-primary px-5 py-3 font-semibold">

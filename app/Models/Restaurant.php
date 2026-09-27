@@ -423,4 +423,62 @@ class Restaurant extends Model
 
         return 'active';
     }
+
+    public function reviews(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Review::class)->latest();
+    }
+
+    public function approvedReviews(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->reviews()->where('is_approved', true);
+    }
+
+    public function reviewsCount(): int
+    {
+        if ($this->relationLoaded('reviews')) {
+            return $this->reviews->where('is_approved', true)->count();
+        }
+
+        return $this->approvedReviews()->count();
+    }
+
+    public function averageRating(): float
+    {
+        if ($this->relationLoaded('reviews')) {
+            $approved = $this->reviews->where('is_approved', true);
+            if ($approved->isEmpty()) {
+                return 4.9;
+            }
+            return round((float) $approved->avg('rating'), 1);
+        }
+
+        $avg = $this->approvedReviews()->avg('rating');
+
+        return $avg ? round((float) $avg, 1) : 4.9;
+    }
+
+    public function ratingBreakdown(): array
+    {
+        $reviews = $this->approvedReviews()->get();
+        $total = $reviews->count();
+        $counts = [5 => 0, 4 => 0, 3 => 0, 2 => 0, 1 => 0];
+
+        foreach ($reviews as $rev) {
+            $star = (int) $rev->rating;
+            if (isset($counts[$star])) {
+                $counts[$star]++;
+            }
+        }
+
+        $breakdown = [];
+        foreach ($counts as $star => $count) {
+            $breakdown[$star] = [
+                'count' => $count,
+                'percentage' => $total > 0 ? round(($count / $total) * 100) : 0,
+            ];
+        }
+
+        return $breakdown;
+    }
 }

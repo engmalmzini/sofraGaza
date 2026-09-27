@@ -47,6 +47,8 @@
     <p class="mb-4 admin-alert admin-alert--wait">رفع إشعار حوالة باقة {{ $pending->plan->name }} بقيمة {{ number_format($pending->amount, 0) }} ₪ — بانتظار تأكيد الإدارة.</p>
 @endif
 
+@include('partials.payment-instructions')
+
 <h2 class="mb-3 text-lg font-bold">{{ $current ? 'تجديد أو ترقية' : 'اختر الباقة' }}</h2>
 <div class="grid gap-4 md:grid-cols-3">
     @foreach($plans as $plan)

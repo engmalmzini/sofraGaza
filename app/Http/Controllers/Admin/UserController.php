@@ -27,7 +27,7 @@ class UserController extends Controller
 
     public function show(User $user): View
     {
-        $user->load(['orders.restaurant', 'pointTransactions', 'subscriptions.membership']);
+        $user->load(['orders.restaurant', 'pointTransactions', 'subscriptions.membership', 'walletTransactions', 'walletTopups']);
 
         return view('admin.users.show', compact('user'));
     }
@@ -42,5 +42,24 @@ class UserController extends Controller
         $points->adjust($user, (int) $data['points'], $data['reason']);
 
         return back()->with('success', 'تم تعديل رصيد النقاط.');
+    }
+
+    public function adjustWallet(Request $request, User $user, \App\Services\WalletService $wallet): RedirectResponse
+    {
+        $data = $request->validate([
+            'amount' => ['required', 'numeric', 'not_in:0', 'min:-10000', 'max:10000'],
+            'reason' => ['required', 'string', 'max:200'],
+        ], [
+            'amount.required' => 'أدخل قيمة المبلغ المراد إضافته أو خصمه.',
+            'reason.required' => 'أدخل سبب التعديل للتوضيح للزبون.',
+        ]);
+
+        try {
+            $wallet->adjustBalance($user, (float) $data['amount'], $data['reason'], auth()->user());
+        } catch (\RuntimeException $e) {
+            return back()->with('error', $e->getMessage());
+        }
+
+        return back()->with('success', 'تم تعديل رصيد المحفظة بنجاح.');
     }
 }

@@ -24,6 +24,8 @@ Route::get('/restaurants/{restaurant}', [RestaurantController::class, 'show'])->
 Route::get('/memberships', [MembershipController::class, 'index'])->name('memberships.index');
 
 Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
+Route::post('/cart/coupon', [\App\Http\Controllers\CouponController::class, 'apply'])->name('cart.coupon.apply');
+Route::delete('/cart/coupon', [\App\Http\Controllers\CouponController::class, 'remove'])->name('cart.coupon.remove');
 Route::post('/cart/{item}', [CartController::class, 'store'])->name('cart.add');
 Route::patch('/cart', [CartController::class, 'update'])->name('cart.update');
 Route::delete('/cart', [CartController::class, 'destroy'])->name('cart.clear');
@@ -59,6 +61,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/account/addresses', [AccountController::class, 'addresses'])->name('account.addresses');
     Route::post('/account/addresses', [AccountController::class, 'storeAddress'])->name('account.addresses.store');
     Route::delete('/account/addresses/{address}', [AccountController::class, 'destroyAddress'])->name('account.addresses.destroy');
+    Route::get('/account/wallet', [App\Http\Controllers\Account\WalletController::class, 'index'])->name('account.wallet');
+    Route::get('/account/wallet/topup', [App\Http\Controllers\Account\WalletController::class, 'create'])->name('account.wallet.topup');
+    Route::post('/account/wallet/topup', [App\Http\Controllers\Account\WalletController::class, 'store'])->name('account.wallet.topup.store');
+
+    Route::post('/restaurants/{restaurant}/reviews', [App\Http\Controllers\ReviewController::class, 'store'])->name('restaurants.reviews.store');
+
     Route::get('/account/notifications', [AccountController::class, 'notifications'])->name('account.notifications');
     Route::get('/account/notifications/{notification}', [AccountController::class, 'openNotification'])->name('account.notifications.open');
     Route::post('/account/notifications/read', [AccountController::class, 'markNotifications'])->name('account.notifications.read');
@@ -102,6 +110,16 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::get('users', [Admin\UserController::class, 'index'])->name('users.index');
     Route::get('users/{user}', [Admin\UserController::class, 'show'])->name('users.show');
     Route::post('users/{user}/points', [Admin\UserController::class, 'adjustPoints'])->name('users.points');
+    Route::post('users/{user}/wallet', [Admin\UserController::class, 'adjustWallet'])->name('users.wallet');
+    Route::get('wallet-topups', [Admin\WalletTopupController::class, 'index'])->name('wallet-topups.index');
+    Route::get('wallet-topups/{topup}/receipt', [Admin\WalletTopupController::class, 'receipt'])->name('wallet-topups.receipt');
+    Route::post('wallet-topups/{topup}/approve', [Admin\WalletTopupController::class, 'approve'])->name('wallet-topups.approve');
+    Route::post('wallet-topups/{topup}/reject', [Admin\WalletTopupController::class, 'reject'])->name('wallet-topups.reject');
+    Route::get('reviews', [Admin\ReviewController::class, 'index'])->name('reviews.index');
+    Route::post('reviews/{review}/toggle', [Admin\ReviewController::class, 'toggle'])->name('reviews.toggle');
+    Route::delete('reviews/{review}', [Admin\ReviewController::class, 'destroy'])->name('reviews.destroy');
+    Route::resource('coupons', Admin\CouponController::class)->only(['index', 'store', 'destroy']);
+    Route::post('coupons/{coupon}/toggle', [Admin\CouponController::class, 'toggle'])->name('coupons.toggle');
     Route::get('settings', [Admin\SettingController::class, 'index'])->name('settings.index');
     Route::post('settings', [Admin\SettingController::class, 'update'])->name('settings.update');
     Route::get('notifications', [Admin\NotificationController::class, 'index'])->name('notifications.index');

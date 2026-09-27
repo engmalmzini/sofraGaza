@@ -28,6 +28,7 @@ class User extends Authenticatable
         'courier_rejection_reason',
         'courier_verified_at',
         'points_balance',
+        'wallet_balance',
     ];
 
     protected $hidden = [
@@ -41,6 +42,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'points_balance' => 'integer',
+            'wallet_balance' => 'decimal:2',
             'courier_verified_at' => 'datetime',
         ];
     }
@@ -209,5 +211,165 @@ class User extends Authenticatable
         }
 
         return route('account.notifications');
+    }
+
+    public function walletTopups(): HasMany
+    {
+        return $this->hasMany(WalletTopup::class)->latest();
+    }
+
+    public function walletTransactions(): HasMany
+    {
+        return $this->hasMany(WalletTransaction::class)->latest();
+    }
+
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(Review::class)->latest();
+    }
+
+    public function hasSufficientWalletBalance(float $amount): bool
+    {
+        return (float) $this->wallet_balance >= $amount;
+    }
+
+    public function totalSpent(): float
+    {
+        return (float) ($this->orders()
+            ->whereIn('status', ['confirmed', 'preparing', 'delivering', 'delivered'])
+            ->selectRaw('COALESCE(SUM(COALESCE(total, subtotal, 0)), 0) as spent')
+            ->value('spent') ?? 0);
+    }
+
+    public function tier(): array
+    {
+        $spent = $this->totalSpent();
+
+        if ($spent >= 1000) {
+            return [
+                'key' => 'platinum',
+                'name' => 'المستوى البلاتيني (VIP)',
+                'badge' => 'diamond',
+                'icon' => 'diamond',
+                'color' => 'bg-gradient-to-r from-purple-700 via-indigo-700 to-slate-900 text-white',
+                'text_color' => 'text-purple-600',
+                'border_color' => 'border-purple-300',
+                'bg_soft' => 'bg-purple-50 text-purple-800 border-purple-200',
+                'current_spent' => $spent,
+                'min_spent' => 1000,
+                'next_tier' => null,
+                'next_min' => null,
+                'remaining' => 0,
+                'progress_percent' => 100,
+                'perks' => [
+                    'أعلى مستوى زبون في سفرة غزة',
+                    'نقاط مضاعفة (2x) على كل وجبة',
+                    'أولوية فائقة في التوصيل والدعم',
+                ],
+            ];
+        }
+
+        if ($spent >= 600) {
+            $nextMin = 1000;
+            $progress = round((($spent - 600) / ($nextMin - 600)) * 100);
+
+            return [
+                'key' => 'gold',
+                'name' => 'المستوى الذهبي',
+                'badge' => 'military_tech',
+                'icon' => 'military_tech',
+                'color' => 'bg-gradient-to-r from-amber-500 via-yellow-600 to-amber-700 text-white',
+                'text_color' => 'text-amber-600',
+                'border_color' => 'border-amber-300',
+                'bg_soft' => 'bg-amber-50 text-amber-900 border-amber-200',
+                'current_spent' => $spent,
+                'min_spent' => 600,
+                'next_tier' => 'البلاتيني (VIP)',
+                'next_min' => $nextMin,
+                'remaining' => round($nextMin - $spent, 1),
+                'progress_percent' => min(100, max(0, $progress)),
+                'perks' => [
+                    'نقاط مضاعفة (1.5x) على كل وجبة',
+                    'أولوية في سرعة تحضير وتوصيل الطلبات',
+                    'خصومات حصرية لكبار الزبائن',
+                ],
+            ];
+        }
+
+        if ($spent >= 300) {
+            $nextMin = 600;
+            $progress = round((($spent - 300) / ($nextMin - 300)) * 100);
+
+            return [
+                'key' => 'silver',
+                'name' => 'المستوى الفضي',
+                'badge' => 'workspace_premium',
+                'icon' => 'workspace_premium',
+                'color' => 'bg-gradient-to-r from-slate-400 via-zinc-500 to-slate-600 text-white',
+                'text_color' => 'text-slate-600',
+                'border_color' => 'border-slate-300',
+                'bg_soft' => 'bg-slate-100 text-slate-800 border-slate-200',
+                'current_spent' => $spent,
+                'min_spent' => 300,
+                'next_tier' => 'الذهبي',
+                'next_min' => $nextMin,
+                'remaining' => round($nextMin - $spent, 1),
+                'progress_percent' => min(100, max(0, $progress)),
+                'perks' => [
+                    'نقاط مكافآت إضافية (1.25x)',
+                    'أولوية خدمة العملاء والمتابعة',
+                ],
+            ];
+        }
+
+        if ($spent >= 150) {
+            $nextMin = 300;
+            $progress = round((($spent - 150) / ($nextMin - 150)) * 100);
+
+            return [
+                'key' => 'bronze',
+                'name' => 'المستوى البرونزي',
+                'badge' => 'emoji_events',
+                'icon' => 'emoji_events',
+                'color' => 'bg-gradient-to-r from-amber-700 via-yellow-800 to-orange-900 text-white',
+                'text_color' => 'text-amber-800',
+                'border_color' => 'border-amber-700/30',
+                'bg_soft' => 'bg-orange-50 text-orange-900 border-orange-200',
+                'current_spent' => $spent,
+                'min_spent' => 150,
+                'next_tier' => 'الفضي',
+                'next_min' => $nextMin,
+                'remaining' => round($nextMin - $spent, 1),
+                'progress_percent' => min(100, max(0, $progress)),
+                'perks' => [
+                    'دخول نادي زبائن سفرة غزة المعتمدين',
+                    'عروض وكوبونات موسمية خاصة',
+                ],
+            ];
+        }
+
+        $nextMin = 150;
+        $progress = round(($spent / $nextMin) * 100);
+
+        return [
+            'key' => 'starter',
+            'name' => 'المستوى المبتدئ',
+            'badge' => 'stars',
+            'icon' => 'stars',
+            'color' => 'bg-gradient-to-r from-slate-200 to-stone-300 text-slate-800',
+            'text_color' => 'text-stone-600',
+            'border_color' => 'border-slate-200',
+            'bg_soft' => 'bg-stone-100 text-stone-700 border-stone-200',
+            'current_spent' => $spent,
+            'min_spent' => 0,
+            'next_tier' => 'البرونزي',
+            'next_min' => $nextMin,
+            'remaining' => round($nextMin - $spent, 1),
+            'progress_percent' => min(100, max(0, $progress)),
+            'perks' => [
+                'اكتساب نقاط الولاء مع كل طلب',
+                'ترقية تلقائية للمستوى البرونزي عند الوصول لـ 150 ₪',
+            ],
+        ];
     }
 }

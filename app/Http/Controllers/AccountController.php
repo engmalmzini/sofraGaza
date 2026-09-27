@@ -26,7 +26,11 @@ class AccountController extends Controller
             'user' => $user,
             'membership' => $user->activeMembership(),
             'subscription' => $user->activeSubscription(),
-            'recentOrders' => $user->orders()->with('restaurant')->take(5)->get(),
+            'tier' => $user->tier(),
+            'recentOrders' => $user->orders()->with('restaurant')->latest()->take(5)->get(),
+            'ordersCount' => $user->orders()->count(),
+            'addressesCount' => $user->addresses()->count(),
+            'unreadNotifications' => $user->unreadNotificationsCount(),
         ]);
     }
 
@@ -40,7 +44,7 @@ class AccountController extends Controller
     public function showOrder(Order $order): View
     {
         abort_unless($order->user_id === auth()->id(), 403);
-        $order->load('items', 'restaurant');
+        $order->load(['items', 'restaurant', 'review']);
 
         return view('account.order-show', compact('order'));
     }
@@ -76,6 +80,7 @@ class AccountController extends Controller
     {
         $data = $request->validate([
             'label' => ['required', 'string', 'max:50'],
+            'area' => ['nullable', 'string', 'max:50'],
             'details' => ['required', 'string', 'min:10'],
             'phone' => ['required', 'string', 'max:20'],
         ]);

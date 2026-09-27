@@ -67,6 +67,8 @@
         <p class="mb-3 rounded-2xl bg-tertiary-fixed text-tertiary px-4 py-3 text-sm font-medium">طلب عضوية {{ $pending->membership->name }} بانتظار مراجعة الحوالة.</p>
     @endif
 
+    @include('partials.payment-instructions')
+
     <h2 class="mb-3 text-lg font-bold text-on-surface">{{ $current ? 'ترقية أو تجديد' : 'اختر عضويتك' }}</h2>
     <div class="grid gap-4 md:grid-cols-2">
         @foreach($memberships as $membership)

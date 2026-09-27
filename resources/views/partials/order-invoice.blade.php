@@ -48,7 +48,7 @@
         @if((float) $order->discount_amount > 0)
             <div class="sg-invoice__discount"><span>خصم العضوية {{ $order->discount_percent }}%</span><span>− {{ number_format($order->discount_amount, 2) }} <span class="ils">₪</span></span></div>
         @endif
-        <div><span>التوصيل</span><span>@if((float) $order->delivery_fee > 0){{ number_format($order->delivery_fee, 2) }} <span class="ils">₪</span>@else مجاني @endif</span></div>
+        <div><span>التوصيل @if($order->delivery_area)({{ $order->deliveryAreaLabel() }})@endif</span><span>@if((float) $order->delivery_fee > 0){{ number_format($order->delivery_fee, 2) }} <span class="ils">₪</span>@else مجاني @endif</span></div>
         @if($order->type === 'redemption')
             <div><span>النقاط المستخدمة</span><span>{{ number_format($order->points_spent) }}</span></div>
         @endif

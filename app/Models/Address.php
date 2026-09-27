@@ -10,6 +10,7 @@ class Address extends Model
     protected $fillable = [
         'user_id',
         'label',
+        'area',
         'details',
         'phone',
         'is_default',

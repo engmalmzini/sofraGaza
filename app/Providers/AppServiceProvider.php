@@ -23,11 +23,27 @@ class AppServiceProvider extends ServiceProvider
             $cart = app(CartService::class);
             $cartCount = $cart->count();
             $view->with('cartCount', $cartCount);
-            $view->with('cartPreview', $cartCount ? $cart->quote(auth()->user()) : null);
             $view->with('unreadNotifications', auth()->user()?->unreadNotificationsCount() ?? 0);
-            $areas = config('brand.areas', []);
+
+            try {
+                $areas = \App\Models\Setting::areasWithFees();
+            } catch (\Throwable) {
+                $areas = config('brand.areas', []);
+            }
+
+            $defaultArea = $areas[0] ?? ['key' => 'الرمال', 'label' => 'غزة • حي الرمال', 'delivery_fee' => 10.0];
+            $currentArea = session('delivery_area', $defaultArea);
+            if (isset($currentArea['key'])) {
+                try {
+                    $currentArea['delivery_fee'] = \App\Models\Setting::deliveryFeeForArea($currentArea['key']);
+                } catch (\Throwable) {
+                    $currentArea['delivery_fee'] = 10.0;
+                }
+            }
+
             $view->with('deliveryAreas', $areas);
-            $view->with('deliveryArea', session('delivery_area', $areas[0] ?? ['key' => 'الرمال', 'label' => 'غزة • حي الرمال']));
+            $view->with('deliveryArea', $currentArea);
+            $view->with('cartPreview', $cartCount ? $cart->quote(auth()->user(), $currentArea['key'] ?? null) : null);
         });
 
         if ($this->app->runningInConsole()) {

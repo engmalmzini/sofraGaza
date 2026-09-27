@@ -19,9 +19,14 @@
                 <button type="submit" class="area-picker__option {{ ($current['key'] ?? '') === $area['key'] ? 'is-active' : '' }}">
                     <span class="material-symbols-outlined">location_on</span>
                     <span>{{ $area['label'] }}</span>
-                    @if(($current['key'] ?? '') === $area['key'])
-                        <span class="material-symbols-outlined area-picker__check">check</span>
-                    @endif
+                    <span class="area-picker__fee" style="margin-inline-start: auto; display: inline-flex; align-items: center; gap: 0.35rem;">
+                        <span style="font-size: 11px; padding: 0.15rem 0.45rem; border-radius: 9999px; background: rgba(0,0,0,0.06); font-weight: 600;">
+                            {{ number_format($area['delivery_fee'] ?? \App\Models\Setting::deliveryFeeForArea($area['key']), 0) }} ₪
+                        </span>
+                        @if(($current['key'] ?? '') === $area['key'])
+                            <span class="material-symbols-outlined area-picker__check">check</span>
+                        @endif
+                    </span>
                 </button>
             </form>
         @endforeach

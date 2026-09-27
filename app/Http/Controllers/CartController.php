@@ -16,8 +16,10 @@ class CartController extends Controller
 
     public function index(): View
     {
+        $areaKey = session('delivery_area')['key'] ?? null;
+
         return view('cart.index', [
-            'quote' => $this->cart->quote(auth()->user()),
+            'quote' => $this->cart->quote(auth()->user(), $areaKey),
         ]);
     }
 
@@ -55,10 +57,11 @@ class CartController extends Controller
 
     private function respond(Request $request, string $message, bool $ok = true): JsonResponse|RedirectResponse
     {
+        $areaKey = session('delivery_area')['key'] ?? null;
         $payload = [
             'ok' => $ok,
             'message' => $message,
-            'cart' => $this->cart->payload(auth()->user()),
+            'cart' => $this->cart->payload(auth()->user(), $areaKey),
         ];
 
         if ($request->expectsJson() || $request->ajax()) {

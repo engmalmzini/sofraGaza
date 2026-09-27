@@ -75,6 +75,15 @@ class RestaurantController extends Controller
         $cart = app(\App\Services\CartService::class)->quote(auth()->user());
         $restaurantCart = ($cart['restaurant']?->id === $restaurant->id && $cart['lines']) ? $cart : null;
 
+        $reviewsCount = $restaurant->reviewsCount();
+        $averageRating = $restaurant->averageRating();
+        $approvedReviews = $restaurant->approvedReviews()->with('user')->take(20)->get();
+        $breakdown = $restaurant->ratingBreakdown();
+        $canUserReview = auth()->check();
+        $userDeliveredOrder = auth()->check()
+            ? auth()->user()->orders()->where('restaurant_id', $restaurant->id)->where('status', 'delivered')->latest()->first()
+            : null;
+
         return view('restaurants.show', [
             'restaurant' => $restaurant,
             'menuSections' => $menuSections,
@@ -82,8 +91,12 @@ class RestaurantController extends Controller
             'rewards' => $this->points->rewardsForRestaurant($restaurant, 4),
             'membership' => auth()->user()?->activeMembership(),
             'pointsBalance' => (int) (auth()->user()->points_balance ?? 0),
-            'rating' => number_format(4.6 + ($restaurant->id % 4) * 0.1, 1),
-            'reviews' => 180 + ($restaurant->id * 47),
+            'rating' => number_format($averageRating, 1),
+            'reviews' => $reviewsCount,
+            'approvedReviews' => $approvedReviews,
+            'ratingBreakdown' => $breakdown,
+            'canUserReview' => $canUserReview,
+            'userDeliveredOrder' => $userDeliveredOrder,
             'eta' => $restaurant->type === 'cafe' ? ['15', '25'] : ['25', '40'],
         ]);
     }

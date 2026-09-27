@@ -86,6 +86,20 @@ class DatabaseSeeder extends Seeder
 
         $settings = [
             ['key' => 'delivery_fee', 'value' => '10', 'label' => 'رسوم التوصيل (شيكل)'],
+            [
+                'key' => 'delivery_fees_by_area',
+                'value' => json_encode([
+                    'الرمال' => 10,
+                    'تل الهوى' => 10,
+                    'النصر' => 10,
+                    'الشجاعية' => 12,
+                    'البلدة القديمة' => 10,
+                    'الميناء' => 10,
+                    'دير البلح' => 15,
+                    'خانيونس' => 20,
+                ], JSON_UNESCAPED_UNICODE),
+                'label' => 'رسوم التوصيل حسب المناطق',
+            ],
             ['key' => 'points_per_amount', 'value' => '1', 'label' => 'كل كم شيكل = نقطة اكتساب واحدة (عام لكل المطاعم)'],
             ['key' => 'points_redeem_per_amount', 'value' => '1', 'label' => 'كل كم شيكل = نقطة استبدال واحدة (عام)'],
             ['key' => 'points_include_delivery', 'value' => '1', 'label' => 'احتساب التوصيل في اكتساب النقاط (1 نعم / 0 لا)'],
@@ -94,6 +108,15 @@ class DatabaseSeeder extends Seeder
             ['key' => 'restaurant_expiry_warning_days', 'value' => '7', 'label' => 'تنبيه انتهاء عرض المطعم قبل (أيام)'],
             ['key' => 'membership_expiry_warning_days', 'value' => '3', 'label' => 'تنبيه انتهاء عضوية الزبون قبل (أيام)'],
             ['key' => 'restaurant_listing_days', 'value' => '90', 'label' => 'مدة عرض المطعم بعد الموافقة (أيام)'],
+            ['key' => 'bank_name', 'value' => 'بنك فلسطين', 'label' => 'اسم البنك للتحويل'],
+            ['key' => 'bank_account_number', 'value' => '2345678', 'label' => 'رقم الحساب البنكي'],
+            ['key' => 'bank_iban', 'value' => 'PS04PALS000000000002345678', 'label' => 'رقم الآيبان (IBAN)'],
+            ['key' => 'bank_beneficiary_name', 'value' => 'سفرة غزة — Sofra Gaza', 'label' => 'اسم المستفيد البنكي'],
+            ['key' => 'jawwal_pay_number', 'value' => '0599000000', 'label' => 'رقم محفظة جوال باي'],
+            ['key' => 'jawwal_pay_name', 'value' => 'محفظة سفرة غزة', 'label' => 'اسم صاحب محفظة جوال باي'],
+            ['key' => 'palpay_number', 'value' => '0599000000', 'label' => 'رقم محفظة بال باي (PalPay)'],
+            ['key' => 'palpay_name', 'value' => 'محفظة بال باي — سفرة غزة', 'label' => 'اسم صاحب محفظة بال باي'],
+            ['key' => 'payment_instructions_note', 'value' => 'يرجى كتابة رقم هاتفك أو رقم الطلب في ملاحظات التحويل، ورفع صورة الإشعار للمراجعة الفورية.', 'label' => 'ملاحظات التحويل للزبائن'],
         ];
 
         foreach ($settings as $setting) {
@@ -318,6 +341,94 @@ class DatabaseSeeder extends Seeder
                     ]
                 );
             }
+        }
+
+        $sampleUsers = [
+            ['name' => 'محمد الهسي', 'phone' => '0597111222', 'email' => 'mohammed@example.com'],
+            ['name' => 'أم يوسف الغزية', 'phone' => '0597222333', 'email' => 'om_yousef@example.com'],
+            ['name' => 'خالد النجار', 'phone' => '0597333444', 'email' => 'khaled@example.com'],
+            ['name' => 'منى الكرد', 'phone' => '0597444555', 'email' => 'muna@example.com'],
+            ['name' => 'إياد حبيب', 'phone' => '0597555666', 'email' => 'eyad@example.com'],
+        ];
+
+        $users = [$customer];
+        foreach ($sampleUsers as $u) {
+            $users[] = User::query()->updateOrCreate(
+                ['phone' => $u['phone']],
+                [
+                    'name' => $u['name'],
+                    'email' => $u['email'],
+                    'password' => Hash::make('123456'),
+                    'role' => 'customer',
+                    'points_balance' => rand(15, 60),
+                    'wallet_balance' => rand(50, 250),
+                ]
+            );
+        }
+
+        $allRestaurants = Restaurant::all();
+        $sampleReviews = [
+            ['rating' => 5, 'comment' => 'الأكل واصل سخن وطازج والتوصيل سريع جداً، تجربة ممتازة وبنصح فيهم بشدة.'],
+            ['rating' => 5, 'comment' => 'شغل مرتب ونظافة عالية، ونكهة أصلية على أصولها. بارك الله فيكم.'],
+            ['rating' => 4, 'comment' => 'الطعم جداً زاكي والكمية وفيرة، التوصيل تأخر 5 دقائق فقط بس الأكل عوّض كل شي.'],
+            ['rating' => 5, 'comment' => 'الخبز طازج والمشاوي متبلة صح، أفضل تجربة طلب أونلاين في غزة.'],
+            ['rating' => 5, 'comment' => 'خدمة ممتازة وتغليف متقن حافظ على سخونة الوجبة. سفرة غزة ما قصرتوا.'],
+            ['rating' => 4, 'comment' => 'جودة ممتازة وسعر مناسب، بنطلب من عندهم دايماً.'],
+        ];
+
+        foreach ($allRestaurants as $index => $restaurant) {
+            $count = rand(3, 5);
+            for ($i = 0; $i < $count; $i++) {
+                $user = $users[($index + $i) % count($users)];
+                $sample = $sampleReviews[($index + $i) % count($sampleReviews)];
+
+                \App\Models\Review::query()->updateOrCreate(
+                    [
+                        'user_id' => $user->id,
+                        'restaurant_id' => $restaurant->id,
+                    ],
+                    [
+                        'rating' => $sample['rating'],
+                        'comment' => $sample['comment'],
+                        'is_approved' => true,
+                        'created_at' => now()->subDays(rand(1, 20))->subHours(rand(1, 12)),
+                    ]
+                );
+            }
+        }
+
+        // Seed default coupons
+        $coupons = [
+            [
+                'code' => 'GAZA10',
+                'type' => 'percent',
+                'value' => 10,
+                'min_order_amount' => 20,
+                'max_discount' => 15,
+                'description' => 'خصم 10% بحد أقصى 15 ₪ للطلبات فوق 20 ₪',
+            ],
+            [
+                'code' => 'SOFRA15',
+                'type' => 'percent',
+                'value' => 15,
+                'min_order_amount' => 50,
+                'max_discount' => 25,
+                'description' => 'خصم 15% للطلبات العائلية فوق 50 ₪',
+            ],
+            [
+                'code' => 'WELCOME',
+                'type' => 'fixed',
+                'value' => 5,
+                'min_order_amount' => 15,
+                'description' => 'خصم 5 ₪ ترحيبي على أي طلب',
+            ],
+        ];
+
+        foreach ($coupons as $c) {
+            \App\Models\Coupon::query()->updateOrCreate(
+                ['code' => $c['code']],
+                array_merge($c, ['is_active' => true])
+            );
         }
     }
 }

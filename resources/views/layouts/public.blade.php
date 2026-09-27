@@ -36,6 +36,7 @@
     $logoPath = public_path('images/logo.png');
     $logoSrc = file_exists($logoPath) ? asset('images/logo.png').'?v='.filemtime($logoPath) : config('brand.logo');
     $pointsBalance = auth()->user()->points_balance ?? 0;
+    $walletBalance = auth()->user()->wallet_balance ?? 0;
 @endphp
 <body class="bg-surface font-body-md text-body-md text-on-surface antialiased @yield('body_class')">
     <header id="site-header" class="site-header">
@@ -58,7 +59,12 @@
 
             <div class="site-header__actions">
                 @auth
-                    <a href="{{ route('account.points') }}" class="header-points" title="نقاط الولاء">
+                    <a href="{{ route('account.wallet') }}" class="flex items-center gap-1 text-xs font-bold px-2.5 py-1.5 rounded-full bg-emerald-50 text-emerald-800 hover:bg-emerald-100 border border-emerald-200/60 transition-colors shrink-0" title="رصيد المحفظة">
+                        <span class="material-symbols-outlined text-[16px] text-emerald-600">account_balance_wallet</span>
+                        <span class="font-mono text-xs">{{ number_format($walletBalance, 0) }}</span>
+                        <span class="ils text-[10px]">₪</span>
+                    </a>
+                    <a href="{{ route('account.points') }}" class="header-points shrink-0" title="نقاط الولاء">
                         <span class="material-symbols-outlined fill-1">stars</span>
                         <span>{{ $pointsBalance }}</span>
                     </a>
@@ -73,8 +79,20 @@
                     </a>
 
                     @auth
-                        <a href="{{ route('account.show') }}" class="header-account">
-                            <span class="header-avatar">{{ mb_substr(auth()->user()->name, 0, 1) }}</span>
+                        @php
+                            $headerTier = auth()->user()->tier();
+                        @endphp
+                        <a href="{{ route('account.show') }}" class="header-account" title="حسابي • مستوى الولاء: {{ $headerTier['name'] }}">
+                            <div class="relative inline-flex items-center justify-center shrink-0">
+                                @if(auth()->user()->photo_path)
+                                    <img src="{{ auth()->user()->photoUrl() }}" alt="{{ auth()->user()->name }}" class="header-avatar object-cover">
+                                @else
+                                    <span class="header-avatar">{{ mb_substr(auth()->user()->name, 0, 1) }}</span>
+                                @endif
+                                <span class="absolute -bottom-1 -left-1 w-4 h-4 rounded-full bg-white ring-2 ring-white shadow-xs flex items-center justify-center pointer-events-none z-10" title="مستوى الولاء: {{ $headerTier['name'] }}">
+                                    @include('partials.tier-icon', ['tier' => $headerTier['key'], 'class' => 'w-full h-full'])
+                                </span>
+                            </div>
                             <span class="header-account__name">{{ explode(' ', auth()->user()->name)[0] }}</span>
                         </a>
                         @if(auth()->user()->isAdmin())
@@ -131,55 +149,106 @@
         </aside>
     @endunless
 
-    <footer class="hidden lg:block w-full bg-surface-container-lowest shadow-[0_1px_8px_rgba(0,0,0,0.04)] pt-space-xl pb-space-lg">
-        <div class="max-w-7xl mx-auto px-margin-desktop">
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-space-lg pb-space-xl">
-                <div class="flex flex-col gap-space-sm">
-                    <img alt="شعار سفرة غزة" class="sg-brand-footer" src="{{ $logoSrc }}">
-                    <p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">كل احتياجاتك في غزة .. في مكان واحد. منصة الضيافة والمطاعم في قطاع غزة.</p>
-                    <div class="flex items-center gap-space-sm pt-space-xs text-primary">
-                        <span class="material-symbols-outlined">forum</span>
-                        <span class="material-symbols-outlined">share</span>
-                        <span class="material-symbols-outlined">mail</span>
-                        <span class="material-symbols-outlined">call</span>
+    <footer class="w-full bg-surface-container-lowest border-t border-surface-container-high pt-12 pb-24 lg:pb-12">
+        <div class="max-w-7xl mx-auto px-margin lg:px-margin-desktop">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-10 pb-10">
+                {{-- Column 1: Brand & Contact --}}
+                <div class="space-y-3">
+                    <img alt="شعار سفرة غزة" class="h-9 w-auto object-contain" src="{{ $logoSrc }}">
+                    <p class="text-xs text-on-surface-variant leading-relaxed">
+                        منصة الضيافة وتوصيل الطعام الأولى في قطاع غزة. كل احتياجاتك في مكان واحد، بجودة وسرعة ومكافآت مع كل طلب.
+                    </p>
+                    <div class="flex items-center gap-4 pt-2 text-on-surface-variant">
+                        <a href="tel:0599000000" class="hover:text-primary transition-colors inline-flex items-center justify-center" title="اتصال هاتفي">
+                            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M5 4h4l2 5l-2.5 1.5a11 11 0 0 0 5 5l1.5 -2.5l5 2v4a2 2 0 0 1 -2 2a16 16 0 0 1 -15 -15a2 2 0 0 1 2 -2"/>
+                            </svg>
+                        </a>
+                        <a href="https://wa.me/972590000000" target="_blank" class="hover:text-[#25D366] transition-colors inline-flex items-center justify-center" title="تواصل عبر واتساب">
+                            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M3 21l1.65 -3.8a9 9 0 1 1 3.4 2.9l-5.05 .9" />
+                                <path d="M9 10a.5 .5 0 0 0 1 0v-1a.5 .5 0 0 0 -1 0v1a5 5 0 0 0 5 5h1a.5 .5 0 0 0 0 -1h-1a.5 .5 0 0 0 0 1" />
+                            </svg>
+                        </a>
+                        <a href="mailto:support@sofragaza.com" class="hover:text-primary transition-colors inline-flex items-center justify-center" title="البريد الإلكتروني">
+                            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <rect width="18" height="14" x="3" y="5" rx="2" />
+                                <path d="m3 7 9 6 9-6" />
+                            </svg>
+                        </a>
                     </div>
                 </div>
-                <div class="flex flex-col gap-space-sm">
-                    <span class="font-headline-sm text-headline-sm text-on-surface">مناطق التوصيل الفعّالة</span>
-                    <ul class="flex flex-col gap-space-xs font-body-sm text-body-sm text-on-surface-variant">
-                        <li>حي الرمال الجنوبي والشمالي</li>
-                        <li>منطقة النصر وتل الهوى</li>
-                        <li>المحافظة الوسطى (النصيرات ودير البلح)</li>
-                        <li>خانيونس والمواصي</li>
-                        <li>مخيم جباليا والشيخ رضوان</li>
+
+                {{-- Column 2: Delivery Areas (Clean list, NO cards) --}}
+                <div class="space-y-3">
+                    <h4 class="text-sm font-extrabold text-on-surface">مناطق التوصيل الفعّالة</h4>
+                    <ul class="space-y-2 text-xs text-on-surface-variant leading-relaxed">
+                        <li class="hover:text-on-surface transition-colors">حي الرمال الجنوبي والشمالي</li>
+                        <li class="hover:text-on-surface transition-colors">منطقة النصر وتل الهوى</li>
+                        <li class="hover:text-on-surface transition-colors">المحافظة الوسطى (النصيرات ودير البلح)</li>
+                        <li class="hover:text-on-surface transition-colors">خانيونس والمواصي</li>
+                        <li class="hover:text-on-surface transition-colors">مخيم جباليا والشيخ رضوان</li>
                     </ul>
                 </div>
-                <div class="flex flex-col gap-space-sm">
-                    <span class="font-headline-sm text-headline-sm text-on-surface">المدفوعات والمحفظة</span>
-                    <p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">ندعم الدفع نقداً عند الاستلام ومحافظ الدفع الإلكتروني المعتمدة بنظام إشعارات تحويل فوري وموثوق.</p>
-                    <div class="flex flex-wrap items-center gap-space-xs pt-space-xs">
-                        <div class="px-space-sm py-space-xs rounded-lg bg-surface-container font-label-sm text-label-sm text-on-surface font-semibold">كاش عند الاستلام</div>
-                        <div class="px-space-sm py-space-xs rounded-lg bg-surface-container font-label-sm text-label-sm text-on-surface font-semibold">حوالة بنكية</div>
-                        <div class="px-space-sm py-space-xs rounded-lg bg-surface-container font-label-sm text-label-sm text-on-surface font-semibold">PalPay</div>
+
+                {{-- Column 3: Payment Methods & Icons --}}
+                <div class="space-y-3">
+                    <h4 class="text-sm font-extrabold text-on-surface">طرق الدفع المعتمدة</h4>
+                    <p class="text-xs text-on-surface-variant leading-relaxed">
+                        وسائل دفع ومحافظ إلكترونية موثوقة في قطاع غزة:
+                    </p>
+
+                    <div class="flex items-center gap-2.5 flex-wrap pt-1">
+                        <img src="{{ asset('images/payments/palpay.png') }}" alt="PalPay" title="محفظتي PalPay" class="w-9 h-9 rounded-xl object-contain shadow-2xs hover:scale-110 transition-transform">
+                        <img src="{{ asset('images/payments/jawwalpay.png') }}" alt="Jawwal Pay" title="جوال باي Jawwal Pay" class="w-9 h-9 rounded-xl object-contain shadow-2xs hover:scale-110 transition-transform">
+                        <img src="{{ asset('images/payments/bop.png') }}" alt="Bank of Palestine" title="بنك فلسطين Bank of Palestine" class="w-9 h-9 rounded-xl object-contain shadow-2xs hover:scale-110 transition-transform">
+                        <img src="{{ asset('images/payments/iburaq.png') }}" alt="iBuraq" title="بُراق iBURAQ" class="w-9 h-9 rounded-xl object-contain shadow-2xs hover:scale-110 transition-transform">
                     </div>
+
+                    <p class="text-[11px] text-on-surface-variant pt-0.5">
+                        إلى جانب الدفع نقداً (كاش) عند الاستلام ومحفظة سفرة غزة.
+                    </p>
                 </div>
-                <div class="flex flex-col gap-space-sm">
-                    <span class="font-headline-sm text-headline-sm text-on-surface">مركز المساعدة والدعم</span>
-                    <ul class="flex flex-col gap-space-xs font-body-sm text-body-sm text-on-surface-variant">
-                        <li><a class="hover:text-primary transition-colors" href="{{ route('memberships.index') }}">العضويات والمكافآت</a></li>
-                        <li><a class="hover:text-primary transition-colors" href="{{ route('partner.register') }}">انضم كشريك مطعم</a></li>
-                        <li><a class="hover:text-primary transition-colors" href="{{ route('courier.register') }}">انضم كمندوب توصيل</a></li>
-                        <li><a class="hover:text-primary transition-colors" href="{{ route('register') }}">إنشاء حساب جديد</a></li>
-                        <li><a class="hover:text-primary transition-colors" href="{{ route('login') }}">تسجيل الدخول</a></li>
+
+                {{-- Column 4: Quick Links (Clean text links) --}}
+                <div class="space-y-3">
+                    <h4 class="text-sm font-extrabold text-on-surface">مركز المساعدة والدعم</h4>
+                    <ul class="space-y-2 text-xs text-on-surface-variant">
+                        <li>
+                            <a class="hover:text-primary transition-colors inline-block" href="{{ route('memberships.index') }}">العضويات والمكافآت</a>
+                        </li>
+                        <li>
+                            <a class="hover:text-primary transition-colors inline-block" href="{{ route('partner.register') }}">انضم كشريك مطعم</a>
+                        </li>
+                        <li>
+                            <a class="hover:text-primary transition-colors inline-block" href="{{ route('courier.register') }}">انضم كمندوب توصيل</a>
+                        </li>
+                        <li>
+                            <a class="hover:text-primary transition-colors inline-block" href="{{ route('redeem.create') }}">استبدال نقاط المكافآت</a>
+                        </li>
+                        <li>
+                            <a class="hover:text-primary transition-colors inline-block" href="{{ auth()->check() ? route('account.show') : route('login') }}">
+                                {{ auth()->check() ? 'لوحة حسابي ومحفظتي' : 'تسجيل الدخول / إنشاء حساب' }}
+                            </a>
+                        </li>
                     </ul>
                 </div>
             </div>
-            <div class="pt-space-lg flex flex-col md:flex-row items-center justify-between gap-space-md text-on-surface-variant font-label-sm text-label-sm">
-                <p>© {{ date('Y') }} سفرة غزة | Sofra Gaza. جميع الحقوق محفوظة لقطاع الضيافة في غزة.</p>
-                <div class="flex items-center gap-space-md">
-                    <a class="hover:text-primary transition-colors" href="{{ route('home') }}">سياسة الاسترجاع</a>
-                    <a class="hover:text-primary transition-colors" href="{{ route('home') }}">شروط الخدمة</a>
-                    <a class="hover:text-primary transition-colors" href="{{ route('account.show') }}">أمان الحساب</a>
+
+            {{-- Bottom Footer Bar --}}
+            <div class="pt-6 border-t border-surface-container-high flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-on-surface-variant">
+                <div class="flex items-center gap-2 flex-wrap text-center md:text-right">
+                    <span>© {{ date('Y') }} سفرة غزة | Sofra Gaza. جميع الحقوق محفوظة لقطاع الضيافة في غزة.</span>
+                    <span>•</span>
+                    <span>صُنع بكل فخر لأهلنا في غزة 🇵🇸</span>
+                </div>
+
+                <div class="flex items-center gap-4 text-xs">
+                    <a class="hover:text-primary transition-colors" href="{{ route('home') }}">سياسة الاسترجاع والضمان</a>
+                    <span>•</span>
+                    <a class="hover:text-primary transition-colors" href="{{ route('home') }}">الشروط والأحكام</a>
+                    <span>•</span>
+                    <a class="hover:text-primary transition-colors" href="{{ route('account.show') }}">أمان الحساب والمحفظة</a>
                 </div>
             </div>
         </div>

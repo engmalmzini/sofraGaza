@@ -162,7 +162,8 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 lg:gap-6">
             @forelse($restaurants as $restaurant)
                 @php
-                    $rating = number_format(4.6 + ($restaurant->id % 4) * 0.1, 1);
+                    $rating = number_format($restaurant->averageRating(), 1);
+                    $reviewsCount = $restaurant->reviewsCount();
                     $eta = $restaurant->type === 'cafe' ? '20-30 دقيقة' : '25-35 دقيقة';
                 @endphp
                 <a href="{{ route('restaurants.show', $restaurant) }}" class="place-card group rounded-2xl border border-slate-100 bg-surface-container-lowest overflow-hidden shadow-xs hover:shadow-md hover:-translate-y-0.5 transition duration-200 flex flex-col" data-area="{{ $restaurant->area }}" data-type="{{ $restaurant->type }}">
@@ -183,8 +184,11 @@
                                 <span class="material-symbols-outlined text-primary text-[17px]">verified</span>
                             </div>
                             <div class="flex items-center gap-1 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200/50 text-amber-900 text-xs font-bold shrink-0">
-                                <span class="material-symbols-outlined text-[13px] text-amber-500">star</span>
+                                <span class="material-symbols-outlined text-[13px] text-amber-500 fill-1">star</span>
                                 <span>{{ $rating }}</span>
+                                @if($reviewsCount > 0)
+                                    <span class="text-[10px] text-amber-700/80 mr-0.5">({{ $reviewsCount }})</span>
+                                @endif
                             </div>
                         </div>
                         <p class="text-stone-500 text-[13px] font-normal">{{ $restaurant->cuisineLabel() }} • {{ $restaurant->address }}</p>

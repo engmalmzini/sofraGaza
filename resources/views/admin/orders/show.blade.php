@@ -12,6 +12,9 @@
             <h2>التواصل والتوصيل</h2>
             <div>الزبون: {{ $order->user->name }}</div>
             <div>الهاتف: {{ $order->phone }}</div>
+            @if($order->delivery_area)
+                <div>منطقة التوصيل: <strong class="text-on-surface">{{ $order->deliveryAreaLabel() }}</strong></div>
+            @endif
             <div>العنوان: {{ $order->address_details }}</div>
             <div>ملاحظات: {{ $order->notes ?: '—' }}</div>
         </section>

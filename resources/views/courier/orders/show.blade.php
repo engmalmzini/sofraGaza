@@ -39,6 +39,9 @@
     <section class="courier-stop courier-stop--drop">
         <div class="courier-stop__label">2 · تسليم</div>
         <h2>{{ $order->user->name }}</h2>
+        @if($order->delivery_area)
+            <div class="text-xs font-bold text-primary mb-1">منطقة التوصيل: {{ $order->deliveryAreaLabel() }}</div>
+        @endif
         <p>{{ $order->address_details }}</p>
         @if($order->notes)
             <p class="courier-note">{{ $order->notes }}</p>

@@ -67,8 +67,8 @@
         <div class="flex flex-col gap-3.5">
             @forelse($restaurants as $restaurant)
                 @php
-                    $rating = number_format(4.6 + ($restaurant->id % 4) * 0.1, 1);
-                    $reviews = 180 + ($restaurant->id * 47);
+                    $rating = number_format($restaurant->averageRating(), 1);
+                    $reviews = $restaurant->reviewsCount();
                     $eta = $restaurant->type === 'cafe' ? '15-25 دقيقة' : '20-30 دقيقة';
                 @endphp
                 <a href="{{ route('restaurants.show', $restaurant) }}" class="place-card group bg-surface-container-lowest rounded-xl shadow-[0_2px_12px_rgba(0,0,0,0.04)] overflow-hidden flex flex-col" data-area="{{ $restaurant->area }}" data-type="{{ $restaurant->type }}">
@@ -93,9 +93,11 @@
                                 <span class="material-symbols-outlined text-secondary text-[16px] shrink-0">verified</span>
                             </div>
                             <div class="flex items-center gap-1 bg-surface-container-low px-2 py-0.5 rounded-md shrink-0">
-                                <span class="material-symbols-outlined text-tertiary text-[14px]">star</span>
+                                <span class="material-symbols-outlined text-amber-500 fill-1 text-[14px]">star</span>
                                 <span class="text-label-sm font-label-sm font-bold text-on-surface">{{ $rating }}</span>
-                                <span class="text-label-sm font-label-sm text-on-surface-variant">({{ $reviews }}+)</span>
+                                @if($reviews > 0)
+                                    <span class="text-label-sm font-label-sm text-on-surface-variant">({{ $reviews }})</span>
+                                @endif
                             </div>
                         </div>
                         <div class="flex items-center gap-2 text-label-sm font-label-sm text-on-surface-variant">

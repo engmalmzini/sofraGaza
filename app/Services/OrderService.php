@@ -15,11 +15,13 @@ class OrderService
         private CartService $cart,
         private PointsService $points,
         private NotificationService $notifications,
+        private WalletService $wallet,
     ) {}
 
-    public function placePurchase(User $user, array $data, UploadedFile $receipt): Order
+    public function placePurchase(User $user, array $data, ?UploadedFile $receipt = null): Order
     {
-        $quote = $this->cart->quote($user);
+        $areaKey = $data['area'] ?? $data['delivery_area'] ?? (session('delivery_area')['key'] ?? null);
+        $quote = $this->cart->quote($user, $areaKey);
 
         if ($quote['lines'] === [] || ! $quote['restaurant']) {
             throw new RuntimeException('السلة فارغة.');
@@ -33,15 +35,35 @@ class OrderService
             }
         }
 
-        $path = $receipt->store('receipts', 'public');
+        $paymentMethod = $data['payment_method'] ?? 'receipt';
+        $isWallet = $paymentMethod === 'wallet';
 
-        $order = DB::transaction(function () use ($user, $data, $quote, $path) {
+        if ($isWallet) {
+            if (! $user->hasSufficientWalletBalance((float) $quote['total'])) {
+                throw new RuntimeException('رصيد المحفظة غير كافٍ لإتمام الدفع.');
+            }
+            $path = null;
+            $status = 'confirmed';
+            $confirmedAt = now();
+        } else {
+            if (! $receipt) {
+                throw new RuntimeException('أرفق صورة إشعار الحوالة لتأكيد الدفع.');
+            }
+            $path = $receipt->store('receipts', 'public');
+            $status = 'pending_confirmation';
+            $confirmedAt = null;
+        }
+
+        $order = DB::transaction(function () use ($user, $data, $quote, $path, $areaKey, $paymentMethod, $status, $confirmedAt, $isWallet) {
             $order = Order::create([
                 'user_id' => $user->id,
                 'restaurant_id' => $quote['restaurant']->id,
                 'membership_id' => $quote['membership']?->id,
                 'type' => 'purchase',
-                'status' => 'pending_confirmation',
+                'payment_method' => $paymentMethod,
+                'status' => $status,
+                'confirmed_at' => $confirmedAt,
+                'delivery_area' => $areaKey,
                 'address_details' => $data['address_details'],
                 'phone' => $data['phone'],
                 'notes' => $data['notes'] ?? null,
@@ -50,6 +72,8 @@ class OrderService
                 'discount_amount' => $quote['discount_amount'],
                 'delivery_fee' => $quote['delivery_fee'],
                 'total' => $quote['total'],
+                'coupon_id' => $quote['coupon']?->id,
+                'coupon_code' => $quote['coupon']?->code,
                 'transfer_receipt_path' => $path,
             ]);
 
@@ -63,14 +87,23 @@ class OrderService
                 ]);
             }
 
+            if ($quote['coupon'] ?? null) {
+                $quote['coupon']->incrementUsage();
+            }
+
+            if ($isWallet) {
+                $this->wallet->payForOrder($user, $order);
+            }
+
             return $order;
         });
 
         $this->cart->clear();
 
+        $adminTitle = $isWallet ? 'طلب جديد مدفوع من المحفظة (مؤكد)' : 'طلب جديد بانتظار التأكيد';
         $this->notifications->notifyAdmins(
-            'طلب جديد بانتظار التأكيد',
-            "طلب #{$order->id} من {$user->name} بقيمة {$order->total} ₪.",
+            $adminTitle,
+            "طلب #{$order->id} من {$user->name} بقيمة {$order->total} ₪ (".($isWallet ? 'خصم من الرصيد' : 'حوالة').').',
             route('admin.orders.show', $order)
         );
 
@@ -89,13 +122,16 @@ class OrderService
             throw new RuntimeException('رصيد النقاط غير كافٍ لهذا الاستبدال.');
         }
 
-        $order = DB::transaction(function () use ($user, $item, $data, $cost) {
+        $areaKey = $data['area'] ?? $data['delivery_area'] ?? (session('delivery_area')['key'] ?? null);
+
+        $order = DB::transaction(function () use ($user, $item, $data, $cost, $areaKey) {
             $order = Order::create([
                 'user_id' => $user->id,
                 'restaurant_id' => $item->restaurant_id,
                 'membership_id' => $user->activeMembership()?->id,
                 'type' => 'redemption',
                 'status' => 'pending_confirmation',
+                'delivery_area' => $areaKey,
                 'address_details' => $data['address_details'],
                 'phone' => $data['phone'],
                 'notes' => $data['notes'] ?? 'استبدال نقاط',
@@ -130,11 +166,15 @@ class OrderService
     {
         $old = $order->status;
 
-        if ($status === 'rejected' && $old === 'pending_confirmation') {
+        if ($status === 'rejected' && in_array($old, ['pending_confirmation', 'confirmed'], true)) {
             $order->update([
                 'status' => 'rejected',
                 'rejection_reason' => $reason,
             ]);
+
+            if ($order->isPaidWithWallet()) {
+                $this->wallet->refundOrder($order, $reason ?: 'رفض الطلب');
+            }
 
             if ($order->points_spent > 0) {
                 $this->points->refund(
@@ -157,6 +197,10 @@ class OrderService
 
         if ($status === 'cancelled' && $order->canCancel()) {
             $order->update(['status' => 'cancelled']);
+
+            if ($order->isPaidWithWallet()) {
+                $this->wallet->refundOrder($order, 'إلغاء الطلب');
+            }
 
             if ($order->points_spent > 0) {
                 $this->points->refund(
