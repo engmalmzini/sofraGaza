@@ -265,6 +265,24 @@ class Restaurant extends Model
         return substr((string) $this->opens_at, 0, 5).' — '.substr((string) $this->closes_at, 0, 5);
     }
 
+    public function isOpen(): bool
+    {
+        if (! $this->is_active || $this->panel_suspended) {
+            return false;
+        }
+
+        if ($this->opens_at && $this->closes_at) {
+            $now = now()->format('H:i:s');
+            if ($this->opens_at <= $this->closes_at) {
+                return $now >= $this->opens_at && $now <= $this->closes_at;
+            }
+
+            return $now >= $this->opens_at || $now <= $this->closes_at;
+        }
+
+        return true;
+    }
+
     public function areaLabel(): string
     {
         $areas = collect(config('brand.areas', []))->keyBy('key');

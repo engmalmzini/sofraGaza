@@ -22,14 +22,8 @@
         @endif
     </p>
 
-    @forelse($orders as $order)
-        @include('courier.partials.order-card', ['order' => $order])
-    @empty
-        <div class="courier-empty">
-            <span class="material-symbols-outlined">{{ $tab === 'done' ? 'check_circle' : 'delivery_dining' }}</span>
-            <strong>{{ $tab === 'done' ? 'لا تسليمات اليوم بعد' : 'لا طلبات مرسلة لك الآن' }}</strong>
-            <p>{{ $tab === 'done' ? 'بعد أول تسليم ستظهر الطلبات هنا.' : 'عندما نرسل لك طلباً يظهر هنا مباشرة. حدّث الصفحة أو انتظر اتصال الإدارة.' }}</p>
-        </div>
-    @endforelse
+    <div id="courier-orders-container" data-last-id="{{ $orders->max('id') ?? 0 }}" data-tab="{{ $tab }}" data-live-url="{{ route('courier.orders.live') }}">
+        @include('courier.partials.live-cards', ['orders' => $orders, 'tab' => $tab])
+    </div>
 @endif
 @endsection

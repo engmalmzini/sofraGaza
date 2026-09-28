@@ -3,7 +3,11 @@
 @section('title', 'حسابي')
 
 @section('content')
-<div class="mx-auto max-w-6xl px-margin lg:px-margin-desktop py-6 lg:py-10 space-y-7">
+<div class="lg:hidden">
+    @include('account.partials.show-mobile')
+</div>
+
+<div class="hidden lg:block mx-auto max-w-6xl px-margin-desktop py-8 space-y-7">
 
     @php
         $tier = $tier ?? $user->tier();
@@ -210,8 +214,8 @@
                 {{-- 1. Points Horizontal Card --}}
                 <div class="flex items-center justify-between p-3.5 sm:p-4 rounded-2xl bg-stone-50 border border-stone-200/80 hover:border-stone-300 transition-colors">
                     <div class="flex items-center gap-3">
-                        <span class="w-10 h-10 rounded-xl bg-stone-900 text-white flex items-center justify-center shrink-0">
-                            <span class="material-symbols-outlined text-[20px] fill-1">stars</span>
+                        <span class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-50 to-amber-100 flex items-center justify-center shrink-0 shadow-2xs">
+                            @include('partials.gold-coin-icon', ['class' => 'w-7 h-7'])
                         </span>
                         <div>
                             <span class="block text-[11px] font-bold text-stone-500">نقاط المكافآت</span>
@@ -432,7 +436,7 @@
                     استكشف أشهى المأكولات والمطاعم المتوفرة في منطقتك بقطاع غزة، واطلب وجبتك المفضلة لتصلك ساخنة وطازجة.
                 </p>
                 <div class="pt-2">
-                    <a href="{{ route('restaurants.index') }}" class="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-primary text-white font-bold text-xs hover:bg-primary-container shadow-xs transition-colors">
+                    <a href="{{ route('home') }}" class="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-primary text-white font-bold text-xs hover:bg-primary-container shadow-xs transition-colors">
                         <span>تصفح المطاعم واطلب الآن</span>
                         <span class="material-symbols-outlined text-[16px]">arrow_back</span>
                     </a>

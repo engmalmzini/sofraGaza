@@ -20,6 +20,98 @@
 <form method="POST" action="{{ route('admin.settings.update') }}" enctype="multipart/form-data" class="w-full max-w-none space-y-6">
     @csrf
 
+    {{-- Banner Ads Management Section --}}
+    <div id="setting-home-banners" class="rounded-2xl border border-slate-200/80 bg-white/95 p-5 sm:p-6 space-y-5 shadow-xs">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+            <div class="flex items-center gap-2.5">
+                <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center shrink-0">
+                    <span class="material-symbols-outlined text-[24px]">view_carousel</span>
+                </div>
+                <div>
+                    <h2 class="text-base font-bold text-on-surface">إدارة البانرات الإعلانية (الشريط العلوي في شاشة الهاتف)</h2>
+                    <p class="text-xs text-on-surface-variant">تظهر هذه الصور كشريط إعلاني مدمج بدون أي نصوص أسفل الهيدر مباشرة. يمكنك إضافة عدد غير محدود من الصور وحذفها في أي وقت.</p>
+                </div>
+            </div>
+            <span class="text-xs font-semibold px-3 py-1 rounded-full bg-amber-100 text-amber-800 shrink-0">
+                إعلانات الهاتف
+            </span>
+        </div>
+
+        {{-- Current Banners Gallery --}}
+        @php
+            $rawBanners = \App\Models\Setting::rawHomeBanners();
+        @endphp
+        <div class="space-y-3">
+            <div class="flex items-center justify-between">
+                <h3 class="text-xs font-bold text-stone-700">البانرات الحالية المفعلة ({{ count($rawBanners) }})</h3>
+                <span class="text-[11px] text-stone-400">انقر على "حذف" لأي صورة لإزالتها فوراً</span>
+            </div>
+
+            @if(count($rawBanners) > 0)
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3.5">
+                    @foreach($rawBanners as $bIdx => $bannerItem)
+                        @php
+                            $bPath = is_array($bannerItem) ? ($bannerItem['image'] ?? $bannerItem['url'] ?? '') : (string) $bannerItem;
+                            $bUrl = (str_starts_with($bPath, 'http://') || str_starts_with($bPath, 'https://'))
+                                ? $bPath
+                                : \Illuminate\Support\Facades\Storage::disk('public')->url($bPath);
+                        @endphp
+                        <div class="relative group rounded-xl border border-stone-200 overflow-hidden bg-stone-50 shadow-2xs flex flex-col">
+                            <div class="w-full h-20 bg-stone-100 overflow-hidden relative">
+                                <img src="{{ $bUrl }}" alt="بانر {{ $bIdx + 1 }}" class="w-full h-full object-cover">
+                                <span class="absolute top-1.5 right-1.5 bg-black/60 text-white text-[10px] font-bold px-1.5 py-0.5 rounded">
+                                    #{{ $bIdx + 1 }}
+                                </span>
+                            </div>
+                            <div class="p-2 bg-white flex items-center justify-between border-t border-stone-100">
+                                <a href="{{ $bUrl }}" target="_blank" class="text-[11px] text-stone-500 hover:text-primary truncate max-w-[100px]">
+                                    معاينة
+                                </a>
+                                <button type="submit" name="remove_banner" value="{{ $bPath }}" class="text-[11px] text-error font-bold hover:underline flex items-center gap-0.5 cursor-pointer">
+                                    <span class="material-symbols-outlined text-[13px]">delete</span>
+                                    <span>حذف</span>
+                                </button>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            @else
+                <div class="rounded-xl border border-dashed border-stone-300 p-6 text-center bg-stone-50/50">
+                    <span class="material-symbols-outlined text-3xl text-stone-300 mb-1">imagesmode</span>
+                    <p class="text-xs text-stone-500 font-medium">لا توجد صور بانرات خاصة مرفوعة حالياً (يتم عرض البانرات الافتراضية الأنيقة تلقائياً).</p>
+                    <p class="text-[11px] text-stone-400 mt-0.5">ارفع أول صورة إعلانية بالأسفل للبدء بعرض إعلاناتك الخاصة.</p>
+                </div>
+            @endif
+        </div>
+
+        {{-- Add New Banners --}}
+        <div class="grid gap-4 md:grid-cols-2 pt-2 border-t border-slate-100">
+            {{-- Upload multiple files --}}
+            <div class="rounded-xl bg-stone-50/70 border border-stone-200/80 p-3.5 space-y-2">
+                <label class="block text-xs font-bold text-stone-800">
+                    <span class="material-symbols-outlined text-[16px] align-middle text-primary">upload_file</span>
+                    رفع صور إعلانات جديدة (يمكنك تحديد عدة صور معاً)
+                </label>
+                <input type="file" name="new_banners[]" multiple accept="image/*" class="text-xs w-full p-2 border border-dashed border-stone-300 rounded-lg bg-white cursor-pointer">
+                <p class="text-[11px] text-stone-500 leading-relaxed">
+                    💡 يُفضل أن تكون الصورة بنسبة عرضية شريطية (مثلاً: 1200×300 أو 800×200 بكسل) لتظهر كإعلان بانر مدمج بدون نصوص.
+                </p>
+            </div>
+
+            {{-- Or paste image URL --}}
+            <div class="rounded-xl bg-stone-50/70 border border-stone-200/80 p-3.5 space-y-2">
+                <label class="block text-xs font-bold text-stone-800">
+                    <span class="material-symbols-outlined text-[16px] align-middle text-primary">link</span>
+                    أو إضافة رابط صورة إعلان مباشر
+                </label>
+                <input type="url" name="new_banner_url" placeholder="https://example.com/banner.jpg" class="text-xs font-mono w-full p-2 border border-stone-300 rounded-lg bg-white" dir="ltr">
+                <p class="text-[11px] text-stone-500 leading-relaxed">
+                    يمكنك كتابة رابط مباشر لأي صورة على الويب لإضافتها فوراً لسلايدر البانرات.
+                </p>
+            </div>
+        </div>
+    </div>
+
     {{-- 1. Payment Accounts & Direct Transfer Section --}}
     <div id="setting-payment-accounts" class="rounded-2xl border border-slate-200/80 bg-white/95 p-5 sm:p-6 space-y-5 shadow-xs">
         <div class="flex items-center justify-between border-b border-slate-100 pb-3">
@@ -164,7 +256,7 @@
 
         <div>
             <label class="mb-1 block text-xs font-bold text-on-surface">ملاحظات وتعليمات التحويل للزبائن</label>
-            <input type="text" name="settings[payment_instructions_note]" value="{{ $paymentAccounts['instructions_note'] }}" class="text-sm" placeholder="مثال: يرجى كتابة رقم الهاتف في ملاحظات التحويل...">
+            <input type="text" name="settings[payment_instructions_note]" value="{{ $paymentAccounts['instructions_note'] ?? '' }}" class="text-sm" placeholder="مثال: يرجى كتابة رقم الهاتف في ملاحظات التحويل...">
             <p class="mt-1 text-[11px] text-on-surface-variant">تظهر هذه الملاحظة التوجيهية للزبائن في كافة شاشات الدفع والتحويل وشحن الرصيد.</p>
         </div>
     </div>

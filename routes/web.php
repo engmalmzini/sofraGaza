@@ -34,6 +34,10 @@ Route::middleware('guest')->group(function () {
     Route::get('/login', [LoginController::class, 'create'])->name('login');
     Route::post('/login', [LoginController::class, 'store']);
     Route::get('/register', [RegisterController::class, 'create'])->name('register');
+    Route::post('/register/phone', [RegisterController::class, 'sendCode'])->name('register.phone');
+    Route::post('/register/phone/resend', [RegisterController::class, 'resendCode'])->name('register.phone.resend');
+    Route::post('/register/phone/reset', [RegisterController::class, 'resetPhone'])->name('register.phone.reset');
+    Route::post('/register/verify', [RegisterController::class, 'verifyCode'])->name('register.verify');
     Route::post('/register', [RegisterController::class, 'store']);
     Route::get('/partners/register', [Partner\RegisterController::class, 'create'])->name('partner.register');
     Route::post('/partners/register', [Partner\RegisterController::class, 'store']);
@@ -87,6 +91,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::post('listings/{listing}/approve', [Admin\ListingController::class, 'approve'])->name('listings.approve');
     Route::post('listings/{listing}/reject', [Admin\ListingController::class, 'reject'])->name('listings.reject');
     Route::resource('restaurants.menu-items', Admin\MenuItemController::class)->except(['show']);
+    Route::get('orders/live', [Admin\OrderController::class, 'live'])->name('orders.live');
     Route::get('orders', [Admin\OrderController::class, 'index'])->name('orders.index');
     Route::get('orders/{order}', [Admin\OrderController::class, 'show'])->name('orders.show');
     Route::get('orders/{order}/receipt', [Admin\OrderController::class, 'receipt'])->name('orders.receipt');
@@ -129,6 +134,10 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
 
 Route::prefix('partner')->name('partner.')->middleware(['auth', 'partner', 'partner.listing'])->group(function () {
     Route::get('/', [Partner\DashboardController::class, 'index'])->name('dashboard');
+    Route::get('orders', [Partner\OrderController::class, 'index'])->name('orders.index');
+    Route::get('orders/live', [Partner\OrderController::class, 'live'])->name('orders.live');
+    Route::get('orders/{order}', [Partner\OrderController::class, 'show'])->name('orders.show');
+    Route::patch('orders/{order}', [Partner\OrderController::class, 'update'])->name('orders.update');
     Route::get('subscription', [Partner\SubscriptionController::class, 'index'])->name('subscription.index');
     Route::post('subscription/{plan}', [Partner\SubscriptionController::class, 'store'])->name('subscription.store');
     Route::get('restaurant', [Partner\RestaurantController::class, 'edit'])->name('restaurant.edit');
@@ -143,6 +152,7 @@ Route::prefix('partner')->name('partner.')->middleware(['auth', 'partner', 'part
 
 Route::prefix('courier')->name('courier.')->middleware(['auth', 'courier'])->group(function () {
     Route::get('/', [Courier\DashboardController::class, 'index'])->name('dashboard');
+    Route::get('orders/live', [Courier\DashboardController::class, 'live'])->name('orders.live');
     Route::get('orders/{order}', [Courier\OrderController::class, 'show'])->name('orders.show');
     Route::post('orders/{order}/complete', [Courier\OrderController::class, 'complete'])->name('orders.complete');
     Route::get('notifications', [Courier\NotificationController::class, 'index'])->name('notifications.index');

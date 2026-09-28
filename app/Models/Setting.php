@@ -134,7 +134,45 @@ class Setting extends Model
             'palpay_name' => (string) static::value('palpay_name', 'محفظة بال باي — سفرة غزة'),
             'palpay_qr_path' => $palpayQrPath,
             'palpay_qr_url' => $palpayQrUrl,
-            'instructions_note' => (string) static::value('payment_instructions_note', 'يرجى كتابة رقم هاتفك أو رقم الطلب في ملاحظات التحويل، ورفع صورة الإشعار للمراجعة الفورية.'),
         ];
+    }
+
+    public static function rawHomeBanners(): array
+    {
+        $raw = static::value('home_banners');
+        if (! $raw) {
+            return [];
+        }
+
+        if (is_array($raw)) {
+            return $raw;
+        }
+
+        $decoded = json_decode((string) $raw, true);
+
+        return is_array($decoded) ? array_values(array_filter($decoded)) : [];
+    }
+
+    public static function homeBanners(): array
+    {
+        $items = static::rawHomeBanners();
+
+        if (empty($items)) {
+            return [
+                'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=1200&h=300&q=80',
+                'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1200&h=300&q=80',
+                'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=1200&h=300&q=80',
+            ];
+        }
+
+        return array_map(function ($item) {
+            $path = is_array($item) ? ($item['image'] ?? $item['url'] ?? '') : (string) $item;
+
+            if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
+                return $path;
+            }
+
+            return \Illuminate\Support\Facades\Storage::disk('public')->url($path);
+        }, $items);
     }
 }

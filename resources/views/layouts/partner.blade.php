@@ -9,11 +9,13 @@
     $logoSrc = file_exists($logoPath) ? asset('images/logo.png').'?v='.filemtime($logoPath) : config('brand.logo');
     $partnerRestaurant = auth()->user()->ownedRestaurant;
     $panelTitle = $partnerRestaurant?->panelTitle() ?? 'لوحة الشريك';
+    $pendingPartnerOrdersCount = $partnerRestaurant ? $partnerRestaurant->orders()->whereIn('status', ['pending_confirmation', 'confirmed', 'preparing'])->count() : 0;
     $navGroups = [
         [
             'label' => $partnerRestaurant?->typeLabel() ?? 'المكان',
             'items' => [
                 ['route' => 'partner.dashboard', 'icon' => 'dashboard', 'label' => 'نظرة عامة', 'match' => 'partner.dashboard'],
+                ['route' => 'partner.orders.index', 'icon' => 'receipt_long', 'label' => 'الطلبات الواردة', 'match' => 'partner.orders.*', 'badge' => $pendingPartnerOrdersCount],
                 ['route' => 'partner.subscription.index', 'icon' => 'workspace_premium', 'label' => 'الاشتراك', 'match' => 'partner.subscription.*'],
                 ['route' => 'partner.restaurant.edit', 'icon' => 'storefront', 'label' => 'بيانات '.($partnerRestaurant?->venueNoun() ?? 'المكان'), 'match' => 'partner.restaurant.*'],
                 ['route' => 'partner.menu-items.index', 'icon' => 'restaurant_menu', 'label' => 'المنيو والتصنيفات', 'match' => 'partner.menu-items.*'],
@@ -83,6 +85,15 @@
                 </button>
             </form>
             <div class="admin-topbar__actions">
+                <a href="{{ route('partner.orders.index') }}" class="admin-topbar__icon" title="الطلبات الواردة">
+                    <span class="material-symbols-outlined">receipt_long</span>
+                    @if($pendingPartnerOrdersCount)
+                        <em>{{ $pendingPartnerOrdersCount > 9 ? '9+' : $pendingPartnerOrdersCount }}</em>
+                    @endif
+                </a>
+                <button type="button" class="admin-topbar__icon js-order-sound-btn" title="اختبار نغمة تنبيه الطلبات (تزمير)">
+                    <span class="material-symbols-outlined text-primary">volume_up</span>
+                </button>
                 <a href="{{ route('partner.notifications.index') }}" class="admin-topbar__icon" title="الإشعارات">
                     <span class="material-symbols-outlined">notifications</span>
                     @if($unreadNotifications)
@@ -122,5 +133,6 @@
             @yield('content')
         </main>
     </div>
+    @include('partials.live-order-sound-and-polling')
 </body>
 </html>

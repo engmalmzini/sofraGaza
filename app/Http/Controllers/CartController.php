@@ -25,10 +25,24 @@ class CartController extends Controller
 
     public function store(Request $request, MenuItem $item): JsonResponse|RedirectResponse
     {
-        $request->validate(['quantity' => ['nullable', 'integer', 'min:1', 'max:20']]);
+        $request->validate([
+            'quantity' => ['nullable', 'integer', 'min:1', 'max:20'],
+            'notes' => ['nullable', 'string', 'max:500'],
+            'addons' => ['nullable', 'array'],
+            'addons.*' => ['string', 'max:100'],
+        ]);
+
+        $notes = $request->input('notes');
+        $addons = $request->input('addons', []);
+        if (! empty($addons) && is_array($addons)) {
+            $addonText = implode('، ', array_filter($addons));
+            if ($addonText !== '') {
+                $notes = filled($notes) ? "{$notes} (مع: {$addonText})" : "مع: {$addonText}";
+            }
+        }
 
         try {
-            $this->cart->add($item, (int) $request->input('quantity', 1));
+            $this->cart->add($item, (int) $request->input('quantity', 1), $notes);
         } catch (RuntimeException $e) {
             return $this->respond($request, $e->getMessage(), false);
         }
@@ -41,9 +55,16 @@ class CartController extends Controller
         $request->validate([
             'item_id' => ['required', 'integer'],
             'quantity' => ['required', 'integer', 'min:0', 'max:20'],
+            'notes' => ['nullable', 'string', 'max:500'],
         ]);
 
-        $this->cart->update((int) $request->item_id, (int) $request->quantity);
+        $hasNotesField = $request->has('notes');
+        $this->cart->update(
+            (int) $request->item_id,
+            (int) $request->quantity,
+            $request->input('notes'),
+            $hasNotesField
+        );
 
         return $this->respond($request, 'تم تحديث السلة.');
     }

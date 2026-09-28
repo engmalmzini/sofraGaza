@@ -4,15 +4,21 @@
 @section('title', 'الطلبات')
 
 @section('content')
-<div class="admin-toolbar">
+<div class="admin-toolbar flex-wrap gap-2">
     <div class="admin-chips">
         <a class="admin-chip {{ request('status') ? '' : 'is-active' }}" href="{{ route('admin.orders.index', request()->except('status')) }}">الكل</a>
         @foreach(\App\Models\Order::STATUSES as $key => $label)
             <a class="admin-chip {{ request('status') === $key ? 'is-active' : '' }}" href="{{ route('admin.orders.index', array_merge(request()->except('page'), ['status' => $key])) }}">{{ $label }}</a>
         @endforeach
     </div>
+    <div class="flex items-center gap-2">
+        <button type="button" id="btn-toggle-sound" class="admin-btn admin-btn--ghost text-xs flex items-center gap-1" title="اختبار نغمة التنبيه">
+            <span class="material-symbols-outlined text-primary text-[16px]">volume_up</span>
+            <span id="sound-status-label">تنبيه صوتي: مفعل</span>
+        </button>
+    </div>
 </div>
-<div class="admin-table-wrap">
+<div class="admin-table-wrap" data-admin-orders-table data-last-id="{{ $orders->max('id') ?? 0 }}" data-live-url="{{ route('admin.orders.live') }}">
     <table>
         <thead>
             <tr>
@@ -24,22 +30,8 @@
                 <th>الحالة</th>
             </tr>
         </thead>
-        <tbody>
-            @forelse($orders as $order)
-                <tr class="admin-click-row" data-href="{{ route('admin.orders.show', $order) }}" role="link" tabindex="0">
-                    <td><a class="font-bold text-primary" href="{{ route('admin.orders.show', $order) }}">{{ $order->id }}</a></td>
-                    <td>{{ $order->user->name }}<div class="text-xs text-on-surface-variant">{{ $order->phone }}</div></td>
-                    <td>{{ $order->restaurant->name }}</td>
-                    <td>{{ number_format($order->total, 2) }} <span class="ils">₪</span></td>
-                    <td>{{ $order->type === 'redemption' ? 'استبدال نقاط' : 'شراء' }}</td>
-                    <td>
-                        @include('admin.partials.pill', ['status' => $order->status, 'label' => $order->statusLabel()])
-                        <span class="material-symbols-outlined admin-click-row__open" aria-hidden="true">chevron_left</span>
-                    </td>
-                </tr>
-            @empty
-                <tr><td colspan="6">لا توجد طلبات مطابقة.</td></tr>
-            @endforelse
+        <tbody id="admin-orders-tbody">
+            @include('admin.orders.partials.order-rows', ['orders' => $orders])
         </tbody>
     </table>
 </div>

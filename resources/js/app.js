@@ -277,23 +277,65 @@ const syncCartIndexPage = (cart) => {
         return;
     }
 
-    if (!cart.lines?.length) {
-        window.location.reload();
+    const count = Number(cart.count || 0);
+    const lines = cart.lines || [];
+    const emptyView = document.getElementById('cart-empty-view');
+    const itemsView = document.getElementById('cart-items-view');
+    const floatingCheckout = document.getElementById('cart-floating-checkout');
+    const clearForm = document.getElementById('header-clear-cart-form');
+    const headerSpacer = document.getElementById('header-cart-empty-spacer');
+
+    if (count === 0 || lines.length === 0) {
+        if (emptyView) {
+            emptyView.classList.remove('hidden');
+        }
+        if (itemsView) {
+            itemsView.classList.add('hidden');
+        }
+        if (floatingCheckout) {
+            floatingCheckout.classList.add('hidden');
+        }
+        if (clearForm) {
+            clearForm.classList.add('hidden');
+        }
+        if (headerSpacer) {
+            headerSpacer.classList.remove('hidden');
+        }
+        page.classList.add('min-h-[calc(100dvh-140px)]', 'lg:min-h-[60vh]', 'flex', 'flex-col', 'justify-center', 'pb-6');
+        page.classList.remove('pb-36');
         return;
     }
 
+    if (emptyView) emptyView.classList.add('hidden');
+    if (itemsView) itemsView.classList.remove('hidden');
+    if (floatingCheckout) floatingCheckout.classList.remove('hidden');
+    if (clearForm) clearForm.classList.remove('hidden');
+    if (headerSpacer) headerSpacer.classList.add('hidden');
+    page.classList.remove('min-h-[calc(100dvh-140px)]', 'lg:min-h-[60vh]', 'flex', 'flex-col', 'justify-center', 'pb-6');
+    page.classList.add('pb-36');
+
     page.querySelectorAll('[data-cart-line]').forEach((row) => {
         const id = Number(row.dataset.cartLine);
-        const line = cart.lines.find((item) => Number(item.id) === id);
+        const line = lines.find((item) => Number(item.id) === id);
 
         if (!line) {
             row.remove();
             return;
         }
 
-        const qty = row.querySelector('[name="quantity"]');
-        if (qty instanceof HTMLInputElement) {
-            qty.value = String(line.qty);
+        const qtyDisplay = row.querySelector('[data-cart-qty]');
+        if (qtyDisplay) {
+            qtyDisplay.textContent = String(line.qty);
+        }
+
+        const plusInput = row.querySelector('[data-cart-qty-plus]');
+        if (plusInput instanceof HTMLInputElement) {
+            plusInput.value = String(line.qty + 1);
+        }
+
+        const minusInput = row.querySelector('[data-cart-qty-minus]');
+        if (minusInput instanceof HTMLInputElement) {
+            minusInput.value = String(Math.max(0, line.qty - 1));
         }
 
         const total = row.querySelector('[data-line-total]');
@@ -311,7 +353,7 @@ const syncCartIndexPage = (cart) => {
     });
 
     page.querySelectorAll('[data-cart-grand-total]').forEach((el) => {
-        el.innerHTML = `${money(cart.total, 2)} ${ilsMark}`;
+        el.innerHTML = `${money(cart.items_total ?? cart.subtotal, 2)} ${ilsMark}`;
     });
 };
 
@@ -321,12 +363,11 @@ const applyCart = (cart) => {
     }
 
     const count = Number(cart.count || 0);
-    const badge = document.querySelector('[data-header-cart-badge]');
 
-    if (badge) {
+    document.querySelectorAll('[data-header-cart-badge]').forEach((badge) => {
         badge.hidden = count === 0;
         badge.textContent = count > 9 ? '9+' : String(count);
-    }
+    });
 
     document.querySelectorAll('[data-cart-count]').forEach((el) => {
         el.textContent = String(count);
@@ -380,6 +421,12 @@ const applyCart = (cart) => {
     setHidden(document.querySelector('[data-desktop-cart-summary]'), count === 0);
     setHidden(document.querySelector('[data-desktop-cart-clear]'), count === 0);
     setHidden(document.querySelector('[data-drawer-summary]'), count === 0);
+
+    const waBtn = document.getElementById('floating-whatsapp-btn');
+    if (waBtn) {
+        waBtn.classList.toggle('bottom-[152px]', count > 0);
+        waBtn.classList.toggle('bottom-[74px]', count === 0);
+    }
 
     const floatingMeta = document.querySelector('[data-floating-cart-meta]');
     if (floatingMeta) {
@@ -532,6 +579,10 @@ const isCartForm = (form) => {
 };
 
 document.addEventListener('submit', async (event) => {
+    if (event.defaultPrevented) {
+        return;
+    }
+
     const form = event.target;
 
     if (!(form instanceof HTMLFormElement) || !isCartForm(form)) {
@@ -1413,6 +1464,18 @@ document.querySelectorAll('form[data-once-submit]').forEach((form) => {
         });
     });
 });
+
+const initWhatsAppFloatingPosition = () => {
+    const waBtn = document.getElementById('floating-whatsapp-btn');
+    if (!waBtn) return;
+    const floatingCart = document.querySelector('[data-floating-cart]:not(.hidden)');
+    const mobileCartPill = document.querySelector('#mobile-cart-pill:not(.hidden)');
+    const hasCart = !!(floatingCart || mobileCartPill);
+    waBtn.classList.toggle('bottom-[152px]', hasCart);
+    waBtn.classList.toggle('bottom-[74px]', !hasCart);
+};
+
+initWhatsAppFloatingPosition();
 
 
 

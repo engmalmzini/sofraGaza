@@ -32,17 +32,23 @@
                     <div class="flex flex-col gap-1">
                         <div class="flex flex-wrap items-center gap-2">
                             <h1 class="font-headline-md text-[24px] font-bold text-on-surface">{{ $restaurant->name }}</h1>
-                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-label-sm text-[11px]">
-                                <span class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
-                                مفتوح يستقبل الطلبات
-                            </span>
+                            @if($restaurant->isOpen())
+                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold text-xs">
+                                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                                    مفتوح يستقبل الطلبات
+                                </span>
+                            @else
+                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-rose-100 text-rose-800 font-bold text-xs">
+                                    <span class="w-2 h-2 rounded-full bg-rose-500"></span>
+                                    مغلق حالياً
+                                </span>
+                            @endif
                         </div>
-                        <p class="font-body-sm text-[14px] text-on-surface-variant flex items-center gap-1 flex-wrap">
-                            <span class="material-symbols-outlined text-[16px] text-primary">location_on</span>
-                            <span>{{ $restaurant->address }}</span>
-                            <span class="text-surface-container-highest">•</span>
-                            <span>{{ $restaurant->description ?: $restaurant->cuisineLabel() }}</span>
-                        </p>
+                        @if($restaurant->description || $restaurant->cuisineLabel())
+                            <p class="font-body-sm text-[14px] text-on-surface-variant truncate">
+                                {{ $restaurant->description ?: $restaurant->cuisineLabel() }}
+                            </p>
+                        @endif
                         <div class="flex flex-wrap items-center gap-4 pt-1">
                             <div class="flex items-center gap-1 bg-surface-container px-3 py-1 rounded-full">
                                 <span class="material-symbols-outlined text-[18px] text-tertiary fill-1">star</span>

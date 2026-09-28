@@ -18,6 +18,13 @@ class DashboardController extends Controller
         $menuByCategory = $restaurant->menuItems()->orderBy('name')->get()->groupBy('category');
         $listing = $restaurant->activeListing();
 
+        $activeOrders = $restaurant->orders()
+            ->with(['user', 'items', 'courier'])
+            ->whereIn('status', ['pending_confirmation', 'confirmed', 'preparing', 'delivering'])
+            ->latest('id')
+            ->get();
+        $activeOrdersCount = $activeOrders->count();
+
         return view('partner.dashboard', [
             'restaurant' => $restaurant,
             'checklist' => $checklist,
@@ -25,6 +32,8 @@ class DashboardController extends Controller
             'categoryStats' => $categoryStats,
             'menuByCategory' => $menuByCategory,
             'listing' => $listing,
+            'activeOrders' => $activeOrders,
+            'activeOrdersCount' => $activeOrdersCount,
         ]);
     }
 }

@@ -53,6 +53,10 @@
 
 <div class="admin-metrics">
     <article class="admin-metric admin-metric--accent">
+        <span>الطلبات الواردة النشطة</span>
+        <strong class="!text-2xl text-primary" id="partner-dash-counter">{{ $activeOrdersCount }}</strong>
+    </article>
+    <article class="admin-metric">
         <span>حالة {{ $restaurant->venueNoun() }}</span>
         <strong class="!text-xl">{{ $restaurant->verificationLabel() }}</strong>
     </article>
@@ -65,6 +69,30 @@
         <strong class="!text-xl">{{ $restaurant->isVisible() ? 'ظاهر' : 'قيد المراجعة' }}</strong>
     </article>
 </div>
+
+<section class="admin-card mb-4" id="partner-live-orders-section" data-last-id="{{ $activeOrders->max('id') ?? 0 }}" data-live-url="{{ route('partner.orders.live') }}">
+    <div class="admin-toolbar flex-wrap gap-2">
+        <div class="flex items-center gap-2">
+            <h2>الطلبات الواردة (تحديث فوري)</h2>
+            <span class="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold animate-pulse">
+                <span class="w-2 h-2 rounded-full bg-emerald-600"></span>
+                مباشر
+            </span>
+        </div>
+        <div class="flex items-center gap-2">
+            <button type="button" id="btn-toggle-sound" class="admin-btn admin-btn--ghost text-xs flex items-center gap-1" title="اختبار نغمة التنبيه">
+                <span class="material-symbols-outlined text-primary text-[16px]">volume_up</span>
+                <span id="sound-status-label">صوت التنبيه: مفعّل</span>
+            </button>
+            <a class="admin-btn admin-btn--ghost text-xs" href="{{ route('partner.orders.index') }}">كل الطلبات</a>
+        </div>
+    </div>
+    <p class="mt-1 text-xs text-on-surface-variant">تظهر الطلبات الجديدة هنا فور إرسال الزبون لها مع رنين إشعار (تزمير) دون الحاجة لتحديث الصفحة.</p>
+
+    <div id="partner-orders-container" class="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        @include('partner.orders.partials.order-cards', ['orders' => $activeOrders, 'restaurant' => $restaurant])
+    </div>
+</section>
 
 <section class="admin-card partner-cats-card">
     <div class="admin-toolbar">

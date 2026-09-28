@@ -85,5 +85,6 @@
     </nav>
     @endif
     </div>
+    @include('partials.live-order-sound-and-polling')
 </body>
 </html>

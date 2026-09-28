@@ -84,6 +84,7 @@ class OrderService
                     'price' => $line['item']->price,
                     'quantity' => $line['qty'],
                     'line_total' => $line['line_total'],
+                    'notes' => $line['notes'] ?? null,
                 ]);
             }
 
@@ -106,6 +107,16 @@ class OrderService
             "طلب #{$order->id} من {$user->name} بقيمة {$order->total} ₪ (".($isWallet ? 'خصم من الرصيد' : 'حوالة').').',
             route('admin.orders.show', $order)
         );
+
+        $restaurantOwner = $order->restaurant?->owner;
+        if ($restaurantOwner) {
+            $this->notifications->notify(
+                $restaurantOwner,
+                'طلب جديد وارد لمطعمك!',
+                "وصل طلب جديد رقم #{$order->id} بقيمة {$order->total} ₪ من {$user->name}.",
+                route('partner.orders.show', $order)
+            );
+        }
 
         return $order;
     }

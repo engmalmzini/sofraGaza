@@ -18,7 +18,7 @@ class HomeController extends Controller
             ->inDeliveryArea()
             ->withCount('menuItems')
             ->latest()
-            ->take(6)
+            ->take(24)
             ->get();
 
         $restaurantCount = Restaurant::query()->visible()->count();

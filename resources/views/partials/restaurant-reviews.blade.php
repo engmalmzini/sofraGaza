@@ -66,54 +66,62 @@
     </div>
 
     {{-- Add Review Form --}}
-    <div class="rounded-2xl border border-slate-200 bg-surface-container-low/50 p-5 space-y-4">
-        <div class="flex items-center gap-2 text-stone-900 font-bold text-sm">
-            <span class="material-symbols-outlined text-primary text-[20px]">rate_review</span>
+    <div class="rounded-2xl border border-slate-200/80 bg-stone-50/70 p-4 sm:p-5 space-y-3.5 shadow-2xs">
+        <div class="flex items-center gap-1.5 text-stone-900 font-bold text-xs">
+            <span class="material-symbols-outlined text-primary text-[18px]">rate_review</span>
             <span>شاركنا تجربتك وتقييمك</span>
         </div>
 
         @auth
-            <form method="POST" action="{{ route('restaurants.reviews.store', $restaurant) }}" class="space-y-4">
+            <form method="POST" action="{{ route('restaurants.reviews.store', $restaurant) }}" class="space-y-3">
                 @csrf
 
                 {{-- Interactive Star Selector --}}
-                <div>
-                    <label class="block text-xs font-bold text-stone-700 mb-1.5">حدد تقييمك من 1 إلى 5 نجوم</label>
-                    <div class="flex items-center gap-1 text-amber-400" id="star-rating-picker">
-                        @for($s = 1; $s <= 5; $s++)
-                            <button type="button" 
-                                    class="star-btn p-1 transition-transform hover:scale-110 focus:outline-hidden"
-                                    data-value="{{ $s }}"
-                                    onclick="selectRating({{ $s }})"
-                                    onmouseenter="hoverRating({{ $s }})"
-                                    onmouseleave="resetHoverRating()">
-                                <span class="material-symbols-outlined text-[28px] star-icon text-slate-300">star</span>
-                            </button>
-                        @endfor
-                        <span id="star-rating-label" class="text-xs font-bold text-stone-600 mr-2">اضغط على النجوم للتقييم</span>
+                <div class="space-y-1.5">
+                    <div class="flex items-center justify-between">
+                        <label class="text-[11px] font-bold text-stone-700">حدد تقييمك</label>
+                        <span id="star-rating-label" class="text-[11px] font-bold text-amber-700">5 نجوم (ممتاز)</span>
+                    </div>
+
+                    <div class="flex items-center justify-between gap-2 p-2 rounded-xl bg-white border border-slate-200/70">
+                        <div class="flex items-center gap-0.5 text-amber-400" id="star-rating-picker">
+                            @for($s = 1; $s <= 5; $s++)
+                                <button type="button" 
+                                        class="star-btn p-0.5 transition-transform hover:scale-110 active:scale-95 focus:outline-hidden cursor-pointer"
+                                        data-value="{{ $s }}"
+                                        onclick="selectRating({{ $s }})"
+                                        onmouseenter="hoverRating({{ $s }})"
+                                        onmouseleave="resetHoverRating()">
+                                    <span class="material-symbols-outlined text-[24px] star-icon text-slate-300">star</span>
+                                </button>
+                            @endfor
+                        </div>
+                        <span class="text-[10px] text-stone-400 font-medium">انقر لاختيار النجوم</span>
                     </div>
                     <input type="hidden" id="selected-rating-input" name="rating" value="5" required>
                 </div>
 
                 <div>
-                    <label class="block text-xs font-bold text-stone-700 mb-1">تعليقك ورأيك (اختياري)</label>
-                    <textarea name="comment" rows="3" placeholder="ما رأيك بمذاق الوجبة، سرعة التوصيل، والتغليف؟" class="w-full rounded-xl border border-slate-200 p-3 text-xs bg-white text-stone-900 focus:border-primary focus:ring-1 focus:ring-primary"></textarea>
+                    <label class="block text-[11px] font-bold text-stone-700 mb-1">تعليقك ورأيك (اختياري)</label>
+                    <textarea name="comment" rows="2" placeholder="ما رأيك بمذاق الوجبة، سرعة التوصيل، والتغليف؟" class="w-full rounded-xl border border-slate-200 p-2.5 text-xs bg-white text-stone-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all resize-none placeholder:text-stone-400"></textarea>
                 </div>
 
-                <div class="flex items-center justify-between gap-3">
-                    <p class="text-[11px] text-stone-400">سيتم نشر تقييمك باسم حسابك الحالي ({{ auth()->user()->name }})</p>
-                    <button type="submit" class="rounded-xl bg-primary hover:bg-primary-container text-white px-5 py-2.5 font-bold text-xs shadow-xs transition-colors">
+                <div class="flex items-center justify-between gap-2 pt-0.5">
+                    <p class="text-[10px] text-stone-400 min-w-0 truncate">
+                        النشر باسم: <strong class="text-stone-600 font-bold">{{ auth()->user()->name }}</strong>
+                    </p>
+                    <button type="submit" class="h-9 px-4 rounded-xl bg-primary hover:bg-primary-container text-white font-extrabold text-[11px] whitespace-nowrap shadow-xs transition-colors shrink-0 cursor-pointer">
                         إرسال التقييم
                     </button>
                 </div>
             </form>
         @else
-            <div class="p-4 rounded-xl bg-white border border-slate-200 flex flex-wrap items-center justify-between gap-3">
-                <div class="text-xs text-stone-600">
-                    سجّل دخولك بحسابك لتتمكن من إضافة تقييم ومشاركة رأيك وتجربتك مع المطعم.
+            <div class="p-3.5 rounded-xl bg-white border border-slate-200 flex flex-wrap items-center justify-between gap-2">
+                <div class="text-[11px] text-stone-600">
+                    سجّل دخولك بحسابك لتتمكن من إضافة تقييم ومشاركة رأيك وتجربتك.
                 </div>
-                <a href="{{ route('login') }}" class="rounded-xl bg-primary text-white hover:bg-primary-container px-4 py-2 font-bold text-xs transition-colors">
-                    تسجيل الدخول للتقييم
+                <a href="{{ route('login') }}" class="rounded-xl bg-primary text-white hover:bg-primary-container px-3.5 py-1.5 font-bold text-xs transition-colors">
+                    تسجيل الدخول
                 </a>
             </div>
         @endauth
@@ -121,7 +129,7 @@
 
     {{-- Reviews List --}}
     <div class="space-y-4">
-        <h3 class="text-sm font-bold text-stone-900">أحدث الآراء المكتوبة</h3>
+        <h3 class="text-xs font-bold text-stone-900">أحدث الآراء المكتوبة</h3>
 
         <div class="space-y-3">
             @forelse($reviewsList as $rev)
@@ -171,11 +179,11 @@
 <script>
 let currentSelectedRating = 5;
 const ratingLabels = {
-    1: 'نجمة واحدة (سيئ)',
-    2: 'نجمتان (مقبول)',
+    1: '1 نجمة (سيئ)',
+    2: '2 نجوم (مقبول)',
     3: '3 نجوم (جيد)',
     4: '4 نجوم (جيد جداً)',
-    5: '5 نجوم (ممتاز ورائع)'
+    5: '5 نجوم (ممتاز)'
 };
 
 function selectRating(val) {

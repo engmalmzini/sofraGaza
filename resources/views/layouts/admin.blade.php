@@ -222,6 +222,9 @@
                         <em>{{ $unreadNotifications > 9 ? '9+' : $unreadNotifications }}</em>
                     @endif
                 </a>
+                <button type="button" class="admin-topbar__icon js-order-sound-btn" title="اختبار نغمة تنبيه الطلبات (تزمير)">
+                    <span class="material-symbols-outlined text-primary">volume_up</span>
+                </button>
                 <details class="admin-topbar__user">
                     <summary class="admin-topbar__icon" title="{{ auth()->user()->name }}" aria-label="الحساب">
                         <span class="material-symbols-outlined">account_circle</span>
@@ -255,5 +258,6 @@
             @yield('content')
         </main>
     </div>
+    @include('partials.live-order-sound-and-polling')
 </body>
 </html>

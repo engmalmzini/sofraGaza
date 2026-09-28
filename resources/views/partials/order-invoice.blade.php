@@ -29,6 +29,12 @@
                     <tr>
                         <td>
                             <strong>{{ $item->name }}</strong>
+                            @if($item->notes)
+                                <div class="mt-1 text-xs text-primary font-medium flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-[14px]">edit_note</span>
+                                    <span>ملاحظات: {{ $item->notes }}</span>
+                                </div>
+                            @endif
                         </td>
                         <td>{{ number_format($item->price, 2) }} <span class="ils">₪</span></td>
                         <td>{{ $item->quantity }}</td>

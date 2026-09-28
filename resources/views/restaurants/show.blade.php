@@ -4,6 +4,8 @@
 @section('body_class', 'page-restaurant-show')
 @section('hideFloatingCart')
 @endsection
+@section('hideMobileSubpageBar')
+@endsection
 
 @section('content')
     @include('restaurants.partials.show-mobile')
@@ -95,29 +97,29 @@
                         <span class="font-label-lg text-[15px] text-on-surface font-semibold">إضافات محببة (اختياري)</span>
                         <label class="flex items-center justify-between p-2 rounded-lg hover:bg-surface-container-low cursor-pointer">
                             <div class="flex items-center gap-2">
-                                <input class="addon-check w-4 h-4 rounded accent-primary" data-price="0" type="checkbox">
+                                <input class="addon-check w-4 h-4 rounded accent-primary" name="addons[]" value="خبز صاج وطابون طازج إضافي" data-price="0" type="checkbox">
                                 <span class="font-body-sm text-[14px] text-on-surface">خبز صاج وطابون طازج إضافي</span>
                             </div>
                             <span class="font-label-sm text-[11px] text-secondary font-bold">مجاناً</span>
                         </label>
                         <label class="flex items-center justify-between p-2 rounded-lg hover:bg-surface-container-low cursor-pointer">
                             <div class="flex items-center gap-2">
-                                <input class="addon-check w-4 h-4 rounded accent-primary" data-price="0" type="checkbox">
+                                <input class="addon-check w-4 h-4 rounded accent-primary" name="addons[]" value="صلصة مثومة غنية وزيت زيتون" data-price="0" type="checkbox">
                                 <span class="font-body-sm text-[14px] text-on-surface">صلصة مثومة غنية وزيت زيتون</span>
                             </div>
                             <span class="font-label-sm text-[11px] text-secondary font-bold">مجاناً</span>
                         </label>
                         <label class="flex items-center justify-between p-2 rounded-lg hover:bg-surface-container-low cursor-pointer">
                             <div class="flex items-center gap-2">
-                                <input class="addon-check w-4 h-4 rounded accent-primary" data-price="0" type="checkbox">
+                                <input class="addon-check w-4 h-4 rounded accent-primary" name="addons[]" value="سلطة دقّة غزاوية حارة بالفلفل الأخضر" data-price="0" type="checkbox">
                                 <span class="font-body-sm text-[14px] text-on-surface">سلطة دقّة غزاوية حارة بالفلفل الأخضر</span>
                             </div>
                             <span class="font-label-sm text-[11px] text-secondary font-bold">مجاناً</span>
                         </label>
                     </div>
                     <div class="flex flex-col gap-1">
-                        <label class="font-label-lg text-[15px] text-on-surface font-semibold" for="orderNotes">ملاحظات التحضير الخاصة</label>
-                        <textarea class="w-full rounded-xl bg-surface-container-low p-3 border-none outline-none font-body-sm text-[14px] text-on-surface placeholder:text-on-surface-variant" id="orderNotes" name="notes" placeholder="مثال: بدون بصل، خبز محمص زيادة، فصل الصلصة عن اللحم..." rows="2"></textarea>
+                        <label class="font-label-lg text-[15px] text-on-surface font-semibold" for="orderNotes">ملاحظات التحضير الخاصة بالصنف</label>
+                        <textarea class="w-full rounded-xl bg-surface-container-low p-3 border border-slate-200 focus:border-primary outline-none font-body-sm text-[14px] text-on-surface placeholder:text-on-surface-variant" id="orderNotes" name="notes" placeholder="مثال: زيادة فلفل حار، بدون جبنة، بدون بصل، خبز محمص زيادة..." rows="2"></textarea>
                     </div>
                 </div>
                 <div class="p-4 bg-surface-container-low flex items-center justify-between gap-4">

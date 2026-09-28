@@ -8,6 +8,10 @@ class PalestinianPhone
 
     public const HTML_PATTERN = '^(059|056)[0-9]{7,}$';
 
+    public const CUSTOMER_PATTERN = '/^05[0-9]{8}$/';
+
+    public const CUSTOMER_HTML_PATTERN = '^05[0-9]{8}$';
+
     public static function digits(?string $value): string
     {
         return preg_replace('/\D+/', '', (string) $value) ?? '';
@@ -68,5 +72,37 @@ class PalestinianPhone
             "{$field}.regex" => 'رقم الهاتف يجب أن يبدأ بـ 059 أو 056 ويتكون من 10 أرقام على الأقل.',
             "{$field}.unique" => 'رقم الهاتف مسجّل مسبقاً.',
         ];
+    }
+
+    public static function customerRules(bool $uniqueUser = false): array
+    {
+        $rules = ['required', 'string', 'size:10', 'regex:'.self::CUSTOMER_PATTERN];
+
+        if ($uniqueUser) {
+            $rules[] = 'unique:users,phone';
+        }
+
+        return $rules;
+    }
+
+    public static function customerMessages(string $field = 'phone'): array
+    {
+        return [
+            "{$field}.required" => 'رقم الهاتف مطلوب.',
+            "{$field}.size" => 'رقم الهاتف يجب أن يتكون من 10 أرقام.',
+            "{$field}.regex" => 'رقم الهاتف يجب أن يبدأ بـ 05 ويتكون من 10 أرقام.',
+            "{$field}.unique" => 'رقم الهاتف مسجّل مسبقاً.',
+        ];
+    }
+
+    public static function mask(string $phone): string
+    {
+        $digits = self::digits($phone);
+
+        if (strlen($digits) < 7) {
+            return $digits;
+        }
+
+        return substr($digits, 0, 3).str_repeat('*', strlen($digits) - 6).substr($digits, -3);
     }
 }

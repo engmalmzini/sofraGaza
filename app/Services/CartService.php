@@ -27,7 +27,7 @@ class CartService
         return Session::get('cart.items', []);
     }
 
-    public function add(MenuItem $item, int $qty = 1): void
+    public function add(MenuItem $item, int $qty = 1, ?string $notes = null): void
     {
         if (! $item->is_available) {
             throw new RuntimeException('هذا الصنف غير متوفر حالياً.');
@@ -43,20 +43,37 @@ class CartService
         }
 
         $items = $this->items();
-        $items[$item->id] = ($items[$item->id] ?? 0) + max(1, $qty);
+        $existing = $items[$item->id] ?? null;
+        $existingQty = is_array($existing) ? (int) ($existing['qty'] ?? 0) : (int) $existing;
+        $existingNotes = is_array($existing) ? ($existing['notes'] ?? null) : null;
+
+        $newQty = $existingQty + max(1, $qty);
+        $newNotes = filled($notes) ? trim($notes) : $existingNotes;
+
+        $items[$item->id] = [
+            'qty' => $newQty,
+            'notes' => $newNotes,
+        ];
 
         Session::put('cart.restaurant_id', $item->restaurant_id);
         Session::put('cart.items', $items);
     }
 
-    public function update(int $itemId, int $qty): void
+    public function update(int $itemId, int $qty, ?string $notes = null, bool $updateNotes = false): void
     {
         $items = $this->items();
 
         if ($qty <= 0) {
             unset($items[$itemId]);
         } else {
-            $items[$itemId] = $qty;
+            $existing = $items[$itemId] ?? null;
+            $existingNotes = is_array($existing) ? ($existing['notes'] ?? null) : null;
+            $newNotes = $updateNotes ? (filled($notes) ? trim($notes) : null) : $existingNotes;
+
+            $items[$itemId] = [
+                'qty' => $qty,
+                'notes' => $newNotes,
+            ];
         }
 
         if ($items === []) {
@@ -120,7 +137,12 @@ class CartService
 
     public function count(): int
     {
-        return (int) array_sum($this->items());
+        $total = 0;
+        foreach ($this->items() as $entry) {
+            $total += is_array($entry) ? (int) ($entry['qty'] ?? 0) : (int) $entry;
+        }
+
+        return $total;
     }
 
     public function quote(?User $user = null, ?string $areaKey = null, ?string $couponCode = null): array
@@ -134,17 +156,24 @@ class CartService
         $lines = [];
         $subtotal = 0.0;
 
-        foreach ($quantities as $id => $qty) {
+        foreach ($quantities as $id => $data) {
             $item = $menuItems->get($id);
             if (! $item) {
                 continue;
             }
 
-            $lineTotal = (float) $item->price * (int) $qty;
+            $qty = is_array($data) ? (int) ($data['qty'] ?? 0) : (int) $data;
+            if ($qty <= 0) {
+                continue;
+            }
+            $notes = is_array($data) ? ($data['notes'] ?? null) : null;
+
+            $lineTotal = (float) $item->price * $qty;
             $subtotal += $lineTotal;
             $lines[] = [
                 'item' => $item,
-                'qty' => (int) $qty,
+                'qty' => $qty,
+                'notes' => $notes,
                 'line_total' => $lineTotal,
             ];
         }
@@ -244,6 +273,7 @@ class CartService
                     'id' => $item->id,
                     'name' => $item->name,
                     'qty' => (int) $line['qty'],
+                    'notes' => $line['notes'] ?? null,
                     'price' => (float) $item->price,
                     'line_total' => $lineTotal,
                     'points' => $this->points->previewLineEarn($item, (int) $line['qty']),
