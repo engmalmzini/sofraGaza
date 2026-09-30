@@ -27,6 +27,8 @@ class User extends Authenticatable
         'courier_status',
         'courier_rejection_reason',
         'courier_verified_at',
+        'payout_method',
+        'payout_details',
         'points_balance',
         'wallet_balance',
     ];
@@ -146,6 +148,82 @@ class User extends Authenticatable
     public function deliveries(): HasMany
     {
         return $this->hasMany(Order::class, 'courier_id')->latest();
+    }
+
+    public function courierPayouts(): HasMany
+    {
+        return $this->hasMany(CourierPayout::class)->latest();
+    }
+
+    public function courierDeliveredOrders(): HasMany
+    {
+        return $this->deliveries()->where('status', 'delivered');
+    }
+
+    public function courierTotalGrossDeliveryFees(): float
+    {
+        return (float) $this->courierDeliveredOrders()->sum('delivery_fee');
+    }
+
+    public function courierLifetimePlatformFee(): float
+    {
+        return round($this->courierTotalGrossDeliveryFees() * 0.15, 2);
+    }
+
+    public function courierLifetimeNetEarnings(): float
+    {
+        return round($this->courierTotalGrossDeliveryFees() * 0.85, 2);
+    }
+
+    public function courierTotalWithdrawn(): float
+    {
+        return (float) $this->courierPayouts()->where('status', CourierPayout::STATUS_COMPLETED)->sum('amount');
+    }
+
+    public function courierPendingPayoutsAmount(): float
+    {
+        return (float) $this->courierPayouts()->where('status', CourierPayout::STATUS_PENDING)->sum('amount');
+    }
+
+    public function courierAvailableBalance(): float
+    {
+        $net = $this->courierLifetimeNetEarnings();
+        $withdrawn = $this->courierTotalWithdrawn();
+        $pending = $this->courierPendingPayoutsAmount();
+
+        return max(0.0, round($net - $withdrawn - $pending, 2));
+    }
+
+    public function courierEarningsForPeriod(string $period = 'all'): array
+    {
+        $query = $this->courierDeliveredOrders()->with(['restaurant', 'user']);
+
+        match ($period) {
+            'today' => $query->whereDate('delivered_at', today()),
+            'yesterday' => $query->whereDate('delivered_at', today()->subDay()),
+            'week' => $query->whereBetween('delivered_at', [now()->startOfWeek(), now()->endOfWeek()]),
+            'month' => $query->whereMonth('delivered_at', now()->month)->whereYear('delivered_at', now()->year),
+            default => null,
+        };
+
+        $orders = $query->latest('delivered_at')->get();
+        $totalFees = (float) $orders->sum('delivery_fee');
+        $platformFee = round($totalFees * 0.15, 2);
+        $netEarnings = round($totalFees * 0.85, 2);
+
+        return [
+            'period' => $period,
+            'orders' => $orders,
+            'count' => $orders->count(),
+            'total_fees' => $totalFees,
+            'platform_fee' => $platformFee,
+            'net_earnings' => $netEarnings,
+        ];
+    }
+
+    public function courierPayoutMethodLabel(): string
+    {
+        return CourierPayout::METHODS[$this->payout_method] ?? ($this->payout_method ?: 'غير محدد');
     }
 
     public function isCourierBusy(): bool

@@ -77,6 +77,10 @@
             اليوم
             @if($navDone)<i>{{ $navDone }}</i>@endif
         </a>
+        <a href="{{ route('courier.wallet') }}" class="{{ request()->routeIs('courier.wallet*') ? 'is-active' : '' }}">
+            <span class="material-symbols-outlined">account_balance_wallet</span>
+            أرباحي
+        </a>
         <a href="{{ route('courier.notifications.index') }}" class="{{ request()->routeIs('courier.notifications.*') ? 'is-active' : '' }}">
             <span class="material-symbols-outlined">notifications</span>
             تنبيهات

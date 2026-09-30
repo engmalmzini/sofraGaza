@@ -29,18 +29,30 @@
                         <th>الصنف</th>
                         <th>السعر</th>
                         <th>التوفر</th>
-                        <th></th>
+                        <th class="text-center">الإجراءات</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach($groupItems as $item)
                         <tr>
-                            <td class="font-bold">{{ $item->name }}</td>
-                            <td>{{ number_format($item->price, 2) }} <span class="ils">₪</span></td>
+                            <td class="font-bold text-slate-900">{{ $item->name }}</td>
+                            <td class="font-mono font-bold text-slate-900">{{ number_format($item->price, 2) }} <span class="ils">₪</span></td>
                             <td>@include('admin.partials.pill', ['status' => $item->is_available ? 'approved' : 'cancelled', 'label' => $item->is_available ? 'متوفر' : 'غير متوفر'])</td>
-                            <td class="whitespace-nowrap space-x-2 space-x-reverse">
-                                <a href="{{ route('partner.menu-items.edit', $item) }}">تعديل</a>
-                                <form class="inline" method="POST" action="{{ route('partner.menu-items.destroy', $item) }}">@csrf @method('DELETE')<button class="text-primary">حذف</button></form>
+                            <td class="whitespace-nowrap">
+                                <div class="admin-table-actions">
+                                    <a class="admin-action-btn admin-action-btn--outline admin-action-btn--sm" href="{{ route('partner.menu-items.edit', $item) }}">
+                                        <span class="material-symbols-outlined">edit</span>
+                                        <span>تعديل</span>
+                                    </a>
+                                    <form class="inline" method="POST" action="{{ route('partner.menu-items.destroy', $item) }}" onsubmit="return confirm('حذف هذا الصنف؟');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="admin-action-btn admin-action-btn--danger admin-action-btn--sm">
+                                            <span class="material-symbols-outlined">delete</span>
+                                            <span>حذف</span>
+                                        </button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                     @endforeach

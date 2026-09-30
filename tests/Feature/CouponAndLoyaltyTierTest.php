@@ -157,4 +157,111 @@ class CouponAndLoyaltyTierTest extends TestCase
         $response->assertSee('ذهبي');
         $response->assertSee('بلاتيني (VIP)');
     }
+
+    public function test_admin_can_create_coupon_for_specific_restaurant_or_all_restaurants(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        [$restaurant] = $this->makeRestaurantAndItem();
+
+        // 1. Create coupon for specific restaurant
+        $response1 = $this->actingAs($admin)->post(route('admin.coupons.store'), [
+            'code' => 'QUDS20',
+            'type' => 'percent',
+            'value' => 20,
+            'restaurant_id' => $restaurant->id,
+        ]);
+        $response1->assertRedirect();
+
+        $coupon1 = Coupon::where('code', 'QUDS20')->first();
+        $this->assertNotNull($coupon1);
+        $this->assertEquals($restaurant->id, $coupon1->restaurant_id);
+        $this->assertTrue($coupon1->isSpecificToRestaurant());
+        $this->assertTrue($coupon1->appliesToRestaurant($restaurant->id));
+        $this->assertFalse($coupon1->appliesToRestaurant($restaurant->id + 99));
+
+        // 2. Create coupon for all restaurants (global)
+        $response2 = $this->actingAs($admin)->post(route('admin.coupons.store'), [
+            'code' => 'ALL10',
+            'type' => 'fixed',
+            'value' => 10,
+            'restaurant_id' => '',
+        ]);
+        $response2->assertRedirect();
+
+        $coupon2 = Coupon::where('code', 'ALL10')->first();
+        $this->assertNotNull($coupon2);
+        $this->assertNull($coupon2->restaurant_id);
+        $this->assertFalse($coupon2->isSpecificToRestaurant());
+        $this->assertTrue($coupon2->appliesToRestaurant($restaurant->id));
+        $this->assertTrue($coupon2->appliesToRestaurant(999));
+    }
+
+    public function test_restaurant_specific_coupon_only_works_for_its_restaurant(): void
+    {
+        $user = User::factory()->create();
+        [$restaurantA, $itemA] = $this->makeRestaurantAndItem(60.0);
+
+        // Make second restaurant and item
+        $ownerB = User::factory()->create(['role' => 'restaurant']);
+        $restaurantB = Restaurant::create([
+            'user_id' => $ownerB->id,
+            'name' => 'شاورما العمدة',
+            'slug' => 'omda',
+            'type' => 'restaurant',
+            'is_active' => true,
+            'verification_status' => Restaurant::VERIFICATION_APPROVED,
+            'starts_at' => now()->subDay(),
+            'expires_at' => now()->addDays(30),
+        ]);
+        $itemB = MenuItem::create([
+            'restaurant_id' => $restaurantB->id,
+            'name' => 'ساندوتش شاورما',
+            'category' => 'وجبات',
+            'price' => 25.0,
+            'is_available' => true,
+        ]);
+
+        // Create coupon specifically for Restaurant A
+        Coupon::create([
+            'code' => 'QUDS_ONLY',
+            'type' => 'fixed',
+            'value' => 15,
+            'restaurant_id' => $restaurantA->id,
+            'is_active' => true,
+        ]);
+
+        $cart = app(CartService::class);
+
+        // 1. User has items from Restaurant B in cart
+        $cart->clear();
+        $cart->add($itemB, 2); // 50 shekels
+
+        // Try applying Restaurant A's coupon to Restaurant B's cart
+        $failResponse = $this->actingAs($user)
+            ->postJson(route('cart.coupon.apply'), ['coupon_code' => 'QUDS_ONLY']);
+
+        $failResponse->assertStatus(422)
+            ->assertJson([
+                'success' => false,
+            ]);
+        $this->assertStringContainsString('مطعم القدس', $failResponse->json('message'));
+
+        $quoteB = $cart->quote($user);
+        $this->assertEquals(0, $quoteB['coupon_discount']);
+
+        // 2. User has items from Restaurant A in cart
+        $cart->clear();
+        $cart->add($itemA, 1); // 60 shekels
+
+        $successResponse = $this->actingAs($user)
+            ->postJson(route('cart.coupon.apply'), ['coupon_code' => 'QUDS_ONLY']);
+
+        $successResponse->assertOk()
+            ->assertJson([
+                'success' => true,
+            ]);
+
+        $quoteA = $cart->quote($user);
+        $this->assertEquals(15.0, $quoteA['coupon_discount']);
+    }
 }

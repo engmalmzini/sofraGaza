@@ -6,6 +6,9 @@
                 <span class="admin-pill {{ in_array($order->status, ['pending_confirmation', 'confirmed']) ? 'admin-pill--wait' : ($order->status === 'preparing' ? 'admin-pill--warn' : 'admin-pill--ok') }}">
                     {{ $order->statusLabel() }}
                 </span>
+                @if($order->isPrepared())
+                    <span class="admin-pill bg-emerald-100 text-emerald-800 text-[11px] font-bold">جاهز للاستلام 🍳</span>
+                @endif
                 @if($order->isPaidWithWallet())
                     <span class="admin-pill admin-pill--ok text-[11px]">مدفوع محفظة</span>
                 @endif
@@ -36,7 +39,7 @@
             <div class="bg-surface-container-low/70 rounded-xl p-3 space-y-2 mt-2">
                 <div class="text-xs font-bold text-slate-700 flex items-center justify-between">
                     <span>الأصناف المطلوبة ({{ $order->items->sum('quantity') }}):</span>
-                    <span class="font-bold text-primary">{{ number_format($order->subtotal, 2) }} ₪</span>
+                    <span class="font-bold text-primary">{{ number_format($order->foodTotal(), 2) }} ₪</span>
                 </div>
 
                 <ul class="space-y-1.5 text-xs text-stone-900 divide-y divide-slate-100">
@@ -66,7 +69,7 @@
 
         <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-outline/10">
             <div class="text-xs text-on-surface-variant">
-                المجموع: <strong class="text-sm font-extrabold text-on-surface">{{ number_format($order->total, 2) }} ₪</strong>
+                حساب الوجبات: <strong class="text-sm font-extrabold text-primary">{{ number_format($order->foodTotal(), 2) }} ₪</strong>
             </div>
 
             <div class="flex items-center gap-2">
@@ -80,6 +83,21 @@
                             <span>بدء التحضير</span>
                         </button>
                     </form>
+                @elseif($order->status === 'preparing')
+                    @if(! $order->isPrepared())
+                        <form method="POST" action="{{ route('partner.orders.prepared', $order) }}">
+                            @csrf
+                            <button type="submit" class="admin-btn admin-btn--primary text-xs py-1 px-3 bg-emerald-600 hover:bg-emerald-700">
+                                <span class="material-symbols-outlined text-[15px]">check_circle</span>
+                                <span>تم تجهيز الطلب</span>
+                            </button>
+                        </form>
+                    @else
+                        <span class="text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-1 rounded-lg border border-emerald-200 flex items-center gap-1">
+                            <span class="material-symbols-outlined text-[14px]">task_alt</span>
+                            <span>جاهز للاستلام</span>
+                        </span>
+                    @endif
                 @endif
                 <a href="{{ route('partner.orders.show', $order) }}" class="admin-btn admin-btn--ghost text-xs py-1 px-3">
                     عرض الفاتورة

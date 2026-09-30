@@ -17,7 +17,7 @@ class OrderController extends Controller
 
     public function index(Request $request): View
     {
-        $query = Order::query()->with(['user', 'restaurant'])->latest();
+        $query = Order::query()->with(['user', 'restaurant', 'courier'])->latest();
 
         if ($request->filled('status')) {
             $query->where('status', $request->status);
@@ -34,7 +34,21 @@ class OrderController extends Controller
 
         $orders = $query->paginate(20)->withQueryString();
 
-        return view('admin.orders.index', compact('orders'));
+        // Also fetch active orders for board view
+        $activeOrders = Order::query()
+            ->with(['user', 'restaurant', 'courier'])
+            ->latest()
+            ->take(60)
+            ->get();
+
+        $ordersByStatus = [
+            'pending_confirmation' => $activeOrders->where('status', 'pending_confirmation'),
+            'preparing' => $activeOrders->whereIn('status', ['confirmed', 'preparing']),
+            'delivering' => $activeOrders->where('status', 'delivering'),
+            'delivered' => $activeOrders->where('status', 'delivered')->take(12),
+        ];
+
+        return view('admin.orders.index', compact('orders', 'ordersByStatus'));
     }
 
     public function show(Order $order): View

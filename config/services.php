@@ -38,7 +38,7 @@ return [
     'tweetsms' => [
         'endpoint' => env('TWEETSMS_ENDPOINT', 'https://www.tweetsms.ps/api.php'),
         'key' => env('TWEETSMS_API_KEY'),
-        'sender' => env('TWEETSMS_SENDER', 'TweetTEST'),
+        'sender' => env('TWEETSMS_SENDER', 'Sofra Gaza'),
     ],
 
 ];

@@ -55,9 +55,9 @@
                         </h1>
                         
                         {{-- Small Rating Badge (Half size) --}}
-                        <div class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md bg-amber-50 border border-amber-200/60 text-amber-800 text-[10px] font-bold shrink-0 select-none">
-                            <span class="material-symbols-outlined text-amber-500 text-[12px] fill-1">star</span>
-                            <span class="font-mono">{{ number_format((float) $rating, 1) }}</span>
+                        <div class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-[#fff7ed] border border-[#fed7aa] text-[#9a3412] text-[10px] font-bold shrink-0 select-none">
+                            @include('partials.star-icon', ['class' => 'w-3 h-3 text-[#d65e15]'])
+                            <span class="font-mono font-bold">{{ number_format((float) $rating, 1) }}</span>
                         </div>
 
                         {{-- Small Reviews Toggle Button (Changes to 'الأطباق' only when viewing reviews) --}}

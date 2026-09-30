@@ -19,7 +19,7 @@ class CustomerPhoneVerificationTest extends TestCase
         config([
             'services.tweetsms.endpoint' => 'https://www.tweetsms.ps/api.php',
             'services.tweetsms.key' => 'test-key',
-            'services.tweetsms.sender' => 'TweetTEST',
+            'services.tweetsms.sender' => 'Sofra Gaza',
         ]);
 
         Http::preventStrayRequests();
@@ -93,7 +93,7 @@ class CustomerPhoneVerificationTest extends TestCase
 
         $this->assertSame('sendsms', $query['comm'] ?? null);
         $this->assertSame('test-key', $query['api_key'] ?? null);
-        $this->assertSame('TweetTEST', $query['sender'] ?? null);
+        $this->assertSame('Sofra Gaza', $query['sender'] ?? null);
         $this->assertSame('0597000111', $query['to'] ?? null);
         $this->assertMatchesRegularExpression('/\d{6}/', (string) ($query['message'] ?? ''));
         preg_match('/(\d{6})/', (string) $query['message'], $matches);

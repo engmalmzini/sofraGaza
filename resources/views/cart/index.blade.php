@@ -5,6 +5,50 @@
 @section('hideWhatsApp', true)
 
 @section('content')
+<style>
+    .cart-desktop-head,
+    .cart-desktop-aside {
+        display: none;
+    }
+@media (min-width: 1024px) {
+    [data-cart-page]:not(.flex) {
+        max-width: 72rem;
+        width: 100%;
+        padding-inline: 2rem;
+        padding-top: 2.5rem;
+        padding-bottom: 4.5rem;
+    }
+    .cart-desktop-head {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    .cart-desktop-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1.45fr) 380px;
+        gap: 1.75rem;
+        align-items: start;
+    }
+    .cart-desktop-grid > * {
+        margin-top: 0 !important;
+    }
+    .cart-desktop-items {
+        padding: 1.5rem 1.65rem;
+        border-radius: 1.5rem;
+    }
+    .cart-desktop-aside {
+        position: sticky;
+        top: 6.5rem;
+        display: block;
+    }
+    .cart-mobile-summary,
+    #cart-floating-checkout {
+        display: none !important;
+    }
+}
+</style>
 <div data-cart-page class="mx-auto max-w-2xl px-3 sm:px-4 py-3 sm:py-6 {{ empty($quote['lines']) ? 'min-h-[calc(100dvh-140px)] lg:min-h-[60vh] flex flex-col justify-center pb-6' : 'pb-36' }}">
 
     {{-- Empty Cart State (Centered in page) --}}
@@ -23,9 +67,24 @@
     </div>
 
     @if(!empty($quote['restaurant']))
-    <div id="cart-items-view" class="{{ empty($quote['lines']) ? 'hidden' : '' }} space-y-3.5">
+    <div id="cart-items-view" class="{{ empty($quote['lines']) ? 'hidden' : '' }}">
+        <div class="cart-desktop-head">
+            <div>
+                <p class="text-xs font-extrabold text-[#c84500] mb-1">سلّة الطلب</p>
+                <h1 class="text-3xl font-black text-stone-900 tracking-tight">مراجعة طلبك</h1>
+                <p class="text-sm font-semibold text-stone-500 mt-1">
+                    @if(count($quote['lines']) === 1)
+                        صنف واحد من {{ $quote['restaurant']->name }}
+                    @else
+                        {{ count($quote['lines']) }} أصناف من {{ $quote['restaurant']->name }}
+                    @endif
+                </p>
+            </div>
+        </div>
+
+        <div class="space-y-3.5 lg:space-y-0 cart-desktop-grid">
         {{-- Card 1: Restaurant and Items Card --}}
-        <div class="bg-white rounded-2xl p-4 border border-slate-100/80 shadow-[0_2px_12px_rgba(0,0,0,0.03)] space-y-4">
+        <div class="bg-white rounded-2xl cart-desktop-items p-4 border border-slate-100/80 shadow-[0_2px_12px_rgba(0,0,0,0.03)] space-y-4">
             {{-- Restaurant Header --}}
             <div class="flex items-center justify-between pb-3 border-b border-slate-100">
                 <div class="flex items-center gap-2.5 min-w-0">
@@ -38,7 +97,7 @@
                     @endif
                     <div class="min-w-0">
                         <span class="text-[11px] text-stone-400 block font-medium">من</span>
-                        <h3 class="font-extrabold text-sm text-stone-900 leading-tight truncate">{{ $quote['restaurant']->name }}</h3>
+                        <h3 class="font-extrabold text-sm lg:text-base text-stone-900 leading-tight truncate">{{ $quote['restaurant']->name }}</h3>
                     </div>
                 </div>
 
@@ -61,10 +120,10 @@
                                         ? \Illuminate\Support\Facades\Storage::disk('public')->url($line['item']->image_path)
                                         : 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=120&h=120&q=80';
                                 @endphp
-                                <img src="{{ $dishImg }}" alt="{{ $line['item']->name }}" class="w-14 h-14 rounded-xl object-cover border border-slate-100 shrink-0">
+                                <img src="{{ $dishImg }}" alt="{{ $line['item']->name }}" class="w-14 h-14 lg:w-16 lg:h-16 rounded-xl object-cover border border-slate-100 shrink-0">
                                 
                                 <div class="min-w-0">
-                                    <h4 class="font-extrabold text-sm text-stone-900 leading-tight truncate">{{ $line['item']->name }}</h4>
+                                    <h4 class="font-extrabold text-sm lg:text-[15px] text-stone-900 leading-tight truncate">{{ $line['item']->name }}</h4>
                                     <p class="font-mono text-xs font-bold text-primary mt-1" data-line-total>
                                         {{ number_format($line['line_total'], 2) }} ₪
                                     </p>
@@ -131,8 +190,8 @@
             </div>
         </div>
 
-        {{-- Card 2: Total Orders Summary Card (مجموع الطلبات) --}}
-        <div class="bg-white rounded-2xl p-4 border border-slate-100/80 shadow-[0_2px_12px_rgba(0,0,0,0.03)] space-y-1.5">
+        {{-- Mobile summary --}}
+        <div class="cart-mobile-summary bg-white rounded-2xl p-4 border border-slate-100/80 shadow-[0_2px_12px_rgba(0,0,0,0.03)] space-y-1.5">
             <div class="flex items-center justify-between">
                 <h3 class="font-extrabold text-sm text-stone-900">مجموع الطلبات</h3>
                 <span class="font-mono text-base font-black text-primary" data-cart-grand-total>{{ number_format($quote['subtotal'], 2) }} ₪</span>
@@ -141,9 +200,49 @@
                 رسوم التوصيل - إن وجدت - تُحدد في الخطوة التالية حسب منطقة التوصيل.
             </p>
         </div>
+
+        {{-- Desktop summary sidebar --}}
+        <aside class="cart-desktop-aside">
+            <div class="rounded-3xl border border-[#ead9c8] bg-white p-6 shadow-[0_12px_32px_rgba(80,40,10,0.07)]">
+                <h2 class="text-lg font-black text-stone-900 mb-5">ملخص الطلب</h2>
+                <div class="space-y-3 text-sm">
+                    <div class="flex items-center justify-between text-stone-600 font-bold">
+                        <span>مجموع الأصناف</span>
+                        <span class="font-mono text-stone-900" data-cart-subtotal>{{ number_format($quote['subtotal'], 2) }} ₪</span>
+                    </div>
+                    <div class="flex items-center justify-between text-stone-600 font-bold">
+                        <span>رسوم التوصيل</span>
+                        <span class="text-xs font-extrabold text-[#c84500]">تُحسب لاحقاً</span>
+                    </div>
+                    <div class="pt-3 mt-1 border-t border-stone-100 flex items-center justify-between">
+                        <span class="font-black text-stone-900">الإجمالي</span>
+                        <span class="font-mono text-xl font-black text-[#c84500]" data-cart-grand-total>{{ number_format($quote['subtotal'], 2) }} ₪</span>
+                    </div>
+                </div>
+                <p class="mt-4 text-[12px] leading-relaxed text-stone-400 font-medium">
+                    رسوم التوصيل - إن وجدت - تُحدد في الخطوة التالية حسب منطقة التوصيل.
+                </p>
+                <a href="{{ route('checkout.create') }}"
+                   class="mt-5 w-full h-14 rounded-2xl bg-[#c84500] hover:bg-[#a33900] text-white font-extrabold text-base flex items-center justify-between px-5 shadow-[0_10px_22px_rgba(163,57,0,0.28)] transition-all">
+                    <span>متابعة للدفع</span>
+                    <span class="font-mono text-sm bg-black/20 px-3 py-1 rounded-xl" data-cart-grand-total>{{ number_format($quote['subtotal'], 2) }} ₪</span>
+                </a>
+                <div class="mt-4 flex items-center justify-center gap-4 text-[11px] font-bold text-stone-400">
+                    <span class="inline-flex items-center gap-1">
+                        <span class="material-symbols-outlined text-[15px] text-[#007a37]">verified_user</span>
+                        دفع آمن
+                    </span>
+                    <span class="inline-flex items-center gap-1">
+                        <span class="material-symbols-outlined text-[15px] text-[#c84500]">delivery_dining</span>
+                        توصيل سريع
+                    </span>
+                </div>
+            </div>
+        </aside>
+        </div>
     </div>
 
-    {{-- Floating Bottom Action Bar fixed above bottom nav bar (No arrow, dark orange) --}}
+    {{-- Floating Bottom Action Bar — mobile only --}}
     <div id="cart-floating-checkout" class="{{ empty($quote['lines']) ? 'hidden' : '' }} fixed bottom-[74px] inset-x-0 px-3 sm:px-4 z-40 max-w-2xl mx-auto pointer-events-none">
         <a href="{{ route('checkout.create') }}" 
            class="pointer-events-auto w-full h-14 rounded-2xl bg-primary hover:bg-primary-container active:scale-[0.99] text-white font-extrabold text-base flex items-center justify-between px-5 shadow-[0_8px_24px_rgba(163,57,0,0.35)] transition-all cursor-pointer">

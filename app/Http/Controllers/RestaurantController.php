@@ -26,7 +26,12 @@ class RestaurantController extends Controller
             }
         }
 
-        $query = Restaurant::query()->visible()->withCount('menuItems');
+        $query = Restaurant::query()
+            ->visible()
+            ->withCount('menuItems')
+            ->withCount(['reviews as approved_reviews_count' => fn ($reviews) => $reviews->where('is_approved', true)])
+            ->withAvg(['reviews as avg_rating' => fn ($reviews) => $reviews->where('is_approved', true)], 'rating')
+            ->withMin('menuItems', 'price');
 
         if ($restrictToDeliveryArea) {
             $query->inDeliveryArea();
@@ -48,7 +53,16 @@ class RestaurantController extends Controller
             });
         }
 
-        $restaurants = $query->latest()->paginate(12)->withQueryString();
+        $sort = $request->string('sort')->toString();
+        if ($sort === 'newest') {
+            $query->latest();
+        } elseif ($sort === 'rating') {
+            $query->orderByDesc('avg_rating')->latest();
+        } else {
+            $query->orderByDesc('is_featured')->latest();
+        }
+
+        $restaurants = $query->paginate(12)->withQueryString();
 
         return view('restaurants.index', compact('restaurants'));
     }

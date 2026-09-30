@@ -32,7 +32,8 @@ class CouponController extends Controller
             return back()->with('error', 'السلة فارغة.');
         }
 
-        $result = $this->cart->applyCoupon($request->input('coupon_code'), (float) $quote['subtotal']);
+        $restaurantId = $this->cart->restaurantId();
+        $result = $this->cart->applyCoupon($request->input('coupon_code'), (float) $quote['subtotal'], $restaurantId);
 
         if (! $result['success']) {
             if ($request->expectsJson()) {
@@ -51,6 +52,8 @@ class CouponController extends Controller
                 'coupon' => [
                     'code' => $result['coupon']->code,
                     'discount_label' => $result['coupon']->formatDiscountLabel(),
+                    'scope_label' => $result['coupon']->scopeLabel(),
+                    'restaurant_id' => $result['coupon']->restaurant_id,
                     'discount_amount' => $newQuote['coupon_discount'],
                 ],
                 'quote' => [

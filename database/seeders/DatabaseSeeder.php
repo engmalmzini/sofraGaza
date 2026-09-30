@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\HomePartner;
 use App\Models\Membership;
 use App\Models\MenuItem;
 use App\Models\Restaurant;
@@ -180,7 +181,7 @@ class DatabaseSeeder extends Seeder
                     ['كباب لحم', 'وجبات', 32, 'كباب فحم مع بصل سماق.'],
                     ['شيش طاووق', 'وجبات', 28, 'دجاج متبل على الفحم.'],
                     ['حمص باللحمة', 'مقبلات', 14, 'حمص سائل مع سمنة ولحمة مفرومة.'],
-                    ['عيران', 'مشروبات', 5, 'لبن مع نعناع وملح.'],
+                    ['عيران', 'مشروبات', 5, 'لبن مع نعناع وملح.', 'images/dishes/ayran.jpg'],
                     ['بطاطا مقلية', 'مقبلات', 8, 'بطاطا مقرمشة.'],
                 ],
             ],
@@ -328,17 +329,21 @@ class DatabaseSeeder extends Seeder
             );
 
             foreach ($place['menu'] as $item) {
+                $payload = [
+                    'category' => $item[1],
+                    'price' => $item[2],
+                    'description' => $item[3],
+                    'is_available' => true,
+                ];
+                if (isset($item[4])) {
+                    $payload['image_path'] = $item[4];
+                }
                 MenuItem::query()->updateOrCreate(
                     [
                         'restaurant_id' => $restaurant->id,
                         'name' => $item[0],
                     ],
-                    [
-                        'category' => $item[1],
-                        'price' => $item[2],
-                        'description' => $item[3],
-                        'is_available' => true,
-                    ]
+                    $payload
                 );
             }
         }
@@ -428,6 +433,24 @@ class DatabaseSeeder extends Seeder
             \App\Models\Coupon::query()->updateOrCreate(
                 ['code' => $c['code']],
                 array_merge($c, ['is_active' => true])
+            );
+        }
+
+        $partners = [
+            ['name' => 'JRAZZA', 'image_path' => 'images/partners/jrazza.png', 'sort_order' => 1],
+            ['name' => 'Kimbo Chicken', 'image_path' => 'images/partners/kimbo.png', 'sort_order' => 2],
+            ['name' => 'RAKO', 'image_path' => 'images/partners/rako.png', 'sort_order' => 3],
+            ['name' => 'CRISP', 'image_path' => 'images/partners/crisp.png', 'sort_order' => 4],
+            ['name' => 'Raja88 Casa', 'image_path' => 'images/partners/raja88.png', 'sort_order' => 5],
+            ['name' => 'CHEESY', 'image_path' => 'images/partners/cheesy.png', 'sort_order' => 6],
+            ['name' => 'sushi', 'image_path' => 'images/partners/sushi.png', 'sort_order' => 7],
+            ['name' => 'tomato', 'image_path' => 'images/partners/tomato.png', 'sort_order' => 8],
+            ['name' => 'food', 'image_path' => 'images/partners/food.png', 'sort_order' => 9],
+        ];
+        foreach ($partners as $partner) {
+            HomePartner::query()->updateOrCreate(
+                ['name' => $partner['name']],
+                array_merge($partner, ['is_active' => true, 'url' => null])
             );
         }
     }

@@ -327,9 +327,13 @@
                         <span class="material-symbols-outlined text-emerald-600 text-[22px]">verified</span>
                         <span class="font-bold text-sm text-emerald-950">تقييمك لهذا الطلب</span>
                     </div>
-                    <div class="flex items-center text-amber-500">
+                    <div class="flex items-center gap-0.5">
                         @for($s = 1; $s <= 5; $s++)
-                            <span class="material-symbols-outlined text-[18px] {{ $s <= $order->review->rating ? 'fill-1' : 'text-slate-300' }}">star</span>
+                            @if($s <= $order->review->rating)
+                                @include('partials.star-icon', ['class' => 'w-4 h-4 text-[#d65e15]'])
+                            @else
+                                @include('partials.star-icon', ['class' => 'w-4 h-4 text-stone-200'])
+                            @endif
                         @endfor
                     </div>
                 </div>
@@ -357,9 +361,9 @@
                         <label class="block text-xs font-bold text-stone-800 mb-1.5">التقييم بالنجوم:</label>
                         <div class="flex items-center gap-2 flex-wrap">
                             @for($i = 1; $i <= 5; $i++)
-                                <label class="cursor-pointer group flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-stone-200 bg-white hover:border-amber-400 hover:bg-amber-50/40 transition-all">
-                                    <input type="radio" name="rating" value="{{ $i }}" class="accent-amber-500" required {{ $i === 5 ? 'checked' : '' }}>
-                                    <span class="material-symbols-outlined text-[18px] text-amber-500 fill-1">star</span>
+                                <label class="cursor-pointer group flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-stone-200 bg-white hover:border-[#fed7aa] hover:bg-[#fff7ed] transition-all">
+                                    <input type="radio" name="rating" value="{{ $i }}" class="accent-[#d65e15]" required {{ $i === 5 ? 'checked' : '' }}>
+                                    @include('partials.star-icon', ['class' => 'w-4 h-4 text-[#d65e15]'])
                                     <span class="text-xs font-bold text-stone-700">{{ $i }}</span>
                                 </label>
                             @endfor

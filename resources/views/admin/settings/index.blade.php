@@ -1,552 +1,888 @@
 @extends('layouts.admin')
 
 @section('kicker', 'النظام')
-@section('title', 'إعدادات المنصة')
+@section('title', 'إعدادات المنصة العامة')
 
 @section('content')
 @php
-    $hints = [
-        'points_per_amount' => 'سعر اكتساب النقاط لكل المطاعم. يمكن تخصيص مطعم من صفحة المطعم، أو صنف من المنيو.',
-        'points_redeem_per_amount' => 'سعر استبدال النقاط العام. يُتجاوز بسعر المطعم أو رقم ثابت للصنف.',
-        'points_include_delivery' => '1 = طلب بـ 40₪ (طعام + توصيل) يكسب 40 نقطة عندما يكون السعر 1. 0 = الطعام فقط.',
-        'restaurant_expiry_warning_days' => 'عدد الأيام قبل انتهاء عرض المطعم لإرسال إشعار تنبيه للمشرف وصاحب المطعم.',
-        'membership_expiry_warning_days' => 'عدد الأيام قبل انتهاء اشتراك عضوية الزبون لإرسال إشعار تجديد.',
-        'restaurant_listing_days' => 'المدة الافتراضية لعرض المطعم على المنصة بالأيام بعد موافقة الإدارة على اشتراكه.',
-        'drink_points' => 'عدد النقاط الافتراضي المطلوب لاستبدال مشروب مجاني.',
-        'meal_points' => 'عدد النقاط الافتراضي المطلوب لاستبدال وجبة مجانية.',
+    $deliveryFeeSetting = $settings->firstWhere('key', 'delivery_fee');
+    $pointsEarnVal = $settings->firstWhere('key', 'points_per_amount')?->value ?? '1';
+    $pointsRedeemVal = $settings->firstWhere('key', 'points_redeem_per_amount')?->value ?? '1';
+    $pointsDeliveryVal = (string) ($settings->firstWhere('key', 'points_include_delivery')?->value ?? '1');
+    $drinkPointsVal = $settings->firstWhere('key', 'drink_points')?->value ?? '20';
+    $mealPointsVal = $settings->firstWhere('key', 'meal_points')?->value ?? '50';
+    $restaurantListingDaysVal = $settings->firstWhere('key', 'restaurant_listing_days')?->value ?? '90';
+    $restaurantExpiryWarningDaysVal = $settings->firstWhere('key', 'restaurant_expiry_warning_days')?->value ?? '7';
+    $membershipExpiryWarningDaysVal = $settings->firstWhere('key', 'membership_expiry_warning_days')?->value ?? '3';
+
+    $managedKeys = [
+        'delivery_fee',
+        'delivery_fees_by_area',
+        'custom_delivery_areas',
+        'bank_name',
+        'bank_account_number',
+        'bank_iban',
+        'bank_beneficiary_name',
+        'jawwal_pay_number',
+        'jawwal_pay_name',
+        'jawwal_pay_qr_path',
+        'palpay_number',
+        'palpay_name',
+        'palpay_qr_path',
+        'payment_instructions_note',
+        'points_per_amount',
+        'points_redeem_per_amount',
+        'points_include_delivery',
+        'drink_points',
+        'meal_points',
+        'restaurant_listing_days',
+        'restaurant_expiry_warning_days',
+        'membership_expiry_warning_days',
+        'home_banners',
     ];
+
+    $otherSettings = $settings->whereNotIn('key', $managedKeys);
 @endphp
 
-<form method="POST" action="{{ route('admin.settings.update') }}" enctype="multipart/form-data" class="w-full max-w-none space-y-6">
+<form method="POST" action="{{ route('admin.settings.update') }}" enctype="multipart/form-data" class="w-full max-w-none space-y-6 pb-20">
     @csrf
 
-    {{-- Banner Ads Management Section --}}
-    <div id="setting-home-banners" class="rounded-2xl border border-slate-200/80 bg-white/95 p-5 sm:p-6 space-y-5 shadow-xs">
-        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-            <div class="flex items-center gap-2.5">
-                <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center shrink-0">
-                    <span class="material-symbols-outlined text-[24px]">view_carousel</span>
-                </div>
-                <div>
-                    <h2 class="text-base font-bold text-on-surface">إدارة البانرات الإعلانية (الشريط العلوي في شاشة الهاتف)</h2>
-                    <p class="text-xs text-on-surface-variant">تظهر هذه الصور كشريط إعلاني مدمج بدون أي نصوص أسفل الهيدر مباشرة. يمكنك إضافة عدد غير محدود من الصور وحذفها في أي وقت.</p>
-                </div>
-            </div>
-            <span class="text-xs font-semibold px-3 py-1 rounded-full bg-amber-100 text-amber-800 shrink-0">
-                إعلانات الهاتف
-            </span>
-        </div>
-
-        {{-- Current Banners Gallery --}}
-        @php
-            $rawBanners = \App\Models\Setting::rawHomeBanners();
-        @endphp
-        <div class="space-y-3">
-            <div class="flex items-center justify-between">
-                <h3 class="text-xs font-bold text-stone-700">البانرات الحالية المفعلة ({{ count($rawBanners) }})</h3>
-                <span class="text-[11px] text-stone-400">انقر على "حذف" لأي صورة لإزالتها فوراً</span>
-            </div>
-
-            @if(count($rawBanners) > 0)
-                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3.5">
-                    @foreach($rawBanners as $bIdx => $bannerItem)
-                        @php
-                            $bPath = is_array($bannerItem) ? ($bannerItem['image'] ?? $bannerItem['url'] ?? '') : (string) $bannerItem;
-                            $bUrl = (str_starts_with($bPath, 'http://') || str_starts_with($bPath, 'https://'))
-                                ? $bPath
-                                : \Illuminate\Support\Facades\Storage::disk('public')->url($bPath);
-                        @endphp
-                        <div class="relative group rounded-xl border border-stone-200 overflow-hidden bg-stone-50 shadow-2xs flex flex-col">
-                            <div class="w-full h-20 bg-stone-100 overflow-hidden relative">
-                                <img src="{{ $bUrl }}" alt="بانر {{ $bIdx + 1 }}" class="w-full h-full object-cover">
-                                <span class="absolute top-1.5 right-1.5 bg-black/60 text-white text-[10px] font-bold px-1.5 py-0.5 rounded">
-                                    #{{ $bIdx + 1 }}
-                                </span>
-                            </div>
-                            <div class="p-2 bg-white flex items-center justify-between border-t border-stone-100">
-                                <a href="{{ $bUrl }}" target="_blank" class="text-[11px] text-stone-500 hover:text-primary truncate max-w-[100px]">
-                                    معاينة
-                                </a>
-                                <button type="submit" name="remove_banner" value="{{ $bPath }}" class="text-[11px] text-error font-bold hover:underline flex items-center gap-0.5 cursor-pointer">
-                                    <span class="material-symbols-outlined text-[13px]">delete</span>
-                                    <span>حذف</span>
-                                </button>
-                            </div>
-                        </div>
-                    @endforeach
-                </div>
-            @else
-                <div class="rounded-xl border border-dashed border-stone-300 p-6 text-center bg-stone-50/50">
-                    <span class="material-symbols-outlined text-3xl text-stone-300 mb-1">imagesmode</span>
-                    <p class="text-xs text-stone-500 font-medium">لا توجد صور بانرات خاصة مرفوعة حالياً (يتم عرض البانرات الافتراضية الأنيقة تلقائياً).</p>
-                    <p class="text-[11px] text-stone-400 mt-0.5">ارفع أول صورة إعلانية بالأسفل للبدء بعرض إعلاناتك الخاصة.</p>
-                </div>
-            @endif
-        </div>
-
-        {{-- Add New Banners --}}
-        <div class="grid gap-4 md:grid-cols-2 pt-2 border-t border-slate-100">
-            {{-- Upload multiple files --}}
-            <div class="rounded-xl bg-stone-50/70 border border-stone-200/80 p-3.5 space-y-2">
-                <label class="block text-xs font-bold text-stone-800">
-                    <span class="material-symbols-outlined text-[16px] align-middle text-primary">upload_file</span>
-                    رفع صور إعلانات جديدة (يمكنك تحديد عدة صور معاً)
-                </label>
-                <input type="file" name="new_banners[]" multiple accept="image/*" class="text-xs w-full p-2 border border-dashed border-stone-300 rounded-lg bg-white cursor-pointer">
-                <p class="text-[11px] text-stone-500 leading-relaxed">
-                    💡 يُفضل أن تكون الصورة بنسبة عرضية شريطية (مثلاً: 1200×300 أو 800×200 بكسل) لتظهر كإعلان بانر مدمج بدون نصوص.
-                </p>
-            </div>
-
-            {{-- Or paste image URL --}}
-            <div class="rounded-xl bg-stone-50/70 border border-stone-200/80 p-3.5 space-y-2">
-                <label class="block text-xs font-bold text-stone-800">
-                    <span class="material-symbols-outlined text-[16px] align-middle text-primary">link</span>
-                    أو إضافة رابط صورة إعلان مباشر
-                </label>
-                <input type="url" name="new_banner_url" placeholder="https://example.com/banner.jpg" class="text-xs font-mono w-full p-2 border border-stone-300 rounded-lg bg-white" dir="ltr">
-                <p class="text-[11px] text-stone-500 leading-relaxed">
-                    يمكنك كتابة رابط مباشر لأي صورة على الويب لإضافتها فوراً لسلايدر البانرات.
-                </p>
-            </div>
+    {{-- 1. Application Segmented Tab Bar (Native App Style) --}}
+    <div class="app-tab-bar-wrap">
+        <div class="app-tab-bar" id="settings-tab-list" role="tablist">
+            <button type="button" 
+                    onclick="switchSettingsTab('payments')" 
+                    id="tab-btn-payments"
+                    class="app-tab-item is-active"
+                    role="tab"
+                    aria-selected="true">
+                <span class="material-symbols-outlined app-tab-icon">payments</span>
+                <span>حسابات التحويل والدفع</span>
+            </button>
+            <button type="button" 
+                    onclick="switchSettingsTab('delivery')" 
+                    id="tab-btn-delivery"
+                    class="app-tab-item"
+                    role="tab"
+                    aria-selected="false">
+                <span class="material-symbols-outlined app-tab-icon">local_shipping</span>
+                <span>رسوم ومناطق التوصيل</span>
+                <span class="app-tab-badge">{{ count($areasWithFees) }}</span>
+            </button>
+            <button type="button" 
+                    onclick="switchSettingsTab('points')" 
+                    id="tab-btn-points"
+                    class="app-tab-item"
+                    role="tab"
+                    aria-selected="false">
+                <span class="material-symbols-outlined app-tab-icon">stars</span>
+                <span>نقاط الولاء</span>
+            </button>
+            <button type="button" 
+                    onclick="switchSettingsTab('banners')" 
+                    id="tab-btn-banners"
+                    class="app-tab-item"
+                    role="tab"
+                    aria-selected="false">
+                <span class="material-symbols-outlined app-tab-icon">view_carousel</span>
+                <span>البانرات والإعلانات</span>
+                <span class="app-tab-badge">{{ count($homeBanners) }}</span>
+            </button>
+            <button type="button" 
+                    onclick="switchSettingsTab('system')" 
+                    id="tab-btn-system"
+                    class="app-tab-item"
+                    role="tab"
+                    aria-selected="false">
+                <span class="material-symbols-outlined app-tab-icon">tune</span>
+                <span>النظام والمدد</span>
+            </button>
+            <button type="button" 
+                    onclick="toggleShowAllSettings(this)" 
+                    id="btn-show-all"
+                    class="app-tab-item app-tab-item--secondary" 
+                    title="التبديل بين التبويبات الفردية أو عرض كافة الأقسام معاً">
+                <span class="material-symbols-outlined app-tab-icon">unfold_more</span>
+                <span>عرض الكل</span>
+            </button>
         </div>
     </div>
 
-    {{-- 1. Payment Accounts & Direct Transfer Section --}}
-    <div id="setting-payment-accounts" class="rounded-2xl border border-slate-200/80 bg-white/95 p-5 sm:p-6 space-y-5 shadow-xs">
-        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-            <div class="flex items-center gap-2.5">
-                <div class="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                    <span class="material-symbols-outlined text-[24px]">payments</span>
-                </div>
-                <div>
-                    <h2 class="text-base font-bold text-on-surface">بيانات الدفع والتحويل المعتمدة (جوال باي، بال باي PalPay، بنك فلسطين)</h2>
-                    <p class="text-xs text-on-surface-variant">تظهر هذه الحسابات والباركودات للزبائن في الدفع المباشر، شحن رصيد المحفظة، واشتراكات العضويات والمطاعم</p>
-                </div>
-            </div>
-            <span class="text-xs font-semibold px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 shrink-0">
-                حسابات التحويل المعتمدة
-            </span>
-        </div>
-
-        <div class="grid gap-5 md:grid-cols-3">
-            {{-- Jawwal Pay Wallet Settings --}}
-            <div class="rounded-xl bg-surface-container-low border border-slate-200/70 p-4.5 space-y-3.5 flex flex-col justify-between">
-                <div class="space-y-3.5">
-                    <div class="flex items-center justify-between border-b border-slate-200/80 pb-2.5">
-                        <div class="flex items-center gap-2 text-stone-900 font-bold text-sm">
-                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
-                            <span>محفظة جوال باي (Jawwal Pay)</span>
-                        </div>
-                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">محفظة</span>
-                    </div>
-
-                    <div>
-                        <label class="mb-1 block text-xs font-bold text-on-surface">رقم المحفظة / الجوال</label>
-                        <input type="text" name="settings[jawwal_pay_number]" value="{{ $paymentAccounts['jawwal_pay_number'] }}" placeholder="0599000000" class="text-sm font-mono" dir="ltr">
-                    </div>
-
-                    <div>
-                        <label class="mb-1 block text-xs font-bold text-on-surface">اسم صاحب المحفظة (المستفيد)</label>
-                        <input type="text" name="settings[jawwal_pay_name]" value="{{ $paymentAccounts['jawwal_pay_name'] }}" placeholder="محفظة سفرة غزة" class="text-sm">
-                    </div>
-
-                    <div>
-                        <label class="mb-1 block text-xs font-bold text-on-surface">صورة باركود / QR جوال باي</label>
-                        <input type="file" name="jawwal_pay_qr" accept="image/*" class="text-xs w-full p-2 border border-dashed border-slate-300 rounded-lg bg-white">
-                        <p class="mt-1 text-[11px] text-on-surface-variant">ارفع صورة كود QR ليتمكن الزبائن من مسحها والدفع فوراً.</p>
-                    </div>
-                </div>
-
-                @if($paymentAccounts['jawwal_pay_qr_url'])
-                    <div class="mt-2 pt-2 border-t border-slate-200/80 flex items-center gap-3 p-2 bg-white rounded-lg border border-slate-200">
-                        <img src="{{ $paymentAccounts['jawwal_pay_qr_url'] }}" alt="باركود جوال باي" class="w-14 h-14 object-contain rounded border p-0.5 shrink-0">
-                        <div class="text-xs space-y-1 min-w-0">
-                            <a href="{{ $paymentAccounts['jawwal_pay_qr_url'] }}" target="_blank" class="font-bold text-primary hover:underline flex items-center gap-1">
-                                <span class="material-symbols-outlined text-[14px]">open_in_new</span>
-                                معاينة الباركود الحالي
-                            </a>
-                            <label class="flex items-center gap-1.5 text-error text-[11px] cursor-pointer">
-                                <input type="checkbox" name="remove_jawwal_pay_qr" value="1">
-                                <span>حذف صورة الباركود</span>
-                            </label>
-                        </div>
-                    </div>
-                @endif
-            </div>
-
-            {{-- PalPay Wallet Settings --}}
-            <div class="rounded-xl bg-surface-container-low border border-slate-200/70 p-4.5 space-y-3.5 flex flex-col justify-between">
-                <div class="space-y-3.5">
-                    <div class="flex items-center justify-between border-b border-slate-200/80 pb-2.5">
-                        <div class="flex items-center gap-2 text-stone-900 font-bold text-sm">
-                            <span class="w-2.5 h-2.5 rounded-full bg-purple-600"></span>
-                            <span>محفظة بال باي (PalPay)</span>
-                        </div>
-                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-100 text-purple-800">محفظتي</span>
-                    </div>
-
-                    <div>
-                        <label class="mb-1 block text-xs font-bold text-on-surface">رقم المحفظة / نقطة البيع</label>
-                        <input type="text" name="settings[palpay_number]" value="{{ $paymentAccounts['palpay_number'] }}" placeholder="0599000000" class="text-sm font-mono" dir="ltr">
-                    </div>
-
-                    <div>
-                        <label class="mb-1 block text-xs font-bold text-on-surface">اسم صاحب المحفظة (المستفيد)</label>
-                        <input type="text" name="settings[palpay_name]" value="{{ $paymentAccounts['palpay_name'] }}" placeholder="محفظة بال باي — سفرة غزة" class="text-sm">
-                    </div>
-
-                    <div>
-                        <label class="mb-1 block text-xs font-bold text-on-surface">صورة باركود / QR بال باي</label>
-                        <input type="file" name="palpay_qr" accept="image/*" class="text-xs w-full p-2 border border-dashed border-slate-300 rounded-lg bg-white">
-                        <p class="mt-1 text-[11px] text-on-surface-variant">ارفع كود QR الخاص بمحفظة بال باي ليتمكن الزبائن من مسحه فوراً عبر تطبيق محفظتي.</p>
-                    </div>
-                </div>
-
-                @if($paymentAccounts['palpay_qr_url'])
-                    <div class="mt-2 pt-2 border-t border-slate-200/80 flex items-center gap-3 p-2 bg-white rounded-lg border border-slate-200">
-                        <img src="{{ $paymentAccounts['palpay_qr_url'] }}" alt="باركود بال باي" class="w-14 h-14 object-contain rounded border p-0.5 shrink-0">
-                        <div class="text-xs space-y-1 min-w-0">
-                            <a href="{{ $paymentAccounts['palpay_qr_url'] }}" target="_blank" class="font-bold text-primary hover:underline flex items-center gap-1">
-                                <span class="material-symbols-outlined text-[14px]">open_in_new</span>
-                                معاينة الباركود الحالي
-                            </a>
-                            <label class="flex items-center gap-1.5 text-error text-[11px] cursor-pointer">
-                                <input type="checkbox" name="remove_palpay_qr" value="1">
-                                <span>حذف صورة الباركود</span>
-                            </label>
-                        </div>
-                    </div>
-                @endif
-            </div>
-
-            {{-- Bank of Palestine Settings --}}
-            <div class="rounded-xl bg-surface-container-low border border-slate-200/70 p-4.5 space-y-3.5 flex flex-col justify-between">
-                <div class="space-y-3.5">
-                    <div class="flex items-center justify-between border-b border-slate-200/80 pb-2.5">
-                        <div class="flex items-center gap-2 text-stone-900 font-bold text-sm">
-                            <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
-                            <span>حساب بنك فلسطين</span>
-                        </div>
-                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-100 text-blue-800">حساب بنكي</span>
-                    </div>
-
-                    <div>
-                        <label class="mb-1 block text-xs font-bold text-on-surface">اسم البنك</label>
-                        <input type="text" name="settings[bank_name]" value="{{ $paymentAccounts['bank_name'] }}" placeholder="بنك فلسطين" class="text-sm">
-                    </div>
-
-                    <div>
-                        <label class="mb-1 block text-xs font-bold text-on-surface">رقم الحساب البنكي</label>
-                        <input type="text" name="settings[bank_account_number]" value="{{ $paymentAccounts['bank_account_number'] }}" placeholder="2345678" class="text-sm font-mono" dir="ltr">
-                    </div>
-
-                    <div>
-                        <label class="mb-1 block text-xs font-bold text-on-surface">رقم الآيبان (IBAN)</label>
-                        <input type="text" name="settings[bank_iban]" value="{{ $paymentAccounts['bank_iban'] }}" placeholder="PS04PALS000000000002345678" class="text-sm font-mono" dir="ltr">
-                    </div>
-
-                    <div>
-                        <label class="mb-1 block text-xs font-bold text-on-surface">اسم المستفيد البنكي</label>
-                        <input type="text" name="settings[bank_beneficiary_name]" value="{{ $paymentAccounts['bank_beneficiary_name'] }}" placeholder="سفرة غزة — Sofra Gaza" class="text-sm">
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div>
-            <label class="mb-1 block text-xs font-bold text-on-surface">ملاحظات وتعليمات التحويل للزبائن</label>
-            <input type="text" name="settings[payment_instructions_note]" value="{{ $paymentAccounts['instructions_note'] ?? '' }}" class="text-sm" placeholder="مثال: يرجى كتابة رقم الهاتف في ملاحظات التحويل...">
-            <p class="mt-1 text-[11px] text-on-surface-variant">تظهر هذه الملاحظة التوجيهية للزبائن في كافة شاشات الدفع والتحويل وشحن الرصيد.</p>
-        </div>
-    </div>
-
-    {{-- 2. Delivery Fees Section --}}
-    @php
-        $deliveryFeeSetting = $settings->firstWhere('key', 'delivery_fee');
-    @endphp
-    <div id="setting-delivery_fee" class="rounded-2xl border border-slate-200/80 bg-white/95 p-5 sm:p-6 space-y-5 shadow-xs">
-        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-            <div class="flex items-center gap-2.5">
-                <div class="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                    <span class="material-symbols-outlined text-[24px]">local_shipping</span>
-                </div>
-                <div>
-                    <h2 class="text-base font-bold text-on-surface">إعدادات رسوم التوصيل</h2>
-                    <p class="text-xs text-on-surface-variant">حدد تكلفة التوصيل العامة وسعر كل منطقة محددة في قطاع غزة</p>
-                </div>
-            </div>
-            <span class="text-xs font-semibold px-3 py-1 rounded-full bg-surface-container-high text-on-surface-variant shrink-0">
-                {{ count($areasWithFees) }} مناطق معتمدة
-            </span>
-        </div>
-
-        {{-- Default fallback delivery fee --}}
-        <div>
-            <label class="mb-1 block text-sm font-bold text-on-surface">رسوم التوصيل العامة الافتراضية (شيكل)</label>
-            <div class="flex items-center gap-2 max-w-xs">
-                <input type="number" step="0.5" min="0" max="999" name="settings[delivery_fee]" value="{{ $deliveryFeeSetting?->value ?? 10 }}" class="text-sm font-bold font-mono">
-                <span class="text-sm font-bold text-stone-500">₪</span>
-            </div>
-            <p class="mt-1 text-xs leading-6 text-on-surface-variant">
-                تُعتمد هذه الرسوم كخيار أساسي وافتراضي في حال لم يتم تحديد سعر خاص للمنطقة أدناه.
-            </p>
-        </div>
-
-        {{-- Area by Area Delivery Fees --}}
-        <div class="space-y-3 pt-2 border-t border-slate-100">
-            <div class="flex items-center justify-between">
-                <div>
-                    <label class="block text-sm font-bold text-on-surface">
-                        رسوم التوصيل المخصصة حسب كل منطقة (شيكل)
-                    </label>
-                    <p class="text-xs text-on-surface-variant">
-                        يتم احتساب هذا السعر تلقائياً عند اختيار الزبون للمنطقة في المتجر أو أثناء إتمام الطلب:
-                    </p>
-                </div>
-            </div>
-
-            <div class="grid gap-3 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
-                @foreach($areasWithFees as $area)
-                    <div class="flex items-center justify-between gap-3 p-3.5 rounded-xl bg-surface-container-low border border-slate-200/70 hover:border-slate-300 transition-colors">
-                        <div class="min-w-0 flex-1">
-                            <div class="flex items-center gap-1.5">
-                                <span class="material-symbols-outlined text-primary text-[18px]">location_on</span>
-                                <span class="font-bold text-sm text-on-surface truncate">{{ $area['label'] }}</span>
-                            </div>
-                            <div class="text-[11px] text-on-surface-variant mr-6">
-                                الرمز: <code class="text-primary font-mono">{{ $area['key'] }}</code>
-                                @if(! empty($area['is_custom_area']))
-                                    <span class="mr-1 inline-block px-1.5 py-0.2 rounded bg-amber-100 text-amber-800 text-[10px] font-bold">مخصصة</span>
-                                @endif
-                            </div>
-                        </div>
-                        <div class="flex items-center gap-1.5 shrink-0">
-                            <input type="number" step="0.5" min="0" max="999" 
-                                   name="delivery_fees_by_area[{{ $area['key'] }}]" 
-                                   value="{{ $area['delivery_fee'] }}" 
-                                   style="width: 5.5rem; text-align: center; font-weight: bold; padding: 0.5rem;"
-                                   class="font-mono text-sm"
-                                   placeholder="{{ $deliveryFeeSetting?->value ?? 10 }}">
-                            <span class="text-xs font-bold text-on-surface-variant">₪</span>
-                            @if(! empty($area['is_custom_area']))
-                                <button type="submit" name="remove_area_key" value="{{ $area['key'] }}"
-                                        class="text-error hover:opacity-75 p-1"
-                                        title="حذف هذه المنطقة المخصصة"
-                                        onclick="return confirm('هل تريد حذف هذه المنطقة المخصصة؟');">
-                                    <span class="material-symbols-outlined text-[18px]">delete</span>
-                                </button>
-                            @endif
-                        </div>
-                    </div>
-                @endforeach
-            </div>
-        </div>
-
-        {{-- Add new area form --}}
-        <details class="rounded-xl bg-surface-container-low border border-dashed border-slate-300 p-4 mt-3">
-            <summary class="cursor-pointer text-xs font-bold text-primary flex items-center gap-1">
-                <span class="material-symbols-outlined text-[18px]">add_circle</span>
-                إضافة منطقة توصيل جديدة للمنصة
-            </summary>
-            <div class="mt-3 grid gap-3 sm:grid-cols-3 pt-3 border-t border-slate-200">
-                <div>
-                    <label class="block text-xs font-semibold text-on-surface mb-1">اسم المنطقة مع المدينة</label>
-                    <input type="text" name="new_area_label" placeholder="غزة • الشيخ رضوان" class="text-xs">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-on-surface mb-1">اسم المنطقة المختصر (الرمز)</label>
-                    <input type="text" name="new_area_key" placeholder="الشيخ رضوان" class="text-xs font-mono">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-on-surface mb-1">رسوم التوصيل (شيكل)</label>
-                    <input type="number" step="0.5" min="0" max="999" name="new_area_fee" placeholder="10" class="text-xs font-mono">
-                </div>
-            </div>
-            <p class="text-[11px] text-on-surface-variant mt-2">عند النقر على "حفظ كافة الإعدادات"، ستُضاف المنطقة وتظهر في كافة أنحاء المتجر والتطبيق.</p>
-        </details>
-    </div>
-
-    {{-- 3. Dedicated Points & Loyalty Rewards Section --}}
-    @php
-        $pointsEarnVal = $settings->firstWhere('key', 'points_per_amount')?->value ?? '1';
-        $pointsRedeemVal = $settings->firstWhere('key', 'points_redeem_per_amount')?->value ?? '1';
-        $pointsDeliveryVal = (string) ($settings->firstWhere('key', 'points_include_delivery')?->value ?? '1');
-    @endphp
-    <div id="setting-points-system" class="rounded-2xl border border-amber-200/80 bg-white/95 p-5 sm:p-6 space-y-5 shadow-xs">
-        <div class="flex items-center justify-between border-b border-amber-100 pb-3">
-            <div class="flex items-center gap-2.5">
-                <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-700 flex items-center justify-center shrink-0">
-                    <span class="material-symbols-outlined text-[24px] fill-1">stars</span>
-                </div>
-                <div>
-                    <h2 class="text-base font-bold text-on-surface">نظام احتساب واستبدال النقاط (العام للمنصة)</h2>
-                    <p class="text-xs text-on-surface-variant">التحكم في معدل اكتساب النقاط لكل طلب ومعدل استبدالها بوجبات مجانية لجميع المطاعم</p>
-                </div>
-            </div>
-            <span class="text-xs font-semibold px-3 py-1 rounded-full bg-amber-100 text-amber-900 shrink-0">
-                برنامج ولاء الزبائن
-            </span>
-        </div>
-
-        <div class="grid gap-5 md:grid-cols-2">
-            {{-- Earn Points --}}
-            <div class="rounded-xl bg-amber-50/40 p-4.5 border border-amber-200/80 space-y-2.5">
-                <div class="flex items-center justify-between">
-                    <label class="text-xs font-extrabold text-stone-900 flex items-center gap-1.5">
-                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
-                        <span>اكتساب النقاط (عند شراء الوجبات)</span>
-                    </label>
-                    <span class="text-[11px] font-mono text-stone-500 font-bold">شيكل / نقطة</span>
-                </div>
-                <input type="number" step="0.01" min="0.01" id="global_points_earn" name="settings[points_per_amount]" value="{{ $pointsEarnVal }}" class="text-sm font-bold font-mono">
-                <div class="flex items-center gap-1.5 flex-wrap pt-0.5">
-                    <span class="text-[10px] text-stone-500 font-bold">خيارات سريعة:</span>
-                    <button type="button" onclick="setGlobalEarnRate(10)" class="px-2.5 py-1 rounded-md bg-emerald-100 hover:bg-emerald-200 text-emerald-900 text-[10px] font-bold transition-colors cursor-pointer">كل 10 ₪ = نقطة</button>
-                    <button type="button" onclick="setGlobalEarnRate(5)" class="px-2.5 py-1 rounded-md bg-slate-100 hover:bg-slate-200 text-slate-800 text-[10px] font-bold transition-colors cursor-pointer">كل 5 ₪ = نقطة</button>
-                    <button type="button" onclick="setGlobalEarnRate(1)" class="px-2.5 py-1 rounded-md bg-slate-100 hover:bg-slate-200 text-slate-800 text-[10px] font-bold transition-colors cursor-pointer">كل 1 ₪ = نقطة</button>
-                </div>
-                <div class="text-[11px] leading-relaxed text-slate-600 bg-white p-3 rounded-lg border border-slate-200">
-                    <strong class="text-emerald-700 block mb-0.5 font-bold">💡 شرح مبسط:</strong>
-                    المبلغ الذي ينفقه الزبون ليكسب <span class="font-bold text-stone-900">نقطة واحدة</span>.
-                    <br>
-                    • إذا وضعت <span class="font-mono font-bold text-stone-900">10</span> (أو ضغطت الزر أعلاه): كل <span class="font-bold">10 شيكل</span> مشتريات = <span class="font-bold">1 نقطة</span> (طلب بقيمة 100 ₪ يكسب الزبون 10 نقاط).
-                    <br>
-                    • إذا وضعت <span class="font-mono font-bold text-stone-900">1</span>: كل 1 شيكل مشتريات = 1 نقطة.
-                </div>
-            </div>
-
-            {{-- Redeem Points --}}
-            <div class="rounded-xl bg-amber-50/40 p-4.5 border border-amber-200/80 space-y-2.5">
-                <div class="flex items-center justify-between">
-                    <label class="text-xs font-extrabold text-stone-900 flex items-center gap-1.5">
-                        <span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
-                        <span>استبدال النقاط (طلب وجبة مجانية)</span>
-                    </label>
-                    <span class="text-[11px] font-mono text-stone-500 font-bold">شيكل / نقطة</span>
-                </div>
-                <input type="number" step="0.01" min="0.01" id="global_points_redeem" name="settings[points_redeem_per_amount]" value="{{ $pointsRedeemVal }}" class="text-sm font-bold font-mono">
-                <div class="flex items-center gap-1.5 flex-wrap pt-0.5">
-                    <span class="text-[10px] text-stone-500 font-bold">خيارات سريعة:</span>
-                    <button type="button" onclick="setGlobalRedeemRate(0.10)" class="px-2.5 py-1 rounded-md bg-amber-100 hover:bg-amber-200 text-amber-900 text-[10px] font-bold transition-colors cursor-pointer">كل 1 ₪ = 10 نقاط</button>
-                    <button type="button" onclick="setGlobalRedeemRate(0.20)" class="px-2.5 py-1 rounded-md bg-slate-100 hover:bg-slate-200 text-slate-800 text-[10px] font-bold transition-colors cursor-pointer">كل 1 ₪ = 5 نقاط</button>
-                    <button type="button" onclick="setGlobalRedeemRate(1)" class="px-2.5 py-1 rounded-md bg-slate-100 hover:bg-slate-200 text-slate-800 text-[10px] font-bold transition-colors cursor-pointer">كل 1 ₪ = نقطة</button>
-                </div>
-                <div class="text-[11px] leading-relaxed text-slate-600 bg-white p-3 rounded-lg border border-slate-200">
-                    <strong class="text-amber-800 block mb-0.5 font-bold">💡 شرح مبسط:</strong>
-                    قيمة النقطة بالشيكل عند استبدالها بوجبة من المنيو.
-                    <br>
-                    • إذا وضعت <span class="font-mono font-bold text-amber-700">0.10</span> (أو ضغطت الزر أعلاه): كل 1 ₪ يحتاج <span class="font-bold">10 نقاط</span> (وجبة بـ 30 ₪ تتطلب 300 نقطة).
-                    <br>
-                    • إذا وضعت <span class="font-mono font-bold text-stone-900">1</span>: كل 1 ₪ يحتاج 1 نقطة (وجبة بـ 30 ₪ تتطلب 30 نقطة).
-                </div>
-            </div>
-        </div>
-
-        {{-- Include delivery fee in points calculation --}}
-        <div class="rounded-xl bg-surface-container-low p-4 border border-slate-200/70 flex items-center justify-between gap-4">
-            <div>
-                <label class="block text-xs font-bold text-stone-900">احتساب النقاط على رسوم التوصيل أيضاً؟</label>
-                <p class="text-[11px] text-on-surface-variant">عند التفعيل، يحصل الزبون على نقاط عن قيمة الوجبات + رسوم التوصيل معاً.</p>
-            </div>
-            <select name="settings[points_include_delivery]" class="text-xs font-bold w-44 rounded-lg">
-                <option value="1" @selected($pointsDeliveryVal === '1')>نعم (شامل التوصيل)</option>
-                <option value="0" @selected($pointsDeliveryVal === '0')>لا (الوجبات فقط)</option>
-            </select>
-        </div>
-
-        {{-- Live Preview Calculator --}}
-        <div class="rounded-xl bg-surface-container-low border border-slate-200/80 p-4 text-xs">
-            <div class="font-bold text-stone-900 flex items-center gap-1.5 mb-2">
-                <span class="material-symbols-outlined text-primary text-[18px]">calculate</span>
-                <span>معاينة حية ومباشرة للحسبة حسب الأرقام العامة المدخلة:</span>
-            </div>
-            <div class="grid sm:grid-cols-2 gap-4 text-stone-700">
-                <div class="p-3 bg-white rounded-lg border border-slate-200">
-                    <div class="text-slate-500 text-[11px]">طلب بقيمة 100 ₪ من أي مطعم عام:</div>
-                    <div class="font-bold text-emerald-800 mt-1" id="global_preview_earn">
-                        يكسب الزبون: <strong>100 نقطة</strong>
-                    </div>
-                </div>
-                <div class="p-3 bg-white rounded-lg border border-slate-200">
-                    <div class="text-slate-500 text-[11px]">وجبة من المنيو سعرها 30 ₪:</div>
-                    <div class="font-bold text-amber-900 mt-1" id="global_preview_redeem">
-                        تتطلب للاستبدال: <strong>30 نقطة</strong>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    {{-- 4. General System & Duration Settings --}}
-    @php
-        $excludedKeys = [
-            'delivery_fee',
-            'delivery_fees_by_area',
-            'custom_delivery_areas',
-            'bank_name',
-            'bank_account_number',
-            'bank_iban',
-            'bank_beneficiary_name',
-            'jawwal_pay_number',
-            'jawwal_pay_name',
-            'jawwal_pay_qr_path',
-            'palpay_number',
-            'palpay_name',
-            'palpay_qr_path',
-            'payment_instructions_note',
-            'points_per_amount',
-            'points_redeem_per_amount',
-            'points_include_delivery',
-        ];
-        $generalSettings = $settings->whereNotIn('key', $excludedKeys);
-    @endphp
-
-    @if($generalSettings->isNotEmpty())
-        <div id="setting-general-system" class="rounded-2xl border border-slate-200/80 bg-white/95 p-5 sm:p-6 space-y-5 shadow-xs">
-            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-                <div class="flex items-center gap-2.5">
-                    <div class="w-10 h-10 rounded-xl bg-slate-100 text-stone-700 flex items-center justify-center shrink-0">
-                        <span class="material-symbols-outlined text-[24px]">tune</span>
+    {{-- ========================================================= --}}
+    {{-- TAB 1: حسابات الدفع والتحويل المعتمدة (Payment Accounts)    --}}
+    {{-- ========================================================= --}}
+    <div id="section-payments" class="settings-section space-y-6">
+        <div class="admin-card !p-0 overflow-hidden shadow-sm">
+            <div class="px-5 py-4 border-b border-slate-100 flex flex-wrap items-center justify-between gap-3 bg-white">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-stone-900 text-white flex items-center justify-center shrink-0 shadow-sm">
+                        <span class="material-symbols-outlined text-primary text-[24px]">payments</span>
                     </div>
                     <div>
-                        <h2 class="text-base font-bold text-on-surface">إعدادات النظام والمدد والتنبيهات</h2>
-                        <p class="text-xs text-on-surface-variant">التحكم في فترات الصلاحيات، وتنبيهات انتهاء العضويات واشتراكات المطاعم</p>
+                        <h2 class="text-base font-bold text-stone-900">بيانات الدفع والتحويل المعتمدة</h2>
+                        <p class="text-xs text-slate-500">تظهر هذه الحسابات للزبائن في الدفع المباشر، شحن المحفظة، واشتراكات المطاعم والعضويات</p>
                     </div>
                 </div>
-                <span class="text-xs font-semibold px-3 py-1 rounded-full bg-slate-100 text-stone-700 shrink-0">
-                    إعدادات عامة
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-slate-100 text-stone-800">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                    <span>3 طرق تحويل معتمدة</span>
                 </span>
             </div>
 
-            <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                @foreach($generalSettings as $setting)
-                    <div id="setting-{{ $setting->key }}" class="p-4 rounded-xl bg-surface-container-low border border-slate-200/70 space-y-2">
-                        <label class="block text-xs font-bold text-on-surface">{{ $setting->label }}</label>
-                        <input name="settings[{{ $setting->key }}]" value="{{ $setting->value }}" class="text-sm font-bold">
-                        @if(! empty($hints[$setting->key]))
-                            <p class="text-[11px] leading-relaxed text-on-surface-variant">{{ $hints[$setting->key] }}</p>
+            <div class="p-6 space-y-6">
+                <div class="grid gap-6 lg:grid-cols-3">
+                    {{-- 1. Jawwal Pay --}}
+                    <div class="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-2xs space-y-4 flex flex-col justify-between">
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                                <div class="flex items-center gap-2">
+                                    <span class="material-symbols-outlined text-primary text-[20px]">account_balance_wallet</span>
+                                    <h3 class="font-bold text-sm text-stone-900">محفظة جوال باي (Jawwal Pay)</h3>
+                                </div>
+                                <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded-md bg-stone-100 text-stone-800">محفظة إلكترونية</span>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold text-stone-800 mb-1">رقم المحفظة / الجوال</label>
+                                <input type="text" 
+                                       name="settings[jawwal_pay_number]" 
+                                       value="{{ $paymentAccounts['jawwal_pay_number'] }}" 
+                                       placeholder="0599000000" 
+                                       class="text-sm font-mono w-full !h-10" 
+                                       dir="ltr">
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold text-stone-800 mb-1">اسم صاحب المحفظة (المستفيد)</label>
+                                <input type="text" 
+                                       name="settings[jawwal_pay_name]" 
+                                       value="{{ $paymentAccounts['jawwal_pay_name'] }}" 
+                                       placeholder="محفظة سفرة غزة" 
+                                       class="text-sm w-full !h-10">
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold text-stone-800 mb-1">صورة باركود QR المحفظة</label>
+                                <input type="file" 
+                                       name="jawwal_pay_qr" 
+                                       accept="image/*" 
+                                       class="text-xs w-full p-2 border border-dashed border-slate-300 rounded-lg bg-slate-50/50 cursor-pointer">
+                                <p class="text-[11px] text-slate-400 mt-1">امسح الكود عبر التطبيق أو ارفع صورة جديدة للباركود.</p>
+                            </div>
+                        </div>
+
+                        @if($paymentAccounts['jawwal_pay_qr_url'])
+                            <div class="pt-3 border-t border-slate-100 flex items-center justify-between gap-3 bg-slate-50 p-2.5 rounded-xl">
+                                <div class="flex items-center gap-2.5 min-w-0">
+                                    <img src="{{ $paymentAccounts['jawwal_pay_qr_url'] }}" alt="QR جوال باي" class="w-12 h-12 object-contain rounded-lg border border-slate-200 bg-white p-0.5 shrink-0">
+                                    <div class="text-xs truncate">
+                                        <a href="{{ $paymentAccounts['jawwal_pay_qr_url'] }}" target="_blank" class="font-bold text-stone-900 hover:text-primary flex items-center gap-1">
+                                            <span>معاينة الرمز</span>
+                                            <span class="material-symbols-outlined text-[13px]">open_in_new</span>
+                                        </a>
+                                        <span class="text-[10px] text-slate-400">مفعل حالياً</span>
+                                    </div>
+                                </div>
+                                <label class="inline-flex items-center gap-1 text-[11px] font-bold text-rose-600 hover:text-rose-700 cursor-pointer shrink-0">
+                                    <input type="checkbox" name="remove_jawwal_pay_qr" value="1" class="rounded text-rose-600 focus:ring-rose-500">
+                                    <span>حذف</span>
+                                </label>
+                            </div>
                         @endif
                     </div>
-                @endforeach
+
+                    {{-- 2. PalPay --}}
+                    <div class="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-2xs space-y-4 flex flex-col justify-between">
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                                <div class="flex items-center gap-2">
+                                    <span class="material-symbols-outlined text-primary text-[20px]">qr_code_scanner</span>
+                                    <h3 class="font-bold text-sm text-stone-900">محفظة بال باي (PalPay)</h3>
+                                </div>
+                                <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded-md bg-stone-100 text-stone-800">محفظتي</span>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold text-stone-800 mb-1">رقم المحفظة / نقطة البيع</label>
+                                <input type="text" 
+                                       name="settings[palpay_number]" 
+                                       value="{{ $paymentAccounts['palpay_number'] }}" 
+                                       placeholder="0599000000" 
+                                       class="text-sm font-mono w-full !h-10" 
+                                       dir="ltr">
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold text-stone-800 mb-1">اسم صاحب المحفظة (المستفيد)</label>
+                                <input type="text" 
+                                       name="settings[palpay_name]" 
+                                       value="{{ $paymentAccounts['palpay_name'] }}" 
+                                       placeholder="محفظة بال باي — سفرة غزة" 
+                                       class="text-sm w-full !h-10">
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold text-stone-800 mb-1">صورة باركود QR بال باي</label>
+                                <input type="file" 
+                                       name="palpay_qr" 
+                                       accept="image/*" 
+                                       class="text-xs w-full p-2 border border-dashed border-slate-300 rounded-lg bg-slate-50/50 cursor-pointer">
+                                <p class="text-[11px] text-slate-400 mt-1">يُمسح عبر تطبيق محفظتي لدفع المبالغ فوراً.</p>
+                            </div>
+                        </div>
+
+                        @if($paymentAccounts['palpay_qr_url'])
+                            <div class="pt-3 border-t border-slate-100 flex items-center justify-between gap-3 bg-slate-50 p-2.5 rounded-xl">
+                                <div class="flex items-center gap-2.5 min-w-0">
+                                    <img src="{{ $paymentAccounts['palpay_qr_url'] }}" alt="QR بال باي" class="w-12 h-12 object-contain rounded-lg border border-slate-200 bg-white p-0.5 shrink-0">
+                                    <div class="text-xs truncate">
+                                        <a href="{{ $paymentAccounts['palpay_qr_url'] }}" target="_blank" class="font-bold text-stone-900 hover:text-primary flex items-center gap-1">
+                                            <span>معاينة الرمز</span>
+                                            <span class="material-symbols-outlined text-[13px]">open_in_new</span>
+                                        </a>
+                                        <span class="text-[10px] text-slate-400">مفعل حالياً</span>
+                                    </div>
+                                </div>
+                                <label class="inline-flex items-center gap-1 text-[11px] font-bold text-rose-600 hover:text-rose-700 cursor-pointer shrink-0">
+                                    <input type="checkbox" name="remove_palpay_qr" value="1" class="rounded text-rose-600 focus:ring-rose-500">
+                                    <span>حذف</span>
+                                </label>
+                            </div>
+                        @endif
+                    </div>
+
+                    {{-- 3. Bank of Palestine --}}
+                    <div class="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-2xs space-y-4 flex flex-col justify-between">
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                                <div class="flex items-center gap-2">
+                                    <span class="material-symbols-outlined text-primary text-[20px]">account_balance</span>
+                                    <h3 class="font-bold text-sm text-stone-900">حساب بنك فلسطين</h3>
+                                </div>
+                                <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded-md bg-stone-100 text-stone-800">حساب بنكي</span>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold text-stone-800 mb-1">اسم البنك</label>
+                                <input type="text" 
+                                       name="settings[bank_name]" 
+                                       value="{{ $paymentAccounts['bank_name'] }}" 
+                                       placeholder="بنك فلسطين" 
+                                       class="text-sm w-full !h-10">
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold text-stone-800 mb-1">رقم الحساب البنكي</label>
+                                <input type="text" 
+                                       name="settings[bank_account_number]" 
+                                       value="{{ $paymentAccounts['bank_account_number'] }}" 
+                                       placeholder="2345678" 
+                                       class="text-sm font-mono w-full !h-10" 
+                                       dir="ltr">
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold text-stone-800 mb-1">رقم الآيبان (IBAN)</label>
+                                <input type="text" 
+                                       name="settings[bank_iban]" 
+                                       value="{{ $paymentAccounts['bank_iban'] }}" 
+                                       placeholder="PS04PALS000000000002345678" 
+                                       class="text-sm font-mono w-full !h-10" 
+                                       dir="ltr">
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold text-stone-800 mb-1">اسم المستفيد البنكي</label>
+                                <input type="text" 
+                                       name="settings[bank_beneficiary_name]" 
+                                       value="{{ $paymentAccounts['bank_beneficiary_name'] }}" 
+                                       placeholder="سفرة غزة — Sofra Gaza" 
+                                       class="text-sm w-full !h-10">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Payment Instructions Note --}}
+                <div class="p-4 rounded-xl bg-slate-50 border border-slate-200/80">
+                    <label class="block text-xs font-bold text-stone-900 mb-1 flex items-center gap-1.5">
+                        <span class="material-symbols-outlined text-primary text-[18px]">info</span>
+                        <span>ملاحظات وتعليمات التحويل الموجهة للزبائن</span>
+                    </label>
+                    <input type="text" 
+                           name="settings[payment_instructions_note]" 
+                           value="{{ $paymentAccounts['instructions_note'] ?? '' }}" 
+                           class="text-sm w-full !h-11 bg-white" 
+                           placeholder="مثال: يرجى كتابة رقم الهاتف في ملاحظات التحويل، ورفع صورة الإشعار للمراجعة الفورية...">
+                    <p class="text-[11px] text-slate-500 mt-1">تظهر هذه الملاحظة التوجيهية للزبائن في كافة شاشات الدفع والتحويل وشحن الرصيد بالمتجر.</p>
+                </div>
             </div>
         </div>
-    @endif
+    </div>
 
-    {{-- Sticky Floating Save Bar --}}
-    <div class="sticky bottom-4 z-20 flex items-center justify-between gap-4 p-4 rounded-2xl bg-white/95 backdrop-blur-md border border-slate-200 shadow-lg">
-        <div class="flex items-center gap-2 text-stone-600 text-xs font-medium">
-            <span class="material-symbols-outlined text-amber-600 text-[20px]">info</span>
-            <span>تأكد من مراجعة الإعدادات، ثم اضغط حفظ لتطبيق التغييرات فوراً في كامل المنصة.</span>
+    {{-- ========================================================= --}}
+    {{-- TAB 2: رسوم ومناطق التوصيل (Delivery Fees & Areas)          --}}
+    {{-- ========================================================= --}}
+    <div id="section-delivery" class="settings-section space-y-6 hidden">
+        <div class="admin-card !p-0 overflow-hidden shadow-sm">
+            <div class="px-5 py-4 border-b border-slate-100 flex flex-wrap items-center justify-between gap-3 bg-white">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-stone-900 text-white flex items-center justify-center shrink-0 shadow-sm">
+                        <span class="material-symbols-outlined text-primary text-[24px]">local_shipping</span>
+                    </div>
+                    <div>
+                        <h2 class="text-base font-bold text-stone-900">إعدادات رسوم التوصيل</h2>
+                        <p class="text-xs text-slate-500">حدد تكلفة التوصيل العامة وسعر كل منطقة محددة في قطاع غزة</p>
+                    </div>
+                </div>
+                <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-slate-100 text-stone-800">
+                    <span>المناطق المعتمدة:</span>
+                    <strong class="font-mono text-stone-900">{{ count($areasWithFees) }}</strong>
+                </span>
+            </div>
+
+            <div class="p-6 space-y-6">
+                {{-- Fallback Default Delivery Fee --}}
+                <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <div class="space-y-1">
+                        <h3 class="text-sm font-bold text-stone-900 flex items-center gap-2">
+                            <span class="material-symbols-outlined text-primary text-[18px]">tune</span>
+                            <span>رسوم التوصيل العامة الافتراضية (الأساسية)</span>
+                        </h3>
+                        <p class="text-xs text-slate-500">
+                            تُعتمد هذه الرسوم كخيار أساسي وافتراضي في حال لم يتم تحديد سعر خاص للمنطقة أدناه.
+                        </p>
+                    </div>
+                    <div class="flex items-center gap-2 shrink-0">
+                        <input type="number" 
+                               step="0.5" 
+                               min="0" 
+                               max="999" 
+                               name="settings[delivery_fee]" 
+                               value="{{ $deliveryFeeSetting?->value ?? 10 }}" 
+                               class="text-base font-bold font-mono text-center w-24 !h-11 bg-white rounded-xl shadow-2xs">
+                        <span class="text-sm font-bold text-stone-700">₪ شيكل</span>
+                    </div>
+                </div>
+
+                {{-- Area by Area Fees with Search --}}
+                <div class="space-y-4">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
+                        <div>
+                            <h3 class="text-sm font-bold text-stone-900">رسوم التوصيل المخصصة حسب كل منطقة</h3>
+                            <p class="text-xs text-slate-500">يتم احتساب هذا السعر تلقائياً عند اختيار الزبون للمنطقة أثناء إتمام الطلب</p>
+                        </div>
+                        <div class="relative w-full sm:w-64">
+                            <input type="text" 
+                                   id="area-search-input"
+                                   oninput="filterDeliveryAreas(this.value)"
+                                   placeholder="تصفية المناطق..." 
+                                   class="!min-h-[2.3rem] !py-1 !pr-8 !pl-3 !text-xs !rounded-full w-full">
+                            <span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 !text-base pointer-events-none">search</span>
+                        </div>
+                    </div>
+
+                    <div class="grid gap-3 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4" id="delivery-areas-grid">
+                        @foreach($areasWithFees as $area)
+                            <div class="area-card flex items-center justify-between gap-3 p-3.5 rounded-xl bg-white border border-slate-200/80 hover:border-primary/40 transition-colors shadow-2xs"
+                                 data-name="{{ $area['label'] }} {{ $area['key'] }}">
+                                <div class="min-w-0 flex-1">
+                                    <div class="flex items-center gap-1.5">
+                                        <span class="material-symbols-outlined text-primary text-[17px]">location_on</span>
+                                        <span class="font-bold text-xs text-stone-900 truncate">{{ $area['label'] }}</span>
+                                    </div>
+                                    <div class="text-[10px] text-slate-400 mr-5 mt-0.5">
+                                        الرمز: <code class="font-mono text-stone-700 font-bold">{{ $area['key'] }}</code>
+                                        @if(! empty($area['is_custom_area']))
+                                            <span class="mr-1 inline-block px-1.5 py-0.2 rounded bg-stone-100 text-stone-800 text-[9px] font-bold">مخصصة</span>
+                                        @endif
+                                    </div>
+                                </div>
+
+                                <div class="flex items-center gap-1.5 shrink-0">
+                                    <input type="number" 
+                                           step="0.5" 
+                                           min="0" 
+                                           max="999" 
+                                           name="delivery_fees_by_area[{{ $area['key'] }}]" 
+                                           value="{{ $area['delivery_fee'] }}" 
+                                           class="font-mono font-bold text-xs text-center w-16 !h-9 bg-slate-50 rounded-lg"
+                                           placeholder="{{ $deliveryFeeSetting?->value ?? 10 }}">
+                                    <span class="text-xs font-bold text-slate-500">₪</span>
+                                    @if(! empty($area['is_custom_area']))
+                                        <button type="submit" 
+                                                name="remove_area_key" 
+                                                value="{{ $area['key'] }}"
+                                                class="admin-action-btn admin-action-btn--danger admin-action-btn--icon admin-action-btn--sm"
+                                                title="حذف هذه المنطقة المخصصة"
+                                                onclick="return confirm('هل تريد حذف هذه المنطقة المخصصة نهائياً؟');">
+                                            <span class="material-symbols-outlined text-[15px]">delete</span>
+                                        </button>
+                                    @endif
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+
+                {{-- Add New Custom Area Card --}}
+                <div class="p-5 rounded-2xl bg-white border border-dashed border-slate-300 space-y-3">
+                    <div class="flex items-center gap-2 text-stone-900 font-bold text-sm">
+                        <span class="material-symbols-outlined text-primary text-[20px]">add_location_alt</span>
+                        <span>إضافة منطقة توصيل جديدة للمنصة</span>
+                    </div>
+                    <div class="grid gap-3 sm:grid-cols-3 pt-2">
+                        <div>
+                            <label class="block text-xs font-bold text-stone-800 mb-1">اسم المنطقة مع المدينة</label>
+                            <input type="text" name="new_area_label" placeholder="مثلاً: غزة • الشيخ رضوان" class="text-xs w-full !h-10">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-stone-800 mb-1">الاسم المختصر (الرمز الفريد)</label>
+                            <input type="text" name="new_area_key" placeholder="الشيخ رضوان" class="text-xs font-mono w-full !h-10">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-stone-800 mb-1">رسوم التوصيل (شيكل)</label>
+                            <input type="number" step="0.5" min="0" max="999" name="new_area_fee" placeholder="10" class="text-xs font-mono w-full !h-10">
+                        </div>
+                    </div>
+                    <p class="text-[11px] text-slate-400">ستُضاف المنطقة وتظهر في كافة أنحاء المتجر والتطبيق عند الضغط على "حفظ كافة الإعدادات".</p>
+                </div>
+            </div>
         </div>
-        <button type="submit" class="admin-btn admin-btn--primary px-8 py-3 text-base flex items-center gap-2 shadow-sm cursor-pointer hover:opacity-95 transition-opacity shrink-0">
-            <span class="material-symbols-outlined text-[20px]">save</span>
-            <span>حفظ كافة الإعدادات</span>
-        </button>
+    </div>
+
+    {{-- ========================================================= --}}
+    {{-- TAB 3: برنامج نقاط الولاء والمكافآت (Points & Rewards)       --}}
+    {{-- ========================================================= --}}
+    <div id="section-points" class="settings-section space-y-6 hidden">
+        <div class="admin-card !p-0 overflow-hidden shadow-sm">
+            <div class="px-5 py-4 border-b border-slate-100 flex flex-wrap items-center justify-between gap-3 bg-white">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-stone-900 text-white flex items-center justify-center shrink-0 shadow-sm">
+                        <span class="material-symbols-outlined text-primary text-[24px]">stars</span>
+                    </div>
+                    <div>
+                        <h2 class="text-base font-bold text-stone-900">نظام احتساب واستبدال النقاط (برنامج الولاء)</h2>
+                        <p class="text-xs text-slate-500">التحكم في معدل اكتساب النقاط لكل طلب ومعدل استبدالها بوجبات ومكافآت مجانية</p>
+                    </div>
+                </div>
+                <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-slate-100 text-stone-800">
+                    نقاط الولاء العامة
+                </span>
+            </div>
+
+            <div class="p-6 space-y-6">
+                <div class="grid gap-6 md:grid-cols-2">
+                    {{-- 1. Earn Rate --}}
+                    <div class="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-2xs space-y-4">
+                        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                            <div class="flex items-center gap-2">
+                                <span class="material-symbols-outlined text-primary text-[20px]">add_circle</span>
+                                <h3 class="font-bold text-sm text-stone-900">معدل اكتساب النقاط (عند الشراء)</h3>
+                            </div>
+                            <span class="text-xs font-mono font-bold text-slate-500">شيكل / نقطة</span>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-stone-800 mb-1">المبلغ المنفق لكسب نقطة واحدة</label>
+                            <input type="number" 
+                                   step="0.01" 
+                                   min="0.01" 
+                                   id="global_points_earn" 
+                                   name="settings[points_per_amount]" 
+                                   value="{{ $pointsEarnVal }}" 
+                                   class="text-base font-bold font-mono w-full !h-11">
+                        </div>
+
+                        <div class="flex items-center gap-1.5 flex-wrap pt-1">
+                            <span class="text-[11px] text-slate-400 font-bold">خيارات سريعة:</span>
+                            <button type="button" onclick="setGlobalEarnRate(10)" class="px-2.5 py-1 rounded-lg bg-stone-100 hover:bg-stone-200 text-stone-800 text-[11px] font-bold transition-colors cursor-pointer">كل 10 ₪ = 1 نقطة</button>
+                            <button type="button" onclick="setGlobalEarnRate(5)" class="px-2.5 py-1 rounded-lg bg-stone-100 hover:bg-stone-200 text-stone-800 text-[11px] font-bold transition-colors cursor-pointer">كل 5 ₪ = 1 نقطة</button>
+                            <button type="button" onclick="setGlobalEarnRate(1)" class="px-2.5 py-1 rounded-lg bg-stone-100 hover:bg-stone-200 text-stone-800 text-[11px] font-bold transition-colors cursor-pointer">كل 1 ₪ = 1 نقطة</button>
+                        </div>
+
+                        <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200/70 text-xs text-slate-600 leading-relaxed">
+                            <strong class="text-stone-900 block mb-1 font-bold">💡 مثال توضيحي:</strong>
+                            إذا وضعت <span class="font-mono font-bold text-stone-900">10</span>: كل 10 شواكل مشتريات تمنح الزبون نقطة واحدة (طلب بـ 100 ₪ = 10 نقاط).
+                        </div>
+                    </div>
+
+                    {{-- 2. Redeem Rate --}}
+                    <div class="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-2xs space-y-4">
+                        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                            <div class="flex items-center gap-2">
+                                <span class="material-symbols-outlined text-primary text-[20px]">redeem</span>
+                                <h3 class="font-bold text-sm text-stone-900">معدل استبدال النقاط (بوجبات مجانية)</h3>
+                            </div>
+                            <span class="text-xs font-mono font-bold text-slate-500">شيكل / نقطة</span>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-stone-800 mb-1">قيمة النقطة الواحدة بالشيكل عند الخصم</label>
+                            <input type="number" 
+                                   step="0.01" 
+                                   min="0.01" 
+                                   id="global_points_redeem" 
+                                   name="settings[points_redeem_per_amount]" 
+                                   value="{{ $pointsRedeemVal }}" 
+                                   class="text-base font-bold font-mono w-full !h-11">
+                        </div>
+
+                        <div class="flex items-center gap-1.5 flex-wrap pt-1">
+                            <span class="text-[11px] text-slate-400 font-bold">خيارات سريعة:</span>
+                            <button type="button" onclick="setGlobalRedeemRate(0.10)" class="px-2.5 py-1 rounded-lg bg-stone-100 hover:bg-stone-200 text-stone-800 text-[11px] font-bold transition-colors cursor-pointer">كل 1 ₪ = 10 نقاط</button>
+                            <button type="button" onclick="setGlobalRedeemRate(0.20)" class="px-2.5 py-1 rounded-lg bg-stone-100 hover:bg-stone-200 text-stone-800 text-[11px] font-bold transition-colors cursor-pointer">كل 1 ₪ = 5 نقاط</button>
+                            <button type="button" onclick="setGlobalRedeemRate(1)" class="px-2.5 py-1 rounded-lg bg-stone-100 hover:bg-stone-200 text-stone-800 text-[11px] font-bold transition-colors cursor-pointer">كل 1 ₪ = 1 نقطة</button>
+                        </div>
+
+                        <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200/70 text-xs text-slate-600 leading-relaxed">
+                            <strong class="text-stone-900 block mb-1 font-bold">💡 مثال توضيحي:</strong>
+                            إذا وضعت <span class="font-mono font-bold text-stone-900">0.10</span>: كل 1 ₪ يحتاج 10 نقاط (وجبة سعرها 30 ₪ تتطلب 300 نقطة).
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Delivery Fee in Points & Default Rewards --}}
+                <div class="grid gap-4 sm:grid-cols-3">
+                    <div class="p-4 rounded-xl bg-slate-50 border border-slate-200/80">
+                        <label class="block text-xs font-bold text-stone-900 mb-1">احتساب النقاط على رسوم التوصيل؟</label>
+                        <select name="settings[points_include_delivery]" class="text-xs font-bold w-full rounded-lg !h-10 bg-white">
+                            <option value="1" @selected($pointsDeliveryVal === '1')>نعم (شامل قيمة الطعام + التوصيل)</option>
+                            <option value="0" @selected($pointsDeliveryVal === '0')>لا (قيمة الطعام والوجبات فقط)</option>
+                        </select>
+                    </div>
+
+                    <div class="p-4 rounded-xl bg-slate-50 border border-slate-200/80">
+                        <label class="block text-xs font-bold text-stone-900 mb-1">نقاط استبدال مشروب مجاني افتراضي</label>
+                        <input type="number" name="settings[drink_points]" value="{{ $drinkPointsVal }}" class="text-sm font-bold font-mono w-full !h-10 bg-white">
+                    </div>
+
+                    <div class="p-4 rounded-xl bg-slate-50 border border-slate-200/80">
+                        <label class="block text-xs font-bold text-stone-900 mb-1">نقاط استبدال وجبة مجانية افتراضية</label>
+                        <input type="number" name="settings[meal_points]" value="{{ $mealPointsVal }}" class="text-sm font-bold font-mono w-full !h-10 bg-white">
+                    </div>
+                </div>
+
+                {{-- Live Interactive Preview Calculator --}}
+                <div class="p-4 rounded-xl bg-stone-900 text-white space-y-3">
+                    <div class="flex items-center gap-2 font-bold text-sm">
+                        <span class="material-symbols-outlined text-primary text-[20px]">calculate</span>
+                        <span>معاينة حية ومباشرة للأرقام المدخلة أعلاه:</span>
+                    </div>
+                    <div class="grid sm:grid-cols-2 gap-3 text-xs">
+                        <div class="p-3 bg-stone-800/80 rounded-xl border border-stone-700">
+                            <span class="text-slate-400 block text-[11px]">طلب بقيمة 100 ₪ من أي مطعم:</span>
+                            <div class="font-bold text-white mt-1 text-sm" id="global_preview_earn">
+                                يكسب الزبون: <span class="font-mono text-primary text-base">100</span> نقطة
+                            </div>
+                        </div>
+                        <div class="p-3 bg-stone-800/80 rounded-xl border border-stone-700">
+                            <span class="text-slate-400 block text-[11px]">وجبة من المنيو سعرها 30 ₪:</span>
+                            <div class="font-bold text-white mt-1 text-sm" id="global_preview_redeem">
+                                تتطلب للاستبدال: <span class="font-mono text-primary text-base">30</span> نقطة
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- ========================================================= --}}
+    {{-- TAB 4: البانرات والإعلانات (Banners & Ads)                 --}}
+    {{-- ========================================================= --}}
+    <div id="section-banners" class="settings-section space-y-6 hidden">
+        <div class="admin-card !p-0 overflow-hidden shadow-sm">
+            <div class="px-5 py-4 border-b border-slate-100 flex flex-wrap items-center justify-between gap-3 bg-white">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-stone-900 text-white flex items-center justify-center shrink-0 shadow-sm">
+                        <span class="material-symbols-outlined text-primary text-[24px]">view_carousel</span>
+                    </div>
+                    <div>
+                        <h2 class="text-base font-bold text-stone-900">إدارة البانرات الإعلانية (الشريط العلوي في شاشة الهاتف)</h2>
+                        <p class="text-xs text-slate-500">تظهر هذه الصور كشريط إعلاني مدمج بدون نصوص أسفل الهيدر مباشرة في شاشات الجوال</p>
+                    </div>
+                </div>
+                <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-slate-100 text-stone-800">
+                    <span>البانرات الحالية:</span>
+                    <strong class="font-mono text-stone-900">{{ count($homeBanners) }}</strong>
+                </span>
+            </div>
+
+            <div class="p-6 space-y-6">
+                {{-- Current Active Banners Gallery --}}
+                <div class="space-y-3">
+                    <h3 class="text-xs font-bold text-stone-900">البانرات المفعلة حالياً</h3>
+
+                    @if(count($homeBanners) > 0)
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                            @foreach($homeBanners as $bIdx => $bannerItem)
+                                @php
+                                    $bPath = is_array($bannerItem) ? ($bannerItem['image'] ?? $bannerItem['url'] ?? '') : (string) $bannerItem;
+                                    $bUrl = (str_starts_with($bPath, 'http://') || str_starts_with($bPath, 'https://'))
+                                        ? $bPath
+                                        : \Illuminate\Support\Facades\Storage::disk('public')->url($bPath);
+                                @endphp
+                                <div class="rounded-xl border border-slate-200 overflow-hidden bg-white shadow-2xs flex flex-col group">
+                                    <div class="w-full h-24 bg-slate-100 overflow-hidden relative">
+                                        <img src="{{ $bUrl }}" alt="بانر {{ $bIdx + 1 }}" class="w-full h-full object-cover">
+                                        <span class="absolute top-2 right-2 bg-stone-900/80 text-white text-[10px] font-mono font-bold px-2 py-0.5 rounded-md">
+                                            #{{ $bIdx + 1 }}
+                                        </span>
+                                    </div>
+                                    <div class="p-3 bg-white flex items-center justify-between border-t border-slate-100">
+                                        <a href="{{ $bUrl }}" target="_blank" class="text-xs font-semibold text-stone-600 hover:text-primary flex items-center gap-1 truncate max-w-[150px]">
+                                            <span>معاينة الرابط</span>
+                                            <span class="material-symbols-outlined text-[14px]">open_in_new</span>
+                                        </a>
+                                        <button type="submit" 
+                                                name="remove_banner" 
+                                                value="{{ $bPath }}" 
+                                                class="admin-action-btn admin-action-btn--danger admin-action-btn--icon admin-action-btn--sm"
+                                                title="حذف هذا البانر نهائياً">
+                                            <span class="material-symbols-outlined">delete</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    @else
+                        <div class="p-8 text-center rounded-2xl border border-dashed border-slate-300 bg-slate-50/50">
+                            <span class="material-symbols-outlined text-4xl text-slate-300 mb-1">imagesmode</span>
+                            <p class="text-xs font-bold text-stone-700">لا توجد صور بانرات خاصة مرفوعة حالياً</p>
+                            <p class="text-[11px] text-slate-400 mt-0.5">يتم عرض البانرات الافتراضية الأنيقة تلقائياً في شاشات الجوال.</p>
+                        </div>
+                    @endif
+                </div>
+
+                {{-- Add New Banners --}}
+                <div class="grid gap-4 md:grid-cols-2 pt-4 border-t border-slate-100">
+                    {{-- File upload --}}
+                    <div class="p-4 rounded-xl bg-slate-50 border border-slate-200/80 space-y-2">
+                        <label class="block text-xs font-bold text-stone-900 flex items-center gap-1.5">
+                            <span class="material-symbols-outlined text-primary text-[18px]">upload_file</span>
+                            <span>رفع صور بانرات جديدة (يمكنك تحديد عدة صور)</span>
+                        </label>
+                        <input type="file" 
+                               name="new_banners[]" 
+                               multiple 
+                               accept="image/*" 
+                               class="text-xs w-full p-2.5 border border-dashed border-slate-300 rounded-lg bg-white cursor-pointer">
+                        <p class="text-[11px] text-slate-500">
+                            💡 المقاس الموصى به: نسبة شريطية عرضية (مثلاً 1200×300 أو 800×200 بكسل).
+                        </p>
+                    </div>
+
+                    {{-- URL input --}}
+                    <div class="p-4 rounded-xl bg-slate-50 border border-slate-200/80 space-y-2">
+                        <label class="block text-xs font-bold text-stone-900 flex items-center gap-1.5">
+                            <span class="material-symbols-outlined text-primary text-[18px]">link</span>
+                            <span>أو إضافة رابط مباشر لصورة إعلان</span>
+                        </label>
+                        <input type="url" 
+                               name="new_banner_url" 
+                               placeholder="https://example.com/banner.jpg" 
+                               class="text-xs font-mono w-full !h-10 bg-white" 
+                               dir="ltr">
+                        <p class="text-[11px] text-slate-500">
+                            يمكنك إدراج رابط صورة خارجي مباشر لإضافتها فوراً لسلايدر البانرات.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- ========================================================= --}}
+    {{-- TAB 5: النظام والمدد الزمنية والتنبيهات (System & Durations) --}}
+    {{-- ========================================================= --}}
+    <div id="section-system" class="settings-section space-y-6 hidden">
+        <div class="admin-card !p-0 overflow-hidden shadow-sm">
+            <div class="px-5 py-4 border-b border-slate-100 flex flex-wrap items-center justify-between gap-3 bg-white">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-stone-900 text-white flex items-center justify-center shrink-0 shadow-sm">
+                        <span class="material-symbols-outlined text-primary text-[24px]">tune</span>
+                    </div>
+                    <div>
+                        <h2 class="text-base font-bold text-stone-900">إعدادات النظام والمدد الزمنية والتنبيهات</h2>
+                        <p class="text-xs text-slate-500">التحكم في فترات الصلاحيات والاشتراكات وتنبيهات التجديد التلقائية</p>
+                    </div>
+                </div>
+                <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-slate-100 text-stone-800">
+                    سياسات النظام
+                </span>
+            </div>
+
+            <div class="p-6 space-y-6">
+                <div class="grid gap-5 sm:grid-cols-3">
+                    {{-- Restaurant listing days --}}
+                    <div class="p-4 rounded-xl bg-white border border-slate-200/90 shadow-2xs space-y-2">
+                        <label class="block text-xs font-bold text-stone-900 flex items-center gap-1.5">
+                            <span class="material-symbols-outlined text-primary text-[18px]">calendar_month</span>
+                            <span>مدة عرض واشتراك المطعم</span>
+                        </label>
+                        <div class="flex items-center gap-2">
+                            <input type="number" 
+                                   min="1" 
+                                   max="3650" 
+                                   name="settings[restaurant_listing_days]" 
+                                   value="{{ $restaurantListingDaysVal }}" 
+                                   class="text-sm font-bold font-mono w-full !h-10">
+                            <span class="text-xs font-bold text-slate-500">يوم</span>
+                        </div>
+                        <p class="text-[11px] text-slate-400">المدة الافتراضية لعرض المطعم على المنصة بعد الموافقة على اشتراكه.</p>
+                    </div>
+
+                    {{-- Restaurant expiry warning --}}
+                    <div class="p-4 rounded-xl bg-white border border-slate-200/90 shadow-2xs space-y-2">
+                        <label class="block text-xs font-bold text-stone-900 flex items-center gap-1.5">
+                            <span class="material-symbols-outlined text-primary text-[18px]">notification_important</span>
+                            <span>تنبيه انتهاء عرض المطعم</span>
+                        </label>
+                        <div class="flex items-center gap-2">
+                            <input type="number" 
+                                   min="1" 
+                                   max="60" 
+                                   name="settings[restaurant_expiry_warning_days]" 
+                                   value="{{ $restaurantExpiryWarningDaysVal }}" 
+                                   class="text-sm font-bold font-mono w-full !h-10">
+                            <span class="text-xs font-bold text-slate-500">يوم</span>
+                        </div>
+                        <p class="text-[11px] text-slate-400">عدد الأيام قبل انتهاء عرض المطعم لإرسال إشعار تنبيه للإدارة والمطعم.</p>
+                    </div>
+
+                    {{-- Membership expiry warning --}}
+                    <div class="p-4 rounded-xl bg-white border border-slate-200/90 shadow-2xs space-y-2">
+                        <label class="block text-xs font-bold text-stone-900 flex items-center gap-1.5">
+                            <span class="material-symbols-outlined text-primary text-[18px]">card_membership</span>
+                            <span>تنبيه انتهاء اشتراك العضوية</span>
+                        </label>
+                        <div class="flex items-center gap-2">
+                            <input type="number" 
+                                   min="1" 
+                                   max="60" 
+                                   name="settings[membership_expiry_warning_days]" 
+                                   value="{{ $membershipExpiryWarningDaysVal }}" 
+                                   class="text-sm font-bold font-mono w-full !h-10">
+                            <span class="text-xs font-bold text-slate-500">يوم</span>
+                        </div>
+                        <p class="text-[11px] text-slate-400">عدد الأيام قبل انتهاء اشتراك بطاقة الزبون لتنبيهه بتجديد العضوية.</p>
+                    </div>
+                </div>
+
+                {{-- Other dynamic settings if any --}}
+                @if($otherSettings->isNotEmpty())
+                    <div class="space-y-3 pt-4 border-t border-slate-100">
+                        <h3 class="text-xs font-bold text-stone-900">إعدادات إضافية مسجلة بالنظام</h3>
+                        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                            @foreach($otherSettings as $setting)
+                                <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80 space-y-1.5">
+                                    <label class="block text-xs font-bold text-stone-900">{{ $setting->label ?: $setting->key }}</label>
+                                    <input name="settings[{{ $setting->key }}]" value="{{ $setting->value }}" class="text-xs font-bold w-full bg-white !h-9">
+                                    <span class="text-[10px] font-mono text-slate-400 block">{{ $setting->key }}</span>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
+            </div>
+        </div>
+    </div>
+
+    {{-- ========================================================= --}}
+    {{-- Sticky Floating Save Bar                                  --}}
+    {{-- ========================================================= --}}
+    <div class="fixed bottom-4 left-4 right-4 md:right-72 z-40">
+        <div class="max-w-5xl mx-auto flex items-center justify-between gap-4 p-4 rounded-2xl bg-stone-900/95 text-white backdrop-blur-md border border-stone-800 shadow-2xl">
+            <div class="flex items-center gap-2.5 min-w-0">
+                <span class="material-symbols-outlined text-primary text-[22px] shrink-0">check_circle</span>
+                <div class="text-xs leading-tight">
+                    <div class="font-bold text-white">جاهز لحفظ التغييرات؟</div>
+                    <div class="text-[11px] text-slate-400 truncate">تطبق كافة التعديلات فوراً على الموقع وتطبيق الهواتف.</div>
+                </div>
+            </div>
+
+            <button type="submit" class="admin-btn admin-btn--primary !min-h-[2.6rem] !px-8 !text-xs flex items-center gap-2 font-bold shadow-md shrink-0">
+                <span class="material-symbols-outlined text-[18px]">save</span>
+                <span>حفظ كافة الإعدادات</span>
+            </button>
+        </div>
     </div>
 </form>
 
+{{-- Scripts --}}
 <script>
+    // Tab switching logic with URL Hash support
+    function switchSettingsTab(tabName) {
+        // Hide all sections unless show all is active
+        document.querySelectorAll('.settings-section').forEach(sec => {
+            sec.classList.add('hidden');
+        });
+
+        // Remove active class from all buttons
+        document.querySelectorAll('#settings-tab-list .app-tab-item:not(.app-tab-item--secondary)').forEach(btn => {
+            btn.classList.remove('is-active');
+            btn.setAttribute('aria-selected', 'false');
+        });
+
+        // Show active section
+        const targetSection = document.getElementById('section-' + tabName);
+        const targetBtn = document.getElementById('tab-btn-' + tabName);
+        if (targetSection) targetSection.classList.remove('hidden');
+        if (targetBtn) {
+            targetBtn.classList.add('is-active');
+            targetBtn.setAttribute('aria-selected', 'true');
+        }
+
+        // Reset show all button text if it was active
+        const showAllBtn = document.getElementById('btn-show-all');
+        if (showAllBtn) {
+            showAllBtn.classList.remove('is-active');
+            showAllBtn.innerHTML = '<span class="material-symbols-outlined app-tab-icon">unfold_more</span><span>عرض الكل</span>';
+        }
+
+        // Update hash without jumping
+        if (history.replaceState) {
+            history.replaceState(null, null, '#' + tabName);
+        }
+    }
+
+    function toggleShowAllSettings(btn) {
+        const sections = document.querySelectorAll('.settings-section');
+        const isShowingAll = !sections[0].classList.contains('hidden') && !sections[1].classList.contains('hidden');
+
+        if (isShowingAll) {
+            // Re-apply single tab
+            switchSettingsTab('payments');
+            btn.classList.remove('is-active');
+            btn.innerHTML = '<span class="material-symbols-outlined app-tab-icon">unfold_more</span><span>عرض الكل</span>';
+        } else {
+            // Show all sections
+            sections.forEach(sec => sec.classList.remove('hidden'));
+            document.querySelectorAll('#settings-tab-list .app-tab-item:not(.app-tab-item--secondary)').forEach(b => {
+                b.classList.add('is-active');
+                b.setAttribute('aria-selected', 'true');
+            });
+            btn.classList.add('is-active');
+            btn.innerHTML = '<span class="material-symbols-outlined app-tab-icon">unfold_less</span><span>تبويبات منفصلة</span>';
+        }
+    }
+
+    // Filter delivery areas by name
+    function filterDeliveryAreas(searchTerm) {
+        const term = searchTerm.trim().toLowerCase();
+        const cards = document.querySelectorAll('#delivery-areas-grid .area-card');
+        cards.forEach(card => {
+            const dataName = (card.getAttribute('data-name') || '').toLowerCase();
+            if (!term || dataName.includes(term)) {
+                card.style.display = '';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    }
+
+    // Interactive Points Preview Calculator
     (function() {
         const earnInput = document.getElementById('global_points_earn');
         const redeemInput = document.getElementById('global_points_redeem');
@@ -560,14 +896,14 @@
             const sampleOrder = 100;
             const earnedPoints = Math.floor(sampleOrder / earnRate);
             if (earnText) {
-                earnText.innerHTML = `يكسب الزبون: <span class="text-stone-900 font-mono text-sm">${earnedPoints} نقطة</span> (كل ${earnRate} ₪ = 1 نقطة)`;
+                earnText.innerHTML = `يكسب الزبون: <span class="font-mono text-primary font-black text-base">${earnedPoints}</span> نقطة (كل ${earnRate} ₪ = 1 نقطة)`;
             }
 
             const sampleItemPrice = 30;
             const redeemPoints = Math.round(sampleItemPrice / redeemRate);
             const ptsPerShekel = (1 / redeemRate).toFixed(1).replace(/\.0$/, '');
             if (redeemText) {
-                redeemText.innerHTML = `تتطلب للاستبدال: <span class="text-stone-900 font-mono text-sm">${redeemPoints} نقطة</span> (كل 1 ₪ = ${ptsPerShekel} نقطة)`;
+                redeemText.innerHTML = `تتطلب للاستبدال: <span class="font-mono text-primary font-black text-base">${redeemPoints}</span> نقطة (كل 1 ₪ = ${ptsPerShekel} نقطة)`;
             }
         }
 
@@ -589,6 +925,13 @@
             earnInput.addEventListener('input', updateGlobalPreviews);
             redeemInput.addEventListener('input', updateGlobalPreviews);
             updateGlobalPreviews();
+        }
+
+        // Check URL hash on page load
+        const hash = window.location.hash.replace('#', '');
+        const validTabs = ['payments', 'delivery', 'points', 'banners', 'system'];
+        if (validTabs.includes(hash)) {
+            switchSettingsTab(hash);
         }
     })();
 </script>

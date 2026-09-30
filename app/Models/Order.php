@@ -45,6 +45,7 @@ class Order extends Model
         'transfer_receipt_path',
         'rejection_reason',
         'confirmed_at',
+        'prepared_at',
         'delivered_at',
     ];
 
@@ -56,8 +57,19 @@ class Order extends Model
             'delivery_fee' => 'decimal:2',
             'total' => 'decimal:2',
             'confirmed_at' => 'datetime',
+            'prepared_at' => 'datetime',
             'delivered_at' => 'datetime',
         ];
+    }
+
+    public function isPrepared(): bool
+    {
+        return $this->prepared_at !== null;
+    }
+
+    public function foodTotal(): float
+    {
+        return max(0.0, round((float) $this->subtotal - (float) $this->discount_amount, 2));
     }
 
     public function user(): BelongsTo

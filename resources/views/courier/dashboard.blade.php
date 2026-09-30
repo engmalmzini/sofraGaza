@@ -14,6 +14,25 @@
         @endif
     </div>
 @else
+    @php
+        $courierBalance = auth()->user()->courierAvailableBalance();
+    @endphp
+    <a href="{{ route('courier.wallet') }}" class="mb-4 flex items-center justify-between p-3.5 bg-gradient-to-l from-emerald-600 to-teal-700 text-white rounded-2xl shadow-sm hover:opacity-95 transition-opacity">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
+                <span class="material-symbols-outlined text-white">account_balance_wallet</span>
+            </div>
+            <div>
+                <div class="text-xs text-white/80">رصيدك المتاح للسحب</div>
+                <div class="text-lg font-black">{{ number_format($courierBalance, 2) }} ₪</div>
+            </div>
+        </div>
+        <div class="flex items-center gap-1 text-xs font-bold bg-white/20 px-3 py-1.5 rounded-xl">
+            <span>المحفظة وسحب الأرباح</span>
+            <span class="material-symbols-outlined text-sm">arrow_back</span>
+        </div>
+    </a>
+
     <p class="courier-lead">
         @if($tab === 'mine')
             الطلبات التي أرسلتها لك الإدارة. افتح الطلب وتابع الاستلام والتسليم.

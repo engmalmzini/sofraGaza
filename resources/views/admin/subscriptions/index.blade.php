@@ -21,18 +21,25 @@
                 <th>المبلغ</th>
                 <th>الحالة</th>
                 <th>البطاقة</th>
-                <th></th>
+                <th class="text-center">الإجراءات</th>
             </tr>
         </thead>
         <tbody>
             @foreach($subscriptions as $subscription)
                 <tr>
-                    <td>{{ $subscription->user->name }}</td>
-                    <td>{{ $subscription->membership->name }}</td>
-                    <td>{{ number_format($subscription->amount, 2) }} <span class="ils">₪</span></td>
+                    <td class="font-bold text-slate-900">{{ $subscription->user->name }}</td>
+                    <td><span class="font-bold text-slate-800">{{ $subscription->membership->name }}</span></td>
+                    <td class="font-mono font-bold text-slate-900">{{ number_format($subscription->amount, 2) }} <span class="ils">₪</span></td>
                     <td>@include('admin.partials.pill', ['status' => $subscription->status, 'label' => $subscription->statusLabel()])</td>
-                    <td>{{ $subscription->cardStatusLabel() }}</td>
-                    <td><a class="font-bold text-primary" href="{{ route('admin.subscriptions.show', $subscription) }}">مراجعة</a></td>
+                    <td><span class="text-xs font-semibold text-slate-600">{{ $subscription->cardStatusLabel() }}</span></td>
+                    <td class="whitespace-nowrap">
+                        <div class="admin-table-actions">
+                            <a class="admin-action-btn admin-action-btn--primary" href="{{ route('admin.subscriptions.show', $subscription) }}">
+                                <span class="material-symbols-outlined">rate_review</span>
+                                <span>مراجعة</span>
+                            </a>
+                        </div>
+                    </td>
                 </tr>
             @endforeach
         </tbody>

@@ -38,15 +38,8 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="admin-app">
-    <div class="admin-bubbles" aria-hidden="true">
-        <span class="admin-bubble" style="--s: 22rem; --x: 8%; --y: 12%; --d: 22s; --a: 0s;"></span>
-        <span class="admin-bubble" style="--s: 14rem; --x: 78%; --y: 8%; --d: 18s; --a: -4s;"></span>
-        <span class="admin-bubble" style="--s: 9rem; --x: 62%; --y: 58%; --d: 16s; --a: -8s;"></span>
-        <span class="admin-bubble" style="--s: 18rem; --x: 88%; --y: 72%; --d: 24s; --a: -2s;"></span>
-        <span class="admin-bubble" style="--s: 7rem; --x: 18%; --y: 68%; --d: 14s; --a: -6s;"></span>
-    </div>
     <div class="admin-scrim" id="admin-scrim" hidden></div>
-    <aside class="admin-sidebar admin-glass" id="admin-sidebar">
+    <aside class="admin-sidebar" id="admin-sidebar">
         <a href="{{ route('partner.dashboard') }}" class="admin-brand">
             <img src="{{ $logoSrc }}" alt="سفرة غزة">
             <span>
@@ -79,7 +72,7 @@
             </button>
             <div class="admin-topbar__tools">
             <form class="admin-topbar__search" action="{{ route('partner.menu-items.index') }}" method="GET" role="search">
-                <input name="q" value="{{ request()->routeIs('partner.menu-items.*') ? request('q') : '' }}" placeholder="ابحث في أصناف المنيو" type="search" autocomplete="off" aria-label="بحث">
+                <input name="q" value="{{ request()->routeIs('partner.menu-items.*') ? request('q') : '' }}" placeholder="ابحث في أصناف المنيو" type="search" autocomplete="off" aria-label="بحث" class="!outline-none !ring-0 !border-0 focus:!outline-none focus:!ring-0 focus:!border-0">
                 <button type="submit" aria-label="بحث">
                     <span class="material-symbols-outlined">search</span>
                 </button>
@@ -92,7 +85,7 @@
                     @endif
                 </a>
                 <button type="button" class="admin-topbar__icon js-order-sound-btn" title="اختبار نغمة تنبيه الطلبات (تزمير)">
-                    <span class="material-symbols-outlined text-primary">volume_up</span>
+                    <span class="material-symbols-outlined">volume_up</span>
                 </button>
                 <a href="{{ route('partner.notifications.index') }}" class="admin-topbar__icon" title="الإشعارات">
                     <span class="material-symbols-outlined">notifications</span>

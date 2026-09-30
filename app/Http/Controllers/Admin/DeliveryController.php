@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\CourierPayout;
 use App\Models\Order;
 use App\Models\User;
 use App\Services\NotificationService;
@@ -21,7 +22,7 @@ class DeliveryController extends Controller
     public function index(Request $request): View
     {
         $tab = $request->string('tab')->toString();
-        if (! in_array($tab, ['waiting', 'active', 'done', 'all'], true)) {
+        if (! in_array($tab, ['waiting', 'active', 'done', 'all', 'payouts'], true)) {
             $tab = 'waiting';
         }
 
@@ -64,7 +65,7 @@ class DeliveryController extends Controller
             $ordersQuery->where('courier_id', $request->integer('courier_id'));
         }
 
-        if ($request->filled('q') && $tab !== 'couriers') {
+        if ($request->filled('q') && ! in_array($tab, ['couriers', 'payouts'], true)) {
             $q = $request->q;
             $ordersQuery->where(function ($builder) use ($q) {
                 $builder->where('id', $q)
@@ -77,9 +78,16 @@ class DeliveryController extends Controller
 
         $orders = $ordersQuery->latest()->paginate(20)->withQueryString();
 
+        $payoutsQuery = CourierPayout::query()->with(['courier', 'processor'])->latest();
+        if ($request->filled('payout_status')) {
+            $payoutsQuery->where('status', $request->input('payout_status'));
+        }
+        $payouts = $payoutsQuery->paginate(20)->withQueryString();
+
         $waitingCount = Order::query()->whereNull('courier_id')->whereIn('status', ['preparing', 'delivering'])->count();
         $activeCount = Order::query()->where('status', 'delivering')->whereNotNull('courier_id')->count();
         $doneCount = Order::query()->where('status', 'delivered')->whereDate('delivered_at', today())->count();
+        $pendingPayoutsCount = CourierPayout::query()->where('status', CourierPayout::STATUS_PENDING)->count();
 
         return view('admin.delivery.index', [
             'applications' => $applications,
@@ -87,10 +95,12 @@ class DeliveryController extends Controller
             'idle' => $idle,
             'busy' => $busy,
             'orders' => $orders,
+            'payouts' => $payouts,
             'tab' => $tab,
             'waitingCount' => $waitingCount,
             'activeCount' => $activeCount,
             'doneCount' => $doneCount,
+            'pendingPayoutsCount' => $pendingPayoutsCount,
         ]);
     }
 
@@ -120,12 +130,16 @@ class DeliveryController extends Controller
     {
         abort_unless($courier->isCourier(), 404);
 
-        $courier->load(['deliveries' => fn ($query) => $query->with(['restaurant', 'user'])->limit(40)]);
+        $courier->load([
+            'deliveries' => fn ($query) => $query->with(['restaurant', 'user'])->limit(40),
+            'courierPayouts' => fn ($query) => $query->with('processor')->limit(20),
+        ]);
 
         return view('admin.delivery.show', [
             'courier' => $courier,
             'active' => $courier->deliveries->where('status', 'delivering')->values(),
             'history' => $courier->deliveries->where('status', '!=', 'delivering')->values(),
+            'payouts' => $courier->courierPayouts,
         ]);
     }
 
@@ -222,5 +236,68 @@ class DeliveryController extends Controller
         );
 
         return back()->with('success', "تم رفض طلب {$courier->name}.");
+    }
+
+    public function completePayout(Request $request, CourierPayout $payout, NotificationService $notifications): RedirectResponse
+    {
+        if (! $payout->isPending()) {
+            return back()->with('error', 'تمت معالجة هذا الطلب مسبقاً.');
+        }
+
+        $notes = $request->input('admin_notes');
+
+        $payout->update([
+            'status' => CourierPayout::STATUS_COMPLETED,
+            'processed_by' => auth()->id(),
+            'processed_at' => now(),
+            'admin_notes' => $notes,
+        ]);
+
+        $courier = $payout->courier;
+        if ($courier) {
+            $formattedAmount = number_format((float) $payout->amount, 2);
+            $notifications->notify(
+                $courier,
+                'تم تحويل مستحقاتك بنجاح',
+                "تم تحويل مبلغ {$formattedAmount} ₪ إلى حسابك ({$payout->methodLabel()}). تم تصفير المبلغ من رصيدك المتاح." . ($notes ? " ملاحظات: {$notes}" : ''),
+                route('courier.wallet')
+            );
+        }
+
+        return back()->with('success', "تم تأكيد تحويل مبلغ {$payout->amount} ₪ للمندوب بنجاح وإرسال إشعار له.");
+    }
+
+    public function rejectPayout(Request $request, CourierPayout $payout, NotificationService $notifications): RedirectResponse
+    {
+        if (! $payout->isPending()) {
+            return back()->with('error', 'تمت معالجة هذا الطلب مسبقاً.');
+        }
+
+        $data = $request->validate([
+            'admin_notes' => ['required', 'string', 'min:3', 'max:500'],
+        ], [
+            'admin_notes.required' => 'يرجى كتابة سبب رفض طلب السحب.',
+            'admin_notes.min' => 'سبب الرفض قصير جداً.',
+        ]);
+
+        $payout->update([
+            'status' => CourierPayout::STATUS_REJECTED,
+            'processed_by' => auth()->id(),
+            'processed_at' => now(),
+            'admin_notes' => $data['admin_notes'],
+        ]);
+
+        $courier = $payout->courier;
+        if ($courier) {
+            $formattedAmount = number_format((float) $payout->amount, 2);
+            $notifications->notify(
+                $courier,
+                'تم رفض طلب سحب المستحقات',
+                "تم رفض طلب سحب {$formattedAmount} ₪. السبب: {$data['admin_notes']}. المبلغ لا يزال متاحاً في محفظتك.",
+                route('courier.wallet')
+            );
+        }
+
+        return back()->with('success', 'تم رفض طلب السحب وإعادة الرصيد للمندوب مع إرسال إشعار بالسبب.');
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Partner;
 
 use App\Models\Order;
+use App\Services\NotificationService;
 use App\Services\OrderService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -66,6 +67,42 @@ class OrderController extends Controller
         return back()->with('success', 'تم تحديث حالة الطلب.');
     }
 
+    public function markPrepared(Order $order, NotificationService $notifications): RedirectResponse
+    {
+        $restaurant = $this->restaurant();
+        abort_unless($order->restaurant_id === $restaurant->id, 403);
+
+        if (! in_array($order->status, ['confirmed', 'preparing'], true)) {
+            return back()->with('error', 'لا يمكن تعديل حالة هذا الطلب حالياً.');
+        }
+
+        $order->update([
+            'status' => 'preparing',
+            'prepared_at' => now(),
+        ]);
+
+        $restaurantName = $restaurant->name;
+
+        // Notify Admins that the order is ready for courier delivery
+        $notifications->notifyAdmins(
+            "الطلب #{$order->id} جاهز للاستلام بالمطعم 🍳",
+            "أنهى مطعم \"{$restaurantName}\" تحضير الطلب #{$order->id} بالكامل وهو جاهز الآن في المطبخ لتسليمه لمندوب التوصيل.",
+            route('admin.delivery.index', ['tab' => 'waiting'])
+        );
+
+        // If a courier is already assigned, notify the courier directly
+        if ($order->courier) {
+            $notifications->notify(
+                $order->courier,
+                "الطلب #{$order->id} جاهز للاستلام 🍳",
+                "أنهى مطعم \"{$restaurantName}\" تحضير الطلب #{$order->id}. تفضل بالتوجه للمطعم لاستلام الوجبات.",
+                route('courier.orders.show', $order)
+            );
+        }
+
+        return back()->with('success', 'تم تأكيد تجهيز الطلب بنجاح! تم إشعار الإدارة والمندوب ليتوجه للمطعم واستلام الوجبات.');
+    }
+
     public function live(Request $request): JsonResponse
     {
         $restaurant = $this->restaurant();
@@ -96,7 +133,7 @@ class OrderController extends Controller
             'latest_order' => $latest ? [
                 'id' => $latest->id,
                 'customer' => $latest->user?->name,
-                'total' => (float) $latest->total,
+                'total' => (float) $latest->foodTotal(),
                 'status' => $latest->status,
                 'status_label' => $latest->statusLabel(),
                 'items_count' => $latest->items->count(),

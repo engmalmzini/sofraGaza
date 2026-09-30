@@ -21,24 +21,31 @@
                 <th>المبلغ</th>
                 <th>الحالة</th>
                 <th>ينتهي</th>
-                <th></th>
+                <th class="text-center">الإجراءات</th>
             </tr>
         </thead>
         <tbody>
             @forelse($listings as $listing)
                 <tr>
-                    <td class="font-bold">
-                        {{ $listing->restaurant->name }}
-                        <div class="text-xs text-on-surface-variant">{{ $listing->restaurant->owner->name ?? '—' }}</div>
+                    <td class="font-bold text-slate-900">
+                        <a href="{{ route('admin.listings.show', $listing) }}" class="text-slate-900 hover:text-primary">{{ $listing->restaurant->name }}</a>
+                        <div class="text-xs text-on-surface-variant font-normal">{{ $listing->restaurant->owner->name ?? '—' }}</div>
                     </td>
-                    <td>{{ $listing->plan->name }}</td>
-                    <td>{{ number_format($listing->amount, 0) }} <span class="ils">₪</span></td>
+                    <td><span class="font-bold text-slate-800">{{ $listing->plan->name }}</span></td>
+                    <td><span class="font-mono font-bold text-slate-900">{{ number_format($listing->amount, 0) }}</span> <span class="ils">₪</span></td>
                     <td>@include('admin.partials.pill', ['status' => $listing->status, 'label' => $listing->statusLabel()])</td>
-                    <td>{{ $listing->ends_at?->format('Y-m-d') ?: '—' }}</td>
-                    <td><a class="font-bold text-primary" href="{{ route('admin.listings.show', $listing) }}">مراجعة</a></td>
+                    <td class="font-mono text-xs text-slate-600">{{ $listing->ends_at?->format('Y-m-d') ?: '—' }}</td>
+                    <td class="whitespace-nowrap">
+                        <div class="admin-table-actions">
+                            <a class="admin-action-btn admin-action-btn--primary" href="{{ route('admin.listings.show', $listing) }}">
+                                <span class="material-symbols-outlined">rate_review</span>
+                                <span>مراجعة</span>
+                            </a>
+                        </div>
+                    </td>
                 </tr>
             @empty
-                <tr><td colspan="6">لا توجد اشتراكات مطابقة.</td></tr>
+                <tr><td colspan="6" class="text-center py-6 text-slate-400">لا توجد اشتراكات مطابقة.</td></tr>
             @endforelse
         </tbody>
     </table>

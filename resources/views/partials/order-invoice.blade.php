@@ -54,10 +54,16 @@
         @if((float) $order->discount_amount > 0)
             <div class="sg-invoice__discount"><span>خصم العضوية {{ $order->discount_percent }}%</span><span>− {{ number_format($order->discount_amount, 2) }} <span class="ils">₪</span></span></div>
         @endif
-        <div><span>التوصيل @if($order->delivery_area)({{ $order->deliveryAreaLabel() }})@endif</span><span>@if((float) $order->delivery_fee > 0){{ number_format($order->delivery_fee, 2) }} <span class="ils">₪</span>@else مجاني @endif</span></div>
+        @if(($tone ?? '') !== 'partner')
+            <div><span>التوصيل @if($order->delivery_area)({{ $order->deliveryAreaLabel() }})@endif</span><span>@if((float) $order->delivery_fee > 0){{ number_format($order->delivery_fee, 2) }} <span class="ils">₪</span>@else مجاني @endif</span></div>
+        @endif
         @if($order->type === 'redemption')
             <div><span>النقاط المستخدمة</span><span>{{ number_format($order->points_spent) }}</span></div>
         @endif
-        <div class="sg-invoice__grand"><span>الإجمالي المستحق</span><span>{{ number_format($order->total, 2) }} <span class="ils">₪</span></span></div>
+        @if(($tone ?? '') === 'partner')
+            <div class="sg-invoice__grand"><span>إجمالي حساب الوجبات</span><span>{{ number_format($order->foodTotal(), 2) }} <span class="ils">₪</span></span></div>
+        @else
+            <div class="sg-invoice__grand"><span>الإجمالي المستحق</span><span>{{ number_format($order->total, 2) }} <span class="ils">₪</span></span></div>
+        @endif
     </div>
 </section>

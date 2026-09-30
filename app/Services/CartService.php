@@ -97,8 +97,15 @@ class CartService
             return null;
         }
 
-        $coupon = \App\Models\Coupon::active()->where('code', $code)->first();
+        $coupon = \App\Models\Coupon::active()->with('restaurant')->where('code', $code)->first();
         if (! $coupon) {
+            Session::forget('cart.coupon_code');
+
+            return null;
+        }
+
+        $currentRestaurantId = $this->restaurantId();
+        if (! $coupon->appliesToRestaurant($currentRestaurantId)) {
             Session::forget('cart.coupon_code');
 
             return null;
@@ -107,16 +114,17 @@ class CartService
         return $coupon;
     }
 
-    public function applyCoupon(string $code, float $subtotal): array
+    public function applyCoupon(string $code, float $subtotal, ?int $restaurantId = null): array
     {
         $normalized = strtoupper(trim($code));
-        $coupon = \App\Models\Coupon::where('code', $normalized)->first();
+        $coupon = \App\Models\Coupon::with('restaurant')->where('code', $normalized)->first();
 
         if (! $coupon) {
             return ['success' => false, 'message' => 'كود الخصم غير موجود أو غير صحيح.'];
         }
 
-        $validation = $coupon->validateForSubtotal($subtotal);
+        $targetRestaurantId = $restaurantId ?? $this->restaurantId();
+        $validation = $coupon->validateForSubtotal($subtotal, $targetRestaurantId);
         if (! $validation['valid']) {
             return ['success' => false, 'message' => $validation['message']];
         }
@@ -186,11 +194,12 @@ class CartService
         $coupon = null;
         $couponDiscount = 0.0;
         $codeToUse = $couponCode ?: Session::get('cart.coupon_code');
+        $currentRestaurantId = $this->restaurantId();
 
         if ($codeToUse) {
-            $candidate = \App\Models\Coupon::active()->where('code', strtoupper(trim($codeToUse)))->first();
+            $candidate = \App\Models\Coupon::active()->with('restaurant')->where('code', strtoupper(trim($codeToUse)))->first();
             if ($candidate) {
-                $validation = $candidate->validateForSubtotal($subtotal);
+                $validation = $candidate->validateForSubtotal($subtotal, $currentRestaurantId);
                 if ($validation['valid']) {
                     $coupon = $candidate;
                     $couponDiscount = $candidate->calculateDiscount($subtotal);

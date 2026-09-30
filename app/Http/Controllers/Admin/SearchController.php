@@ -34,6 +34,7 @@ class SearchController extends Controller
             'subscriptions' => $this->subscriptions($q, 8),
             'listings' => $this->restaurants($q, 8),
             'settings' => $this->settings($q, 8),
+            'homepage' => $this->homepage($q, 8),
             'couriers' => $this->couriers($q, 8)->concat($this->orders($q, 4)),
             default => $this->global($q),
         };
@@ -49,6 +50,7 @@ class SearchController extends Controller
             ->concat($this->memberships($q, 1))
             ->concat($this->subscriptions($q, 1))
             ->concat($this->settings($q, 1))
+            ->concat($this->homepage($q, 1))
             ->concat($this->couriers($q, 2));
     }
 
@@ -173,6 +175,25 @@ class SearchController extends Controller
                 $q,
                 $subscription->user->name,
             ));
+    }
+
+    private function homepage(string $q, int $limit): Collection
+    {
+        $haystack = 'محتوى الصفحة الرئيسية الشراكات شعارات شركاء هيرو فئات تطبيق ولاء';
+        if (! str_contains($haystack, $q) && mb_stripos($haystack, $q) === false) {
+            return collect();
+        }
+
+        return collect([
+            $this->row(
+                'محتوى الصفحة الرئيسية',
+                'النصوص والصور وشعارات الشراكات',
+                route('admin.homepage.index'),
+                'home_app_logo',
+                $q,
+                'الرئيسية شراكات',
+            ),
+        ])->take($limit);
     }
 
     private function settings(string $q, int $limit): Collection

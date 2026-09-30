@@ -21,8 +21,13 @@
     </div>
     <div class="space-y-4">
         <section class="admin-card">
-            <h2>الحالة</h2>
             <div class="mt-2">@include('admin.partials.pill', ['status' => $order->status, 'label' => $order->statusLabel()])</div>
+            @if($order->isPrepared())
+                <div class="mt-2 p-2 rounded-lg bg-emerald-50 border border-emerald-200 text-xs text-emerald-800 flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-[16px] text-emerald-600">task_alt</span>
+                    <span>تم تجهيز الطلب بالمطعم في: {{ $order->prepared_at?->format('H:i') }} (جاهز للاستلام)</span>
+                </div>
+            @endif
             @if($order->nextStatuses())
                 @foreach($order->nextStatuses() as $status => $label)
                     <form method="POST" action="{{ route('admin.orders.update', $order) }}" class="mt-3">

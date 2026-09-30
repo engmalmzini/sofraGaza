@@ -400,9 +400,45 @@ class Restaurant extends Model
         }
 
         $covers = config('brand.covers', []);
+        if (isset($covers[$this->name])) {
+            return $covers[$this->name];
+        }
 
-        return $covers[$this->name]
-            ?? ($this->type === 'cafe' ? config('brand.cafe_cover') : config('brand.restaurant_cover'));
+        $categories = config('brand.categories', []);
+        $catImages = [];
+        foreach ($categories as $cat) {
+            $catImages[$cat['key']] = $cat['image'];
+        }
+
+        if ($this->cuisine && isset($catImages[$this->cuisine])) {
+            return $catImages[$this->cuisine];
+        }
+
+        // Match based on keywords in name
+        $name = mb_strtolower($this->name);
+        if (str_contains($name, 'شاورما') || str_contains($name, 'صاج')) {
+            return $catImages['shawarma'] ?? config('brand.restaurant_cover');
+        }
+        if (str_contains($name, 'برجر') || str_contains($name, 'سناك') || str_contains($name, 'ساندويش')) {
+            return $catImages['burger'] ?? config('brand.restaurant_cover');
+        }
+        if (str_contains($name, 'مشاوي') || str_contains($name, 'مشويات') || str_contains($name, 'طاجن')) {
+            return $catImages['grill'] ?? config('brand.restaurant_cover');
+        }
+        if (str_contains($name, 'بيتزا') || str_contains($name, 'معجنات') || str_contains($name, 'فطائر')) {
+            return $catImages['pizza'] ?? config('brand.restaurant_cover');
+        }
+        if (str_contains($name, 'سمك') || str_contains($name, 'بحري') || str_contains($name, 'جمبري')) {
+            return $catImages['seafood'] ?? config('brand.restaurant_cover');
+        }
+        if (str_contains($name, 'حلو') || str_contains($name, 'كنافة') || str_contains($name, 'مجدوع') || str_contains($name, 'كيك')) {
+            return $catImages['sweets'] ?? config('brand.restaurant_cover');
+        }
+        if (str_contains($name, 'فول') || str_contains($name, 'فطور') || str_contains($name, 'حمص')) {
+            return $catImages['breakfast'] ?? config('brand.restaurant_cover');
+        }
+
+        return $this->type === 'cafe' ? config('brand.cafe_cover') : config('brand.restaurant_cover');
     }
 
     public function cuisineLabel(): string

@@ -26,106 +26,108 @@
     </div>
 
     {{-- Topups Table --}}
-    <div class="admin-card overflow-hidden">
-        <div class="overflow-x-auto">
-            <table class="w-full text-right text-xs">
-                <thead>
-                    <tr class="bg-surface-container-low text-on-surface-variant border-b border-slate-200">
-                        <th class="py-3 px-4 font-bold">#</th>
-                        <th class="py-3 px-4 font-bold">الزبون</th>
-                        <th class="py-3 px-4 font-bold">المبلغ المطلوب</th>
-                        <th class="py-3 px-4 font-bold">طريقة الدفع</th>
-                        <th class="py-3 px-4 font-bold">إشعار الحوالة</th>
-                        <th class="py-3 px-4 font-bold">الحالة</th>
-                        <th class="py-3 px-4 font-bold">التاريخ</th>
-                        <th class="py-3 px-4 font-bold">الإجراءات</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-slate-100">
-                    @forelse($topups as $topup)
-                        <tr class="hover:bg-surface-container-lowest transition-colors">
-                            <td class="py-3.5 px-4 font-mono font-bold">{{ $topup->id }}</td>
-                            <td class="py-3.5 px-4">
-                                <a href="{{ route('admin.users.show', $topup->user) }}" class="font-bold text-on-surface hover:text-primary">
-                                    {{ $topup->user->name }}
+    {{-- Topups Table --}}
+    <div class="admin-table-wrap">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>الزبون</th>
+                    <th>المبلغ المطلوب</th>
+                    <th>طريقة الدفع</th>
+                    <th>إشعار الحوالة</th>
+                    <th>الحالة</th>
+                    <th>التاريخ</th>
+                    <th class="text-center">الإجراءات</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse($topups as $topup)
+                    <tr>
+                        <td class="font-mono font-bold text-slate-500">#{{ $topup->id }}</td>
+                        <td>
+                            <a href="{{ route('admin.users.show', $topup->user) }}" class="font-bold text-slate-900 hover:text-primary">
+                                {{ $topup->user->name }}
+                            </a>
+                            <div class="text-xs text-slate-500 font-mono" dir="ltr">{{ $topup->user->phone }}</div>
+                        </td>
+                        <td>
+                            <span class="font-mono font-bold text-sm text-emerald-700">{{ number_format($topup->amount, 2) }}</span>
+                            <span class="ils">₪</span>
+                        </td>
+                        <td class="font-semibold text-slate-800">{{ $topup->paymentMethodLabel() }}</td>
+                        <td>
+                            @if($topup->receiptUrl())
+                                <a href="{{ route('admin.wallet-topups.receipt', $topup) }}" target="_blank" class="admin-action-btn admin-action-btn--outline admin-action-btn--sm">
+                                    <span class="material-symbols-outlined">receipt_long</span>
+                                    <span>عرض الإشعار</span>
                                 </a>
-                                <div class="text-[11px] text-on-surface-variant font-mono">{{ $topup->user->phone }}</div>
-                            </td>
-                            <td class="py-3.5 px-4 font-mono font-bold text-sm text-emerald-700">
-                                {{ number_format($topup->amount, 2) }} ₪
-                            </td>
-                            <td class="py-3.5 px-4 text-on-surface">{{ $topup->paymentMethodLabel() }}</td>
-                            <td class="py-3.5 px-4">
-                                @if($topup->receiptUrl())
-                                    <a href="{{ route('admin.wallet-topups.receipt', $topup) }}" target="_blank" class="inline-flex items-center gap-1 font-bold text-primary hover:underline">
-                                        <span class="material-symbols-outlined text-[15px]">receipt</span>
-                                        <span>عرض الإشعار</span>
-                                    </a>
-                                @else
-                                    <span class="text-on-surface-variant">لا يوجد</span>
-                                @endif
-                            </td>
-                            <td class="py-3.5 px-4">
-                                @if($topup->isPending())
-                                    <span class="inline-flex px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 font-semibold text-[11px]">
-                                        قيد المراجعة
-                                    </span>
-                                @elseif($topup->isApproved())
-                                    <span class="inline-flex px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-900 font-semibold text-[11px]">
-                                        تمت الإضافة
-                                    </span>
-                                @else
-                                    <span class="inline-flex px-2 py-0.5 rounded-full bg-rose-100 text-rose-900 font-semibold text-[11px]">
-                                        مرفوض
-                                    </span>
-                                    @if($topup->rejection_reason)
-                                        <div class="text-[10px] text-rose-700 mt-0.5 max-w-[150px] truncate" title="{{ $topup->rejection_reason }}">
-                                            {{ $topup->rejection_reason }}
-                                        </div>
-                                    @endif
-                                @endif
-                            </td>
-                            <td class="py-3.5 px-4 text-on-surface-variant whitespace-nowrap">{{ $topup->created_at->format('Y-m-d H:i') }}</td>
-                            <td class="py-3.5 px-4 whitespace-nowrap">
-                                @if($topup->isPending())
-                                    <div class="flex items-center gap-2">
-                                        <form method="POST" action="{{ route('admin.wallet-topups.approve', $topup) }}" onsubmit="return confirm('تأكيد استلام الحوالة وإضافة {{ $topup->amount }} ₪ لرصيد {{ $topup->user->name }}؟')">
-                                            @csrf
-                                            <button type="submit" class="admin-btn admin-btn--primary !py-1 !px-2.5 !text-xs">
-                                                تأكيد وإضافة الرصيد
-                                            </button>
-                                        </form>
-
-                                        <button type="button" 
-                                                class="admin-btn admin-btn--err !py-1 !px-2.5 !text-xs"
-                                                onclick="openRejectModal({{ $topup->id }}, '{{ $topup->user->name }}', {{ $topup->amount }})">
-                                            رفض
-                                        </button>
+                            @else
+                                <span class="text-xs text-slate-400">لا يوجد إشعار</span>
+                            @endif
+                        </td>
+                        <td>
+                            @if($topup->isPending())
+                                <span class="inline-flex px-2.5 py-1 rounded-full bg-amber-100 text-amber-900 font-bold text-[11px]">
+                                    قيد المراجعة
+                                </span>
+                            @elseif($topup->isApproved())
+                                <span class="inline-flex px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-900 font-bold text-[11px]">
+                                    تمت الإضافة
+                                </span>
+                            @else
+                                <span class="inline-flex px-2.5 py-1 rounded-full bg-rose-100 text-rose-900 font-bold text-[11px]">
+                                    مرفوض
+                                </span>
+                                @if($topup->rejection_reason)
+                                    <div class="text-[10px] text-rose-700 mt-0.5 max-w-[150px] truncate" title="{{ $topup->rejection_reason }}">
+                                        {{ $topup->rejection_reason }}
                                     </div>
-                                @else
-                                    <span class="text-[11px] text-on-surface-variant">
-                                        {{ $topup->reviewer ? 'راجعها: '.$topup->reviewer->name : 'مكتمل' }}
-                                    </span>
                                 @endif
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="8" class="py-8 text-center text-on-surface-variant">
-                                لا توجد طلبات شحن مطابقة.
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
+                            @endif
+                        </td>
+                        <td class="text-slate-500 text-xs whitespace-nowrap">{{ $topup->created_at->format('Y-m-d H:i') }}</td>
+                        <td class="whitespace-nowrap">
+                            @if($topup->isPending())
+                                <div class="admin-table-actions">
+                                    <form method="POST" action="{{ route('admin.wallet-topups.approve', $topup) }}" onsubmit="return confirm('تأكيد استلام الحوالة وإضافة {{ $topup->amount }} ₪ لرصيد {{ $topup->user->name }}؟')">
+                                        @csrf
+                                        <button type="submit" class="admin-action-btn admin-action-btn--primary">
+                                            <span class="material-symbols-outlined">check_circle</span>
+                                            <span>تأكيد الشحن</span>
+                                        </button>
+                                    </form>
 
-        @if($topups->hasPages())
-            <div class="p-4 border-t border-slate-100">
-                {{ $topups->links() }}
-            </div>
-        @endif
+                                    <button type="button" 
+                                            class="admin-action-btn admin-action-btn--danger"
+                                            onclick="openRejectModal({{ $topup->id }}, '{{ $topup->user->name }}', {{ $topup->amount }})">
+                                        <span class="material-symbols-outlined">cancel</span>
+                                        <span>رفض</span>
+                                    </button>
+                                </div>
+                            @else
+                                <span class="text-xs font-semibold text-slate-500">
+                                    {{ $topup->reviewer ? 'راجعها: '.$topup->reviewer->name : 'مكتمل' }}
+                                </span>
+                            @endif
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="8" class="py-8 text-center text-slate-400">
+                            لا توجد طلبات شحن مطابقة.
+                        </td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
     </div>
+
+    @if($topups->hasPages())
+        <div class="mt-4">
+            {{ $topups->links() }}
+        </div>
+    @endif
 </div>
 
 {{-- Reject Modal --}}
@@ -142,8 +144,8 @@
             </div>
 
             <div class="flex justify-end gap-2 pt-2">
-                <button type="button" onclick="closeRejectModal()" class="admin-btn admin-btn--ghost text-xs">إلغاء</button>
-                <button type="submit" class="admin-btn admin-btn--err text-xs">تأكيد الرفض</button>
+                <button type="button" onclick="closeRejectModal()" class="admin-action-btn admin-action-btn--outline">إلغاء</button>
+                <button type="submit" class="admin-action-btn admin-action-btn--danger">تأكيد الرفض</button>
             </div>
         </form>
     </div>

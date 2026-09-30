@@ -96,7 +96,7 @@
                     </div>
                     <span id="coupon-status-badge" class="{{ ($appliedCoupon || ($quote['coupon'] ?? null)) ? '' : 'hidden' }} text-[11px] font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full flex items-center gap-1">
                         <span class="material-symbols-outlined text-[13px]">check</span>
-                        <span id="coupon-status-text">مفعّل: {{ $appliedCoupon['code'] ?? ($quote['coupon']['code'] ?? '') }}</span>
+                        <span id="coupon-status-text">مفعّل: {{ $appliedCoupon['code'] ?? ($quote['coupon']['code'] ?? '') }}@if(($appliedCoupon?->restaurant || ($quote['coupon']?->restaurant ?? null))) ({{ ($appliedCoupon?->restaurant ?? $quote['coupon']?->restaurant)->name }})@endif</span>
                     </span>
                 </div>
 
@@ -841,7 +841,10 @@ function handleApplyCoupon() {
                 feedback.textContent = data.message;
             }
             if (badge) badge.classList.remove('hidden');
-            if (badgeText) badgeText.textContent = `مفعّل: ${data.coupon.code}`;
+            if (badgeText) {
+                const scope = (data.coupon && data.coupon.scope_label && data.coupon.restaurant_id) ? ` (${data.coupon.scope_label})` : '';
+                badgeText.textContent = `مفعّل: ${data.coupon.code}${scope}`;
+            }
             if (removeBtn) removeBtn.classList.remove('hidden');
 
             currentDiscountAmount = parseFloat(data.quote.discount_amount);

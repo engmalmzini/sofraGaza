@@ -104,6 +104,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::post('delivery/{courier}/reject', [Admin\DeliveryController::class, 'reject'])->name('delivery.reject');
     Route::get('delivery/{courier}', [Admin\DeliveryController::class, 'show'])->name('delivery.show');
     Route::put('delivery/{courier}', [Admin\DeliveryController::class, 'update'])->name('delivery.update');
+    Route::post('delivery/payouts/{payout}/complete', [Admin\DeliveryController::class, 'completePayout'])->name('delivery.payouts.complete');
+    Route::post('delivery/payouts/{payout}/reject', [Admin\DeliveryController::class, 'rejectPayout'])->name('delivery.payouts.reject');
     Route::post('memberships/{membership}/toggle', [Admin\MembershipController::class, 'toggle'])->name('memberships.toggle');
     Route::resource('memberships', Admin\MembershipController::class)->except(['show']);
     Route::get('subscriptions', [Admin\SubscriptionController::class, 'index'])->name('subscriptions.index');
@@ -123,8 +125,13 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::get('reviews', [Admin\ReviewController::class, 'index'])->name('reviews.index');
     Route::post('reviews/{review}/toggle', [Admin\ReviewController::class, 'toggle'])->name('reviews.toggle');
     Route::delete('reviews/{review}', [Admin\ReviewController::class, 'destroy'])->name('reviews.destroy');
-    Route::resource('coupons', Admin\CouponController::class)->only(['index', 'store', 'destroy']);
+    Route::resource('coupons', Admin\CouponController::class)->only(['index', 'store', 'update', 'destroy']);
     Route::post('coupons/{coupon}/toggle', [Admin\CouponController::class, 'toggle'])->name('coupons.toggle');
+    Route::get('homepage', [Admin\HomepageController::class, 'index'])->name('homepage.index');
+    Route::post('homepage', [Admin\HomepageController::class, 'update'])->name('homepage.update');
+    Route::post('homepage/partners', [Admin\HomepageController::class, 'storePartner'])->name('homepage.partners.store');
+    Route::put('homepage/partners/{partner}', [Admin\HomepageController::class, 'updatePartner'])->name('homepage.partners.update');
+    Route::delete('homepage/partners/{partner}', [Admin\HomepageController::class, 'destroyPartner'])->name('homepage.partners.destroy');
     Route::get('settings', [Admin\SettingController::class, 'index'])->name('settings.index');
     Route::post('settings', [Admin\SettingController::class, 'update'])->name('settings.update');
     Route::get('notifications', [Admin\NotificationController::class, 'index'])->name('notifications.index');
@@ -138,6 +145,7 @@ Route::prefix('partner')->name('partner.')->middleware(['auth', 'partner', 'part
     Route::get('orders/live', [Partner\OrderController::class, 'live'])->name('orders.live');
     Route::get('orders/{order}', [Partner\OrderController::class, 'show'])->name('orders.show');
     Route::patch('orders/{order}', [Partner\OrderController::class, 'update'])->name('orders.update');
+    Route::post('orders/{order}/prepared', [Partner\OrderController::class, 'markPrepared'])->name('orders.prepared');
     Route::get('subscription', [Partner\SubscriptionController::class, 'index'])->name('subscription.index');
     Route::post('subscription/{plan}', [Partner\SubscriptionController::class, 'store'])->name('subscription.store');
     Route::get('restaurant', [Partner\RestaurantController::class, 'edit'])->name('restaurant.edit');
@@ -155,6 +163,8 @@ Route::prefix('courier')->name('courier.')->middleware(['auth', 'courier'])->gro
     Route::get('orders/live', [Courier\DashboardController::class, 'live'])->name('orders.live');
     Route::get('orders/{order}', [Courier\OrderController::class, 'show'])->name('orders.show');
     Route::post('orders/{order}/complete', [Courier\OrderController::class, 'complete'])->name('orders.complete');
+    Route::get('wallet', [Courier\WalletController::class, 'index'])->name('wallet');
+    Route::post('wallet/payout', [Courier\WalletController::class, 'requestPayout'])->name('wallet.payout');
     Route::get('notifications', [Courier\NotificationController::class, 'index'])->name('notifications.index');
     Route::get('notifications/{notification}', [Courier\NotificationController::class, 'open'])->name('notifications.open');
     Route::post('notifications/read', [Courier\NotificationController::class, 'markRead'])->name('notifications.read');

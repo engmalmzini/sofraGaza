@@ -93,6 +93,14 @@
             'restaurant_id' => null,
             'filter' => true,
         ];
+    } elseif (request()->routeIs('admin.homepage.*')) {
+        $adminSearch = [
+            'scope' => 'homepage',
+            'action' => route('admin.homepage.index'),
+            'placeholder' => 'ابحث في محتوى الرئيسية',
+            'restaurant_id' => null,
+            'filter' => false,
+        ];
     } elseif (request()->routeIs('admin.settings.*')) {
         $adminSearch = [
             'scope' => 'settings',
@@ -133,28 +141,15 @@
         [
             'label' => 'النظام',
             'items' => [
+                ['route' => 'admin.homepage.index', 'icon' => 'home_app_logo', 'label' => 'محتوى الرئيسية', 'match' => 'admin.homepage.*'],
                 ['route' => 'admin.settings.index', 'icon' => 'settings', 'label' => 'الإعدادات', 'match' => 'admin.settings.*'],
             ],
         ],
     ];
 @endphp
 <body class="admin-app">
-    <div class="admin-bubbles" aria-hidden="true">
-        <span class="admin-bubble" style="--s: 22rem; --x: 8%; --y: 12%; --d: 22s; --a: 0s;"></span>
-        <span class="admin-bubble" style="--s: 14rem; --x: 78%; --y: 8%; --d: 18s; --a: -4s;"></span>
-        <span class="admin-bubble" style="--s: 9rem; --x: 62%; --y: 58%; --d: 16s; --a: -8s;"></span>
-        <span class="admin-bubble" style="--s: 18rem; --x: 88%; --y: 72%; --d: 24s; --a: -2s;"></span>
-        <span class="admin-bubble" style="--s: 7rem; --x: 18%; --y: 68%; --d: 14s; --a: -6s;"></span>
-        <span class="admin-bubble" style="--s: 5rem; --x: 42%; --y: 22%; --d: 12s; --a: -3s;"></span>
-        <span class="admin-bubble" style="--s: 11rem; --x: 4%; --y: 42%; --d: 20s; --a: -9s;"></span>
-        <span class="admin-bubble" style="--s: 4rem; --x: 52%; --y: 82%; --d: 11s; --a: -5s;"></span>
-        <span class="admin-bubble" style="--s: 16rem; --x: 70%; --y: 34%; --d: 26s; --a: -7s;"></span>
-        <span class="admin-bubble admin-bubble--tiny" style="--s: 2.2rem; --x: 30%; --y: 48%; --d: 9s; --a: -1s;"></span>
-        <span class="admin-bubble admin-bubble--tiny" style="--s: 1.6rem; --x: 92%; --y: 28%; --d: 8s; --a: -4s;"></span>
-        <span class="admin-bubble admin-bubble--tiny" style="--s: 2.8rem; --x: 48%; --y: 6%; --d: 10s; --a: -2s;"></span>
-    </div>
     <div class="admin-scrim" id="admin-scrim" hidden></div>
-    <aside class="admin-sidebar admin-glass" id="admin-sidebar">
+    <aside class="admin-sidebar" id="admin-sidebar">
         <a href="{{ route('admin.dashboard') }}" class="admin-brand">
             <img src="{{ $logoSrc }}" alt="سفرة غزة">
             <span>
@@ -208,6 +203,7 @@
                         autocomplete="off"
                         aria-label="بحث"
                         aria-autocomplete="list"
+                        class="!outline-none !ring-0 !border-0 focus:!outline-none focus:!ring-0 focus:!border-0"
                     >
                     <button type="submit" aria-label="بحث">
                         <span class="material-symbols-outlined">search</span>
@@ -223,7 +219,7 @@
                     @endif
                 </a>
                 <button type="button" class="admin-topbar__icon js-order-sound-btn" title="اختبار نغمة تنبيه الطلبات (تزمير)">
-                    <span class="material-symbols-outlined text-primary">volume_up</span>
+                    <span class="material-symbols-outlined">volume_up</span>
                 </button>
                 <details class="admin-topbar__user">
                     <summary class="admin-topbar__icon" title="{{ auth()->user()->name }}" aria-label="الحساب">

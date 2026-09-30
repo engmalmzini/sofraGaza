@@ -9,26 +9,30 @@
     {{-- Section Header --}}
     <div class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 pb-5">
         <div>
-            <div class="inline-flex items-center gap-1.5 text-amber-700 text-xs font-bold mb-1">
-                <span class="material-symbols-outlined text-[16px] text-amber-500 fill-1">star</span>
+            <div class="inline-flex items-center gap-1.5 text-stone-700 text-xs font-bold mb-1">
+                @include('partials.star-icon', ['class' => 'w-4 h-4 text-[#d65e15]'])
                 <span>آراء موثقة</span>
             </div>
             <h2 class="text-xl sm:text-2xl font-bold text-stone-900">تقييمات وآراء الزبائن</h2>
             <p class="text-xs sm:text-sm text-stone-500 mt-1">تجارب حقيقية لزبائن طلبوا من {{ $restaurant->name }} عبر سفرة غزة</p>
         </div>
 
-        <div class="flex items-center gap-3 bg-amber-50/80 border border-amber-200/60 rounded-2xl px-5 py-3 shrink-0">
+        <div class="flex items-center gap-3 bg-[#fff7ed] border border-[#fed7aa] rounded-2xl px-5 py-3 shrink-0">
             <div class="text-center">
-                <span class="text-3xl sm:text-4xl font-black text-amber-950 font-mono block leading-none">{{ $avgRating }}</span>
-                <span class="text-[10px] text-amber-800/80 font-semibold block mt-1">من 5 نجوم</span>
+                <span class="text-3xl sm:text-4xl font-black text-[#9a3412] font-mono block leading-none">{{ $avgRating }}</span>
+                <span class="text-[10px] text-[#c2410c] font-semibold block mt-1">من 5 نجوم</span>
             </div>
-            <div class="border-r border-amber-200/80 pr-3 flex flex-col justify-center">
-                <div class="flex items-center gap-0.5 text-amber-500">
+            <div class="border-r border-[#fed7aa] pr-3 flex flex-col justify-center">
+                <div class="flex items-center gap-0.5">
                     @for($i = 1; $i <= 5; $i++)
-                        <span class="material-symbols-outlined text-[18px] {{ $i <= round((float) $avgRating) ? 'fill-1' : 'opacity-30' }}">star</span>
+                        @if($i <= round((float) $avgRating))
+                            @include('partials.star-icon', ['class' => 'w-4 h-4 text-[#d65e15]'])
+                        @else
+                            @include('partials.star-icon', ['class' => 'w-4 h-4 text-stone-200'])
+                        @endif
                     @endfor
                 </div>
-                <span class="text-xs font-bold text-amber-900 mt-1">{{ number_format($totalCount) }} تقييم معتمد</span>
+                <span class="text-xs font-bold text-[#9a3412] mt-1">{{ number_format($totalCount) }} تقييم معتمد</span>
             </div>
         </div>
     </div>
@@ -44,7 +48,7 @@
                 <div class="flex items-center gap-2.5 text-xs text-stone-600">
                     <span class="w-12 font-bold shrink-0 flex items-center gap-1 justify-end">
                         <span>{{ $star }}</span>
-                        <span class="material-symbols-outlined text-[14px] text-amber-500 fill-1">star</span>
+                        @include('partials.star-icon', ['class' => 'w-3.5 h-3.5 text-[#d65e15]'])
                     </span>
                     <div class="flex-1 h-2 rounded-full bg-slate-200/80 overflow-hidden">
                         <div class="h-full bg-amber-500 rounded-full transition-all duration-500" style="width: {{ $starData['percentage'] }}%"></div>
@@ -153,9 +157,13 @@
                             </div>
                         </div>
 
-                        <div class="flex items-center gap-0.5 text-amber-500">
+                        <div class="flex items-center gap-0.5">
                             @for($i = 1; $i <= 5; $i++)
-                                <span class="material-symbols-outlined text-[15px] {{ $i <= $rev->rating ? 'fill-1' : 'opacity-25' }}">star</span>
+                                @if($i <= $rev->rating)
+                                    @include('partials.star-icon', ['class' => 'w-3.5 h-3.5 text-[#d65e15]'])
+                                @else
+                                    @include('partials.star-icon', ['class' => 'w-3.5 h-3.5 text-stone-200'])
+                                @endif
                             @endfor
                         </div>
                     </div>

@@ -7,10 +7,13 @@
     <title>@yield('title', 'سفرة غزة') — سفرة غزة</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Alexandria:wght@400;600;700;800;900&family=Amiri:wght@400;700&family=Cairo:wght@400;500;600;700;800;900&family=Tajawal:wght@400;500;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Serif+Display&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400..700,0..1,-50..200" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
+        .font-alexandria { font-family: 'Alexandria', sans-serif !important; }
+        .font-tajawal { font-family: 'Tajawal', sans-serif !important; }
+        .font-cairo { font-family: 'Cairo', sans-serif !important; }
         .app-toast { top: calc(4.75rem + env(safe-area-inset-top, 0px)); bottom: auto; }
         @media (min-width: 1024px) {
             .app-toast { top: 5.25rem; inset-inline-end: 1.75rem; inset-inline-start: auto; }
@@ -30,6 +33,396 @@
             margin-inline: 0.18em 0.02em;
             transform: none;
         }
+        /* Filled Star Glyph & Colors Site-wide (Matching Foodly reference #d65e15) */
+        .fill-1,
+        [data-fill="1"] {
+            font-variation-settings: 'FILL' 1, 'wght' 600, 'GRAD' 0, 'opsz' 24 !important;
+        }
+        .fill-1.text-amber-500,
+        .fill-1.text-amber-600,
+        .fill-1.text-tertiary,
+        .text-amber-500.fill-1,
+        .text-amber-600.fill-1,
+        .rating-star-icon {
+            color: #d65e15 !important;
+        }
+        /* ═══════════════════════════════════════════════════════════════════
+           STRICT SEPARATION: MOBILE HEADER vs DESKTOP HEADER
+           ═══════════════════════════════════════════════════════════════════ */
+        #site-header-desktop {
+            display: none !important;
+        }
+        #site-header-mobile {
+            display: block;
+        }
+
+        @media (max-width: 1023px) {
+            #site-header-desktop {
+                display: none !important;
+            }
+            #site-header-mobile {
+                display: block !important;
+            }
+            #site-header-mobile.is-subpage-hidden {
+                display: none !important;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            #site-header-mobile {
+                display: none !important;
+            }
+            #site-header-desktop {
+                display: block !important;
+            }
+
+            body.is-home-page {
+                background-color: #FAF6F0 !important;
+            }
+            body.is-home-page #site-header-desktop {
+                position: relative;
+                background: #FAF6F0;
+                border-bottom: none !important;
+                box-shadow: none !important;
+                backdrop-filter: none !important;
+                -webkit-backdrop-filter: none !important;
+                padding-top: 1rem;
+                padding-bottom: 0.5rem;
+                transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            }
+            body.is-home-page .site-main {
+                padding-top: 0 !important;
+                background: transparent !important;
+            }
+            body.is-home-page #site-header-desktop .site-header__bar {
+                height: auto;
+                max-width: 80rem;
+                margin-inline: auto;
+                padding-inline: 1.5rem;
+                transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            }
+            body.is-home-page #site-header-desktop .site-header__nav {
+                display: flex;
+                gap: 1.75rem;
+            }
+            body.is-home-page #site-header-desktop .site-header__nav a {
+                font-size: 15px;
+                font-weight: 700;
+                color: #443833;
+            }
+            body.is-home-page #site-header-desktop .site-header__nav a:hover,
+            body.is-home-page #site-header-desktop .site-header__nav a.is-active {
+                color: #c84500;
+            }
+            body.is-home-page #site-header-desktop .site-header__nav a::after {
+                display: none !important;
+            }
+
+            /* ═══════════════════════════════════════════════════════════════════
+               CRAVK STYLE FLOATING BLACK PILL CAPSULE HEADER (ON SCROLL DOWN - DESKTOP ONLY)
+               ═══════════════════════════════════════════════════════════════════ */
+            #site-header-desktop.is-scrolled {
+                position: fixed !important;
+                top: 14px !important;
+                inset-inline: 0 !important;
+                width: 100% !important;
+                z-index: 100 !important;
+                background: transparent !important;
+                border-bottom: none !important;
+                box-shadow: none !important;
+                padding: 0 1rem !important;
+                pointer-events: none !important;
+                display: flex !important;
+                justify-content: center !important;
+                animation: sgPillDrop 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+            }
+
+            @keyframes sgPillDrop {
+                0% {
+                    opacity: 0;
+                    transform: translateY(-20px) scale(0.97);
+                }
+                100% {
+                    opacity: 1;
+                    transform: translateY(0) scale(1);
+                }
+            }
+
+            #site-header-desktop.is-scrolled .site-header__bar {
+                pointer-events: auto !important;
+                background: #0d0d0f !important;
+                background: rgba(13, 13, 15, 0.94) !important;
+                backdrop-filter: blur(20px) !important;
+                -webkit-backdrop-filter: blur(20px) !important;
+                border-radius: 9999px !important;
+                border: 1px solid rgba(255, 255, 255, 0.12) !important;
+                box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.06) !important;
+                padding: 0.25rem 0.4rem 0.25rem 1rem !important;
+                max-width: 1040px !important;
+                width: 100% !important;
+                height: 48px !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: space-between !important;
+                gap: 0.75rem !important;
+                transition: all 0.3s ease !important;
+            }
+
+            /* Brand Logo in Black Capsule */
+            #site-header-desktop.is-scrolled .site-header__brand {
+                gap: 0.4rem !important;
+            }
+            #site-header-desktop.is-scrolled .site-header__brand img {
+                height: 28px !important;
+                width: auto !important;
+            }
+            #site-header-desktop.is-scrolled .site-header__brand span.text-stone-900 {
+                color: #ffffff !important;
+                font-size: 13.5px !important;
+                white-space: nowrap !important;
+            }
+            #site-header-desktop.is-scrolled .site-header__brand span.text-stone-400 {
+                color: #9ca3af !important;
+                font-size: 7.5px !important;
+                white-space: nowrap !important;
+            }
+            #site-header-desktop.is-scrolled .site-header__location {
+                display: none !important;
+            }
+
+            /* Center Nav Links inside Floating Pill */
+            #site-header-desktop.is-scrolled .site-header__nav {
+                display: flex !important;
+                align-items: center !important;
+                gap: 0.2rem !important;
+                margin: 0 !important;
+                flex-wrap: nowrap !important;
+            }
+            #site-header-desktop.is-scrolled .site-header__nav a {
+                color: #d1d5db !important;
+                font-size: 11px !important;
+                font-weight: 600 !important;
+                padding: 0.25rem 0.55rem !important;
+                border-radius: 9999px !important;
+                transition: all 0.2s ease !important;
+                text-decoration: none !important;
+                display: inline-flex !important;
+                align-items: center !important;
+                white-space: nowrap !important;
+                line-height: 1 !important;
+            }
+            #site-header-desktop.is-scrolled .site-header__nav a:hover {
+                color: #ffffff !important;
+                background: rgba(255, 255, 255, 0.08) !important;
+            }
+
+            /* Active Link: Distinct White Pill with Black Dot & Bold Text */
+            #site-header-desktop.is-scrolled .site-header__nav a.is-active {
+                background: #ffffff !important;
+                color: #0d0d0f !important;
+                font-weight: 800 !important;
+                font-size: 11.5px !important;
+                padding: 0.25rem 0.75rem !important;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25) !important;
+                gap: 0.35rem !important;
+                white-space: nowrap !important;
+            }
+            #site-header-desktop.is-scrolled .site-header__nav a.is-active::before {
+                content: '' !important;
+                display: inline-block !important;
+                width: 5px !important;
+                height: 5px !important;
+                border-radius: 9999px !important;
+                background: #0d0d0f !important;
+            }
+
+            /* Action Buttons inside Black Capsule */
+            #site-header-desktop.is-scrolled .site-header__actions {
+                display: flex !important;
+                align-items: center !important;
+                gap: 0.4rem !important;
+                flex-wrap: nowrap !important;
+            }
+            #site-header-desktop.is-scrolled .site-header__actions button,
+            #site-header-desktop.is-scrolled .site-header__actions a:not(.site-header__cta) {
+                background: rgba(255, 255, 255, 0.08) !important;
+                border: 1px solid rgba(255, 255, 255, 0.12) !important;
+                color: #f3f4f6 !important;
+                width: 32px !important;
+                height: 32px !important;
+                border-radius: 9999px !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                transition: all 0.2s ease !important;
+            }
+            #site-header-desktop.is-scrolled .site-header__actions button .material-symbols-outlined,
+            #site-header-desktop.is-scrolled .site-header__actions a:not(.site-header__cta) .material-symbols-outlined {
+                font-size: 17px !important;
+            }
+            #site-header-desktop.is-scrolled .site-header__actions button:hover,
+            #site-header-desktop.is-scrolled .site-header__actions a:not(.site-header__cta):hover {
+                background: rgba(255, 255, 255, 0.18) !important;
+                color: #ff9800 !important;
+            }
+
+            /* Orange Pill CTA Button (Matches Cravk orange pill button) */
+            #site-header-desktop.is-scrolled .site-header__actions a.site-header__cta {
+                background: #ea580c !important;
+                background: linear-gradient(135deg, #ea580c 0%, #c84500 100%) !important;
+                color: #ffffff !important;
+                border-radius: 9999px !important;
+                padding: 0.35rem 0.95rem !important;
+                font-weight: 800 !important;
+                font-size: 11.5px !important;
+                box-shadow: 0 4px 12px rgba(234, 88, 12, 0.35) !important;
+                display: inline-flex !important;
+                align-items: center !important;
+                gap: 0.35rem !important;
+                border: none !important;
+                white-space: nowrap !important;
+                transition: all 0.2s ease !important;
+            }
+            #site-header-desktop.is-scrolled .site-header__actions a.site-header__cta:hover {
+                filter: brightness(1.08) !important;
+                transform: scale(1.03) !important;
+            }
+        }
+
+        /* Desktop footer — Grapeslab layout, Sofra Gaza colors */
+        .sg-footer {
+            background: #FAF6F0;
+            padding: 2.75rem 0 0;
+            margin: 0;
+        }
+        .sg-footer__shell {
+            width: 100%;
+            margin: 0;
+            border-radius: 48px 48px 0 0;
+            overflow: hidden;
+            background: linear-gradient(165deg, #F7EDE3 0%, #EEDCC8 52%, #E8D4BC 100%);
+            box-shadow: 0 -14px 36px rgba(80, 40, 10, 0.08);
+        }
+        .sg-footer__panel {
+            --sg-footer-cols: 1.45fr 0.9fr 0.9fr 1fr 1.05fr;
+            background: linear-gradient(165deg, #F7EDE3 0%, #EEDCC8 52%, #E8D4BC 100%);
+            padding: 52px 56px 28px;
+        }
+        .sg-footer__grid {
+            display: grid;
+            grid-template-columns: var(--sg-footer-cols);
+            gap: 2.5rem 1.75rem;
+            align-items: start;
+        }
+        .sg-footer__brand-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+        .sg-footer__brand-row img {
+            height: 42px;
+            width: auto;
+            object-fit: contain;
+        }
+        .sg-footer__blurb {
+            margin: 0 0 22px;
+            max-width: 240px;
+            font-size: 0.78rem;
+            line-height: 1.75;
+            color: #6b5a4e;
+            font-weight: 600;
+        }
+        .sg-footer__socials {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .sg-footer__social {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: #ffffff;
+            color: #3d342c;
+            box-shadow: 0 2px 8px rgba(80, 40, 10, 0.08);
+            transition: transform 0.2s ease, background 0.2s ease, color 0.2s ease;
+        }
+        .sg-footer__social svg {
+            width: 15px;
+            height: 15px;
+        }
+        .sg-footer__social:hover {
+            transform: translateY(-2px);
+            color: #3d342c;
+        }
+        .sg-footer__col-title {
+            margin: 4px 0 18px;
+            font-size: 0.95rem;
+            font-weight: 800;
+            color: #1a130f;
+        }
+        .sg-footer__col-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 11px;
+        }
+        .sg-footer__col-list a,
+        .sg-footer__col-list span {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #6b5a4e;
+            text-decoration: none;
+            transition: color 0.15s ease;
+        }
+        .sg-footer__col-list a:hover {
+            color: #a33900;
+        }
+        .sg-footer__bottom {
+            position: relative;
+            display: grid;
+            grid-template-columns: var(--sg-footer-cols);
+            gap: 2.5rem 1.75rem;
+            align-items: center;
+            margin-top: 2.35rem;
+            min-height: 40px;
+        }
+        .sg-footer__copy {
+            position: absolute;
+            inset-inline: 0;
+            text-align: center;
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: #6b5a4e;
+            pointer-events: none;
+        }
+        .sg-footer__pays {
+            grid-column: 5;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            justify-content: flex-start;
+            position: relative;
+            z-index: 1;
+        }
+        .sg-footer__pays img {
+            height: 28px;
+            width: auto;
+            max-width: 52px;
+            object-fit: contain;
+            border-radius: 6px;
+        }
+        @media (max-width: 1100px) {
+            .sg-footer__panel { padding: 40px 32px 28px; }
+            .sg-footer__grid,
+            .sg-footer__bottom { grid-template-columns: 1.2fr 1fr 1fr; }
+            .sg-footer__pays { grid-column: 3; }
+        }
     </style>
 </head>
 @php
@@ -39,7 +432,11 @@
     $walletBalance = auth()->user()->wallet_balance ?? 0;
 @endphp
 <body class="bg-surface font-body-md text-body-md text-on-surface antialiased {{ request()->routeIs('home') ? 'is-home-page' : 'is-sub-page' }} @yield('body_class')">
-    <header id="site-header" class="site-header {{ request()->routeIs('home') ? '' : 'hidden lg:block' }}">
+
+    {{-- ═══════════════════════════════════════════════════════════════════
+         1. NATIVE MOBILE HEADER (MOBILE ONLY: < 1024px)
+         ═══════════════════════════════════════════════════════════════════ --}}
+    <header id="site-header-mobile" class="site-header site-header--mobile {{ request()->routeIs('home') ? '' : 'is-subpage-hidden' }}">
         <div class="site-header__bar">
             <div class="site-header__start">
                 <a href="{{ route('home') }}" class="site-header__brand">
@@ -50,12 +447,6 @@
                     @include('partials.area-picker', ['variant' => 'stacked'])
                 </div>
             </div>
-
-            <nav class="site-header__nav" aria-label="التنقل الرئيسي">
-                <a href="{{ route('home') }}" class="{{ request()->routeIs('home') ? 'is-active' : '' }}">الرئيسية</a>
-                <a href="{{ route('restaurants.index') }}" class="{{ request()->routeIs('restaurants.*') ? 'is-active' : '' }}">المطاعم</a>
-                <a href="{{ route('memberships.index') }}" class="{{ request()->routeIs('memberships.*') ? 'is-active' : '' }}">المكافآت</a>
-            </nav>
 
             <div class="site-header__actions">
                 @auth
@@ -70,8 +461,6 @@
                     </a>
                 @endauth
 
-                @include('partials.header-search', ['class' => 'site-header__search'])
-
                 <div class="header-session">
                     <a href="{{ route('cart.index') }}" class="header-icon-btn" aria-label="السلة" data-header-cart>
                         <span class="material-symbols-outlined">shopping_bag</span>
@@ -82,7 +471,7 @@
                         @php
                             $headerTier = auth()->user()->tier();
                         @endphp
-                        <a href="{{ route('account.show') }}" class="header-account hidden lg:inline-flex" title="حسابي • مستوى الولاء: {{ $headerTier['name'] }}">
+                        <a href="{{ route('account.show') }}" class="header-account" title="حسابي • مستوى الولاء: {{ $headerTier['name'] }}">
                             <div class="relative inline-flex items-center justify-center shrink-0">
                                 @if(auth()->user()->photo_path)
                                     <img src="{{ auth()->user()->photoUrl() }}" alt="{{ auth()->user()->name }}" class="header-avatar object-cover">
@@ -95,19 +484,9 @@
                             </div>
                             <span class="header-account__name">{{ explode(' ', auth()->user()->name)[0] }}</span>
                         </a>
-                        @if(auth()->user()->isAdmin())
-                            <a href="{{ route('admin.dashboard') }}" class="header-icon-btn header-icon-btn--desktop" title="لوحة التحكم">
-                                <span class="material-symbols-outlined">admin_panel_settings</span>
-                            </a>
-                        @elseif(auth()->user()->isRestaurantOwner())
-                            <a href="{{ auth()->user()->partnerPanelRoute() }}" class="header-icon-btn header-icon-btn--desktop" title="لوحة المطعم">
-                                <span class="material-symbols-outlined">storefront</span>
-                            </a>
-                        @endif
                     @else
                         <a href="{{ route('login') }}" class="header-cta">
-                            <span class="lg:hidden">دخول</span>
-                            <span class="hidden lg:inline">تسجيل الدخول</span>
+                            <span>دخول</span>
                         </a>
                     @endauth
                 </div>
@@ -119,6 +498,102 @@
                 @include('partials.header-search')
             </div>
         @endunless
+    </header>
+
+    {{-- ═══════════════════════════════════════════════════════════════════
+         2. DESKTOP HEADER (DESKTOP ONLY: >= 1024px)
+         ═══════════════════════════════════════════════════════════════════ --}}
+    <header id="site-header-desktop" class="site-header site-header--desktop">
+        <div class="site-header__bar">
+            {{-- Brand Logo --}}
+            <div class="site-header__start">
+                <a href="{{ route('home') }}" class="site-header__brand flex items-center gap-2.5">
+                    <img alt="شعار سفرة غزة" src="{{ $logoSrc }}" class="h-9 sm:h-11 w-auto object-contain">
+                    <div class="hidden sm:flex flex-col text-right">
+                        <span class="font-black text-stone-900 text-lg leading-tight tracking-tight">سُفرة <span class="text-[#c84500]">غزة</span></span>
+                        <span class="text-[9px] font-bold text-stone-400 tracking-wider">SOFRA GAZA</span>
+                    </div>
+                </a>
+
+                <div class="site-header__location hidden xl:block">
+                    @include('partials.area-picker', ['variant' => 'stacked'])
+                </div>
+            </div>
+
+            {{-- Center Navigation Links (Foodly Style) --}}
+            <nav class="site-header__nav" aria-label="التنقل الرئيسي">
+                <a href="{{ route('home') }}" class="{{ request()->routeIs('home') ? 'is-active' : '' }}">الرئيسية</a>
+                <a href="{{ route('restaurants.index') }}" class="{{ request()->routeIs('restaurants.*') ? 'is-active' : '' }}">المطاعم</a>
+                <a href="{{ route('restaurants.index') }}">التصنيفات</a>
+                <a href="{{ route('memberships.index') }}" class="{{ request()->routeIs('memberships.*') ? 'is-active' : '' }}">المكافآت</a>
+                <a href="{{ route('home') }}#why-us">عن سفرة غزة</a>
+                <a href="#site-footer">تواصل معنا</a>
+            </nav>
+
+            {{-- Right/End Action Icons & CTA --}}
+            <div class="site-header__actions">
+                @auth
+                    <a href="{{ route('account.wallet') }}" class="hidden md:flex items-center gap-1 text-xs font-bold px-2.5 py-1.5 rounded-full bg-emerald-50 text-emerald-800 hover:bg-emerald-100 border border-emerald-200/60 transition-colors shrink-0" title="رصيد المحفظة">
+                        <span class="material-symbols-outlined text-[16px] text-emerald-600">account_balance_wallet</span>
+                        <span class="font-mono text-xs">{{ number_format($walletBalance, 0) }}</span>
+                        <span class="ils text-[10px]">₪</span>
+                    </a>
+                    <a href="{{ route('account.points') }}" class="header-points shrink-0" title="نقاط الولاء">
+                        @include('partials.gold-coin-icon', ['class' => 'w-4 h-4'])
+                        <span>{{ $pointsBalance }}</span>
+                    </a>
+                @endauth
+
+                {{-- 1. Search Icon Button (Circular) --}}
+                <button type="button" 
+                        onclick="document.getElementById('header-search-modal')?.classList.toggle('hidden'); document.getElementById('header-search-input')?.focus();" 
+                        class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white shadow-xs border border-stone-200/80 flex items-center justify-center text-stone-700 hover:text-[#c84500] hover:border-[#c84500]/30 transition-all shrink-0 cursor-pointer" 
+                        aria-label="بحث">
+                    <span class="material-symbols-outlined text-[20px]">search</span>
+                </button>
+
+                {{-- 2. User / Account Icon Button (Circular) --}}
+                @auth
+                    <a href="{{ route('account.show') }}" class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white shadow-xs border border-stone-200/80 flex items-center justify-center text-stone-700 hover:text-[#c84500] hover:border-[#c84500]/30 transition-all shrink-0 overflow-hidden" title="حسابي">
+                        @if(auth()->user()->photo_path)
+                            <img src="{{ auth()->user()->photoUrl() }}" alt="{{ auth()->user()->name }}" class="w-full h-full object-cover">
+                        @else
+                            <span class="material-symbols-outlined text-[20px]">person</span>
+                        @endif
+                    </a>
+                @else
+                    <a href="{{ route('login') }}" class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white shadow-xs border border-stone-200/80 flex items-center justify-center text-stone-700 hover:text-[#c84500] hover:border-[#c84500]/30 transition-all shrink-0" title="تسجيل الدخول">
+                        <span class="material-symbols-outlined text-[20px]">person</span>
+                    </a>
+                @endauth
+
+                {{-- 3. Cart Icon Button (Circular with Badge Counter) --}}
+                <a href="{{ route('cart.index') }}" class="relative w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white shadow-xs border border-stone-200/80 flex items-center justify-center text-stone-700 hover:text-[#c84500] hover:border-[#c84500]/30 transition-all shrink-0" aria-label="السلة" data-header-cart>
+                    <span class="material-symbols-outlined text-[20px]">shopping_bag</span>
+                    <span class="header-badge absolute -top-1 -right-1 bg-[#c84500] text-white text-[10px] font-black w-4 h-4 rounded-full flex items-center justify-center shadow-xs" data-header-cart-badge @if(! $cartCount) hidden @endif>{{ $cartCount > 9 ? '9+' : $cartCount }}</span>
+                </a>
+
+                {{-- 4. Order Now CTA Pill Button --}}
+                <a href="{{ route('restaurants.index') }}" class="site-header__cta px-4 py-2 sm:px-6 sm:py-2.5 rounded-full bg-[#c84500] hover:bg-[#b03d00] text-white font-extrabold text-xs sm:text-sm shadow-sm hover:shadow hover:scale-[1.02] active:scale-95 transition-all whitespace-nowrap inline-flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-[17px]">shopping_bag</span>
+                    <span>اطلب الآن</span>
+                </a>
+            </div>
+        </div>
+
+        {{-- Quick Search Modal (Desktop) --}}
+        <div id="header-search-modal" class="hidden fixed inset-0 z-50 bg-stone-900/40 backdrop-blur-xs flex items-start justify-center pt-20 px-4" onclick="if(event.target === this) this.classList.add('hidden')">
+            <div class="bg-white rounded-2xl p-3 sm:p-4 shadow-2xl w-full max-w-lg border border-stone-200" onclick="event.stopPropagation()">
+                <form action="{{ route('restaurants.index') }}" method="GET" class="flex items-center gap-2.5">
+                    <span class="material-symbols-outlined text-amber-600 text-[22px]">search</span>
+                    <input id="header-search-input" type="text" name="q" placeholder="ابحث عن مطعم، كافيه، أو وجبتك المفضلة..." class="w-full text-sm sm:text-base font-bold text-stone-800 outline-none bg-transparent">
+                    <button type="submit" class="px-4 py-2 rounded-full bg-[#c84500] text-white font-bold text-xs shrink-0 hover:bg-[#b03d00] transition-colors">بحث</button>
+                    <button type="button" onclick="document.getElementById('header-search-modal').classList.add('hidden')" class="p-1 text-stone-400 hover:text-stone-700">
+                        <span class="material-symbols-outlined text-[20px]">close</span>
+                    </button>
+                </form>
+            </div>
+        </div>
     </header>
 
     {{-- Native Mobile Subpage Header (Shown on all pages except Home and Restaurant Details on mobile) --}}
@@ -193,106 +668,79 @@
         </aside>
     @endunless
 
-    <footer class="hidden lg:block w-full bg-surface-container-lowest border-t border-surface-container-high pt-12 pb-12">
-        <div class="max-w-7xl mx-auto px-margin lg:px-margin-desktop">
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-10 pb-10">
-                {{-- Column 1: Brand & Contact --}}
-                <div class="space-y-3">
-                    <img alt="شعار سفرة غزة" class="h-9 w-auto object-contain" src="{{ $logoSrc }}">
-                    <p class="text-xs text-on-surface-variant leading-relaxed">
-                        منصة الضيافة وتوصيل الطعام الأولى في قطاع غزة. كل احتياجاتك في مكان واحد، بجودة وسرعة ومكافآت مع كل طلب.
-                    </p>
-                    <div class="flex items-center gap-4 pt-2 text-on-surface-variant">
-                        <a href="tel:0599000000" class="hover:text-primary transition-colors inline-flex items-center justify-center" title="اتصال هاتفي">
-                            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                <path d="M5 4h4l2 5l-2.5 1.5a11 11 0 0 0 5 5l1.5 -2.5l5 2v4a2 2 0 0 1 -2 2a16 16 0 0 1 -15 -15a2 2 0 0 1 2 -2"/>
-                            </svg>
+    <footer id="site-footer" class="sg-footer hidden lg:block w-full">
+        <div class="sg-footer__shell">
+            <div class="sg-footer__panel">
+                <div class="sg-footer__grid">
+                    <div>
+                        <a href="{{ route('home') }}" class="sg-footer__brand-row">
+                            <img alt="شعار سفرة غزة" src="{{ $logoSrc }}">
                         </a>
-                        <a href="https://wa.me/972590000000" target="_blank" class="hover:text-[#25D366] transition-colors inline-flex items-center justify-center" title="تواصل عبر واتساب">
-                            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                <path d="M3 21l1.65 -3.8a9 9 0 1 1 3.4 2.9l-5.05 .9" />
-                                <path d="M9 10a.5 .5 0 0 0 1 0v-1a.5 .5 0 0 0 -1 0v1a5 5 0 0 0 5 5h1a.5 .5 0 0 0 0 -1h-1a.5 .5 0 0 0 0 1" />
-                            </svg>
-                        </a>
-                        <a href="mailto:support@sofragaza.com" class="hover:text-primary transition-colors inline-flex items-center justify-center" title="البريد الإلكتروني">
-                            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                <rect width="18" height="14" x="3" y="5" rx="2" />
-                                <path d="m3 7 9 6 9-6" />
-                            </svg>
-                        </a>
-                    </div>
-                </div>
-
-                {{-- Column 2: Delivery Areas (Clean list, NO cards) --}}
-                <div class="space-y-3">
-                    <h4 class="text-sm font-extrabold text-on-surface">مناطق التوصيل الفعّالة</h4>
-                    <ul class="space-y-2 text-xs text-on-surface-variant leading-relaxed">
-                        <li class="hover:text-on-surface transition-colors">حي الرمال الجنوبي والشمالي</li>
-                        <li class="hover:text-on-surface transition-colors">منطقة النصر وتل الهوى</li>
-                        <li class="hover:text-on-surface transition-colors">المحافظة الوسطى (النصيرات ودير البلح)</li>
-                        <li class="hover:text-on-surface transition-colors">خانيونس والمواصي</li>
-                        <li class="hover:text-on-surface transition-colors">مخيم جباليا والشيخ رضوان</li>
-                    </ul>
-                </div>
-
-                {{-- Column 3: Payment Methods & Icons --}}
-                <div class="space-y-3">
-                    <h4 class="text-sm font-extrabold text-on-surface">طرق الدفع المعتمدة</h4>
-                    <p class="text-xs text-on-surface-variant leading-relaxed">
-                        وسائل دفع ومحافظ إلكترونية موثوقة في قطاع غزة:
-                    </p>
-
-                    <div class="flex items-center gap-2.5 flex-wrap pt-1">
-                        <img src="{{ asset('images/payments/palpay.png') }}" alt="PalPay" title="محفظتي PalPay" class="w-9 h-9 rounded-xl object-contain shadow-2xs hover:scale-110 transition-transform">
-                        <img src="{{ asset('images/payments/jawwalpay.png') }}" alt="Jawwal Pay" title="جوال باي Jawwal Pay" class="w-9 h-9 rounded-xl object-contain shadow-2xs hover:scale-110 transition-transform">
-                        <img src="{{ asset('images/payments/bop.png') }}" alt="Bank of Palestine" title="بنك فلسطين Bank of Palestine" class="w-9 h-9 rounded-xl object-contain shadow-2xs hover:scale-110 transition-transform">
-                        <img src="{{ asset('images/payments/iburaq.png') }}" alt="iBuraq" title="بُراق iBURAQ" class="w-9 h-9 rounded-xl object-contain shadow-2xs hover:scale-110 transition-transform">
-                    </div>
-
-                    <p class="text-[11px] text-on-surface-variant pt-0.5">
-                        إلى جانب الدفع نقداً (كاش) عند الاستلام ومحفظة سفرة غزة.
-                    </p>
-                </div>
-
-                {{-- Column 4: Quick Links (Clean text links) --}}
-                <div class="space-y-3">
-                    <h4 class="text-sm font-extrabold text-on-surface">مركز المساعدة والدعم</h4>
-                    <ul class="space-y-2 text-xs text-on-surface-variant">
-                        <li>
-                            <a class="hover:text-primary transition-colors inline-block" href="{{ route('memberships.index') }}">العضويات والمكافآت</a>
-                        </li>
-                        <li>
-                            <a class="hover:text-primary transition-colors inline-block" href="{{ route('partner.register') }}">انضم كشريك مطعم</a>
-                        </li>
-                        <li>
-                            <a class="hover:text-primary transition-colors inline-block" href="{{ route('courier.register') }}">انضم كمندوب توصيل</a>
-                        </li>
-                        <li>
-                            <a class="hover:text-primary transition-colors inline-block" href="{{ route('redeem.create') }}">استبدال نقاط المكافآت</a>
-                        </li>
-                        <li>
-                            <a class="hover:text-primary transition-colors inline-block" href="{{ auth()->check() ? route('account.show') : route('login') }}">
-                                {{ auth()->check() ? 'لوحة حسابي ومحفظتي' : 'تسجيل الدخول / إنشاء حساب' }}
+                        <p class="sg-footer__blurb">
+                            منصة الضيافة وتوصيل الطعام الأولى في قطاع غزة. كل احتياجاتك في مكان واحد، بجودة وسرعة ومكافآت مع كل طلب.
+                        </p>
+                        <div class="sg-footer__socials">
+                            <a href="https://www.facebook.com" target="_blank" rel="noopener noreferrer" class="sg-footer__social" aria-label="فيسبوك" title="فيسبوك">
+                                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M14 9h3V6h-3c-1.7 0-3 1.3-3 3v2H8v3h3v7h3v-7h2.6l.4-3H14V9z"/></svg>
                             </a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
+                            <a href="https://www.instagram.com" target="_blank" rel="noopener noreferrer" class="sg-footer__social" aria-label="إنستغرام" title="إنستغرام">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="0.8" fill="currentColor" stroke="none"/></svg>
+                            </a>
+                            <a href="https://wa.me/972590000000" target="_blank" rel="noopener noreferrer" class="sg-footer__social" aria-label="تواصل عبر واتساب" title="تواصل عبر واتساب">
+                                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0 0 12.04 2zm5.48 14.19c-.23.64-.94 1.17-1.54 1.24-.4.05-.91.08-1.48-.09-.35-.1-.79-.24-1.36-.47-2.39-1.03-3.94-3.44-4.06-3.6-.13-.16-.99-1.31-.99-2.5 0-1.18.61-1.76.83-2 .22-.24.48-.3.64-.3h.46c.15 0 .35-.06.54.41.2.49.68 1.66.74 1.78.06.12.1.26.02.42-.08.16-.12.26-.24.4-.12.13-.25.3-.36.4-.12.12-.24.25-.1.49.14.24.62 1.02 1.33 1.65.91.81 1.68 1.06 1.92 1.18.24.12.38.1.52-.06.14-.16.59-.69.75-.92.16-.24.31-.2.52-.12.21.08 1.34.63 1.57.75.23.12.38.17.44.27.05.1.05.58-.18 1.22z"/></svg>
+                            </a>
+                            <a href="tel:0599000000" class="sg-footer__social" aria-label="اتصال هاتفي" title="اتصال هاتفي">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13.5l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/></svg>
+                            </a>
+                        </div>
+                    </div>
 
-            {{-- Bottom Footer Bar --}}
-            <div class="pt-6 border-t border-surface-container-high flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-on-surface-variant">
-                <div class="flex items-center gap-2 flex-wrap text-center md:text-right">
-                    <span>© {{ date('Y') }} سفرة غزة | Sofra Gaza. جميع الحقوق محفوظة لقطاع الضيافة في غزة.</span>
-                    <span>•</span>
-                    <span>صُنع بكل فخر لأهلنا في غزة 🇵🇸</span>
+                    <div>
+                        <h4 class="sg-footer__col-title">الدعم</h4>
+                        <ul class="sg-footer__col-list">
+                            <li><a href="{{ auth()->check() ? route('account.show') : route('login') }}">{{ auth()->check() ? 'حسابي' : 'تسجيل الدخول' }}</a></li>
+                            <li><a href="{{ route('account.orders') }}">طلباتي</a></li>
+                            <li><a href="{{ route('redeem.create') }}">استبدال النقاط</a></li>
+                            <li><a href="{{ route('account.wallet') }}">المحفظة</a></li>
+                        </ul>
+                    </div>
+
+                    <div>
+                        <h4 class="sg-footer__col-title">قائمتنا</h4>
+                        <ul class="sg-footer__col-list">
+                            <li><a href="{{ route('memberships.index') }}">العروض</a></li>
+                            <li><a href="{{ route('restaurants.index') }}">الأشهر</a></li>
+                            <li><a href="{{ route('restaurants.index') }}">التصنيفات</a></li>
+                        </ul>
+                    </div>
+
+                    <div>
+                        <h4 class="sg-footer__col-title">روابط مفيدة</h4>
+                        <ul class="sg-footer__col-list">
+                            <li><a href="{{ route('partner.register') }}">انضم كشريك مطعم</a></li>
+                            <li><a href="{{ route('courier.register') }}">انضم كمندوب توصيل</a></li>
+                            <li><a href="{{ route('home') }}">الشروط والأحكام</a></li>
+                            <li><a href="{{ route('home') }}#why-us">عن سفرة غزة</a></li>
+                        </ul>
+                    </div>
+
+                    <div>
+                        <h4 class="sg-footer__col-title">تواصل معنا</h4>
+                        <ul class="sg-footer__col-list">
+                            <li><a href="mailto:support@sofragaza.com">support@sofragaza.com</a></li>
+                            <li><span>غزة، فلسطين</span></li>
+                        </ul>
+                    </div>
                 </div>
 
-                <div class="flex items-center gap-4 text-xs">
-                    <a class="hover:text-primary transition-colors" href="{{ route('home') }}">سياسة الاسترجاع والضمان</a>
-                    <span>•</span>
-                    <a class="hover:text-primary transition-colors" href="{{ route('home') }}">الشروط والأحكام</a>
-                    <span>•</span>
-                    <a class="hover:text-primary transition-colors" href="{{ route('account.show') }}">أمان الحساب والمحفظة</a>
+                <div class="sg-footer__bottom">
+                    <span class="sg-footer__copy">حقوق النشر © {{ date('Y') }} سفرة غزة</span>
+                    <div class="sg-footer__pays" aria-label="طرق الدفع المعتمدة">
+                        <img src="{{ asset('images/payments/palpay.png') }}" alt="محفظتي PalPay" title="محفظتي PalPay">
+                        <img src="{{ asset('images/payments/jawwalpay.png') }}" alt="جوال باي" title="جوال باي">
+                        <img src="{{ asset('images/payments/bop.png') }}" alt="بنك فلسطين" title="بنك فلسطين">
+                        <img src="{{ asset('images/payments/iburaq.png') }}" alt="بُراق" title="بُراق">
+                    </div>
                 </div>
             </div>
         </div>
@@ -334,6 +782,22 @@
             </a>
         </div>
     </nav>
+    <script>
+    (function() {
+        const header = document.getElementById('site-header-desktop');
+        if (!header) return;
+        const onScroll = () => {
+            if (window.innerWidth >= 1024 && window.scrollY > 60) {
+                header.classList.add('is-scrolled');
+            } else {
+                header.classList.remove('is-scrolled');
+            }
+        };
+        window.addEventListener('scroll', onScroll, { passive: true });
+        window.addEventListener('resize', onScroll, { passive: true });
+        onScroll();
+    })();
+    </script>
     @yield('scripts')
 </body>
 </html>

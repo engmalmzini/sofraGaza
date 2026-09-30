@@ -32,33 +32,44 @@
                 <th>التحقق</th>
                 <th>الظهور</th>
                 <th>اللوحة</th>
-                <th></th>
+                <th class="text-center">الإجراءات</th>
             </tr>
         </thead>
         <tbody>
             @forelse($restaurants as $restaurant)
                 <tr>
                     <td class="font-bold">
-                        <a href="{{ route('admin.restaurants.show', $restaurant) }}">{{ $restaurant->name }}</a>
-                        <div class="text-xs text-on-surface-variant">{{ $restaurant->typeLabel() }}</div>
+                        <a href="{{ route('admin.restaurants.show', $restaurant) }}" class="text-slate-900 hover:text-primary">{{ $restaurant->name }}</a>
+                        <div class="text-xs text-on-surface-variant font-normal">{{ $restaurant->typeLabel() }}</div>
                     </td>
                     <td>{{ $restaurant->owner->name ?? 'مضاف من الإدارة' }}</td>
-                    <td>{{ $restaurant->menu_items_count }}</td>
+                    <td><span class="font-bold text-slate-800">{{ $restaurant->menu_items_count }}</span> صنف</td>
                     <td>
                         @if($restaurant->isPending())
                             —
                         @else
                             {{ $restaurant->expires_at?->format('Y-m-d') }}
-                            <div class="text-xs {{ $restaurant->daysRemaining() <= 7 ? 'text-primary' : 'text-on-surface-variant' }}">باقي {{ $restaurant->daysRemaining() }} يوم</div>
+                            <div class="text-xs {{ $restaurant->daysRemaining() <= 7 ? 'text-primary font-bold' : 'text-on-surface-variant' }}">باقي {{ $restaurant->daysRemaining() }} يوم</div>
                         @endif
                     </td>
                     <td>@include('admin.partials.pill', ['status' => $restaurant->verification_status, 'label' => $restaurant->verificationLabel()])</td>
                     <td>@include('admin.partials.pill', ['status' => $restaurant->isVisible() ? 'approved' : 'cancelled', 'label' => $restaurant->isVisible() ? 'ظاهر' : 'غير منشور'])</td>
                     <td>@include('admin.partials.pill', ['status' => $restaurant->panel_suspended ? 'rejected' : 'approved', 'label' => $restaurant->panel_suspended ? 'موقوفة' : 'مفتوحة'])</td>
-                    <td class="space-x-2 space-x-reverse whitespace-nowrap">
-                        <a class="font-bold text-primary" href="{{ route('admin.restaurants.show', $restaurant) }}">مراجعة</a>
-                        <a href="{{ route('admin.restaurants.menu-items.index', $restaurant) }}">المنيو</a>
-                        <a href="{{ route('admin.restaurants.edit', $restaurant) }}">تعديل</a>
+                    <td class="whitespace-nowrap">
+                        <div class="admin-table-actions">
+                            <a class="admin-action-btn admin-action-btn--primary" href="{{ route('admin.restaurants.show', $restaurant) }}">
+                                <span class="material-symbols-outlined">visibility</span>
+                                <span>مراجعة</span>
+                            </a>
+                            <a class="admin-action-btn admin-action-btn--dark" href="{{ route('admin.restaurants.menu-items.index', $restaurant) }}">
+                                <span class="material-symbols-outlined">restaurant_menu</span>
+                                <span>المنيو</span>
+                            </a>
+                            <a class="admin-action-btn admin-action-btn--outline" href="{{ route('admin.restaurants.edit', $restaurant) }}">
+                                <span class="material-symbols-outlined">edit</span>
+                                <span>تعديل</span>
+                            </a>
+                        </div>
                     </td>
                 </tr>
             @empty

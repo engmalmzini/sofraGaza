@@ -1,38 +1,43 @@
 @php
-    $rating = number_format($restaurant->averageRating(), 1);
-    $reviewsCount = $restaurant->reviewsCount();
-    $eta = $restaurant->type === 'cafe' ? '20-30 دقيقة' : '25-35 دقيقة';
+    $rating = number_format((float) ($restaurant->avg_rating ?? $restaurant->averageRating()), 1);
+    $reviewsCount = (int) ($restaurant->approved_reviews_count ?? $restaurant->reviewsCount());
+    $eta = $restaurant->type === 'cafe' ? '20-25 د' : '25-35 د';
+    $minPrice = $restaurant->menu_items_min_price;
+    $badge = match ($restaurant->badgeLabel()) {
+        'خصم 10% للأعضاء' => 'خصم 10%',
+        'نقاط مضاعفة' => 'نقاط ×2',
+        'مشروب هدية' => 'هدية',
+        default => $restaurant->badgeLabel(),
+    };
 @endphp
-<a href="{{ route('restaurants.show', $restaurant) }}" class="group rounded-2xl border border-slate-100 bg-surface-container-lowest overflow-hidden shadow-xs hover:shadow-md hover:-translate-y-0.5 transition duration-200 flex flex-col">
-    <div class="relative h-40 sm:h-44 w-full overflow-hidden bg-stone-100">
-        <img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" alt="{{ $restaurant->name }}" src="{{ $restaurant->coverUrl() }}">
-        <div class="absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent pointer-events-none"></div>
-        <div class="absolute top-2.5 right-2.5 bg-surface-container-lowest/90 backdrop-blur-md px-2.5 py-1 rounded-full flex items-center gap-1 shadow-sm">
-            <span class="w-2 h-2 rounded-full bg-secondary"></span>
-            <span class="text-label-sm font-label-sm font-bold text-on-surface">مفتوح الآن</span>
-        </div>
-        <div class="absolute top-2.5 left-2.5 bg-primary text-on-primary text-label-sm font-label-sm font-bold px-2 py-0.5 rounded-full shadow-sm">{{ $restaurant->badgeLabel() }}</div>
+<a href="{{ route('restaurants.show', $restaurant) }}" class="sg-dish-card group">
+    <div class="sg-dish-card__media">
+        <img src="{{ $restaurant->coverUrl() }}" alt="{{ $restaurant->name }}" loading="lazy">
+        <span class="sg-dish-card__badge">{{ $badge }}</span>
+        <button type="button" class="sg-dish-card__fav" aria-label="أضف للمفضلة" onclick="event.preventDefault(); event.stopPropagation(); this.classList.toggle('is-on');">
+            <span class="material-symbols-outlined">favorite</span>
+        </button>
     </div>
-    <div class="p-3.5 sm:p-4 flex flex-col gap-1.5">
-        <div class="flex items-center justify-between gap-2">
-            <div class="flex items-center gap-1 min-w-0">
-                <h3 class="font-headline-sm text-base font-bold text-stone-900 group-hover:text-primary transition-colors truncate">{{ $restaurant->name }}</h3>
-                <span class="material-symbols-outlined text-primary text-[17px] shrink-0">verified</span>
-            </div>
-            <div class="flex items-center gap-1 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200/50 text-amber-900 text-xs font-bold shrink-0">
-                <span class="material-symbols-outlined text-[13px] text-amber-500 fill-1">star</span>
-                <span>{{ $rating }}</span>
-                @if($reviewsCount > 0)
-                    <span class="text-[10px] text-amber-700/80 mr-0.5">({{ $reviewsCount }})</span>
-                @endif
-            </div>
+    <div class="sg-dish-card__body">
+        <h3 class="sg-dish-card__title">{{ $restaurant->name }}</h3>
+        <p class="sg-dish-card__sub">{{ $restaurant->cuisineLabel() }} • {{ $restaurant->areaLabel() }}</p>
+        <div class="sg-dish-card__meta">
+            @include('partials.star-icon', ['class' => 'sg-dish-card__star'])
+            <span class="sg-dish-card__rating">{{ $rating }}</span>
+            @if($reviewsCount > 0)
+                <span class="sg-dish-card__reviews">({{ $reviewsCount }})</span>
+            @endif
+            <span class="sg-dish-card__dot"></span>
+            <span class="material-symbols-outlined sg-dish-card__clock">schedule</span>
+            <span>{{ $eta }}</span>
         </div>
-        <p class="text-stone-500 text-[13px] font-normal truncate">{{ $restaurant->cuisineLabel() }} • {{ $restaurant->address }}</p>
-        <div class="flex items-center gap-2 text-stone-600 text-[12px] pt-1">
-            <div class="flex items-center gap-1">
-                <span class="material-symbols-outlined text-[15px] text-stone-400">schedule</span>
-                <span>{{ $eta }}</span>
-            </div>
+        <div class="sg-dish-card__foot">
+            @if($minPrice)
+                <span class="sg-dish-card__price">{{ number_format((float) $minPrice, 2) }} <span class="ils">₪</span></span>
+            @else
+                <span class="sg-dish-card__price">اطلب الآن</span>
+            @endif
+            <span class="sg-dish-card__plus" aria-hidden="true">+</span>
         </div>
     </div>
 </a>
