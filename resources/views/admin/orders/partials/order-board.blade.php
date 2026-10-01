@@ -1,85 +1,81 @@
-<div class="admin-board">
-    <!-- 1. Pending Confirmation Column -->
-    <div class="admin-board__col admin-board__col--pending">
-        <div class="admin-board__head">
-            <div class="admin-board__title">
-                <span class="material-symbols-outlined">pending_actions</span>
-                <span>بانتظار التأكيد</span>
-            </div>
-            <span class="admin-board__count">{{ $ordersByStatus['pending_confirmation']->count() }}</span>
-        </div>
-        <div class="admin-board__cards">
-            @forelse($ordersByStatus['pending_confirmation'] as $order)
-                @include('admin.orders.partials.order-card', ['order' => $order])
-            @empty
-                <div class="admin-board__empty">
-                    <span class="material-symbols-outlined">done_all</span>
-                    <span>لا توجد طلبات معلقة</span>
-                </div>
-            @endforelse
-        </div>
-    </div>
+@php
+    $cardContext = $cardContext ?? 'admin';
+    $showRouteName = $showRouteName ?? match ($cardContext) {
+        'partner' => 'partner.orders.show',
+        'customer' => 'account.orders.show',
+        default => 'admin.orders.show',
+    };
+    $moveUrl = $moveUrl ?? '';
+    $allowedColumns = $allowedColumns ?? '';
+    $readonly = $moveUrl === '';
+    $columns = [
+        'pending_confirmation' => [
+            'title' => 'بانتظار التأكيد',
+            'icon' => 'pending_actions',
+            'empty_icon' => 'done_all',
+            'empty' => 'لا توجد طلبات معلقة',
+            'mod' => 'pending',
+        ],
+        'preparing' => [
+            'title' => 'قيد التحضير بالمطعم',
+            'icon' => 'skillet',
+            'empty_icon' => 'soup_kitchen',
+            'empty' => 'لا توجد وجبات قيد التجهيز',
+            'mod' => 'preparing',
+        ],
+        'delivering' => [
+            'title' => 'مع المندوب للتوصيل',
+            'icon' => 'two_wheeler',
+            'empty_icon' => 'moped',
+            'empty' => 'لا توجد طلبات قيد النقل',
+            'mod' => 'delivering',
+        ],
+        'delivered' => [
+            'title' => 'تم التسليم بنجاح',
+            'icon' => 'task_alt',
+            'empty_icon' => 'check_circle',
+            'empty' => 'لا توجد طلبات مكتملة حديثاً',
+            'mod' => 'delivered',
+        ],
+    ];
+@endphp
 
-    <!-- 2. Preparing / Confirmed Column -->
-    <div class="admin-board__col admin-board__col--preparing">
-        <div class="admin-board__head">
-            <div class="admin-board__title">
-                <span class="material-symbols-outlined">skillet</span>
-                <span>قيد التحضير بالمطعم</span>
-            </div>
-            <span class="admin-board__count">{{ $ordersByStatus['preparing']->count() }}</span>
-        </div>
-        <div class="admin-board__cards">
-            @forelse($ordersByStatus['preparing'] as $order)
-                @include('admin.orders.partials.order-card', ['order' => $order])
-            @empty
-                <div class="admin-board__empty">
-                    <span class="material-symbols-outlined">soup_kitchen</span>
-                    <span>لا توجد وجبات قيد التجهيز</span>
+<div
+    class="admin-board {{ $readonly ? 'admin-board--readonly' : 'admin-board--live' }}"
+    data-order-board
+    @unless($readonly)
+        data-move-url="{{ $moveUrl }}"
+        data-allowed-columns="{{ $allowedColumns }}"
+    @endunless
+>
+    @foreach($columns as $columnKey => $column)
+        @php $columnOrders = collect($ordersByStatus[$columnKey] ?? []); @endphp
+        <div
+            class="admin-board__col admin-board__col--{{ $column['mod'] }}"
+            data-board-column="{{ $columnKey }}"
+        >
+            <div class="admin-board__head">
+                <div class="admin-board__title">
+                    <span class="material-symbols-outlined">{{ $column['icon'] }}</span>
+                    <span>{{ $column['title'] }}</span>
                 </div>
-            @endforelse
-        </div>
-    </div>
-
-    <!-- 3. Delivering Column -->
-    <div class="admin-board__col admin-board__col--delivering">
-        <div class="admin-board__head">
-            <div class="admin-board__title">
-                <span class="material-symbols-outlined">two_wheeler</span>
-                <span>مع المندوب للتوصيل</span>
+                <span class="admin-board__count" data-board-count>{{ $columnOrders->count() }}</span>
             </div>
-            <span class="admin-board__count">{{ $ordersByStatus['delivering']->count() }}</span>
-        </div>
-        <div class="admin-board__cards">
-            @forelse($ordersByStatus['delivering'] as $order)
-                @include('admin.orders.partials.order-card', ['order' => $order])
-            @empty
-                <div class="admin-board__empty">
-                    <span class="material-symbols-outlined">moped</span>
-                    <span>لا توجد طلبات قيد النقل</span>
-                </div>
-            @endforelse
-        </div>
-    </div>
-
-    <!-- 4. Delivered Column -->
-    <div class="admin-board__col admin-board__col--delivered">
-        <div class="admin-board__head">
-            <div class="admin-board__title">
-                <span class="material-symbols-outlined">task_alt</span>
-                <span>تم التسليم بنجاح</span>
+            <div class="admin-board__cards" data-board-cards>
+                @forelse($columnOrders as $order)
+                    @include('admin.orders.partials.order-card', [
+                        'order' => $order,
+                        'showRouteName' => $showRouteName,
+                        'cardContext' => $cardContext,
+                        'readonly' => $readonly,
+                    ])
+                @empty
+                    <div class="admin-board__empty" data-board-empty>
+                        <span class="material-symbols-outlined">{{ $column['empty_icon'] }}</span>
+                        <span>{{ $column['empty'] }}</span>
+                    </div>
+                @endforelse
             </div>
-            <span class="admin-board__count">{{ $ordersByStatus['delivered']->count() }}</span>
         </div>
-        <div class="admin-board__cards">
-            @forelse($ordersByStatus['delivered'] as $order)
-                @include('admin.orders.partials.order-card', ['order' => $order])
-            @empty
-                <div class="admin-board__empty">
-                    <span class="material-symbols-outlined">check_circle</span>
-                    <span>لا توجد طلبات مكتملة حديثاً</span>
-                </div>
-            @endforelse
-        </div>
-    </div>
+    @endforeach
 </div>

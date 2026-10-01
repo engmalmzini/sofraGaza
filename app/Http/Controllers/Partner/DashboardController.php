@@ -16,14 +16,20 @@ class DashboardController extends Controller
             ->groupBy('category')
             ->pluck('items_count', 'category');
         $menuByCategory = $restaurant->menuItems()->orderBy('name')->get()->groupBy('category');
-        $listing = $restaurant->activeListing();
 
         $activeOrders = $restaurant->orders()
             ->with(['user', 'items', 'courier'])
             ->whereIn('status', ['pending_confirmation', 'confirmed', 'preparing', 'delivering'])
             ->latest('id')
             ->get();
+        $deliveredOrders = $restaurant->orders()
+            ->with(['user', 'items', 'courier'])
+            ->where('status', 'delivered')
+            ->latest('id')
+            ->take(12)
+            ->get();
         $activeOrdersCount = $activeOrders->count();
+        $ordersByStatus = \App\Models\Order::groupForBoard($activeOrders->concat($deliveredOrders));
 
         return view('partner.dashboard', [
             'restaurant' => $restaurant,
@@ -31,9 +37,9 @@ class DashboardController extends Controller
             'readyCount' => $readyCount,
             'categoryStats' => $categoryStats,
             'menuByCategory' => $menuByCategory,
-            'listing' => $listing,
             'activeOrders' => $activeOrders,
             'activeOrdersCount' => $activeOrdersCount,
+            'ordersByStatus' => $ordersByStatus,
         ]);
     }
 }

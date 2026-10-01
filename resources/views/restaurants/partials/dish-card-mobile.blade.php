@@ -17,7 +17,7 @@
                 <span class="font-headline-sm text-[20px] text-primary font-bold">{{ number_format((float) $item->price, 0) }}</span>
                 <span class="ils text-primary">₪</span>
             </div>
-            @if($item->is_available)
+            @if($item->is_available && ($canShop ?? true))
                 <button type="button" class="font-label-sm text-[12px] text-on-surface-variant hover:text-primary underline" data-open-customizer data-item-id="{{ $item->id }}" data-item-name="{{ $item->name }}" data-item-price="{{ (float) $item->price }}" data-item-desc="{{ $item->description }}" data-add-url="{{ route('cart.add', $item) }}">تخصيص</button>
             @endif
         </div>
@@ -30,7 +30,12 @@
                 <span class="material-symbols-outlined text-[28px]">restaurant</span>
             </div>
         @endif
-        @if($item->is_available)
+        @include('partials.favorite-button', [
+            'type' => 'menu_item',
+            'id' => $item->id,
+            'class' => 'absolute top-1 right-1 w-7 h-7 rounded-full bg-white/90 text-stone-500 flex items-center justify-center shadow-sm z-10',
+        ])
+        @if($item->is_available && ($canShop ?? true))
             <form method="POST" action="{{ route('cart.add', $item) }}">
                 @csrf
                 <button type="submit" aria-label="إضافة للسلة" class="absolute bottom-1.5 left-1.5 w-7 h-7 rounded-full bg-primary text-on-primary flex items-center justify-center shadow-md active:scale-95 transition-transform">

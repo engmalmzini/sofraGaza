@@ -62,6 +62,21 @@
     </div>
 
     <div class="space-y-3">
+        <div class="rounded-3xl bg-white border border-slate-100 p-3 lg:p-4 shadow-xs">
+            <div class="flex items-center justify-between gap-2 mb-1 px-1">
+                <h2 class="text-sm font-extrabold text-stone-900">متابعة الطلبات</h2>
+                <span class="inline-flex items-center gap-1.5 text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                    مباشر
+                </span>
+            </div>
+            @include('admin.orders.partials.order-board', [
+                'ordersByStatus' => $ordersByStatus,
+                'showRouteName' => 'account.orders.show',
+                'cardContext' => 'customer',
+            ])
+        </div>
+
         @forelse($orders as $order)
             <a href="{{ route('account.orders.show', $order) }}" class="flex items-center justify-between gap-3 rounded-2xl bg-surface-container-lowest border border-slate-100 p-4 shadow-xs">
                 <div>

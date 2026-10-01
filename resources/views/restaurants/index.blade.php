@@ -344,6 +344,8 @@
         border-radius: 8px;
         z-index: 2;
     }
+    .sg-dish-card__badge--ad { background: #ea580c; }
+    .sg-dish-card--ad { outline: 2px solid #fdba74; }
     .sg-dish-card__fav {
         position: absolute;
         top: 8px;

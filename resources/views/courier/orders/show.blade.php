@@ -8,10 +8,18 @@
     $backTab = $order->status === 'delivered' ? 'done' : 'mine';
     $foodCost = max(0, (float)$order->subtotal - (float)$order->discount_amount);
     $isPrepaid = $order->isPaidWithWallet() || $order->confirmed_at;
+    $deliveryFee = (float) $order->delivery_fee;
+    $courierNet = round($deliveryFee * 0.85, 2);
+    $platformCut = round($deliveryFee * 0.15, 2);
+    $backUrl = match (request('from')) {
+        'earnings' => route('courier.wallet.statement', array_filter(['period' => request('period')])),
+        'wallet' => route('courier.wallet', array_filter(['period' => request('period')])),
+        default => route('courier.dashboard', ['tab' => $backTab]),
+    };
 @endphp
 
 @section('title', 'طلب #'.$order->id)
-@section('back', route('courier.dashboard', ['tab' => $backTab]))
+@section('back', $backUrl)
 
 @section('content')
 <article class="courier-detail">
@@ -37,11 +45,24 @@
             </div>
 
             <div class="p-2.5 rounded-xl bg-white border border-slate-200/80 shadow-xs">
-                <span class="text-slate-500 block">أجرة التوصيل (لك):</span>
-                <strong class="text-base text-emerald-600 block mt-0.5">{{ number_format($order->delivery_fee, 2) }} <span class="ils">₪</span></strong>
+                <span class="text-slate-500 block">أجرة التوصيل الأصلية:</span>
+                <strong class="text-base text-stone-900 block mt-0.5">{{ number_format($deliveryFee, 2) }} <span class="ils">₪</span></strong>
                 <small class="text-[10px] text-slate-400">({{ $order->deliveryAreaLabel() ?: 'المنطقة المحددة' }})</small>
             </div>
         </div>
+
+        @if($order->status === 'delivered' && $order->courier_id === auth()->id())
+            <div class="cw-order-cut">
+                <div>
+                    <span>خصم المنصة 15%</span>
+                    <strong>-{{ number_format($platformCut, 2) }} ₪</strong>
+                </div>
+                <div class="is-net">
+                    <span>صافي حصتك 85%</span>
+                    <strong>+{{ number_format($courierNet, 2) }} ₪</strong>
+                </div>
+            </div>
+        @endif
 
         {{-- Payment instructions --}}
         @if($isPrepaid)

@@ -34,7 +34,16 @@
 
 <!-- 1. Board View (Columns by status) -->
 <div id="orders-page-board" class="{{ request('status') ? 'hidden' : '' }} mb-6">
-    @include('admin.orders.partials.order-board', ['ordersByStatus' => $ordersByStatus])
+    <p class="text-xs text-slate-500 mb-2">اسحب بطاقة الطلب من أيقونة السحب وأفلتها في العمود التالي لتحديث الحالة تلقائياً — بدون الحاجة لزر.</p>
+    <div id="admin-orders-board">
+        @include('admin.orders.partials.order-board', [
+            'ordersByStatus' => $ordersByStatus,
+            'showRouteName' => 'admin.orders.show',
+            'moveUrl' => url('/admin/orders/__ID__/move'),
+            'allowedColumns' => 'preparing,delivering,delivered',
+            'cardContext' => 'admin',
+        ])
+    </div>
 </div>
 
 <!-- 2. Table View -->

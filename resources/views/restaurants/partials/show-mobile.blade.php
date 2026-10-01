@@ -23,7 +23,7 @@
                 <span class="material-symbols-outlined text-[24px]">arrow_forward</span>
             </button>
 
-            {{-- كلمة مفتوح أو مغلق (Open/Closed Badge) --}}
+            <div class="flex items-center gap-2">
             @if($restaurant->isOpen())
                 <div class="px-3 py-1.5 rounded-full bg-emerald-500/90 backdrop-blur-md text-white font-extrabold text-xs shadow-md flex items-center gap-1.5">
                     <span class="w-2 h-2 rounded-full bg-white animate-pulse"></span>
@@ -35,6 +35,12 @@
                     <span>مغلق</span>
                 </div>
             @endif
+            @include('partials.favorite-button', [
+                'type' => 'restaurant',
+                'id' => $restaurant->id,
+                'class' => 'w-10 h-10 rounded-full bg-black/40 text-white backdrop-blur-md flex items-center justify-center shadow-md',
+            ])
+            </div>
         </div>
     </div>
 
@@ -87,13 +93,22 @@
                 </div>
             </div>
 
-            @if($membership?->discount_percent)
+            @if(($canShop ?? true) && $membership?->discount_percent)
                 <div class="mt-2.5 bg-primary/10 border border-primary/20 px-2.5 py-1.5 rounded-xl flex items-center justify-between gap-2">
                     <div class="flex items-center gap-1.5 min-w-0">
                         <span class="material-symbols-outlined text-primary text-[15px]">local_activity</span>
                         <span class="text-[11px] text-primary font-bold">خصم {{ $membership->discount_percent }}% فوري للأعضاء</span>
                     </div>
                     <span class="text-[10px] text-primary font-extrabold shrink-0">{{ $vip ? 'مُفعل تلقائياً' : 'للأعضاء' }}</span>
+                </div>
+            @endif
+
+            @if($canShop ?? true)
+                <div class="mt-2.5">
+                    @include('partials.group-order-entry', [
+                        'restaurant' => $restaurant,
+                        'entryClass' => 'w-full inline-flex items-center justify-center gap-1.5 rounded-xl border border-stone-200 bg-stone-50 text-stone-800 font-extrabold text-xs px-3 py-2.5 hover:border-primary/40 hover:text-primary transition-colors',
+                    ])
                 </div>
             @endif
         </div>
@@ -109,6 +124,7 @@
         </div>
 
         {{-- Sub-bar below categories: Left corner for 'استبدال النقاط' with very small font --}}
+        @if($canShop ?? true)
         <div class="flex items-center justify-end pt-1 pb-0.5">
             @if(count($rewards))
                 <button type="button" 
@@ -126,6 +142,7 @@
                 </a>
             @endif
         </div>
+        @endif
     </div>
 
     {{-- 4. Dishes List (عرض الوجبات) --}}
@@ -144,7 +161,7 @@
     </div>
 
     {{-- 5. Points Redemption Section (مخفي افتراضياً ويظهر عند اختيار تبويب استبدال النقاط) --}}
-    @if(count($rewards))
+    @if(($canShop ?? true) && count($rewards))
     <div id="mobile-rewards-section" class="hidden px-margin mt-3 mb-24 space-y-3">
         {{-- Rewards Header Banner --}}
         <div class="bg-gradient-to-r from-amber-500/15 via-amber-500/5 to-transparent border border-amber-200/80 rounded-2xl p-3.5 flex items-center justify-between gap-2 shadow-xs">
@@ -304,6 +321,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 
+    @if($canShop ?? true)
     <div id="mobile-cart-pill" class="fixed bottom-20 inset-x-4 z-40 {{ $restaurantCart ? '' : 'hidden' }}">
         <button type="button" class="js-open-cart w-full bg-inverse-surface text-inverse-on-surface rounded-full px-4 py-3 flex items-center justify-between shadow-2xl">
             <div class="flex items-center gap-3">
@@ -327,4 +345,5 @@ document.addEventListener('DOMContentLoaded', () => {
             </span>
         </button>
     </div>
+    @endif
 </div>

@@ -14,7 +14,22 @@ class PalestinianPhone
 
     public static function digits(?string $value): string
     {
-        return preg_replace('/\D+/', '', (string) $value) ?? '';
+        return preg_replace('/\D+/', '', (string) $value) ?: '';
+    }
+
+    public static function local(?string $value): string
+    {
+        $digits = self::digits($value);
+
+        if (str_starts_with($digits, '00972')) {
+            $digits = substr($digits, 2);
+        }
+
+        if (str_starts_with($digits, '972') && strlen($digits) >= 12) {
+            $digits = '0'.substr($digits, 3);
+        }
+
+        return $digits;
     }
 
     public static function international(?string $value): ?string

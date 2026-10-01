@@ -37,7 +37,21 @@ class UserFactory extends Factory
 
     public function admin(): static
     {
-        return $this->state(fn () => ['role' => 'admin']);
+        return $this->state(fn () => [
+            'role' => 'admin',
+            'is_super_admin' => true,
+            'admin_active' => true,
+        ]);
+    }
+
+    public function staffAdmin(array $permissions = ['restaurants']): static
+    {
+        return $this->state(fn () => [
+            'role' => 'admin',
+            'is_super_admin' => false,
+            'admin_active' => true,
+            'admin_permissions' => $permissions,
+        ]);
     }
 
     public function restaurantOwner(): static

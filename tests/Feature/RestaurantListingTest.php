@@ -3,11 +3,8 @@
 namespace Tests\Feature;
 
 use App\Models\Restaurant;
-use App\Models\RestaurantPlan;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class RestaurantListingTest extends TestCase
@@ -17,7 +14,7 @@ class RestaurantListingTest extends TestCase
     public function test_admin_can_suspend_panel_and_hide_restaurant_while_keeping_data(): void
     {
         $admin = User::factory()->admin()->create();
-        [$owner, $restaurant] = $this->makePaidVenue();
+        [$owner, $restaurant] = $this->makeApprovedVenue();
 
         $this->actingAs($admin)
             ->post(route('admin.restaurants.suspend', $restaurant))
@@ -37,16 +34,16 @@ class RestaurantListingTest extends TestCase
 
         $this->actingAs($owner)
             ->get(route('partner.dashboard'))
-            ->assertRedirect(route('partner.subscription.index'));
+            ->assertOk()
+            ->assertSee('تم إيقاف اللوحة', false)
+            ->assertSee('بياناتك محفوظة', false);
 
         $this->actingAs($owner)
-            ->get(route('partner.subscription.index'))
-            ->assertOk()
-            ->assertSee('قم بتجديد الاشتراك', false)
-            ->assertSee('بياناتك محفوظة', false);
+            ->get(route('partner.menu-items.index'))
+            ->assertRedirect(route('partner.dashboard'));
     }
 
-    public function test_admin_confirms_transfer_and_partner_sees_remaining_days(): void
+    public function test_admin_approval_publishes_restaurant_immediately(): void
     {
         $admin = User::factory()->admin()->create();
         $owner = User::factory()->restaurantOwner()->create();
@@ -59,48 +56,53 @@ class RestaurantListingTest extends TestCase
             'is_active' => false,
             'verification_status' => Restaurant::VERIFICATION_PENDING,
         ]);
-        RestaurantPlan::seedDefaults();
-        Storage::fake('public');
-        $plan = RestaurantPlan::query()->where('duration_days', 180)->first();
-
-        $this->actingAs($owner)
-            ->post(route('partner.subscription.store', $plan), [
-                'receipt' => UploadedFile::fake()->image('hawala.jpg'),
-            ])
-            ->assertRedirect(route('partner.subscription.index'));
-
-        $this->assertDatabaseHas('restaurant_subscriptions', [
-            'restaurant_id' => $restaurant->id,
-            'status' => 'pending',
-            'amount' => 500,
-        ]);
-
-        $listing = $restaurant->pendingListing();
-
-        $this->actingAs($admin)
-            ->get(route('admin.listings.show', $listing))
-            ->assertOk()
-            ->assertSee('حوالة', false);
-
-        $this->actingAs($admin)
-            ->post(route('admin.listings.approve', $listing))
-            ->assertRedirect();
-
-        $restaurant->refresh();
-        $this->assertTrue($restaurant->isVisible());
-        $this->assertTrue($restaurant->hasPaidAccess());
 
         $this->actingAs($owner)
             ->get(route('partner.dashboard'))
             ->assertOk()
-            ->assertSee('باقة 6 أشهر', false)
-            ->assertSee('باقي', false);
+            ->assertSee('جاري التحقق', false);
+
+        $this->actingAs($admin)
+            ->post(route('admin.restaurants.approve', $restaurant))
+            ->assertRedirect(route('admin.restaurants.index'));
+
+        $restaurant->refresh();
+        $owner->refresh();
+        $this->assertTrue($restaurant->isVisible());
+        $this->assertTrue($restaurant->hasPaidAccess());
+        $this->assertTrue($restaurant->isApproved());
+
+        $this->actingAs($owner)
+            ->get(route('partner.dashboard'))
+            ->assertOk()
+            ->assertSee('ظاهر للزبائن', false)
+            ->assertDontSee('اشتراكك', false);
+    }
+
+    public function test_approved_restaurant_stays_visible_after_old_listing_date_passes(): void
+    {
+        [, $restaurant] = $this->makeApprovedVenue();
+        $restaurant->update(['expires_at' => now()->subDays(10)]);
+
+        $restaurant->refresh();
+        $this->assertTrue($restaurant->isVisible());
+        $this->assertTrue(Restaurant::query()->visible()->whereKey($restaurant->id)->exists());
+
+        $this->get(route('restaurants.show', $restaurant))->assertOk();
+        $this->get(route('home'))->assertSee('مطعم الياسمين الموقوف', false);
+
+        $admin = User::factory()->admin()->create();
+        $this->actingAs($admin)
+            ->get(route('admin.restaurants.index'))
+            ->assertOk()
+            ->assertDontSee('ينتهي', false)
+            ->assertDontSee('باقي', false);
     }
 
     /**
      * @return array{0: User, 1: Restaurant}
      */
-    private function makePaidVenue(): array
+    private function makeApprovedVenue(): array
     {
         $owner = User::factory()->restaurantOwner()->create();
         $restaurant = Restaurant::query()->create([
@@ -112,7 +114,6 @@ class RestaurantListingTest extends TestCase
             'is_active' => true,
             'verification_status' => Restaurant::VERIFICATION_APPROVED,
         ]);
-        $this->grantPaidListing($restaurant);
 
         return [$owner, $restaurant];
     }

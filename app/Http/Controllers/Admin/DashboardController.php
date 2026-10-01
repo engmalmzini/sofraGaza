@@ -16,7 +16,6 @@ class DashboardController extends Controller
 {
     public function index(): View
     {
-        $warningDays = (int) Setting::value('restaurant_expiry_warning_days', 7);
         $membershipWarning = (int) Setting::value('membership_expiry_warning_days', 3);
 
         $pendingOrders = Order::query()->where('status', 'pending_confirmation')->count();
@@ -37,21 +36,6 @@ class DashboardController extends Controller
             ->count();
         $activeCouriers = User::query()->where('role', 'courier')->where('is_active', true)->count();
         $customers = User::query()->where('role', 'customer')->count();
-
-        $expiringRestaurants = Restaurant::query()
-            ->where('is_active', true)
-            ->where('verification_status', Restaurant::VERIFICATION_APPROVED)
-            ->whereDate('expires_at', '>=', now())
-            ->whereDate('expires_at', '<=', now()->addDays($warningDays))
-            ->orderBy('expires_at')
-            ->get();
-
-        $expiredRestaurants = Restaurant::query()
-            ->where('verification_status', Restaurant::VERIFICATION_APPROVED)
-            ->whereDate('expires_at', '<', now())
-            ->orderByDesc('expires_at')
-            ->take(8)
-            ->get();
 
         $expiringMemberships = MembershipSubscription::query()
             ->with(['user', 'membership'])
@@ -93,12 +77,8 @@ class DashboardController extends Controller
             ->take(50)
             ->get();
 
-        $ordersByStatus = [
-            'pending_confirmation' => $activeOrders->where('status', 'pending_confirmation'),
-            'preparing' => $activeOrders->whereIn('status', ['confirmed', 'preparing']),
-            'delivering' => $activeOrders->where('status', 'delivering'),
-            'delivered' => $activeOrders->where('status', 'delivered')->take(8),
-        ];
+        $ordersByStatus = Order::groupForBoard($activeOrders);
+        $ordersByStatus['delivered'] = $ordersByStatus['delivered']->take(8);
 
         $latestOrders = $activeOrders->take(10);
 
@@ -109,8 +89,6 @@ class DashboardController extends Controller
             'monthSales',
             'activeRestaurants',
             'activeCouriers',
-            'expiringRestaurants',
-            'expiredRestaurants',
             'expiringMemberships',
             'pendingSubscriptions',
             'pendingSubscriptionsList',
@@ -122,7 +100,7 @@ class DashboardController extends Controller
             'customers',
             'latestOrders',
             'ordersByStatus',
-            'warningDays',
+            'membershipWarning',
         ));
     }
 }

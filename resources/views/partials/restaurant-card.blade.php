@@ -10,13 +10,15 @@
         default => $restaurant->badgeLabel(),
     };
 @endphp
-<a href="{{ route('restaurants.show', $restaurant) }}" class="sg-dish-card group">
+<a href="{{ route('restaurants.show', $restaurant) }}" class="sg-dish-card group {{ $restaurant->isBoosted() ? 'sg-dish-card--ad' : '' }}">
     <div class="sg-dish-card__media">
         <img src="{{ $restaurant->coverUrl() }}" alt="{{ $restaurant->name }}" loading="lazy">
-        <span class="sg-dish-card__badge">{{ $badge }}</span>
-        <button type="button" class="sg-dish-card__fav" aria-label="أضف للمفضلة" onclick="event.preventDefault(); event.stopPropagation(); this.classList.toggle('is-on');">
-            <span class="material-symbols-outlined">favorite</span>
-        </button>
+        <span class="sg-dish-card__badge {{ $restaurant->isBoosted() ? 'sg-dish-card__badge--ad' : '' }}">{{ $restaurant->isBoosted() ? 'إعلان' : $badge }}</span>
+        @include('partials.favorite-button', [
+            'type' => 'restaurant',
+            'id' => $restaurant->id,
+            'class' => 'sg-dish-card__fav',
+        ])
     </div>
     <div class="sg-dish-card__body">
         <h3 class="sg-dish-card__title">{{ $restaurant->name }}</h3>
@@ -35,7 +37,7 @@
             @if($minPrice)
                 <span class="sg-dish-card__price">{{ number_format((float) $minPrice, 2) }} <span class="ils">₪</span></span>
             @else
-                <span class="sg-dish-card__price">اطلب الآن</span>
+                <span class="sg-dish-card__price">{{ ($canShop ?? true) ? 'اطلب الآن' : 'عرض القائمة' }}</span>
             @endif
             <span class="sg-dish-card__plus" aria-hidden="true">+</span>
         </div>

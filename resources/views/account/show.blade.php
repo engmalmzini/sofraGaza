@@ -235,6 +235,20 @@
                     </div>
                 </div>
 
+                {{-- Invite friends --}}
+                <a href="{{ route('account.invite') }}" class="flex items-center justify-between p-3.5 sm:p-4 rounded-2xl bg-stone-50 border border-stone-200/80 hover:border-stone-300 transition-colors">
+                    <div class="flex items-center gap-3 min-w-0">
+                        <span class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0">
+                            <span class="material-symbols-outlined text-[20px]">group_add</span>
+                        </span>
+                        <div class="min-w-0">
+                            <span class="block text-[11px] font-bold text-stone-500">ادعُ صديق</span>
+                            <strong class="block text-xs sm:text-sm font-bold text-stone-900 truncate">وكلاكما ياخذ نقاط</strong>
+                        </div>
+                    </div>
+                    <span class="text-[11px] font-bold text-stone-600 bg-white border border-stone-200 px-2 py-0.5 rounded-full shrink-0">{{ $referredCount ?? 0 }}</span>
+                </a>
+
                 {{-- 2. VIP Membership Horizontal Card --}}
                 <div class="flex items-center justify-between p-3.5 sm:p-4 rounded-2xl bg-stone-50 border border-stone-200/80 hover:border-stone-300 transition-colors">
                     <div class="flex items-center gap-3">
@@ -315,6 +329,32 @@
                 <div class="mt-3">
                     <h3 class="text-sm font-bold text-stone-900 group-hover:text-primary transition-colors">طلباتي</h3>
                     <p class="text-[11px] text-stone-500 mt-0.5">متابعة وتفاصيل الفواتير</p>
+                </div>
+            </a>
+
+            <a href="{{ route('account.invite') }}" class="group rounded-2xl bg-white border border-slate-200/80 p-4 shadow-xs hover:border-primary/40 hover:-translate-y-0.5 transition-all flex flex-col justify-between">
+                <div class="flex items-center justify-between">
+                    <div class="w-10 h-10 rounded-xl bg-stone-100 text-stone-900 flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-colors">
+                        <span class="material-symbols-outlined text-[20px]">group_add</span>
+                    </div>
+                    <span class="text-[11px] font-bold text-stone-600 bg-stone-100 px-2 py-0.5 rounded-full">{{ $referredCount ?? 0 }} صديق</span>
+                </div>
+                <div class="mt-3">
+                    <h3 class="text-sm font-bold text-stone-900 group-hover:text-primary transition-colors">ادعُ صديق</h3>
+                    <p class="text-[11px] text-stone-500 mt-0.5">كودك — وكلاكما ياخذ نقاط</p>
+                </div>
+            </a>
+
+            <a href="{{ route('account.favorites') }}" class="group rounded-2xl bg-white border border-slate-200/80 p-4 shadow-xs hover:border-primary/40 hover:-translate-y-0.5 transition-all flex flex-col justify-between">
+                <div class="flex items-center justify-between">
+                    <div class="w-10 h-10 rounded-xl bg-stone-100 text-stone-900 flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-colors">
+                        <span class="material-symbols-outlined text-[20px]">favorite</span>
+                    </div>
+                    <span class="text-[11px] font-bold text-stone-600 bg-stone-100 px-2 py-0.5 rounded-full">{{ $favoritesCount ?? 0 }}</span>
+                </div>
+                <div class="mt-3">
+                    <h3 class="text-sm font-bold text-stone-900 group-hover:text-primary transition-colors">المفضلة</h3>
+                    <p class="text-[11px] text-stone-500 mt-0.5">مطاعمك وأصنافك المحفوظة</p>
                 </div>
             </a>
 

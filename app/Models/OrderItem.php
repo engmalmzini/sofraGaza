@@ -9,8 +9,10 @@ class OrderItem extends Model
 {
     protected $fillable = [
         'order_id',
+        'group_member_id',
         'menu_item_id',
         'name',
+        'ordered_by_name',
         'price',
         'quantity',
         'line_total',
@@ -33,5 +35,10 @@ class OrderItem extends Model
     public function menuItem(): BelongsTo
     {
         return $this->belongsTo(MenuItem::class);
+    }
+
+    public function groupMember(): BelongsTo
+    {
+        return $this->belongsTo(GroupOrderMember::class);
     }
 }

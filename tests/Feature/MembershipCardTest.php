@@ -145,6 +145,8 @@ class MembershipCardTest extends TestCase
 
         $this->assertFalse($plan->fresh()->is_active);
 
+        $this->post('/logout');
+
         $this->get(route('memberships.index'))
             ->assertOk()
             ->assertDontSee('العضوية الأساسية', false);

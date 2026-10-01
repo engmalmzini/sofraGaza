@@ -41,19 +41,15 @@ class OrderController extends Controller
             ->take(60)
             ->get();
 
-        $ordersByStatus = [
-            'pending_confirmation' => $activeOrders->where('status', 'pending_confirmation'),
-            'preparing' => $activeOrders->whereIn('status', ['confirmed', 'preparing']),
-            'delivering' => $activeOrders->where('status', 'delivering'),
-            'delivered' => $activeOrders->where('status', 'delivered')->take(12),
-        ];
+        $ordersByStatus = Order::groupForBoard($activeOrders);
+        $ordersByStatus['delivered'] = $ordersByStatus['delivered']->take(12);
 
         return view('admin.orders.index', compact('orders', 'ordersByStatus'));
     }
 
     public function show(Order $order): View
     {
-        $order->load(['user', 'restaurant', 'items', 'membership', 'courier']);
+        $order->load(['user', 'restaurant', 'items', 'membership', 'courier', 'groupOrder.members.user']);
 
         return view('admin.orders.show', compact('order'));
     }
@@ -79,6 +75,28 @@ class OrderController extends Controller
         return back()->with('success', 'تم تحديث حالة الطلب.');
     }
 
+    public function move(Request $request, Order $order): JsonResponse
+    {
+        $data = $request->validate([
+            'column' => ['required', 'string', 'in:pending_confirmation,preparing,delivering,delivered'],
+        ]);
+
+        try {
+            $this->orders->moveToColumn($order, $data['column']);
+        } catch (RuntimeException $e) {
+            return response()->json(['ok' => false, 'message' => $e->getMessage()], 422);
+        }
+
+        $order->refresh();
+
+        return response()->json([
+            'ok' => true,
+            'status' => $order->status,
+            'column' => $order->boardColumn(),
+            'status_label' => $order->statusLabel(),
+        ]);
+    }
+
     public function live(Request $request): JsonResponse
     {
         $hasLastId = $request->has('last_id');
@@ -97,6 +115,17 @@ class OrderController extends Controller
             ->get();
 
         $html = view('admin.orders.partials.order-rows', ['orders' => $recentOrders])->render();
+        $boardOrders = Order::query()->with(['user', 'restaurant', 'courier'])->latest()->take(60)->get();
+        $ordersByStatus = Order::groupForBoard($boardOrders);
+        $ordersByStatus['delivered'] = $ordersByStatus['delivered']->take(12);
+        $boardHtml = view('admin.orders.partials.order-board', [
+            'ordersByStatus' => $ordersByStatus,
+            'showRouteName' => 'admin.orders.show',
+            'moveUrl' => url('/admin/orders/__ID__/move'),
+            'allowedColumns' => 'preparing,delivering,delivered',
+            'cardContext' => 'admin',
+        ])->render();
+        $boardSignature = $boardOrders->map(fn (Order $order) => $order->id.':'.$order->status)->implode('|');
 
         return response()->json([
             'latest_id' => $latestId,
@@ -112,6 +141,8 @@ class OrderController extends Controller
                 'status_label' => $latest->statusLabel(),
             ] : null,
             'html' => $html,
+            'board_html' => $boardHtml,
+            'board_signature' => $boardSignature,
         ]);
     }
 }

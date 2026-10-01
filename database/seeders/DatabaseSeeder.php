@@ -23,6 +23,8 @@ class DatabaseSeeder extends Seeder
                 'email' => 'admin@sofra.ps',
                 'password' => Hash::make('admin123'),
                 'role' => 'admin',
+                'is_super_admin' => true,
+                'admin_active' => true,
             ]
         );
 
@@ -106,6 +108,8 @@ class DatabaseSeeder extends Seeder
             ['key' => 'points_include_delivery', 'value' => '1', 'label' => 'احتساب التوصيل في اكتساب النقاط (1 نعم / 0 لا)'],
             ['key' => 'drink_points', 'value' => '20', 'label' => 'نقاط استبدال مشروب'],
             ['key' => 'meal_points', 'value' => '50', 'label' => 'نقاط استبدال وجبة'],
+            ['key' => 'referral_inviter_points', 'value' => '50', 'label' => 'نقاط الداعي عند انضمام صديق بكوده'],
+            ['key' => 'referral_invitee_points', 'value' => '50', 'label' => 'نقاط الصديق الجديد عند إدخال كود الدعوة'],
             ['key' => 'restaurant_expiry_warning_days', 'value' => '7', 'label' => 'تنبيه انتهاء عرض المطعم قبل (أيام)'],
             ['key' => 'membership_expiry_warning_days', 'value' => '3', 'label' => 'تنبيه انتهاء عضوية الزبون قبل (أيام)'],
             ['key' => 'restaurant_listing_days', 'value' => '90', 'label' => 'مدة عرض المطعم بعد الموافقة (أيام)'],

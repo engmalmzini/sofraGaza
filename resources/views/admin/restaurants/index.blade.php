@@ -15,9 +15,6 @@
                 @endif
             </a>
         @endforeach
-        @if($pendingListingCount)
-            <a class="admin-chip" href="{{ route('admin.listings.index', ['status' => 'pending']) }}">حوالات بانتظار التأكيد ({{ $pendingListingCount }})</a>
-        @endif
     </div>
     <a href="{{ route('admin.restaurants.create') }}" class="admin-btn admin-btn--primary">إضافة مطعم / كافي</a>
 </div>
@@ -28,7 +25,6 @@
                 <th>الاسم</th>
                 <th>صاحب المطعم</th>
                 <th>المنيو</th>
-                <th>ينتهي</th>
                 <th>التحقق</th>
                 <th>الظهور</th>
                 <th>اللوحة</th>
@@ -44,14 +40,6 @@
                     </td>
                     <td>{{ $restaurant->owner->name ?? 'مضاف من الإدارة' }}</td>
                     <td><span class="font-bold text-slate-800">{{ $restaurant->menu_items_count }}</span> صنف</td>
-                    <td>
-                        @if($restaurant->isPending())
-                            —
-                        @else
-                            {{ $restaurant->expires_at?->format('Y-m-d') }}
-                            <div class="text-xs {{ $restaurant->daysRemaining() <= 7 ? 'text-primary font-bold' : 'text-on-surface-variant' }}">باقي {{ $restaurant->daysRemaining() }} يوم</div>
-                        @endif
-                    </td>
                     <td>@include('admin.partials.pill', ['status' => $restaurant->verification_status, 'label' => $restaurant->verificationLabel()])</td>
                     <td>@include('admin.partials.pill', ['status' => $restaurant->isVisible() ? 'approved' : 'cancelled', 'label' => $restaurant->isVisible() ? 'ظاهر' : 'غير منشور'])</td>
                     <td>@include('admin.partials.pill', ['status' => $restaurant->panel_suspended ? 'rejected' : 'approved', 'label' => $restaurant->panel_suspended ? 'موقوفة' : 'مفتوحة'])</td>
@@ -73,7 +61,7 @@
                     </td>
                 </tr>
             @empty
-                <tr><td colspan="8">لا توجد مطاعم مطابقة.</td></tr>
+                <tr><td colspan="7">لا توجد مطاعم مطابقة.</td></tr>
             @endforelse
         </tbody>
     </table>

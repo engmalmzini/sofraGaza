@@ -94,9 +94,22 @@
                 </div>
                 <div class="p-5 grid gap-4 md:grid-cols-2">
                     @foreach($section['fields'] as $key => $field)
-                        <div class="{{ ($field['type'] ?? 'text') === 'textarea' || ($field['type'] ?? '') === 'image' ? 'md:col-span-2' : '' }}">
-                            <label class="block text-xs font-bold text-stone-900 mb-1.5">{{ $field['label'] }}</label>
-                            @if(($field['type'] ?? 'text') === 'textarea')
+                        <div class="{{ in_array($field['type'] ?? 'text', ['textarea', 'image', 'toggle'], true) ? 'md:col-span-2' : '' }}">
+                            @if(($field['type'] ?? 'text') !== 'toggle')
+                                <label class="block text-xs font-bold text-stone-900 mb-1.5">{{ $field['label'] }}</label>
+                            @endif
+                            @if(($field['type'] ?? 'text') === 'toggle')
+                                <label class="flex items-start gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3.5 cursor-pointer hover:border-primary/40 transition-colors">
+                                    <input type="hidden" name="content[{{ $key }}]" value="0">
+                                    <input type="checkbox" name="content[{{ $key }}]" value="1" class="mt-0.5 w-4 h-4 accent-primary" @checked(\App\Support\HomeContent::isOn($key))>
+                                    <span class="min-w-0">
+                                        <span class="block text-sm font-bold text-stone-900">{{ $field['label'] }}</span>
+                                        @if(!empty($field['help']))
+                                            <span class="block text-[11px] text-slate-500 mt-0.5 leading-relaxed">{{ $field['help'] }}</span>
+                                        @endif
+                                    </span>
+                                </label>
+                            @elseif(($field['type'] ?? 'text') === 'textarea')
                                 <textarea name="content[{{ $key }}]" rows="3" class="text-sm font-medium w-full rounded-lg bg-white">{{ $values[$key] ?? '' }}</textarea>
                             @elseif(($field['type'] ?? '') === 'image')
                                 <div class="flex flex-col sm:flex-row gap-4 items-start">

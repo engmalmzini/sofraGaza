@@ -14,6 +14,10 @@ class EnsureUserIsAdmin
             abort(403, 'هذه الصفحة مخصصة للإدارة فقط.');
         }
 
+        if (! $request->user()->isActiveAdmin()) {
+            abort(403, 'تم إيقاف صلاحية هذا الحساب الإداري.');
+        }
+
         return $next($request);
     }
 }

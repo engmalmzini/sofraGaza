@@ -52,6 +52,8 @@ class SettingController extends Controller
                 'palpay_number' => 'رقم محفظة بال باي (PalPay)',
                 'palpay_name' => 'اسم صاحب محفظة بال باي',
                 'payment_instructions_note' => 'ملاحظات وتعليمات التحويل',
+                'referral_inviter_points' => 'نقاط الداعي عند انضمام صديق بكوده',
+                'referral_invitee_points' => 'نقاط الصديق الجديد عند إدخال كود الدعوة',
             ];
 
             foreach ($values['settings'] as $key => $value) {

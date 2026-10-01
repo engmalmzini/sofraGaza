@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\GroupOrder;
 use App\Models\Setting;
 use App\Services\CartService;
 use App\Services\OrderService;
@@ -19,6 +20,10 @@ class CheckoutController extends Controller
 
     public function create(): View|RedirectResponse
     {
+        if ($redirect = $this->redirectIfGroupOrder()) {
+            return $redirect;
+        }
+
         $user = auth()->user();
         $areaKey = session('delivery_area')['key'] ?? (config('brand.areas.0.key') ?? 'الرمال');
         $quote = $this->cart->quote($user, $areaKey);
@@ -40,6 +45,9 @@ class CheckoutController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
+        if ($redirect = $this->redirectIfGroupOrder()) {
+            return $redirect;
+        }
         $paymentMethod = $request->input('payment_method', 'receipt');
         $isWallet = $paymentMethod === 'wallet';
 
@@ -88,5 +96,21 @@ class CheckoutController extends Controller
             : 'تم إرسال طلبك وهو بانتظار مراجعة الحوالة.';
 
         return redirect()->route('account.orders.show', $order)->with('success', $message);
+    }
+
+    private function redirectIfGroupOrder(): ?RedirectResponse
+    {
+        $user = auth()->user();
+        $groupId = session('group_order_id');
+        if (! $user || ! $groupId) {
+            return null;
+        }
+
+        $group = GroupOrder::query()->with('members')->find($groupId);
+        if (! $group || ! $group->isCollecting() || ! $group->memberFor($user)) {
+            return null;
+        }
+
+        return redirect()->to($group->actionUrlFor($user));
     }
 }

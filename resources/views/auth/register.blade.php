@@ -15,6 +15,9 @@
 
 <h1 class="auth-title">إنشاء حساب</h1>
 <p class="auth-lead">نبدأ بالتحقق من رقم الجوال، ثم تكمل بيانات الحساب.</p>
+@if(filled($referralCode ?? null) && $step !== 'account')
+    <p class="auth-legal auth-legal--start">كود الدعوة محفوظ: <strong dir="ltr">{{ $referralCode }}</strong> — كلاكما ياخذ نقاط بعد إنشاء الحساب.</p>
+@endif
 
 <ol class="auth-steps" aria-label="خطوات إنشاء الحساب">
     <li @class(['is-current' => $step === 'phone'])>الهاتف</li>
@@ -73,6 +76,13 @@
             <input type="password" name="password_confirmation" autocomplete="new-password" placeholder="تأكيد كلمة المرور">
         </label>
         @error('password')
+            <p class="auth-error">{{ $message }}</p>
+        @enderror
+        <p class="auth-legal auth-legal--start">شخص دعاك؟ حط كوده — وكلاكما ياخذ {{ $inviteePoints ?? 50 }} نقطة.</p>
+        <label class="auth-field">
+            <input name="referral_code" value="{{ old('referral_code', $referralCode) }}" maxlength="12" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="كود الدعوة (اختياري)" dir="ltr">
+        </label>
+        @error('referral_code')
             <p class="auth-error">{{ $message }}</p>
         @enderror
         <button type="submit" class="auth-submit">إنشاء حساب</button>

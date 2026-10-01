@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -21,6 +22,9 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'is_super_admin',
+        'admin_active',
+        'admin_permissions',
         'photo_path',
         'bike_photo_path',
         'bike_type',
@@ -31,6 +35,8 @@ class User extends Authenticatable
         'payout_details',
         'points_balance',
         'wallet_balance',
+        'referral_code',
+        'referred_by_id',
     ];
 
     protected $hidden = [
@@ -46,7 +52,19 @@ class User extends Authenticatable
             'points_balance' => 'integer',
             'wallet_balance' => 'decimal:2',
             'courier_verified_at' => 'datetime',
+            'is_super_admin' => 'boolean',
+            'admin_active' => 'boolean',
+            'admin_permissions' => 'array',
         ];
+    }
+
+    protected static function booted(): void
+    {
+        static::creating(function (User $user) {
+            if (blank($user->referral_code)) {
+                $user->referral_code = app(\App\Services\ReferralService::class)->generateUniqueCode();
+            }
+        });
     }
 
     public const COURIER_PENDING = 'pending';
@@ -61,6 +79,96 @@ class User extends Authenticatable
         return $this->role === 'admin';
     }
 
+    public function isSuperAdmin(): bool
+    {
+        return $this->isAdmin() && (bool) $this->is_super_admin;
+    }
+
+    public function isActiveAdmin(): bool
+    {
+        return $this->isAdmin() && $this->admin_active !== false;
+    }
+
+    public function adminPermissionKeys(): array
+    {
+        return array_values(array_filter((array) $this->admin_permissions));
+    }
+
+    public function canAccessAdmin(string $module): bool
+    {
+        if (! $this->isActiveAdmin()) {
+            return false;
+        }
+
+        if ($module === 'team') {
+            return $this->isSuperAdmin();
+        }
+
+        if ($module === 'dashboard' || $module === '') {
+            return true;
+        }
+
+        if ($this->isSuperAdmin() || $this->admin_permissions === null) {
+            return true;
+        }
+
+        return in_array($module, $this->adminPermissionKeys(), true);
+    }
+
+    public function adminRoleLabel(): string
+    {
+        if ($this->isSuperAdmin()) {
+            return 'المدير الأعلى';
+        }
+
+        $keys = $this->adminPermissionKeys();
+        if ($keys === []) {
+            return 'مدير بصلاحيات محدودة';
+        }
+
+        $labels = array_map(
+            fn (string $key) => \App\Support\AdminAccess::MODULES[$key]['label'] ?? $key,
+            array_slice($keys, 0, 3)
+        );
+
+        $suffix = count($keys) > 3 ? '…' : '';
+
+        return 'مدير — '.implode('، ', $labels).$suffix;
+    }
+
+    public function auditLogs(): HasMany
+    {
+        return $this->hasMany(AdminAuditLog::class, 'user_id')->latest();
+    }
+
+    public function favorites(): HasMany
+    {
+        return $this->hasMany(Favorite::class)->latest();
+    }
+
+    public function referrer(): BelongsTo
+    {
+        return $this->belongsTo(self::class, 'referred_by_id');
+    }
+
+    public function referredUsers(): HasMany
+    {
+        return $this->hasMany(self::class, 'referred_by_id');
+    }
+
+    public function ensureReferralCode(): string
+    {
+        if (filled($this->referral_code)) {
+            return $this->referral_code;
+        }
+
+        $this->forceFill([
+            'referral_code' => app(\App\Services\ReferralService::class)->generateUniqueCode(),
+        ])->save();
+
+        return $this->referral_code;
+    }
+
     public function isRestaurantOwner(): bool
     {
         return $this->role === 'restaurant_owner';
@@ -73,13 +181,49 @@ class User extends Authenticatable
 
     public function partnerPanelRoute(): string
     {
-        $restaurant = $this->ownedRestaurant;
+        return route('partner.dashboard');
+    }
 
-        if ($restaurant && ! $restaurant->hasPaidAccess()) {
-            return route('partner.subscription.index');
+    public function canShopAsCustomer(): bool
+    {
+        return ! $this->isAdmin() && ! $this->isRestaurantOwner();
+    }
+
+    public function staffHomeRoute(): string
+    {
+        if ($this->isAdmin()) {
+            return route('admin.dashboard');
         }
 
-        return route('partner.dashboard');
+        if ($this->isRestaurantOwner()) {
+            return $this->partnerPanelRoute();
+        }
+
+        if ($this->isCourier()) {
+            return route('courier.dashboard');
+        }
+
+        return route('home');
+    }
+
+    public function publicAccountUrl(): string
+    {
+        if ($this->isCourier()) {
+            return route('courier.dashboard');
+        }
+
+        if (! $this->canShopAsCustomer()) {
+            return $this->staffHomeRoute();
+        }
+
+        return route('account.show');
+    }
+
+    public static function currentCanShop(): bool
+    {
+        $user = auth()->user();
+
+        return ! $user || $user->canShopAsCustomer();
     }
 
     public function isCourier(): bool
@@ -143,6 +287,16 @@ class User extends Authenticatable
     public function orders(): HasMany
     {
         return $this->hasMany(Order::class)->latest();
+    }
+
+    public function hostedGroupOrders(): HasMany
+    {
+        return $this->hasMany(GroupOrder::class, 'host_user_id');
+    }
+
+    public function groupOrderMembers(): HasMany
+    {
+        return $this->hasMany(GroupOrderMember::class);
     }
 
     public function deliveries(): HasMany

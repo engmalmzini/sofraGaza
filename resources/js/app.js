@@ -264,6 +264,77 @@ const showToast = (message, type = 'success') => {
     }, 3500);
 };
 
+const paintFavoriteButton = (button, on) => {
+    button.classList.toggle('is-on', on);
+    button.classList.toggle('text-primary', on);
+    button.setAttribute('aria-pressed', on ? 'true' : 'false');
+    button.setAttribute('aria-label', on ? 'محفوظ في المفضلة' : 'حفظ في المفضلة');
+    button.setAttribute('title', on ? 'محفوظ في المفضلة' : 'حفظ في المفضلة');
+    const icon = button.querySelector('.material-symbols-outlined');
+    if (icon) {
+        icon.textContent = on ? 'favorite' : 'favorite_border';
+        icon.classList.toggle('fill-1', on);
+    }
+};
+
+document.addEventListener('click', async (event) => {
+    const button = event.target.closest('.js-fav-toggle');
+    if (!button) {
+        return;
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    if (button.dataset.busy === '1') {
+        return;
+    }
+
+    if (document.body.dataset.auth !== '1') {
+        window.location.href = button.dataset.loginUrl || '/login';
+        return;
+    }
+
+    button.dataset.busy = '1';
+
+    const body = new FormData();
+    body.append('_token', csrfToken());
+    body.append('type', button.dataset.favType);
+    body.append('id', button.dataset.favId);
+
+    try {
+        const response = await fetch(button.dataset.favUrl, {
+            method: 'POST',
+            headers: {
+                Accept: 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': csrfToken(),
+            },
+            body,
+        });
+
+        if (response.status === 401 || (response.redirected && response.url.includes('/login'))) {
+            window.location.href = button.dataset.loginUrl || '/login';
+            return;
+        }
+
+        const data = await response.json().catch(() => null);
+        if (!response.ok) {
+            showToast(data?.message || 'تعذر حفظ المفضلة', 'error');
+            return;
+        }
+
+        document.querySelectorAll(`.js-fav-toggle[data-fav-type="${button.dataset.favType}"][data-fav-id="${button.dataset.favId}"]`).forEach((match) => {
+            paintFavoriteButton(match, Boolean(data.favorited));
+        });
+        showToast(data.message || (data.favorited ? 'انحفظ في المفضلة' : 'تشال من المفضلة'));
+    } catch {
+        showToast('تعذر الاتصال بالخادم', 'error');
+    } finally {
+        button.dataset.busy = '';
+    }
+}, true);
+
 const setHidden = (el, hidden) => {
     if (el) {
         el.classList.toggle('hidden', hidden);
@@ -764,20 +835,6 @@ const initRestaurantShow = () => {
             } catch {
                 // user cancelled share
             }
-        });
-    });
-
-    page.querySelectorAll('.fav-page').forEach((button) => {
-        button.addEventListener('click', () => {
-            const icon = button.querySelector('.material-symbols-outlined');
-            const active = icon?.textContent?.trim() === 'favorite';
-
-            if (icon) {
-                icon.textContent = active ? 'favorite_border' : 'favorite';
-                icon.classList.toggle('fill-1', !active);
-            }
-
-            button.classList.toggle('text-primary', !active);
         });
     });
 
@@ -1476,6 +1533,302 @@ const initWhatsAppFloatingPosition = () => {
 };
 
 initWhatsAppFloatingPosition();
+
+const initOrderBoardDnD = () => {
+    if (window.__sofraOrderBoardDnD) {
+        return;
+    }
+    window.__sofraOrderBoardDnD = true;
+
+    const csrf = () => document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+
+    const toast = (message, ok = true) => {
+        let el = document.getElementById('order-board-toast');
+        if (!el) {
+            el = document.createElement('div');
+            el.id = 'order-board-toast';
+            el.className = 'order-board-toast';
+            document.body.appendChild(el);
+        }
+        el.textContent = message;
+        el.classList.toggle('is-error', !ok);
+        el.classList.add('is-visible');
+        clearTimeout(el._hide);
+        el._hide = setTimeout(() => el.classList.remove('is-visible'), 2800);
+    };
+
+    const columnFromPoint = (x, y, ghost) => {
+        const prev = ghost ? ghost.style.display : null;
+        if (ghost) {
+            ghost.style.display = 'none';
+        }
+        const el = document.elementFromPoint(x, y);
+        if (ghost) {
+            ghost.style.display = prev || '';
+        }
+        return el?.closest('[data-board-column]') || null;
+    };
+
+    const refreshColumn = (col) => {
+        if (!col) {
+            return;
+        }
+        const wrap = col.querySelector('[data-board-cards]');
+        const count = wrap ? wrap.querySelectorAll('[data-order-card]').length : 0;
+        const countEl = col.querySelector('[data-board-count]');
+        if (countEl) {
+            countEl.textContent = String(count);
+        }
+        const empty = wrap?.querySelector('[data-board-empty]');
+        if (count === 0 && wrap && !empty) {
+            const node = document.createElement('div');
+            node.className = 'admin-board__empty';
+            node.dataset.boardEmpty = '';
+            node.innerHTML = '<span class="material-symbols-outlined">inbox</span><span>لا توجد طلبات</span>';
+            wrap.appendChild(node);
+        } else if (count > 0 && empty) {
+            empty.remove();
+        }
+    };
+
+    let drag = null;
+
+    const clearHighlights = () => {
+        document.querySelectorAll('.is-drop-target, .is-drop-forbidden').forEach((col) => {
+            col.classList.remove('is-drop-target', 'is-drop-forbidden');
+        });
+    };
+
+    const stopDrag = () => {
+        if (!drag) {
+            return;
+        }
+        drag.ghost?.remove();
+        drag.placeholder?.remove();
+        drag.card.classList.remove('is-dragging-source');
+        document.body.classList.remove('is-dragging-order');
+        clearHighlights();
+        try {
+            drag.card.releasePointerCapture?.(drag.pointerId);
+        } catch (e) {
+            // ignore
+        }
+        drag = null;
+    };
+
+    const restoreCard = () => {
+        if (!drag) {
+            return;
+        }
+        if (drag.nextSibling && drag.nextSibling.parentNode === drag.origin) {
+            drag.origin.insertBefore(drag.card, drag.nextSibling);
+        } else {
+            drag.origin.appendChild(drag.card);
+        }
+        refreshColumn(drag.originCol);
+        refreshColumn(drag.card.closest('[data-board-column]'));
+    };
+
+    document.addEventListener('pointerdown', (event) => {
+        if (event.button !== 0) {
+            return;
+        }
+        const handle = event.target.closest('[data-order-drag-handle]');
+        if (!handle) {
+            return;
+        }
+        const card = handle.closest('[data-order-card]');
+        const board = handle.closest('[data-order-board]');
+        if (!card || !board?.dataset.moveUrl) {
+            return;
+        }
+
+        const originCol = card.closest('[data-board-column]');
+        const origin = card.parentElement;
+        drag = {
+            card,
+            board,
+            origin,
+            originCol,
+            nextSibling: card.nextElementSibling,
+            pointerId: event.pointerId,
+            startX: event.clientX,
+            startY: event.clientY,
+            offsetX: event.clientX - card.getBoundingClientRect().left,
+            offsetY: event.clientY - card.getBoundingClientRect().top,
+            width: card.getBoundingClientRect().width,
+            started: false,
+            ghost: null,
+            placeholder: null,
+            allowed: (board.dataset.allowedColumns || '')
+                .split(',')
+                .map((item) => item.trim())
+                .filter(Boolean),
+        };
+    });
+
+    document.addEventListener('pointermove', (event) => {
+        if (!drag) {
+            return;
+        }
+        const dx = event.clientX - drag.startX;
+        const dy = event.clientY - drag.startY;
+        if (!drag.started) {
+            if (Math.hypot(dx, dy) < 8) {
+                return;
+            }
+            drag.started = true;
+            document.body.classList.add('is-dragging-order');
+            drag.card.classList.add('is-dragging-source');
+            const placeholder = document.createElement('div');
+            placeholder.className = 'admin-board__placeholder';
+            placeholder.style.height = `${drag.card.getBoundingClientRect().height}px`;
+            drag.placeholder = placeholder;
+            drag.card.after(placeholder);
+            const ghost = drag.card.cloneNode(true);
+            ghost.classList.add('is-drag-ghost');
+            ghost.style.width = `${drag.width}px`;
+            document.body.appendChild(ghost);
+            drag.ghost = ghost;
+            try {
+                drag.card.setPointerCapture(event.pointerId);
+            } catch (e) {
+                // ignore
+            }
+        }
+
+        event.preventDefault();
+        drag.ghost.style.left = `${event.clientX - drag.offsetX}px`;
+        drag.ghost.style.top = `${event.clientY - drag.offsetY}px`;
+
+        const col = columnFromPoint(event.clientX, event.clientY, drag.ghost);
+        clearHighlights();
+        if (!col || col.closest('[data-order-board]') !== drag.board) {
+            return;
+        }
+        const key = col.dataset.boardColumn;
+        const samePreparing =
+            key === 'preparing' &&
+            drag.card.dataset.orderStatus === 'confirmed' &&
+            drag.originCol?.dataset.boardColumn === 'preparing';
+        const allowed = drag.allowed.includes(key) || samePreparing;
+        col.classList.add(allowed ? 'is-drop-target' : 'is-drop-forbidden');
+
+        if (allowed) {
+            const wrap = col.querySelector('[data-board-cards]');
+            wrap?.querySelector('[data-board-empty]')?.remove();
+            if (drag.placeholder && wrap && drag.placeholder.parentElement !== wrap) {
+                wrap.appendChild(drag.placeholder);
+            }
+        }
+    }, { passive: false });
+
+    const finishDrag = async (event) => {
+        if (!drag) {
+            return;
+        }
+        if (!drag.started) {
+            drag = null;
+            return;
+        }
+
+        const col = columnFromPoint(event.clientX, event.clientY, drag.ghost);
+        const column = col?.dataset.boardColumn;
+        const samePreparing =
+            column === 'preparing' &&
+            drag.card.dataset.orderStatus === 'confirmed' &&
+            drag.originCol?.dataset.boardColumn === 'preparing';
+        const allowed = column && (drag.allowed.includes(column) || samePreparing);
+        const currentColumn = drag.card.dataset.orderColumn;
+        const noop = allowed && column === currentColumn && drag.card.dataset.orderStatus !== 'confirmed';
+
+        if (!allowed || !col || noop) {
+            restoreCard();
+            if (column && !allowed) {
+                toast('لا يمكن نقل الطلب إلى هذا العمود', false);
+            }
+            stopDrag();
+            return;
+        }
+
+        const wrap = col.querySelector('[data-board-cards]');
+        wrap?.querySelector('[data-board-empty]')?.remove();
+        wrap?.appendChild(drag.card);
+        refreshColumn(drag.originCol);
+        refreshColumn(col);
+
+        const orderId = drag.card.dataset.orderCard;
+        const url = drag.board.dataset.moveUrl.replace('__ID__', orderId);
+        const card = drag.card;
+        const origin = drag.origin;
+        const originCol = drag.originCol;
+        const nextSibling = drag.nextSibling;
+        stopDrag();
+
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Accept: 'application/json',
+                    'X-CSRF-TOKEN': csrf(),
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+                body: JSON.stringify({ column, _token: csrf() }),
+            });
+            const data = await response.json().catch(() => ({}));
+            if (!response.ok || !data.ok) {
+                throw new Error(data.message || 'تعذر تحديث حالة الطلب');
+            }
+            card.dataset.orderStatus = data.status;
+            card.dataset.orderColumn = data.column;
+            toast(data.status_label ? `تم التحديث: ${data.status_label}` : 'تم تحديث حالة الطلب');
+        } catch (error) {
+            if (nextSibling && nextSibling.parentNode === origin) {
+                origin.insertBefore(card, nextSibling);
+            } else {
+                origin.appendChild(card);
+            }
+            refreshColumn(originCol);
+            refreshColumn(card.closest('[data-board-column]'));
+            toast(error.message || 'تعذر تحديث حالة الطلب', false);
+        }
+    };
+
+    document.addEventListener('pointerup', finishDrag);
+    document.addEventListener('pointercancel', () => {
+        if (!drag) {
+            return;
+        }
+        if (drag.started) {
+            restoreCard();
+        }
+        stopDrag();
+    });
+};
+
+document.addEventListener('click', async (event) => {
+    const button = event.target.closest('.js-copy');
+    if (!button) {
+        return;
+    }
+
+    const text = button.getAttribute('data-copy') || '';
+    const label = button.querySelector('.js-copy-label') || button;
+    const original = label.textContent;
+
+    try {
+        await navigator.clipboard.writeText(text);
+        label.textContent = 'تم النسخ';
+        window.setTimeout(() => {
+            label.textContent = original;
+        }, 1600);
+    } catch {
+        // clipboard unavailable
+    }
+});
+
+initOrderBoardDnD();
 
 
 

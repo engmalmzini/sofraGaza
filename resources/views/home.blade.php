@@ -638,6 +638,10 @@
     color: #e11d48;
     transform: scale(1.12);
 }
+.sg-card__fav-btn.is-on,
+.sg-card__fav-btn.is-on .material-symbols-outlined {
+    color: #e11d48;
+}
 .sg-card__body {
     padding: 1.25rem 1.15rem;
     display: flex;
@@ -1780,7 +1784,7 @@
                     {{-- Action Buttons --}}
                     <div class="flex flex-wrap items-center gap-4 sm:gap-5 mb-8 sm:mb-10 w-full sm:w-auto">
                         <a href="{{ route('restaurants.index') }}" class="px-8 py-3.5 rounded-full bg-[#c84500] hover:bg-[#b03d00] text-white font-extrabold text-base shadow-lg shadow-orange-950/15 hover:shadow-xl hover:scale-[1.02] active:scale-95 transition-all text-center">
-                            {{ $home['hero_cta_primary'] }}
+                            {{ ($canShop ?? true) ? $home['hero_cta_primary'] : 'استعرض المطاعم' }}
                         </a>
                         <a href="{{ route('restaurants.index') }}" class="px-8 py-3.5 rounded-full bg-white/90 hover:bg-stone-900 hover:text-white border-2 border-stone-800 text-stone-900 font-extrabold text-base transition-all text-center">
                             {{ $home['hero_cta_secondary'] }}
@@ -2006,7 +2010,7 @@
                         </span>
 
                         <div class="sg-cat-cta-btn">
-                            <span>{{ $home['categories_cta'] }}</span>
+                            <span>{{ ($canShop ?? true) ? $home['categories_cta'] : 'عرض القائمة' }}</span>
                             <span class="material-symbols-outlined text-[16px]">chevron_left</span>
                         </div>
 
@@ -2021,6 +2025,7 @@
     {{-- ═══════════════════════════════════════════════════════════════════
          4. THE MASTER RESTAURANT EXPLORER & GRID
          ═══════════════════════════════════════════════════════════════════ --}}
+    @include('partials.home-personal-picks')
     <section class="py-8 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full" id="places-section">
         
 
@@ -2047,6 +2052,30 @@
             </div>
         </div>
 
+        @php
+            $boostedPlaces = $restaurants->filter(fn ($place) => $place->isBoosted())->values();
+        @endphp
+        @if($boostedPlaces->isNotEmpty())
+            <div class="sg-ad-rail" aria-label="إعلانات مدفوعة">
+                <div class="sg-ad-rail__head">
+                    <span class="material-symbols-outlined">campaign</span>
+                    <span>إعلانات تظهر أولاً</span>
+                </div>
+                <div class="sg-ad-rail__grid">
+                    @foreach($boostedPlaces->take(3) as $place)
+                        <a href="{{ route('restaurants.show', $place) }}" class="sg-ad-card">
+                            <img src="{{ $place->coverUrl() }}" alt="{{ $place->name }}">
+                            <div>
+                                <em>إعلان</em>
+                                <strong>{{ $place->name }}</strong>
+                                <span>{{ $place->cuisineLabel() }} • {{ $place->areaLabel() }}</span>
+                            </div>
+                        </a>
+                    @endforeach
+                </div>
+            </div>
+        @endif
+
         {{-- Dynamic Restaurant Grid --}}
         <div class="sg-place-grid" id="restaurants-grid">
             @forelse($restaurants->take(8) as $restaurant)
@@ -2054,9 +2083,10 @@
                     $rating = number_format($restaurant->averageRating(), 1);
                     $reviewsCount = $restaurant->reviewsCount();
                     $eta = $restaurant->type === 'cafe' ? '20-25 دقيقة' : '25-35 دقيقة';
+                    $isAd = $restaurant->isBoosted();
                 @endphp
                 <a href="{{ route('restaurants.show', $restaurant) }}" 
-                   class="sg-card place-card group" 
+                   class="sg-card place-card group {{ $isAd ? 'place-card--ad' : '' }}" 
                    data-area="{{ $restaurant->area }}" 
                    data-type="{{ $restaurant->type }}">
                     
@@ -2065,14 +2095,16 @@
                         <img src="{{ $restaurant->coverUrl() }}" alt="{{ $restaurant->name }}" class="sg-card__img" loading="lazy">
                         
                         {{-- Top Badge --}}
-                        <span class="sg-card__badge-promo">
-                            {{ $restaurant->badgeLabel() }}
+                        <span class="sg-card__badge-promo {{ $isAd ? 'sg-card__badge-promo--ad' : '' }}">
+                            {{ $isAd ? 'إعلان' : $restaurant->badgeLabel() }}
                         </span>
 
                         {{-- Favorite button --}}
-                        <button type="button" aria-label="أضف للمفضلة" class="sg-card__fav-btn" onclick="event.preventDefault(); this.classList.toggle('text-rose-600');">
-                            <span class="material-symbols-outlined text-[18px]">favorite</span>
-                        </button>
+                        @include('partials.favorite-button', [
+                            'type' => 'restaurant',
+                            'id' => $restaurant->id,
+                            'class' => 'sg-card__fav-btn',
+                        ])
 
                         {{-- Delivery Time Badge --}}
                         <div class="sg-card__badge-time">
@@ -2136,9 +2168,11 @@
     {{-- ═══════════════════════════════════════════════════════════════════
          4b. MOBILE APP DOWNLOAD (قسم التطبيق — بعد المواقع)
          ═══════════════════════════════════════════════════════════════════ --}}
+    @if(\App\Support\HomeContent::isOn('app_section_visible'))
     <div class="hidden lg:block w-full px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
         @include('partials.app-download')
     </div>
+    @endif
 
     <section id="partners-section" class="sg-partners-band hidden lg:block w-full" aria-label="{{ $home['partners_title'] }}">
         <h2 class="sg-partners-title">{{ $home['partners_title'] }}</h2>
@@ -2176,25 +2210,31 @@
                     <h2 class="sg-gold-title">{{ $home['loyalty_title'] }}</h2>
                     <p class="sg-gold-text">{{ $home['loyalty_text'] }}</p>
                     <div class="sg-gold-actions">
-                        <div class="sg-gold-balance">
-                            <div class="sg-gold-balance__coin" aria-hidden="true">
-                                <span class="material-symbols-outlined">monetization_on</span>
+                        @if($canShop ?? true)
+                            <div class="sg-gold-balance">
+                                <div class="sg-gold-balance__coin" aria-hidden="true">
+                                    <span class="material-symbols-outlined">monetization_on</span>
+                                </div>
+                                <div>
+                                    <small>رصيدك الحالي</small>
+                                    <strong>{{ number_format(auth()->user()->points_balance ?? 0) }} نقطة</strong>
+                                </div>
                             </div>
-                            <div>
-                                <small>رصيدك الحالي</small>
-                                <strong>{{ number_format(auth()->user()->points_balance ?? 0) }} نقطة</strong>
-                            </div>
-                        </div>
-                        <a href="{{ route('redeem.create') }}" class="sg-gold-cta">
-                            <span class="material-symbols-outlined text-[18px]">redeem</span>
-                            <span>{{ $home['loyalty_cta'] }}</span>
-                        </a>
+                            <a href="{{ route('redeem.create') }}" class="sg-gold-cta">
+                                <span class="material-symbols-outlined text-[18px]">redeem</span>
+                                <span>{{ $home['loyalty_cta'] }}</span>
+                            </a>
+                        @endif
                     </div>
                 </div>
 
                 <div class="sg-gold-rewards">
                     @forelse($rewards as $reward)
-                        <a href="{{ $reward['url'] ?? route('redeem.create') }}" class="sg-gold-ticket">
+                        @if($canShop ?? true)
+                            <a href="{{ $reward['url'] ?? route('redeem.create') }}" class="sg-gold-ticket">
+                        @else
+                            <div class="sg-gold-ticket">
+                        @endif
                             <img src="{{ $reward['image'] }}" alt="{{ $reward['name'] }}" loading="lazy">
                             <div class="sg-gold-ticket__meta">
                                 <span class="sg-gold-ticket__pts">
@@ -2203,12 +2243,18 @@
                                 </span>
                                 <h4>{{ $reward['name'] }}</h4>
                                 <p>{{ $reward['place'] }}</p>
-                                <span class="sg-gold-ticket__go">
-                                    <span>استبدال مجاناً</span>
-                                    <span class="material-symbols-outlined">arrow_back</span>
-                                </span>
+                                @if($canShop ?? true)
+                                    <span class="sg-gold-ticket__go">
+                                        <span>استبدال مجاناً</span>
+                                        <span class="material-symbols-outlined">arrow_back</span>
+                                    </span>
+                                @endif
                             </div>
-                        </a>
+                        @if($canShop ?? true)
+                            </a>
+                        @else
+                            </div>
+                        @endif
                     @empty
                         <div class="sg-gold-empty">
                             <span class="material-symbols-outlined text-4xl text-amber-400 mb-2">loyalty</span>
@@ -2269,7 +2315,7 @@
                         <div class="sg-why-icon"><span class="material-symbols-outlined">payments</span></div>
                         <h3>{{ $home['why_3_title'] }}</h3>
                         <p>{{ $home['why_3_text'] }}</p>
-                        <a href="{{ route('account.wallet') }}">
+                        <a href="{{ ($canShop ?? true) ? route('account.wallet') : route('restaurants.index') }}">
                             <span>{{ $home['why_cta'] }}</span>
                             <span class="material-symbols-outlined">expand_more</span>
                         </a>

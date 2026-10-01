@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'سفرة غزة') — سفرة غزة</title>
+    @include('partials.icon-font')
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Alexandria:wght@400;600;700;800;900&family=Amiri:wght@400;700&family=Cairo:wght@400;500;600;700;800;900&family=Tajawal:wght@400;500;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Serif+Display&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,400..700,0..1,-50..200" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
         .font-alexandria { font-family: 'Alexandria', sans-serif !important; }
@@ -430,8 +430,10 @@
     $logoSrc = file_exists($logoPath) ? asset('images/logo.png').'?v='.filemtime($logoPath) : config('brand.logo');
     $pointsBalance = auth()->user()->points_balance ?? 0;
     $walletBalance = auth()->user()->wallet_balance ?? 0;
+    $canShop = $canShop ?? \App\Models\User::currentCanShop();
+    $accountHomeUrl = $accountHomeUrl ?? (auth()->user()?->publicAccountUrl() ?? route('login'));
 @endphp
-<body class="bg-surface font-body-md text-body-md text-on-surface antialiased {{ request()->routeIs('home') ? 'is-home-page' : 'is-sub-page' }} @yield('body_class')">
+<body class="bg-surface font-body-md text-body-md text-on-surface antialiased {{ request()->routeIs('home') ? 'is-home-page' : 'is-sub-page' }} @yield('body_class')" data-auth="{{ auth()->check() && auth()->user()->canShopAsCustomer() ? '1' : '0' }}">
 
     {{-- ═══════════════════════════════════════════════════════════════════
          1. NATIVE MOBILE HEADER (MOBILE ONLY: < 1024px)
@@ -449,29 +451,33 @@
             </div>
 
             <div class="site-header__actions">
-                @auth
-                    <a href="{{ route('account.wallet') }}" class="flex items-center gap-1 text-xs font-bold px-2.5 py-1.5 rounded-full bg-emerald-50 text-emerald-800 hover:bg-emerald-100 border border-emerald-200/60 transition-colors shrink-0" title="رصيد المحفظة">
-                        <span class="material-symbols-outlined text-[16px] text-emerald-600">account_balance_wallet</span>
-                        <span class="font-mono text-xs">{{ number_format($walletBalance, 0) }}</span>
-                        <span class="ils text-[10px]">₪</span>
-                    </a>
-                    <a href="{{ route('account.points') }}" class="header-points shrink-0" title="نقاط الولاء">
-                        @include('partials.gold-coin-icon', ['class' => 'w-4 h-4'])
-                        <span>{{ $pointsBalance }}</span>
-                    </a>
-                @endauth
+                @if($canShop)
+                    @auth
+                        <a href="{{ route('account.wallet') }}" class="flex items-center gap-1 text-xs font-bold px-2.5 py-1.5 rounded-full bg-emerald-50 text-emerald-800 hover:bg-emerald-100 border border-emerald-200/60 transition-colors shrink-0" title="رصيد المحفظة">
+                            <span class="material-symbols-outlined text-[16px] text-emerald-600">account_balance_wallet</span>
+                            <span class="font-mono text-xs">{{ number_format($walletBalance, 0) }}</span>
+                            <span class="ils text-[10px]">₪</span>
+                        </a>
+                        <a href="{{ route('account.points') }}" class="header-points shrink-0" title="نقاط الولاء">
+                            @include('partials.gold-coin-icon', ['class' => 'w-4 h-4'])
+                            <span>{{ $pointsBalance }}</span>
+                        </a>
+                    @endauth
+                @endif
 
                 <div class="header-session">
-                    <a href="{{ route('cart.index') }}" class="header-icon-btn" aria-label="السلة" data-header-cart>
-                        <span class="material-symbols-outlined">shopping_bag</span>
-                        <span class="header-badge" data-header-cart-badge @if(! $cartCount) hidden @endif>{{ $cartCount > 9 ? '9+' : $cartCount }}</span>
-                    </a>
+                    @if($canShop)
+                        <a href="{{ route('cart.index') }}" class="header-icon-btn" aria-label="السلة" data-header-cart>
+                            <span class="material-symbols-outlined">shopping_bag</span>
+                            <span class="header-badge" data-header-cart-badge @if(! $cartCount) hidden @endif>{{ $cartCount > 9 ? '9+' : $cartCount }}</span>
+                        </a>
+                    @endif
 
                     @auth
                         @php
                             $headerTier = auth()->user()->tier();
                         @endphp
-                        <a href="{{ route('account.show') }}" class="header-account" title="حسابي • مستوى الولاء: {{ $headerTier['name'] }}">
+                        <a href="{{ $accountHomeUrl }}" class="header-account" title="حسابي • مستوى الولاء: {{ $headerTier['name'] }}">
                             <div class="relative inline-flex items-center justify-center shrink-0">
                                 @if(auth()->user()->photo_path)
                                     <img src="{{ auth()->user()->photoUrl() }}" alt="{{ auth()->user()->name }}" class="header-avatar object-cover">
@@ -525,24 +531,28 @@
                 <a href="{{ route('home') }}" class="{{ request()->routeIs('home') ? 'is-active' : '' }}">الرئيسية</a>
                 <a href="{{ route('restaurants.index') }}" class="{{ request()->routeIs('restaurants.*') ? 'is-active' : '' }}">المطاعم</a>
                 <a href="{{ route('restaurants.index') }}">التصنيفات</a>
-                <a href="{{ route('memberships.index') }}" class="{{ request()->routeIs('memberships.*') ? 'is-active' : '' }}">المكافآت</a>
+                @if($canShop)
+                    <a href="{{ route('memberships.index') }}" class="{{ request()->routeIs('memberships.*') ? 'is-active' : '' }}">المكافآت</a>
+                @endif
                 <a href="{{ route('home') }}#why-us">عن سفرة غزة</a>
                 <a href="#site-footer">تواصل معنا</a>
             </nav>
 
             {{-- Right/End Action Icons & CTA --}}
             <div class="site-header__actions">
-                @auth
-                    <a href="{{ route('account.wallet') }}" class="hidden md:flex items-center gap-1 text-xs font-bold px-2.5 py-1.5 rounded-full bg-emerald-50 text-emerald-800 hover:bg-emerald-100 border border-emerald-200/60 transition-colors shrink-0" title="رصيد المحفظة">
-                        <span class="material-symbols-outlined text-[16px] text-emerald-600">account_balance_wallet</span>
-                        <span class="font-mono text-xs">{{ number_format($walletBalance, 0) }}</span>
-                        <span class="ils text-[10px]">₪</span>
-                    </a>
-                    <a href="{{ route('account.points') }}" class="header-points shrink-0" title="نقاط الولاء">
-                        @include('partials.gold-coin-icon', ['class' => 'w-4 h-4'])
-                        <span>{{ $pointsBalance }}</span>
-                    </a>
-                @endauth
+                @if($canShop)
+                    @auth
+                        <a href="{{ route('account.wallet') }}" class="hidden md:flex items-center gap-1 text-xs font-bold px-2.5 py-1.5 rounded-full bg-emerald-50 text-emerald-800 hover:bg-emerald-100 border border-emerald-200/60 transition-colors shrink-0" title="رصيد المحفظة">
+                            <span class="material-symbols-outlined text-[16px] text-emerald-600">account_balance_wallet</span>
+                            <span class="font-mono text-xs">{{ number_format($walletBalance, 0) }}</span>
+                            <span class="ils text-[10px]">₪</span>
+                        </a>
+                        <a href="{{ route('account.points') }}" class="header-points shrink-0" title="نقاط الولاء">
+                            @include('partials.gold-coin-icon', ['class' => 'w-4 h-4'])
+                            <span>{{ $pointsBalance }}</span>
+                        </a>
+                    @endauth
+                @endif
 
                 {{-- 1. Search Icon Button (Circular) --}}
                 <button type="button" 
@@ -554,7 +564,7 @@
 
                 {{-- 2. User / Account Icon Button (Circular) --}}
                 @auth
-                    <a href="{{ route('account.show') }}" class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white shadow-xs border border-stone-200/80 flex items-center justify-center text-stone-700 hover:text-[#c84500] hover:border-[#c84500]/30 transition-all shrink-0 overflow-hidden" title="حسابي">
+                    <a href="{{ $accountHomeUrl }}" class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white shadow-xs border border-stone-200/80 flex items-center justify-center text-stone-700 hover:text-[#c84500] hover:border-[#c84500]/30 transition-all shrink-0 overflow-hidden" title="حسابي">
                         @if(auth()->user()->photo_path)
                             <img src="{{ auth()->user()->photoUrl() }}" alt="{{ auth()->user()->name }}" class="w-full h-full object-cover">
                         @else
@@ -567,17 +577,24 @@
                     </a>
                 @endauth
 
-                {{-- 3. Cart Icon Button (Circular with Badge Counter) --}}
-                <a href="{{ route('cart.index') }}" class="relative w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white shadow-xs border border-stone-200/80 flex items-center justify-center text-stone-700 hover:text-[#c84500] hover:border-[#c84500]/30 transition-all shrink-0" aria-label="السلة" data-header-cart>
-                    <span class="material-symbols-outlined text-[20px]">shopping_bag</span>
-                    <span class="header-badge absolute -top-1 -right-1 bg-[#c84500] text-white text-[10px] font-black w-4 h-4 rounded-full flex items-center justify-center shadow-xs" data-header-cart-badge @if(! $cartCount) hidden @endif>{{ $cartCount > 9 ? '9+' : $cartCount }}</span>
-                </a>
+                @if($canShop)
+                    {{-- 3. Cart Icon Button (Circular with Badge Counter) --}}
+                    <a href="{{ route('cart.index') }}" class="relative w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white shadow-xs border border-stone-200/80 flex items-center justify-center text-stone-700 hover:text-[#c84500] hover:border-[#c84500]/30 transition-all shrink-0" aria-label="السلة" data-header-cart>
+                        <span class="material-symbols-outlined text-[20px]">shopping_bag</span>
+                        <span class="header-badge absolute -top-1 -right-1 bg-[#c84500] text-white text-[10px] font-black w-4 h-4 rounded-full flex items-center justify-center shadow-xs" data-header-cart-badge @if(! $cartCount) hidden @endif>{{ $cartCount > 9 ? '9+' : $cartCount }}</span>
+                    </a>
 
-                {{-- 4. Order Now CTA Pill Button --}}
-                <a href="{{ route('restaurants.index') }}" class="site-header__cta px-4 py-2 sm:px-6 sm:py-2.5 rounded-full bg-[#c84500] hover:bg-[#b03d00] text-white font-extrabold text-xs sm:text-sm shadow-sm hover:shadow hover:scale-[1.02] active:scale-95 transition-all whitespace-nowrap inline-flex items-center gap-1.5">
-                    <span class="material-symbols-outlined text-[17px]">shopping_bag</span>
-                    <span>اطلب الآن</span>
-                </a>
+                    {{-- 4. Order Now CTA Pill Button --}}
+                    <a href="{{ route('restaurants.index') }}" class="site-header__cta px-4 py-2 sm:px-6 sm:py-2.5 rounded-full bg-[#c84500] hover:bg-[#b03d00] text-white font-extrabold text-xs sm:text-sm shadow-sm hover:shadow hover:scale-[1.02] active:scale-95 transition-all whitespace-nowrap inline-flex items-center gap-1.5">
+                        <span class="material-symbols-outlined text-[17px]">shopping_bag</span>
+                        <span>اطلب الآن</span>
+                    </a>
+                @else
+                    <a href="{{ route('restaurants.index') }}" class="site-header__cta px-4 py-2 sm:px-6 sm:py-2.5 rounded-full bg-[#c84500] hover:bg-[#b03d00] text-white font-extrabold text-xs sm:text-sm shadow-sm hover:shadow hover:scale-[1.02] active:scale-95 transition-all whitespace-nowrap inline-flex items-center gap-1.5">
+                        <span class="material-symbols-outlined text-[17px]">storefront</span>
+                        <span>استعرض المطاعم</span>
+                    </a>
+                @endif
             </div>
         </div>
 
@@ -614,7 +631,7 @@
                 </h1>
 
                 {{-- 3. أيقونة السلة أو زر إفراغ السلة في صفحة السلة --}}
-                @if(request()->routeIs('cart.index'))
+                @if($canShop && request()->routeIs('cart.index'))
                     <form id="header-clear-cart-form" method="POST" action="{{ route('cart.clear') }}" onsubmit="return confirm('هل تريد إفراغ السلة بالكامل؟');" class="{{ $cartCount ? '' : 'hidden' }}">
                         @csrf
                         @method('DELETE')
@@ -623,7 +640,7 @@
                         </button>
                     </form>
                     <div id="header-cart-empty-spacer" class="w-10 h-10 -ml-2 {{ $cartCount ? 'hidden' : '' }}"></div>
-                @else
+                @elseif($canShop)
                     <a href="{{ route('cart.index') }}" 
                        aria-label="السلة" 
                        class="relative w-10 h-10 -ml-2 flex items-center justify-center text-stone-800 hover:text-primary active:scale-90 transition-transform bg-transparent cursor-pointer" 
@@ -633,12 +650,15 @@
                               data-header-cart-badge 
                               @if(! $cartCount) hidden @endif>{{ $cartCount > 9 ? '9+' : $cartCount }}</span>
                     </a>
+                @else
+                    <div class="w-10 h-10 -ml-2"></div>
                 @endif
             </div>
         </div>
     @endunless
 
     <main class="w-full bg-surface pb-28 lg:pb-0 site-main">
+        @include('partials.group-order-banner')
         @yield('content')
     </main>
 
@@ -647,7 +667,7 @@
         <p class="app-toast__text"></p>
     </div>
 
-    @unless(request()->routeIs('checkout.*') || request()->routeIs('cart.*') || View::hasSection('hideFloatingCart'))
+    @unless(! $canShop || request()->routeIs('checkout.*') || request()->routeIs('cart.*') || View::hasSection('hideFloatingCart'))
         <aside data-floating-cart class="lg:hidden fixed bottom-20 inset-x-0 px-margin z-40 pointer-events-none {{ $cartCount && $cartPreview ? '' : 'hidden' }}">
             <div class="pointer-events-auto bg-on-surface text-surface rounded-full shadow-[0_8px_24px_rgba(0,0,0,0.2)] p-2 pr-4 flex items-center justify-between">
                 <div class="flex items-center gap-2.5">
@@ -698,17 +718,21 @@
                     <div>
                         <h4 class="sg-footer__col-title">الدعم</h4>
                         <ul class="sg-footer__col-list">
-                            <li><a href="{{ auth()->check() ? route('account.show') : route('login') }}">{{ auth()->check() ? 'حسابي' : 'تسجيل الدخول' }}</a></li>
-                            <li><a href="{{ route('account.orders') }}">طلباتي</a></li>
-                            <li><a href="{{ route('redeem.create') }}">استبدال النقاط</a></li>
-                            <li><a href="{{ route('account.wallet') }}">المحفظة</a></li>
+                            <li><a href="{{ $accountHomeUrl }}">{{ auth()->check() ? 'حسابي' : 'تسجيل الدخول' }}</a></li>
+                            @if($canShop)
+                                <li><a href="{{ route('account.orders') }}">طلباتي</a></li>
+                                <li><a href="{{ route('redeem.create') }}">استبدال النقاط</a></li>
+                                <li><a href="{{ route('account.wallet') }}">المحفظة</a></li>
+                            @endif
                         </ul>
                     </div>
 
                     <div>
                         <h4 class="sg-footer__col-title">قائمتنا</h4>
                         <ul class="sg-footer__col-list">
-                            <li><a href="{{ route('memberships.index') }}">العروض</a></li>
+                            @if($canShop)
+                                <li><a href="{{ route('memberships.index') }}">العروض</a></li>
+                            @endif
                             <li><a href="{{ route('restaurants.index') }}">الأشهر</a></li>
                             <li><a href="{{ route('restaurants.index') }}">التصنيفات</a></li>
                         </ul>
@@ -760,26 +784,37 @@
 
     {{-- Native App Style Bottom Navigation Bar (Mobile only) --}}
     <nav class="lg:hidden fixed bottom-0 inset-x-0 w-full z-50 pb-safe bg-white/95 backdrop-blur-xl border-t border-stone-200/80 shadow-[0_-2px_12px_rgba(0,0,0,0.06)]">
-        <div class="grid grid-cols-4 h-16 items-center px-1">
+        <div class="grid {{ $canShop ? 'grid-cols-4' : 'grid-cols-3' }} h-16 items-center px-1">
             <a class="flex flex-col items-center justify-center min-w-0 h-full gap-0.5 transition-colors {{ request()->routeIs('home') ? 'text-amber-500 font-bold' : 'text-stone-400 hover:text-stone-600' }}" href="{{ route('home') }}">
                 <span class="material-symbols-outlined text-[24px] {{ request()->routeIs('home') ? 'fill-1' : '' }}">home</span>
                 <span class="text-[11px] font-bold">الرئيسية</span>
             </a>
-            <a class="flex flex-col items-center justify-center min-w-0 h-full gap-0.5 transition-colors relative {{ request()->routeIs('cart.*') ? 'text-amber-500 font-bold' : 'text-stone-400 hover:text-stone-600' }}" href="{{ route('cart.index') }}">
-                <span class="relative">
-                    <span class="material-symbols-outlined text-[24px] {{ request()->routeIs('cart.*') ? 'fill-1' : '' }}">shopping_bag</span>
-                    <span class="header-badge absolute -top-1.5 -right-2 bg-primary text-white text-[10px] font-extrabold w-4 h-4 rounded-full flex items-center justify-center" data-header-cart-badge @if(! $cartCount) hidden @endif>{{ $cartCount > 9 ? '9+' : $cartCount }}</span>
-                </span>
-                <span class="text-[11px] font-bold">السلة</span>
-            </a>
-            <a class="flex flex-col items-center justify-center min-w-0 h-full gap-0.5 transition-colors {{ request()->routeIs('account.orders*') ? 'text-amber-500 font-bold' : 'text-stone-400 hover:text-stone-600' }}" href="{{ auth()->check() ? route('account.orders') : route('login') }}">
-                <span class="material-symbols-outlined text-[24px] {{ request()->routeIs('account.orders*') ? 'fill-1' : '' }}">receipt_long</span>
-                <span class="text-[11px] font-bold">طلباتي</span>
-            </a>
-            <a class="flex flex-col items-center justify-center min-w-0 h-full gap-0.5 transition-colors {{ request()->routeIs('account.*') && !request()->routeIs('account.orders*') ? 'text-amber-500 font-bold' : 'text-stone-400 hover:text-stone-600' }}" href="{{ auth()->check() ? route('account.show') : route('login') }}">
-                <span class="material-symbols-outlined text-[24px] {{ request()->routeIs('account.*') && !request()->routeIs('account.orders*') ? 'fill-1' : '' }}">person</span>
-                <span class="text-[11px] font-bold">حسابي</span>
-            </a>
+            @if($canShop)
+                <a class="flex flex-col items-center justify-center min-w-0 h-full gap-0.5 transition-colors relative {{ request()->routeIs('cart.*') ? 'text-amber-500 font-bold' : 'text-stone-400 hover:text-stone-600' }}" href="{{ route('cart.index') }}">
+                    <span class="relative">
+                        <span class="material-symbols-outlined text-[24px] {{ request()->routeIs('cart.*') ? 'fill-1' : '' }}">shopping_bag</span>
+                        <span class="header-badge absolute -top-1.5 -right-2 bg-primary text-white text-[10px] font-extrabold w-4 h-4 rounded-full flex items-center justify-center" data-header-cart-badge @if(! $cartCount) hidden @endif>{{ $cartCount > 9 ? '9+' : $cartCount }}</span>
+                    </span>
+                    <span class="text-[11px] font-bold">السلة</span>
+                </a>
+                <a class="flex flex-col items-center justify-center min-w-0 h-full gap-0.5 transition-colors {{ request()->routeIs('account.orders*') ? 'text-amber-500 font-bold' : 'text-stone-400 hover:text-stone-600' }}" href="{{ auth()->check() ? route('account.orders') : route('login') }}">
+                    <span class="material-symbols-outlined text-[24px] {{ request()->routeIs('account.orders*') ? 'fill-1' : '' }}">receipt_long</span>
+                    <span class="text-[11px] font-bold">طلباتي</span>
+                </a>
+                <a class="flex flex-col items-center justify-center min-w-0 h-full gap-0.5 transition-colors {{ request()->routeIs('account.*') && !request()->routeIs('account.orders*') ? 'text-amber-500 font-bold' : 'text-stone-400 hover:text-stone-600' }}" href="{{ $accountHomeUrl }}">
+                    <span class="material-symbols-outlined text-[24px] {{ request()->routeIs('account.*') && !request()->routeIs('account.orders*') ? 'fill-1' : '' }}">person</span>
+                    <span class="text-[11px] font-bold">حسابي</span>
+                </a>
+            @else
+                <a class="flex flex-col items-center justify-center min-w-0 h-full gap-0.5 transition-colors {{ request()->routeIs('restaurants.*') ? 'text-amber-500 font-bold' : 'text-stone-400 hover:text-stone-600' }}" href="{{ route('restaurants.index') }}">
+                    <span class="material-symbols-outlined text-[24px] {{ request()->routeIs('restaurants.*') ? 'fill-1' : '' }}">storefront</span>
+                    <span class="text-[11px] font-bold">المطاعم</span>
+                </a>
+                <a class="flex flex-col items-center justify-center min-w-0 h-full gap-0.5 transition-colors text-stone-400 hover:text-stone-600" href="{{ $accountHomeUrl }}">
+                    <span class="material-symbols-outlined text-[24px]">dashboard</span>
+                    <span class="text-[11px] font-bold">{{ auth()->user()?->isAdmin() ? 'لوحة التحكم' : 'لوحتي' }}</span>
+                </a>
+            @endif
         </div>
     </nav>
     <script>

@@ -22,6 +22,7 @@
     <div class="space-y-4">
         {{-- Invoice with items and item-level notes (Partner tone: Food only, no delivery fee) --}}
         @include('partials.order-invoice', ['order' => $order, 'tone' => 'partner'])
+        @include('partials.group-order-receipts', ['order' => $order, 'tone' => 'partner'])
 
         {{-- Special preparation notes summary --}}
         @php

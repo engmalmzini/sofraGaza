@@ -6,12 +6,16 @@ use App\Models\Membership;
 use App\Models\Restaurant;
 use App\Support\HomeContent;
 use App\Models\HomePartner;
+use App\Services\FavoriteService;
 use App\Services\PointsService;
 use Illuminate\View\View;
 
 class HomeController extends Controller
 {
-    public function __construct(private PointsService $points) {}
+    public function __construct(
+        private PointsService $points,
+        private FavoriteService $favorites,
+    ) {}
 
     public function index(): View
     {
@@ -19,6 +23,7 @@ class HomeController extends Controller
             ->visible()
             ->inDeliveryArea()
             ->withCount('menuItems')
+            ->boostedFirst()
             ->latest()
             ->take(24)
             ->get();
@@ -33,6 +38,20 @@ class HomeController extends Controller
             ->take(8)
             ->get();
 
+        $reorderDishes = collect();
+        $reorderRestaurants = collect();
+        $homeFavoriteRestaurants = collect();
+        $homeFavoriteDishes = collect();
+        $user = auth()->user();
+        if ($user?->canShopAsCustomer()) {
+            $suggestions = $this->favorites->suggestionsFor($user);
+            $reorderDishes = $suggestions['dishes'];
+            $reorderRestaurants = $suggestions['restaurants'];
+            $saved = $this->favorites->savedFor($user);
+            $homeFavoriteRestaurants = $saved['restaurants']->take(6);
+            $homeFavoriteDishes = $saved['dishes']->take(6);
+        }
+
         return view('home', [
             'restaurants' => $restaurants,
             'restaurantCount' => $restaurantCount,
@@ -46,6 +65,10 @@ class HomeController extends Controller
             'partners' => HomePartner::query()->active()->ordered()->get(),
             'pointsEarnLabel' => $this->points->earnRateLabel(),
             'pointsRedeemLabel' => $this->points->redeemRateLabel(),
+            'reorderDishes' => $reorderDishes,
+            'reorderRestaurants' => $reorderRestaurants,
+            'homeFavoriteRestaurants' => $homeFavoriteRestaurants,
+            'homeFavoriteDishes' => $homeFavoriteDishes,
         ]);
     }
 }

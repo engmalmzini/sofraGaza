@@ -18,6 +18,9 @@
             <h1 class="text-xl sm:text-2xl font-black text-stone-900 tracking-tight">طلب #{{ $order->id }}</h1>
             <p class="text-xs sm:text-sm text-stone-500 mt-0.5">
                 {{ $order->restaurant->name }} · {{ $order->statusLabel() }}
+                @if($order->isGroupOrder())
+                    · طلب جماعي
+                @endif
             </p>
         </div>
 
@@ -165,6 +168,9 @@
                         </span>
                         <div class="min-w-0 flex-1">
                             <h4 class="font-bold text-sm text-stone-900 leading-snug">{{ $item->name }}</h4>
+                            @if($item->ordered_by_name)
+                                <span class="text-[11px] text-primary font-bold block mt-0.5">طلب {{ $item->ordered_by_name }}</span>
+                            @endif
                             @if($item->quantity > 1)
                                 <span class="text-[11px] text-stone-400 block mt-0.5">{{ number_format($item->price, 2) }} ₪ للقطعة</span>
                             @endif
@@ -186,6 +192,12 @@
             @endforelse
         </div>
     </div>
+
+    @if($order->isGroupOrder())
+        <div class="mb-4">
+            @include('partials.group-order-receipts', ['order' => $order, 'tone' => 'partner'])
+        </div>
+    @endif
 
     {{-- 6. Financial Summary Card --}}
     <div class="rounded-3xl bg-white border border-stone-200/80 p-4 sm:p-5 shadow-2xs mb-4">

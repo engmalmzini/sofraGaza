@@ -4,18 +4,24 @@
 @section('title', 'نظرة عامة على المنصة')
 
 @section('actions')
-    <a href="{{ route('admin.orders.index') }}" class="admin-btn admin-btn--primary">
-        <span class="material-symbols-outlined">receipt_long</span>
-        <span>الطلبات @if($pendingOrders > 0)({{ $pendingOrders }})@endif</span>
-    </a>
-    <a href="{{ route('admin.restaurants.create') }}" class="admin-btn admin-btn--secondary">
-        <span class="material-symbols-outlined">add_business</span>
-        <span>إضافة مطعم</span>
-    </a>
-    <a href="{{ route('admin.delivery.index') }}" class="admin-btn admin-btn--ghost">
-        <span class="material-symbols-outlined">two_wheeler</span>
-        <span>المندوبين</span>
-    </a>
+    @if(auth()->user()->canAccessAdmin('orders'))
+        <a href="{{ route('admin.orders.index') }}" class="admin-btn admin-btn--primary">
+            <span class="material-symbols-outlined">receipt_long</span>
+            <span>الطلبات @if($pendingOrders > 0)({{ $pendingOrders }})@endif</span>
+        </a>
+    @endif
+    @if(auth()->user()->canAccessAdmin('restaurants'))
+        <a href="{{ route('admin.restaurants.create') }}" class="admin-btn admin-btn--secondary">
+            <span class="material-symbols-outlined">add_business</span>
+            <span>إضافة مطعم</span>
+        </a>
+    @endif
+    @if(auth()->user()->canAccessAdmin('delivery'))
+        <a href="{{ route('admin.delivery.index') }}" class="admin-btn admin-btn--ghost">
+            <span class="material-symbols-outlined">two_wheeler</span>
+            <span>المندوبين</span>
+        </a>
+    @endif
 @endsection
 
 @section('content')
@@ -75,7 +81,7 @@
         </div>
         <strong>{{ $customers }} <span class="text-sm font-semibold text-slate-500">زبون</span></strong>
         <span class="admin-metric__note">
-            @if($pendingSubscriptions > 0)
+            @if($pendingSubscriptions > 0 && auth()->user()->canAccessAdmin('memberships'))
                 <a href="{{ route('admin.subscriptions.index') }}" class="text-primary font-bold hover:underline">
                     {{ $pendingSubscriptions }} طلب عضوية بانتظار الاعتماد
                 </a>
@@ -113,7 +119,7 @@
             </div>
         @else
             <!-- 1. Pending Restaurants -->
-            @if($pendingRestaurants->isNotEmpty())
+            @if($pendingRestaurants->isNotEmpty() && auth()->user()->canAccessAdmin('restaurants'))
                 <div class="admin-subheading">
                     <span>مطاعم جديدة بانتظار الاعتماد</span>
                     <span class="text-xs text-primary font-bold">{{ $pendingRestaurants->count() }} مطاعم</span>
@@ -138,7 +144,7 @@
             @endif
 
             <!-- 2. Pending Courier Payouts -->
-            @if($pendingPayouts->isNotEmpty())
+            @if($pendingPayouts->isNotEmpty() && auth()->user()->canAccessAdmin('delivery'))
                 <div class="admin-subheading">
                     <span>سحب أرباح المندوبين (كاش / محفظة)</span>
                     <span class="text-xs text-primary font-bold">{{ $pendingPayouts->count() }} طلبات</span>
@@ -163,7 +169,7 @@
             @endif
 
             <!-- 3. Pending Wallet Topups -->
-            @if($pendingTopups->isNotEmpty())
+            @if($pendingTopups->isNotEmpty() && auth()->user()->canAccessAdmin('customers'))
                 <div class="admin-subheading">
                     <span>طلبات شحن رصيد المحفظة</span>
                     <span class="text-xs text-primary font-bold">{{ $pendingTopups->count() }} طلبات</span>
@@ -188,7 +194,7 @@
             @endif
 
             <!-- 4. Pending Membership Subscriptions -->
-            @if($pendingSubscriptionsList->isNotEmpty())
+            @if($pendingSubscriptionsList->isNotEmpty() && auth()->user()->canAccessAdmin('memberships'))
                 <div class="admin-subheading">
                     <span>طلبات ترقية العضويات</span>
                     <span class="text-xs text-primary font-bold">{{ $pendingSubscriptionsList->count() }} طلبات</span>
@@ -221,39 +227,10 @@
                 <span class="material-symbols-outlined text-primary">event_upcoming</span>
                 <h2 class="text-base font-bold text-slate-900">متابعة الاشتراكات والصلاحيات</h2>
             </div>
-            <span class="text-xs text-slate-500 font-semibold">تنبيه خلال {{ $warningDays }} أيام</span>
+            <span class="text-xs text-slate-500 font-semibold">تنبيه خلال {{ $membershipWarning }} أيام</span>
         </div>
 
-        <!-- 1. Expiring Restaurants -->
         <div class="admin-subheading">
-            <span>اشتراكات مطاعم قاربت على الانتهاء</span>
-            <span class="text-xs font-bold text-slate-500">{{ $expiringRestaurants->count() }}</span>
-        </div>
-        @if($expiringRestaurants->isNotEmpty())
-            <div class="admin-action-list">
-                @foreach($expiringRestaurants as $restaurant)
-                    <div class="admin-action-item">
-                        <div class="admin-action-item__main">
-                            <span class="admin-action-item__title">{{ $restaurant->name }}</span>
-                            <span class="admin-action-item__meta">
-                                ينتهي في: {{ $restaurant->expires_at->format('Y-m-d') }}
-                            </span>
-                        </div>
-                        <div class="admin-action-item__side">
-                            <span class="admin-pill admin-pill--wait">باقي {{ $restaurant->daysRemaining() }} يوم</span>
-                            <a href="{{ route('admin.restaurants.edit', $restaurant) }}" class="admin-btn admin-btn--ghost !min-h-[2rem] !py-1 !px-2.5 !text-xs" title="تعديل أو تجديد">
-                                تجديد
-                            </a>
-                        </div>
-                    </div>
-                @endforeach
-            </div>
-        @else
-            <p class="text-xs text-slate-500 py-2">✅ كافة اشتراكات المطاعم سارية ولا يوجد ما هو وشيك الانتهاء.</p>
-        @endif
-
-        <!-- 2. Expiring Memberships -->
-        <div class="admin-subheading mt-4">
             <span>عضويات زبائن قاربت على الانتهاء</span>
             <span class="text-xs font-bold text-slate-500">{{ $expiringMemberships->count() }}</span>
         </div>
@@ -276,38 +253,11 @@
         @else
             <p class="text-xs text-slate-500 py-2">لا توجد عضويات على وشك الانتهاء حالياً.</p>
         @endif
-
-        <!-- 3. Expired Restaurants -->
-        @if($expiredRestaurants->isNotEmpty())
-            <div class="admin-subheading mt-4">
-                <span>اشتراكات مطاعم منتهية الصلاحية</span>
-                <span class="text-xs font-bold text-rose-600">{{ $expiredRestaurants->count() }}</span>
-            </div>
-            <div class="admin-action-list">
-                @foreach($expiredRestaurants as $restaurant)
-                    <div class="admin-action-item">
-                        <div class="admin-action-item__main">
-                            <span class="admin-action-item__title text-slate-500 line-through">{{ $restaurant->name }}</span>
-                            <span class="admin-action-item__meta text-rose-500">
-                                انتهى في {{ $restaurant->expires_at->format('Y-m-d') }}
-                            </span>
-                        </div>
-                        <div class="admin-action-item__side">
-                            <span class="admin-pill admin-pill--off">منتهي</span>
-                            <a href="{{ route('admin.restaurants.edit', $restaurant) }}" class="admin-btn admin-btn--ghost !min-h-[2rem] !py-1 !px-2.5 !text-xs">
-                                تفعيل
-                            </a>
-                        </div>
-                    </div>
-                @endforeach
-            </div>
-        @endif
     </section>
 </div>
 
-<!-- Bottom Section: Latest Orders with Rich Details & Filter Chips -->
-<section class="admin-card mt-5">
 <!-- Bottom Section: Orders Live Board & Table (Cards in Columns by Status) -->
+@if(auth()->user()->canAccessAdmin('orders'))
 <section class="admin-card mt-5" data-admin-orders-table data-last-id="{{ $latestOrders->max('id') ?? 0 }}" data-live-url="{{ route('admin.orders.live') }}">
     <div class="admin-toolbar flex-wrap gap-3">
         <div class="flex items-center gap-3">
@@ -339,7 +289,16 @@
 
     <!-- 1. Primary View: Kanban Board of Order Cards in Columns by Status -->
     <div id="orders-view-board" class="transition-all">
-        @include('admin.orders.partials.order-board', ['ordersByStatus' => $ordersByStatus])
+        <p class="text-xs text-slate-500 mt-3">اسحب البطاقة وأفلتها في العمود التالي لتحديث الحالة تلقائياً.</p>
+        <div id="admin-orders-board">
+            @include('admin.orders.partials.order-board', [
+                'ordersByStatus' => $ordersByStatus,
+                'showRouteName' => 'admin.orders.show',
+                'moveUrl' => url('/admin/orders/__ID__/move'),
+                'allowedColumns' => 'preparing,delivering,delivered',
+                'cardContext' => 'admin',
+            ])
+        </div>
     </div>
 
     <!-- 2. Secondary View: Detailed Table -->
@@ -446,36 +405,45 @@
         }
     </script>
 </section>
+@endif
 
 <!-- Bottom Shortcuts: Fast Management Access -->
 <div class="admin-shortcuts">
-    <a href="{{ route('admin.restaurants.create') }}" class="admin-shortcut">
-        <span class="material-symbols-outlined">add_business</span>
-        <div>
-            <strong>إضافة مطعم جديد</strong>
-            <small>تسجيل واعتماد شريك جديد</small>
-        </div>
-    </a>
-    <a href="{{ route('admin.coupons.index') }}" class="admin-shortcut">
-        <span class="material-symbols-outlined">sell</span>
-        <div>
-            <strong>أكواد الخصم</strong>
-            <small>إنشاء وإدارة الكوبونات</small>
-        </div>
-    </a>
-    <a href="{{ route('admin.delivery.index') }}" class="admin-shortcut">
-        <span class="material-symbols-outlined">motorcycle</span>
-        <div>
-            <strong>إدارة المندوبين</strong>
-            <small>تتبع التوصيل وسحب الأرباح</small>
-        </div>
-    </a>
-    <a href="{{ route('admin.wallet-topups.index') }}" class="admin-shortcut">
-        <span class="material-symbols-outlined">account_balance_wallet</span>
-        <div>
-            <strong>شحن رصيد المحافظ</strong>
-            <small>مراجعة حوالات الزبائن</small>
-        </div>
-    </a>
+    @if(auth()->user()->canAccessAdmin('restaurants'))
+        <a href="{{ route('admin.restaurants.create') }}" class="admin-shortcut">
+            <span class="material-symbols-outlined">add_business</span>
+            <div>
+                <strong>إضافة مطعم جديد</strong>
+                <small>تسجيل واعتماد شريك جديد</small>
+            </div>
+        </a>
+    @endif
+    @if(auth()->user()->canAccessAdmin('coupons'))
+        <a href="{{ route('admin.coupons.index') }}" class="admin-shortcut">
+            <span class="material-symbols-outlined">sell</span>
+            <div>
+                <strong>أكواد الخصم</strong>
+                <small>إنشاء وإدارة الكوبونات</small>
+            </div>
+        </a>
+    @endif
+    @if(auth()->user()->canAccessAdmin('delivery'))
+        <a href="{{ route('admin.delivery.index') }}" class="admin-shortcut">
+            <span class="material-symbols-outlined">motorcycle</span>
+            <div>
+                <strong>إدارة المندوبين</strong>
+                <small>تتبع التوصيل وسحب الأرباح</small>
+            </div>
+        </a>
+    @endif
+    @if(auth()->user()->canAccessAdmin('customers'))
+        <a href="{{ route('admin.wallet-topups.index') }}" class="admin-shortcut">
+            <span class="material-symbols-outlined">account_balance_wallet</span>
+            <div>
+                <strong>شحن رصيد المحافظ</strong>
+                <small>مراجعة حوالات الزبائن</small>
+            </div>
+        </a>
+    @endif
 </div>
 @endsection

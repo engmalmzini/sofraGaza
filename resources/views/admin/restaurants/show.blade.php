@@ -59,9 +59,7 @@
             @if($restaurant->isPending())
                 <form method="POST" action="{{ route('admin.restaurants.approve', $restaurant) }}" class="mt-4 space-y-2">
                     @csrf
-                    <label class="block text-sm font-bold">مدة العرض بعد الموافقة (يوم)</label>
-                    <input type="number" name="listing_days" min="7" max="365" value="{{ \App\Models\Setting::value('restaurant_listing_days', 90) }}">
-                    <button class="admin-btn admin-btn--secondary w-full">الموافقة على البيانات</button>
+                    <button class="admin-btn admin-btn--secondary w-full">الموافقة والنشر</button>
                 </form>
                 <form method="POST" action="{{ route('admin.restaurants.reject', $restaurant) }}" class="mt-3 space-y-2">
                     @csrf
@@ -80,27 +78,6 @@
                     <button class="admin-btn admin-btn--danger w-full">إيقاف اللوحة وإخفاء المطعم</button>
                 </form>
             @endif
-        </section>
-        <section class="admin-card">
-            <h2>اشتراك الظهور</h2>
-            @php $activeListing = $restaurant->activeListing(); @endphp
-            @if($activeListing)
-                <p class="mt-2 text-sm">{{ $activeListing->plan->name }} · باقي {{ $activeListing->daysRemaining() }} يوم</p>
-                <p class="text-xs text-on-surface-variant">حتى {{ $activeListing->ends_at->format('Y-m-d') }}</p>
-            @else
-                <p class="mt-2 text-sm text-on-surface-variant">لا يوجد اشتراك ساري.</p>
-            @endif
-            <div class="mt-3 space-y-2 text-sm">
-                @foreach($restaurant->listingSubscriptions as $listing)
-                    <div class="admin-row">
-                        <span>
-                            {{ $listing->plan->name }} · {{ number_format($listing->amount, 0) }} ₪
-                            <a class="text-primary font-bold" href="{{ route('admin.listings.show', $listing) }}">مراجعة</a>
-                        </span>
-                        @include('admin.partials.pill', ['status' => $listing->status, 'label' => $listing->statusLabel()])
-                    </div>
-                @endforeach
-            </div>
         </section>
     </div>
 </div>

@@ -25,6 +25,22 @@ class SearchController extends Controller
             return response()->json(['results' => []]);
         }
 
+        $scopeModule = match ($scope) {
+            'orders' => 'orders',
+            'couriers' => 'delivery',
+            'restaurants', 'menu_items', 'listings' => 'restaurants',
+            'users' => 'customers',
+            'memberships', 'subscriptions' => 'memberships',
+            'settings' => 'settings',
+            'homepage' => 'homepage',
+            'finance' => 'finance',
+            default => 'dashboard',
+        };
+
+        if ($scope !== 'global' && ! $this->allowed($scopeModule)) {
+            return response()->json(['results' => []]);
+        }
+
         $results = match ($scope) {
             'orders' => $this->orders($q, 8),
             'restaurants' => $this->restaurants($q, 8),
@@ -35,6 +51,7 @@ class SearchController extends Controller
             'listings' => $this->restaurants($q, 8),
             'settings' => $this->settings($q, 8),
             'homepage' => $this->homepage($q, 8),
+            'finance' => $this->finance($q, 8),
             'couriers' => $this->couriers($q, 8)->concat($this->orders($q, 4)),
             default => $this->global($q),
         };
@@ -42,16 +59,41 @@ class SearchController extends Controller
         return response()->json(['results' => $this->finalize($results)]);
     }
 
+    private function allowed(string $module): bool
+    {
+        return (bool) auth()->user()?->canAccessAdmin($module);
+    }
+
     private function global(string $q): Collection
     {
-        return $this->orders($q, 3)
-            ->concat($this->restaurants($q, 2))
-            ->concat($this->users($q, 2))
-            ->concat($this->memberships($q, 1))
-            ->concat($this->subscriptions($q, 1))
-            ->concat($this->settings($q, 1))
-            ->concat($this->homepage($q, 1))
-            ->concat($this->couriers($q, 2));
+        $results = collect();
+
+        if ($this->allowed('orders')) {
+            $results = $results->concat($this->orders($q, 3));
+        }
+        if ($this->allowed('restaurants')) {
+            $results = $results->concat($this->restaurants($q, 2));
+        }
+        if ($this->allowed('customers')) {
+            $results = $results->concat($this->users($q, 2));
+        }
+        if ($this->allowed('memberships')) {
+            $results = $results->concat($this->memberships($q, 1))->concat($this->subscriptions($q, 1));
+        }
+        if ($this->allowed('settings')) {
+            $results = $results->concat($this->settings($q, 1));
+        }
+        if ($this->allowed('homepage')) {
+            $results = $results->concat($this->homepage($q, 1));
+        }
+        if ($this->allowed('finance')) {
+            $results = $results->concat($this->finance($q, 1));
+        }
+        if ($this->allowed('delivery')) {
+            $results = $results->concat($this->couriers($q, 2));
+        }
+
+        return $results;
     }
 
     private function orders(string $q, int $limit): Collection
@@ -193,6 +235,21 @@ class SearchController extends Controller
                 $q,
                 'الرئيسية شراكات',
             ),
+        ])->take($limit);
+    }
+
+    private function finance(string $q, int $limit): Collection
+    {
+        $haystack = 'مالية مالية الطلبات مالية المطاعم نظرة عامة تسوية عمولة إعلانات boost مصاريف دخل اشتراكات كباتن صافي';
+        if (! str_contains($haystack, $q) && mb_stripos($haystack, $q) === false) {
+            return collect();
+        }
+
+        return collect([
+            $this->row('نظرة عامة', 'الدخل الكلي والمصروف والصافي الحقيقي', route('admin.finance.index'), 'account_balance', $q, 'مالية دخل مصروف'),
+            $this->row('مالية الطلبات', 'قيمة الطلبات والعمولة والإلغاء', route('admin.finance.orders'), 'receipt_long', $q, 'مالية الطلبات'),
+            $this->row('مالية المطاعم', 'مبيعات وتسويات المطاعم', route('admin.finance.restaurants'), 'payments', $q, 'مالية المطاعم تسوية'),
+            $this->row('إعلانات المطاعم', 'حملات الظهور الأول بعد تأكيد الحوالة', route('admin.boosts.index'), 'campaign', $q, 'إعلانات boost'),
         ])->take($limit);
     }
 

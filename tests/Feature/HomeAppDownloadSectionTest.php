@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Support\HomeContent;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -9,8 +10,17 @@ class HomeAppDownloadSectionTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_home_page_shows_app_download_section_after_places(): void
+    public function test_app_download_section_is_hidden_by_default(): void
     {
+        $this->get(route('home'))
+            ->assertOk()
+            ->assertDontSee('aria-label="حمّل تطبيق سفرة غزة"', false);
+    }
+
+    public function test_home_page_shows_app_download_section_after_places_when_enabled(): void
+    {
+        HomeContent::save(['app_section_visible' => '1']);
+
         $html = $this->get(route('home'))
             ->assertOk()
             ->assertSee('حمّل', false)

@@ -21,6 +21,9 @@ __pycache__/
 /storage/*.key
 /storage/pail
 /vendor
+/database/*.sqlite
+/public/test_mockup.html
+/public/current_section.png
 Homestead.json
 Homestead.yaml
 Thumbs.db

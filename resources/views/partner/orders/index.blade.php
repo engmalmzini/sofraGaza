@@ -32,12 +32,18 @@
 
 {{-- Real-time Orders Container --}}
 <div class="mt-4" id="partner-orders-wrapper" data-last-id="{{ $orders->max('id') ?? 0 }}" data-live-url="{{ route('partner.orders.live') }}">
-    <div id="partner-orders-container" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        @include('partner.orders.partials.order-cards', ['orders' => $orders, 'restaurant' => $restaurant])
-    </div>
-</div>
-
-<div class="mt-4">
-    {{ $orders->links() }}
+    @if(! request('status'))
+        <p class="text-xs text-slate-500 mb-2">اسحب الطلب من عمود الانتظار وأفلته في قيد التحضير ليبدأ التحضير تلقائياً.</p>
+        <div id="partner-orders-container">
+            @include('partner.orders.partials.order-board', ['ordersByStatus' => $ordersByStatus])
+        </div>
+    @else
+        <div id="partner-orders-container" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            @include('partner.orders.partials.order-cards', ['orders' => $orders, 'restaurant' => $restaurant])
+        </div>
+        <div class="mt-4">
+            {{ $orders->links() }}
+        </div>
+    @endif
 </div>
 @endsection

@@ -6,6 +6,7 @@ use App\Models\Order;
 use App\Models\User;
 use App\Models\WalletTopup;
 use App\Models\WalletTransaction;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
@@ -100,38 +101,112 @@ class WalletService
         );
     }
 
-    public function payForOrder(User $user, Order $order): void
+    public function charge(User $user, float $amount, string $description, Model $reference, string $type = WalletTransaction::TYPE_ORDER_PAYMENT): void
     {
-        $total = (float) $order->total;
-
-        if ($total <= 0) {
+        if ($amount <= 0) {
             return;
         }
 
-        DB::transaction(function () use ($user, $order, $total) {
+        DB::transaction(function () use ($user, $amount, $description, $reference, $type) {
             $lockedUser = User::query()->whereKey($user->id)->lockForUpdate()->first();
 
-            if ((float) $lockedUser->wallet_balance < $total) {
+            if ((float) $lockedUser->wallet_balance < $amount) {
                 throw new RuntimeException('رصيد المحفظة غير كافٍ لإتمام عملية الدفع.');
             }
 
-            $newBalance = round((float) $lockedUser->wallet_balance - $total, 2);
+            $newBalance = round((float) $lockedUser->wallet_balance - $amount, 2);
             $lockedUser->update(['wallet_balance' => $newBalance]);
 
             WalletTransaction::create([
                 'user_id' => $lockedUser->id,
-                'type' => WalletTransaction::TYPE_ORDER_PAYMENT,
-                'amount' => -$total,
+                'type' => $type,
+                'amount' => -$amount,
                 'balance_after' => $newBalance,
-                'reference_id' => $order->id,
-                'reference_type' => Order::class,
-                'description' => "خصم قيمة الطلب #{$order->id}",
+                'reference_id' => $reference->getKey(),
+                'reference_type' => $reference::class,
+                'description' => $description,
             ]);
         });
     }
 
+    public function credit(User $user, float $amount, string $description, Model $reference, string $type = WalletTransaction::TYPE_REFUND): void
+    {
+        if ($amount <= 0) {
+            return;
+        }
+
+        DB::transaction(function () use ($user, $amount, $description, $reference, $type) {
+            $lockedUser = User::query()->whereKey($user->id)->lockForUpdate()->first();
+            $newBalance = round((float) $lockedUser->wallet_balance + $amount, 2);
+            $lockedUser->update(['wallet_balance' => $newBalance]);
+
+            WalletTransaction::create([
+                'user_id' => $lockedUser->id,
+                'type' => $type,
+                'amount' => $amount,
+                'balance_after' => $newBalance,
+                'reference_id' => $reference->getKey(),
+                'reference_type' => $reference::class,
+                'description' => $description,
+            ]);
+        });
+    }
+
+    public function payForOrder(User $user, Order $order): void
+    {
+        $this->charge(
+            $user,
+            (float) $order->total,
+            "خصم قيمة الطلب #{$order->id}",
+            $order,
+        );
+    }
+
+    public function refundGroupOrder(Order $order, string $reason = 'إلغاء الطلب'): void
+    {
+        $group = $order->groupOrder()->with('members.user')->first();
+        if (! $group) {
+            return;
+        }
+
+        foreach ($group->members as $member) {
+            if (! $member->isPaid() || $member->payment_method !== 'wallet' || ! $member->user) {
+                continue;
+            }
+
+            $amount = (float) $member->total;
+            if ($member->is_host) {
+                $amount = round($amount + (float) $order->delivery_fee, 2);
+            }
+
+            if ($amount <= 0) {
+                continue;
+            }
+
+            $this->credit(
+                $member->user,
+                $amount,
+                "استرداد نصيب طلب جماعي #{$order->id} ({$reason})",
+                $member,
+            );
+
+            $this->notifications->notify(
+                $member->user,
+                'تم استرداد نصيبك إلى المحفظة',
+                "تمت إعادة {$amount} ₪ إلى محفظتك من الطلب الجماعي #{$order->id}.",
+                route('account.wallet')
+            );
+        }
+    }
+
     public function refundOrder(Order $order, string $reason = 'إلغاء الطلب'): void
     {
+        if ($order->group_order_id) {
+            $this->refundGroupOrder($order, $reason);
+
+            return;
+        }
+
         if ($order->payment_method !== 'wallet' || (float) $order->total <= 0) {
             return;
         }

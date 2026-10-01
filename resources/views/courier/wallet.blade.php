@@ -117,87 +117,74 @@
 
     {{-- Time Filters & Earnings Breakdown --}}
     <section class="rounded-2xl bg-white p-4 border border-slate-200/80 shadow-xs space-y-3">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <div class="flex items-start justify-between gap-3">
             <div>
                 <h2 class="text-sm font-bold text-stone-900 flex items-center gap-1.5">
                     <span class="material-symbols-outlined text-primary text-[20px]">calendar_month</span>
                     <span>كشف حساب الأرباح حسب الفترة</span>
                 </h2>
-                <p class="text-[11px] text-slate-500">اختر الفترة لمعرفة كم عملت وحصتك الصافية بدقة</p>
+                <p class="text-[11px] text-slate-500 mt-0.5">اختر الفترة لمعرفة كم عملت وحصتك الصافية بدقة</p>
             </div>
-
-            {{-- Period Filter Pills --}}
-            <div class="flex items-center gap-1 overflow-x-auto pb-1 sm:pb-0 text-xs">
-                @php
-                    $periods = [
-                        'today' => 'اليوم',
-                        'yesterday' => 'أمس',
-                        'week' => 'الأسبوع',
-                        'month' => 'الشهر',
-                        'all' => 'الكل',
-                    ];
-                @endphp
-                @foreach($periods as $pKey => $pLabel)
-                    <a href="{{ route('courier.wallet', ['period' => $pKey]) }}" class="px-3 py-1.5 rounded-xl font-bold transition-all shrink-0 {{ $period === $pKey ? 'bg-primary text-on-primary shadow-xs' : 'bg-surface-container-high text-slate-700 hover:bg-slate-200' }}">
-                        {{ $pLabel }}
-                    </a>
-                @endforeach
-            </div>
+            <a href="{{ route('courier.wallet.statement', ['period' => $period]) }}" class="cw-open-full">
+                <span class="material-symbols-outlined">open_in_full</span>
+                <span>عرض كامل</span>
+            </a>
         </div>
+
+        @include('courier.partials.earnings-periods', ['periodRoute' => 'courier.wallet'])
 
         {{-- Filtered Stats Cards --}}
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
-            <div class="p-3 rounded-xl bg-surface-container-lowest border border-slate-200/80 shadow-xs">
-                <span class="text-[11px] text-slate-500 block">التوصيلات المكتملة</span>
-                <strong class="text-base font-black text-stone-900 block mt-0.5 font-mono">{{ $earnings['count'] }} طلب</strong>
+        <a href="{{ route('courier.wallet.statement', ['period' => $period]) }}" class="cw-wallet-stats">
+            <div>
+                <span>التوصيلات المكتملة</span>
+                <strong>{{ $earnings['count'] }} طلب</strong>
             </div>
-
-            <div class="p-3 rounded-xl bg-surface-container-lowest border border-slate-200/80 shadow-xs">
-                <span class="text-[11px] text-slate-500 block">إجمالي رسوم التوصيل</span>
-                <strong class="text-base font-black text-stone-900 block mt-0.5 font-mono">{{ number_format($earnings['total_fees'], 2) }} ₪</strong>
+            <div>
+                <span>إجمالي رسوم التوصيل</span>
+                <strong>{{ number_format($earnings['total_fees'], 2) }} ₪</strong>
             </div>
-
-            <div class="p-3 rounded-xl bg-surface-container-lowest border border-slate-200/80 shadow-xs">
-                <span class="text-[11px] text-slate-500 block">خصم المنصة (15%)</span>
-                <strong class="text-base font-black text-rose-600 block mt-0.5 font-mono">-{{ number_format($earnings['platform_fee'], 2) }} ₪</strong>
+            <div>
+                <span>خصم المنصة (15%)</span>
+                <strong class="text-rose-600">-{{ number_format($earnings['platform_fee'], 2) }} ₪</strong>
             </div>
-
-            <div class="p-3 rounded-xl bg-emerald-50 border border-emerald-200/80 shadow-xs">
-                <span class="text-[11px] text-emerald-800 font-bold block">صافي مستحقاتك (85%)</span>
-                <strong class="text-lg font-black text-emerald-700 block mt-0.5 font-mono">+{{ number_format($earnings['net_earnings'], 2) }} ₪</strong>
+            <div class="is-net">
+                <span>صافي مستحقاتك (85%)</span>
+                <strong>+{{ number_format($earnings['net_earnings'], 2) }} ₪</strong>
             </div>
-        </div>
+        </a>
 
         {{-- Deliveries List for this Period --}}
-        <div class="pt-2">
-            <h3 class="text-xs font-bold text-stone-800 mb-2">طلبات التوصيل المسلّمة خلال هذه الفترة:</h3>
+        <div class="pt-1">
+            <div class="flex items-center justify-between mb-2">
+                <h3 class="text-xs font-bold text-stone-800">آخر التوصيلات المسلّمة:</h3>
+                @if($earnings['orders']->isNotEmpty())
+                    <a href="{{ route('courier.wallet.statement', ['period' => $period]) }}" class="text-[11px] font-bold text-primary">عرض الكشف الكامل</a>
+                @endif
+            </div>
             @if($earnings['orders']->isEmpty())
                 <div class="py-6 text-center text-xs text-slate-400 bg-stone-50 rounded-xl">
                     لا توجد توصيلات مكتملة مسجلة في هذه الفترة.
                 </div>
             @else
                 <div class="space-y-2">
-                    @foreach($earnings['orders'] as $order)
+                    @foreach($earnings['orders']->take(4) as $order)
                         @php
                             $fee = (float) $order->delivery_fee;
                             $courierNet = round($fee * 0.85, 2);
                             $platformCut = round($fee * 0.15, 2);
                         @endphp
-                        <div class="p-3 rounded-xl bg-stone-50/80 border border-slate-200/70 flex items-center justify-between gap-2 text-xs">
-                            <div class="space-y-0.5">
+                        <a href="{{ route('courier.orders.show', ['order' => $order, 'from' => 'wallet', 'period' => $period]) }}" class="cw-wallet-order">
+                            <div class="space-y-0.5 min-w-0">
                                 <div class="flex items-center gap-2">
-                                    <a href="{{ route('courier.orders.show', $order) }}" class="font-bold text-primary hover:underline">
-                                        طلب #{{ $order->id }}
-                                    </a>
+                                    <span class="font-bold text-primary">طلب #{{ $order->id }}</span>
                                     <span class="text-slate-400 font-mono text-[10px]">
                                         {{ $order->delivered_at ? $order->delivered_at->format('Y/m/d H:i') : $order->created_at->format('Y/m/d H:i') }}
                                     </span>
                                 </div>
-                                <div class="text-slate-600 font-medium">
+                                <div class="text-slate-600 font-medium truncate">
                                     {{ $order->restaurant->name }} ← {{ $order->deliveryAreaLabel() ?: $order->address_details }}
                                 </div>
                             </div>
-
                             <div class="text-left shrink-0">
                                 <div class="font-bold font-mono text-emerald-700 text-sm">
                                     +{{ number_format($courierNet, 2) }} ₪
@@ -206,9 +193,15 @@
                                     (رسم: {{ number_format($fee, 1) }} - خصم: {{ number_format($platformCut, 1) }})
                                 </div>
                             </div>
-                        </div>
+                        </a>
                     @endforeach
                 </div>
+                @if($earnings['orders']->count() > 4)
+                    <a href="{{ route('courier.wallet.statement', ['period' => $period]) }}" class="cw-open-full cw-open-full--block">
+                        <span>عرض كل التوصيلات ({{ $earnings['count'] }})</span>
+                        <span class="material-symbols-outlined">arrow_back</span>
+                    </a>
+                @endif
             @endif
         </div>
     </section>

@@ -135,7 +135,16 @@ class CourierPayoutAndEarningsTest extends TestCase
         $this->actingAs($courier)
             ->get(route('courier.wallet', ['period' => 'yesterday']))
             ->assertOk()
-            ->assertSee('17.00');
+            ->assertSee('17.00')
+            ->assertSee('عرض كامل')
+            ->assertSee(route('courier.wallet.statement', ['period' => 'yesterday'], false));
+
+        $this->actingAs($courier)
+            ->get(route('courier.wallet.statement', ['period' => 'today']))
+            ->assertOk()
+            ->assertSee('كشف حساب الأرباح')
+            ->assertSee('8.50')
+            ->assertSee('صافي حصتك');
     }
 
     public function test_courier_can_request_payout_and_admins_are_notified(): void

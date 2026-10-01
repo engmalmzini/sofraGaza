@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Restaurant;
-use App\Models\Setting;
 use App\Services\NotificationService;
 use App\Services\RestaurantListingService;
 use Illuminate\Http\RedirectResponse;
@@ -33,9 +32,8 @@ class RestaurantController extends Controller
 
         $restaurants = $query->paginate(15)->withQueryString();
         $pendingCount = Restaurant::query()->pendingVerification()->count();
-        $pendingListingCount = \App\Models\RestaurantSubscription::query()->where('status', 'pending')->count();
 
-        return view('admin.restaurants.index', compact('restaurants', 'pendingCount', 'pendingListingCount'));
+        return view('admin.restaurants.index', compact('restaurants', 'pendingCount'));
     }
 
     public function create(): View
@@ -54,15 +52,17 @@ class RestaurantController extends Controller
         $data['verification_status'] = Restaurant::VERIFICATION_APPROVED;
         $data['verified_at'] = now();
         $data['verified_by'] = $request->user()->id;
+        $data['starts_at'] = now()->toDateString();
+        $data['expires_at'] = $data['expires_at'] ?? '2099-12-31';
 
         Restaurant::create($data);
 
-        return redirect()->route('admin.restaurants.index')->with('success', 'تمت إضافة المطعم وتحديد مدة عرضه.');
+        return redirect()->route('admin.restaurants.index')->with('success', 'تمت إضافة المطعم.');
     }
 
     public function show(Restaurant $restaurant): View
     {
-        $restaurant->load(['owner', 'verifier', 'listingSubscriptions.plan'])->loadCount('menuItems');
+        $restaurant->load(['owner', 'verifier'])->loadCount('menuItems');
 
         return view('admin.restaurants.show', compact('restaurant'));
     }
@@ -89,21 +89,12 @@ class RestaurantController extends Controller
     {
         abort_unless($restaurant->isPending(), 403);
 
-        $days = (int) ($request->integer('listing_days') ?: Setting::value('restaurant_listing_days', 90));
-        $days = max(7, min(365, $days));
-
-        $hasListing = $restaurant->activeListing() && ! $restaurant->panel_suspended;
-
         $restaurant->update([
             'verification_status' => Restaurant::VERIFICATION_APPROVED,
             'rejection_reason' => null,
-            'is_active' => $hasListing,
-            'starts_at' => $hasListing
-                ? $restaurant->activeListing()->starts_at?->toDateString()
-                : now()->toDateString(),
-            'expires_at' => $hasListing
-                ? $restaurant->activeListing()->ends_at?->toDateString()
-                : now()->addDays($days)->toDateString(),
+            'is_active' => true,
+            'panel_suspended' => false,
+            'starts_at' => $restaurant->starts_at?->toDateString() ?? now()->toDateString(),
             'verified_at' => now(),
             'verified_by' => $request->user()->id,
         ]);
@@ -112,17 +103,13 @@ class RestaurantController extends Controller
             $notifications->notify(
                 $restaurant->owner,
                 'تم قبول مطعمك',
-                $hasListing
-                    ? "تمت الموافقة على {$restaurant->name}. أصبح مطعمك ظاهراً للزبائن في الصفحة الرئيسية."
-                    : "تمت مراجعة بيانات {$restaurant->name}. لازم تشترك وتأكيد الحوالة حتى تظهر الصفحة وتُفتح اللوحة.",
-                $hasListing ? route('partner.dashboard') : route('partner.subscription.index')
+                "تمت الموافقة على {$restaurant->name}. أصبح مطعمك جاهزاً وظاهراً للزبائن في الصفحة الرئيسية.",
+                route('partner.dashboard')
             );
         }
 
         return redirect()->route('admin.restaurants.index')
-            ->with('success', $hasListing
-                ? "تمت الموافقة على {$restaurant->name} ونُشر على المنصة."
-                : "تمت مراجعة {$restaurant->name}. لن يُنشر قبل تأكيد اشتراك الظهور.");
+            ->with('success', "تمت الموافقة على {$restaurant->name} ونُشر على المنصة.");
     }
 
     public function reject(Request $request, Restaurant $restaurant, NotificationService $notifications): RedirectResponse
@@ -184,8 +171,6 @@ class RestaurantController extends Controller
             'description' => ['nullable', 'string'],
             'phone' => ['nullable', 'string', 'max:20'],
             'address' => ['nullable', 'string', 'max:255'],
-            'starts_at' => ['required', 'date'],
-            'expires_at' => ['required', 'date', 'after_or_equal:starts_at'],
             'image' => ['nullable', 'image', 'max:4096'],
             'is_active' => ['nullable'],
             'is_featured' => ['nullable'],

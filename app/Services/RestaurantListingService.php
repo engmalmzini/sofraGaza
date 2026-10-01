@@ -74,7 +74,6 @@ class RestaurantListingService
                 'is_active' => true,
                 'panel_suspended' => false,
                 'starts_at' => $starts->toDateString(),
-                'expires_at' => $ends->toDateString(),
                 'verified_at' => now(),
             ]);
         });
@@ -85,7 +84,7 @@ class RestaurantListingService
             $this->notifications->notify(
                 $subscription->restaurant->owner,
                 'تم تفعيل اشتراكك',
-                "تم تأكيد حوالة باقة {$plan->name}. تقدر تضيف المنيو، و{$subscription->restaurant->venueNounYours()} ظاهر على الموقع حتى ".$subscription->ends_at->translatedFormat('d F Y').'.',
+                "تم تأكيد حوالة باقة {$plan->name}. تقدر تضيف المنيو، و{$subscription->restaurant->venueNounYours()} ظاهر على الموقع.",
                 route('partner.dashboard')
             );
         }
@@ -112,8 +111,8 @@ class RestaurantListingService
             $this->notifications->notify(
                 $subscription->restaurant->owner,
                 'لم يتم قبول حوالة الاشتراك',
-                $reason.' يمكنك رفع إشعار جديد من صفحة الاشتراك.',
-                route('partner.subscription.index')
+                $reason.' يمكنك تعديل البيانات من لوحة المطعم.',
+                route('partner.dashboard')
             );
         }
 
@@ -131,8 +130,8 @@ class RestaurantListingService
             $this->notifications->notify(
                 $restaurant->owner,
                 'تم إيقاف لوحة المطعم',
-                'قم بتجديد الاشتراك. بياناتك محفوظة ولن يظهر '.$restaurant->venueNounYours().' على الموقع حتى إعادة التفعيل.',
-                route('partner.subscription.index')
+                'بياناتك محفوظة ولن يظهر '.$restaurant->venueNounYours().' على الموقع حتى تعيد الإدارة تفعيل اللوحة.',
+                route('partner.dashboard')
             );
         }
 
@@ -141,24 +140,20 @@ class RestaurantListingService
 
     public function unsuspend(Restaurant $restaurant): string
     {
-        $listing = $restaurant->activeListing();
-
-        if (! $listing) {
-            throw new RuntimeException('لا يوجد اشتراك ساري. أكّد حوالة الباقة أولاً ثم أعد تفعيل اللوحة.');
+        if (! $restaurant->isApproved()) {
+            throw new RuntimeException('المطعم غير موافق عليه بعد. وافق على البيانات أولاً ثم أعد تفعيل اللوحة.');
         }
 
         $restaurant->update([
             'panel_suspended' => false,
             'is_active' => true,
-            'starts_at' => $listing->starts_at?->toDateString() ?? now()->toDateString(),
-            'expires_at' => $listing->ends_at?->toDateString(),
         ]);
 
         if ($restaurant->owner) {
             $this->notifications->notify(
                 $restaurant->owner,
                 'تم إعادة فتح اللوحة',
-                'اشتراكك ساري ويمكنك إدارة المنيو من جديد.',
+                'يمكنك إدارة المنيو من جديد، و'.$restaurant->venueNounYours().' ظاهر للزبائن.',
                 route('partner.dashboard')
             );
         }

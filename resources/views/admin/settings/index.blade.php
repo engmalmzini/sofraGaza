@@ -11,8 +11,8 @@
     $pointsDeliveryVal = (string) ($settings->firstWhere('key', 'points_include_delivery')?->value ?? '1');
     $drinkPointsVal = $settings->firstWhere('key', 'drink_points')?->value ?? '20';
     $mealPointsVal = $settings->firstWhere('key', 'meal_points')?->value ?? '50';
-    $restaurantListingDaysVal = $settings->firstWhere('key', 'restaurant_listing_days')?->value ?? '90';
-    $restaurantExpiryWarningDaysVal = $settings->firstWhere('key', 'restaurant_expiry_warning_days')?->value ?? '7';
+    $referralInviterVal = $settings->firstWhere('key', 'referral_inviter_points')?->value ?? '50';
+    $referralInviteeVal = $settings->firstWhere('key', 'referral_invitee_points')?->value ?? '50';
     $membershipExpiryWarningDaysVal = $settings->firstWhere('key', 'membership_expiry_warning_days')?->value ?? '3';
 
     $managedKeys = [
@@ -35,6 +35,8 @@
         'points_include_delivery',
         'drink_points',
         'meal_points',
+        'referral_inviter_points',
+        'referral_invitee_points',
         'restaurant_listing_days',
         'restaurant_expiry_warning_days',
         'membership_expiry_warning_days',
@@ -120,7 +122,7 @@
                     </div>
                     <div>
                         <h2 class="text-base font-bold text-stone-900">بيانات الدفع والتحويل المعتمدة</h2>
-                        <p class="text-xs text-slate-500">تظهر هذه الحسابات للزبائن في الدفع المباشر، شحن المحفظة، واشتراكات المطاعم والعضويات</p>
+                        <p class="text-xs text-slate-500">تظهر هذه الحسابات للزبائن في الدفع المباشر، شحن المحفظة، واشتراكات العضويات</p>
                     </div>
                 </div>
                 <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-slate-100 text-stone-800">
@@ -563,6 +565,17 @@
                     </div>
                 </div>
 
+                <div class="grid gap-4 sm:grid-cols-2">
+                    <div class="p-4 rounded-xl bg-emerald-50/70 border border-emerald-100">
+                        <label class="block text-xs font-bold text-stone-900 mb-1">نقاط الداعي عند انضمام صديق (برنامج دائم)</label>
+                        <input type="number" min="0" name="settings[referral_inviter_points]" value="{{ $referralInviterVal }}" class="text-sm font-bold font-mono w-full !h-10 bg-white">
+                    </div>
+                    <div class="p-4 rounded-xl bg-emerald-50/70 border border-emerald-100">
+                        <label class="block text-xs font-bold text-stone-900 mb-1">نقاط الصديق الجديد عند إدخال كود الدعوة</label>
+                        <input type="number" min="0" name="settings[referral_invitee_points]" value="{{ $referralInviteeVal }}" class="text-sm font-bold font-mono w-full !h-10 bg-white">
+                    </div>
+                </div>
+
                 {{-- Live Interactive Preview Calculator --}}
                 <div class="p-4 rounded-xl bg-stone-900 text-white space-y-3">
                     <div class="flex items-center gap-2 font-bold text-sm">
@@ -714,43 +727,7 @@
             </div>
 
             <div class="p-6 space-y-6">
-                <div class="grid gap-5 sm:grid-cols-3">
-                    {{-- Restaurant listing days --}}
-                    <div class="p-4 rounded-xl bg-white border border-slate-200/90 shadow-2xs space-y-2">
-                        <label class="block text-xs font-bold text-stone-900 flex items-center gap-1.5">
-                            <span class="material-symbols-outlined text-primary text-[18px]">calendar_month</span>
-                            <span>مدة عرض واشتراك المطعم</span>
-                        </label>
-                        <div class="flex items-center gap-2">
-                            <input type="number" 
-                                   min="1" 
-                                   max="3650" 
-                                   name="settings[restaurant_listing_days]" 
-                                   value="{{ $restaurantListingDaysVal }}" 
-                                   class="text-sm font-bold font-mono w-full !h-10">
-                            <span class="text-xs font-bold text-slate-500">يوم</span>
-                        </div>
-                        <p class="text-[11px] text-slate-400">المدة الافتراضية لعرض المطعم على المنصة بعد الموافقة على اشتراكه.</p>
-                    </div>
-
-                    {{-- Restaurant expiry warning --}}
-                    <div class="p-4 rounded-xl bg-white border border-slate-200/90 shadow-2xs space-y-2">
-                        <label class="block text-xs font-bold text-stone-900 flex items-center gap-1.5">
-                            <span class="material-symbols-outlined text-primary text-[18px]">notification_important</span>
-                            <span>تنبيه انتهاء عرض المطعم</span>
-                        </label>
-                        <div class="flex items-center gap-2">
-                            <input type="number" 
-                                   min="1" 
-                                   max="60" 
-                                   name="settings[restaurant_expiry_warning_days]" 
-                                   value="{{ $restaurantExpiryWarningDaysVal }}" 
-                                   class="text-sm font-bold font-mono w-full !h-10">
-                            <span class="text-xs font-bold text-slate-500">يوم</span>
-                        </div>
-                        <p class="text-[11px] text-slate-400">عدد الأيام قبل انتهاء عرض المطعم لإرسال إشعار تنبيه للإدارة والمطعم.</p>
-                    </div>
-
+                <div class="grid gap-5 sm:grid-cols-2">
                     {{-- Membership expiry warning --}}
                     <div class="p-4 rounded-xl bg-white border border-slate-200/90 shadow-2xs space-y-2">
                         <label class="block text-xs font-bold text-stone-900 flex items-center gap-1.5">

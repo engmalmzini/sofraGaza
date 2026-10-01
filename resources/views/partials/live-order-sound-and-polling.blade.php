@@ -10,7 +10,7 @@
         $liveEndpoint = route('partner.orders.live');
         $hasSound = true;
         $serverLatestOrderId = auth()->user()->ownedRestaurant?->orders()->max('id') ?? 0;
-    } elseif (request()->routeIs('admin.*') && auth()->check() && auth()->user()->isAdmin()) {
+    } elseif (request()->routeIs('admin.*') && auth()->check() && auth()->user()->isAdmin() && auth()->user()->canAccessAdmin('orders')) {
         $role = 'admin';
         $liveEndpoint = route('admin.orders.live');
         $hasSound = true;
@@ -354,14 +354,21 @@
 
                 // Update container HTML if on partner dashboard / orders
                 const partnerContainer = document.getElementById('partner-orders-container');
-                if (partnerContainer && data.html) {
-                    partnerContainer.innerHTML = data.html;
+                if (partnerContainer && (data.board_html || data.html) && partnerContainer.querySelector('[data-order-board]')) {
+                    if (!document.body.classList.contains('is-dragging-order')) {
+                        partnerContainer.innerHTML = data.board_html || data.html;
+                    }
                 }
 
                 // Update Admin orders tbody if on admin orders index
                 const adminTbody = document.getElementById('admin-orders-tbody');
                 if (adminTbody && data.html) {
                     adminTbody.innerHTML = data.html;
+                }
+
+                const adminBoard = document.getElementById('admin-orders-board');
+                if (adminBoard && data.board_html && !document.body.classList.contains('is-dragging-order')) {
+                    adminBoard.innerHTML = data.board_html;
                 }
 
                 // Update Courier orders container
@@ -390,13 +397,27 @@
                 localStorage.setItem(storageKey, lastKnownId);
             }
 
-            // Keep HTML fresh if count changes (e.g. status changed from confirmed to delivering)
-            if (data.html) {
-                const partnerContainer = document.getElementById('partner-orders-container');
-                if (partnerContainer && data.active_count !== undefined) {
-                    const cards = partnerContainer.querySelectorAll('[data-order-card]');
-                    if (cards.length !== data.active_count) {
-                        partnerContainer.innerHTML = data.html;
+            // Keep HTML fresh if board signature / counts change
+            if (!document.body.classList.contains('is-dragging-order')) {
+                const signature = data.board_signature || '';
+                const prevSignature = window.__sofraBoardSignature || '';
+                if (signature && signature !== prevSignature) {
+                    window.__sofraBoardSignature = signature;
+                    const partnerContainer = document.getElementById('partner-orders-container');
+                    if (partnerContainer && (data.board_html || data.html) && partnerContainer.querySelector('[data-order-board]')) {
+                        partnerContainer.innerHTML = data.board_html || data.html;
+                    }
+                    const adminBoard = document.getElementById('admin-orders-board');
+                    if (adminBoard && data.board_html) {
+                        adminBoard.innerHTML = data.board_html;
+                    }
+                } else if (data.html) {
+                    const partnerContainer = document.getElementById('partner-orders-container');
+                    if (partnerContainer && data.active_count !== undefined && !partnerContainer.querySelector('[data-order-board]')) {
+                        const cards = partnerContainer.querySelectorAll('[data-order-card]');
+                        if (cards.length !== data.active_count) {
+                            partnerContainer.innerHTML = data.html;
+                        }
                     }
                 }
             }

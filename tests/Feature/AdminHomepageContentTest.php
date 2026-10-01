@@ -52,6 +52,49 @@ class AdminHomepageContentTest extends TestCase
             ->assertSee('شركاؤنا الذهبيون', false);
     }
 
+    public function test_admin_can_toggle_app_download_section_on_the_homepage(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+
+        $this->actingAs($admin)
+            ->get(route('admin.homepage.index'))
+            ->assertOk()
+            ->assertSee('إظهار القسم في الصفحة الرئيسية', false)
+            ->assertSee('فعّله بعد نشر التطبيق', false);
+
+        $this->get(route('home'))
+            ->assertOk()
+            ->assertDontSee('aria-label="حمّل تطبيق سفرة غزة"', false);
+
+        $this->actingAs($admin)
+            ->post(route('admin.homepage.update'), [
+                'content' => [
+                    'app_section_visible' => '1',
+                ],
+            ])
+            ->assertRedirect();
+
+        $this->assertTrue(HomeContent::isOn('app_section_visible'));
+
+        $this->get(route('home'))
+            ->assertOk()
+            ->assertSee('aria-label="حمّل تطبيق سفرة غزة"', false);
+
+        $this->actingAs($admin)
+            ->post(route('admin.homepage.update'), [
+                'content' => [
+                    'app_section_visible' => '0',
+                ],
+            ])
+            ->assertRedirect();
+
+        $this->assertFalse(HomeContent::isOn('app_section_visible'));
+
+        $this->get(route('home'))
+            ->assertOk()
+            ->assertDontSee('aria-label="حمّل تطبيق سفرة غزة"', false);
+    }
+
     public function test_admin_can_add_partner_logo_shown_on_home(): void
     {
         Storage::fake('public');

@@ -7,17 +7,22 @@ use App\Exceptions\SmsDeliveryException;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Services\CustomerPhoneVerification;
+use App\Services\ReferralService;
 use App\Support\PalestinianPhone;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class RegisterController extends Controller
 {
-    public function create(CustomerPhoneVerification $verification)
+    public function create(Request $request, CustomerPhoneVerification $verification, ReferralService $referrals)
     {
+        $referrals->rememberIncomingCode($request->query('ref'));
+
         return view('auth.register', [
             'step' => $verification->step(),
             'verifiedPhone' => $verification->phone(),
+            'referralCode' => old('referral_code', $referrals->incomingCode()),
+            'inviteePoints' => $referrals->inviteePoints(),
         ]);
     }
 
@@ -70,7 +75,7 @@ class RegisterController extends Controller
         return redirect()->route('register')->with('success', 'تم التحقق من رقم الهاتف. أكمل بيانات الحساب.');
     }
 
-    public function store(Request $request, CustomerPhoneVerification $verification)
+    public function store(Request $request, CustomerPhoneVerification $verification, ReferralService $referrals)
     {
         $phone = $verification->verifiedPhone();
 
@@ -81,11 +86,14 @@ class RegisterController extends Controller
         $data = $request->validate([
             'name' => ['required', 'string', 'max:120'],
             'password' => ['required', 'string', 'min:6', 'confirmed'],
+            'referral_code' => ['nullable', 'string', 'max:16'],
         ], [
             'name.required' => 'الاسم مطلوب.',
             'password.min' => 'كلمة المرور يجب ألا تقل عن 6 أحرف.',
             'password.confirmed' => 'تأكيد كلمة المرور غير مطابق.',
         ]);
+
+        $referrer = $referrals->resolveReferrer($data['referral_code'] ?? null);
 
         if (User::query()->where('phone', $phone)->exists()) {
             $verification->clear();
@@ -101,11 +109,17 @@ class RegisterController extends Controller
             'role' => 'customer',
         ]);
 
+        $awarded = $referrer ? $referrals->awardBoth($referrer, $user) : false;
+        $referrals->forgetIncomingCode();
         $verification->clear();
 
-        Auth::login($user);
+        Auth::login($user->fresh());
 
-        return redirect()->route('home')->with('success', 'تم إنشاء حسابك بنجاح. أهلاً بك في سفرة غزة.');
+        $message = $awarded
+            ? 'تم إنشاء حسابك بنجاح. أهلاً بك — حصلت أنت والصديق على نقاط الدعوة.'
+            : 'تم إنشاء حسابك بنجاح. أهلاً بك في سفرة غزة.';
+
+        return redirect()->route('home')->with('success', $message);
     }
 
     private function deliverCode(CustomerPhoneVerification $verification, string $phone, ?string $ip)

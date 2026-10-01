@@ -3,6 +3,9 @@
 namespace App\Models;
 
 use App\Models\Concerns\HasStoredReceipt;
+use App\Support\Finance;
+use Carbon\CarbonInterface;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -24,6 +27,7 @@ class Order extends Model
     protected $fillable = [
         'user_id',
         'restaurant_id',
+        'group_order_id',
         'courier_id',
         'membership_id',
         'coupon_id',
@@ -72,6 +76,75 @@ class Order extends Model
         return max(0.0, round((float) $this->subtotal - (float) $this->discount_amount, 2));
     }
 
+    public function isPurchase(): bool
+    {
+        return ($this->type ?? 'purchase') !== 'redemption';
+    }
+
+    public function isRedemption(): bool
+    {
+        return ($this->type ?? '') === 'redemption' || (int) $this->points_spent > 0;
+    }
+
+    public function platformCommission(): float
+    {
+        return round($this->foodTotal() * Finance::RESTAURANT_COMMISSION_RATE, 2);
+    }
+
+    public function restaurantNet(): float
+    {
+        return round($this->foodTotal() - $this->platformCommission(), 2);
+    }
+
+    public function courierFinanceShare(): float
+    {
+        return round($this->foodTotal() * Finance::COURIER_ORDER_SHARE_RATE, 2);
+    }
+
+    public function isPremiumGift(): bool
+    {
+        $this->loadMissing('membership');
+
+        return $this->isRedemption()
+            && (float) ($this->membership?->monthly_price ?? 0) >= Finance::PREMIUM_GIFT_MIN_PRICE;
+    }
+
+    public function giftCost(): float
+    {
+        if (! $this->isRedemption()) {
+            return 0.0;
+        }
+
+        $this->loadMissing('items.menuItem');
+
+        return round($this->items->sum(function (OrderItem $item) {
+            $unit = (float) ($item->menuItem?->price ?: $item->price);
+
+            return $unit * max(1, (int) $item->quantity);
+        }), 2);
+    }
+
+    public function scopePurchase(Builder $query): Builder
+    {
+        return $query->where('type', '!=', 'redemption');
+    }
+
+    public function scopeDeliveredIn(Builder $query, CarbonInterface $start, CarbonInterface $end): Builder
+    {
+        return $query->where('status', 'delivered')->where(function (Builder $inner) use ($start, $end) {
+            $inner->whereBetween('delivered_at', [$start, $end])
+                ->orWhere(function (Builder $fallback) use ($start, $end) {
+                    $fallback->whereNull('delivered_at')->whereBetween('updated_at', [$start, $end]);
+                });
+        });
+    }
+
+    public function scopeIncompleteIn(Builder $query, CarbonInterface $start, CarbonInterface $end): Builder
+    {
+        return $query->whereIn('status', ['cancelled', 'rejected'])
+            ->whereBetween('updated_at', [$start, $end]);
+    }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
@@ -80,6 +153,16 @@ class Order extends Model
     public function restaurant(): BelongsTo
     {
         return $this->belongsTo(Restaurant::class);
+    }
+
+    public function groupOrder(): BelongsTo
+    {
+        return $this->belongsTo(GroupOrder::class);
+    }
+
+    public function isGroupOrder(): bool
+    {
+        return $this->group_order_id !== null;
     }
 
     public function courier(): BelongsTo
@@ -141,11 +224,18 @@ class Order extends Model
 
     public function paymentMethodLabel(): string
     {
-        return match ($this->payment_method) {
+        $label = match ($this->payment_method) {
             'wallet' => 'رصيد المحفظة',
             'receipt' => 'حوالة بنكية / جوال باي',
+            'group' => 'طلب جماعي',
             default => $this->payment_method ?: 'حوالة',
         };
+
+        if ($this->isGroupOrder()) {
+            return 'طلب جماعي — كل واحد دفع نصيبه';
+        }
+
+        return $label;
     }
 
     public function nextStatuses(): array
@@ -157,5 +247,27 @@ class Order extends Model
             'delivering' => ['delivered' => 'تم التسليم'],
             default => [],
         };
+    }
+
+    public function boardColumn(): string
+    {
+        return match ($this->status) {
+            'confirmed', 'preparing' => 'preparing',
+            'delivering' => 'delivering',
+            'delivered' => 'delivered',
+            default => 'pending_confirmation',
+        };
+    }
+
+    public static function groupForBoard($orders): array
+    {
+        $collection = collect($orders);
+
+        return [
+            'pending_confirmation' => $collection->where('status', 'pending_confirmation')->values(),
+            'preparing' => $collection->whereIn('status', ['confirmed', 'preparing'])->values(),
+            'delivering' => $collection->where('status', 'delivering')->values(),
+            'delivered' => $collection->where('status', 'delivered')->values(),
+        ];
     }
 }

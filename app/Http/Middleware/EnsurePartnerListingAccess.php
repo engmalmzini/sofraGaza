@@ -16,10 +16,10 @@ class EnsurePartnerListingAccess
 
         $restaurant = $request->user()?->ownedRestaurant;
 
-        if ($restaurant?->hasPaidAccess()) {
-            return $next($request);
+        if ($restaurant?->panel_suspended && ! $request->routeIs('partner.dashboard', 'partner.notifications.*', 'partner.restaurant.*')) {
+            return redirect()->route('partner.dashboard')->with('error', $restaurant->panelLockMessage());
         }
 
-        return redirect()->route('partner.subscription.index');
+        return $next($request);
     }
 }

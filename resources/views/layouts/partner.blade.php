@@ -16,8 +16,8 @@
             'items' => [
                 ['route' => 'partner.dashboard', 'icon' => 'dashboard', 'label' => 'نظرة عامة', 'match' => 'partner.dashboard'],
                 ['route' => 'partner.orders.index', 'icon' => 'receipt_long', 'label' => 'الطلبات الواردة', 'match' => 'partner.orders.*', 'badge' => $pendingPartnerOrdersCount],
-                ['route' => 'partner.subscription.index', 'icon' => 'workspace_premium', 'label' => 'الاشتراك', 'match' => 'partner.subscription.*'],
                 ['route' => 'partner.restaurant.edit', 'icon' => 'storefront', 'label' => 'بيانات '.($partnerRestaurant?->venueNoun() ?? 'المكان'), 'match' => 'partner.restaurant.*'],
+                ['route' => 'partner.boosts.index', 'icon' => 'campaign', 'label' => 'الإعلان والظهور الأول', 'match' => 'partner.boosts.*'],
                 ['route' => 'partner.menu-items.index', 'icon' => 'restaurant_menu', 'label' => 'المنيو والتصنيفات', 'match' => 'partner.menu-items.*'],
             ],
         ],
@@ -31,10 +31,10 @@
     ];
 @endphp
     <title>@yield('title', $panelTitle) — سفرة غزة</title>
+    @include('partials.icon-font')
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="admin-app">
@@ -127,5 +127,45 @@
         </main>
     </div>
     @include('partials.live-order-sound-and-polling')
+
+    @if($partnerRestaurant?->isPending())
+        <div class="partner-visit-overlay" id="partner-visit-dialog" role="dialog" aria-modal="true" aria-labelledby="partner-visit-title">
+            <div class="partner-visit-card">
+                <div class="partner-visit-card__icon" aria-hidden="true">
+                    <span class="material-symbols-outlined">storefront</span>
+                </div>
+                <p class="partner-visit-card__kicker">حساب قيد المراجعة</p>
+                <h2 id="partner-visit-title">سيتم زيارة {{ $partnerRestaurant->venueNounYours() }} قريباً</h2>
+                <p>
+                    حساب <strong>{{ $partnerRestaurant->name }}</strong> لا يزال قيد مراجعة الإدارة.
+                    سيتم زيارة {{ $partnerRestaurant->venueNounYours() }} قريباً من قبل فريق سفرة غزة للتحقق من البيانات، وبعد الموافقة يظهر للزبائن.
+                </p>
+                <button type="button" class="admin-btn admin-btn--primary partner-visit-card__ok" id="partner-visit-dismiss">
+                    حسناً، فهمت
+                </button>
+            </div>
+        </div>
+        <script>
+            (function () {
+                var root = document.getElementById('partner-visit-dialog');
+                if (!root) return;
+                var key = 'partner-visit-dialog-{{ auth()->id() }}-{{ csrf_token() }}';
+                try {
+                    if (sessionStorage.getItem(key) === '1') {
+                        root.hidden = true;
+                        return;
+                    }
+                } catch (e) {}
+                document.body.classList.add('partner-visit-lock');
+                var btn = document.getElementById('partner-visit-dismiss');
+                if (!btn) return;
+                btn.addEventListener('click', function () {
+                    root.hidden = true;
+                    document.body.classList.remove('partner-visit-lock');
+                    try { sessionStorage.setItem(key, '1'); } catch (e) {}
+                });
+            })();
+        </script>
+    @endif
 </body>
 </html>

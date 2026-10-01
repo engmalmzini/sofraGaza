@@ -21,6 +21,11 @@
         @unless($item->is_available)
             <span class="rd-dish__badge is-muted">غير متوفر</span>
         @endunless
+        @include('partials.favorite-button', [
+            'type' => 'menu_item',
+            'id' => $item->id,
+            'class' => 'absolute top-2 left-2 w-8 h-8 rounded-full bg-white/92 text-stone-600 flex items-center justify-center shadow-sm z-10',
+        ])
     </div>
     <div class="rd-dish__body">
         <h3 class="rd-dish__title">{{ $item->name }}</h3>
@@ -29,7 +34,7 @@
         @endif
         <div class="rd-dish__foot">
             <span class="rd-dish__price">{{ number_format((float) $item->price, 0) }} <span class="ils">₪</span></span>
-            @if($item->is_available)
+            @if($item->is_available && ($canShop ?? true))
                 <div class="rd-dish__actions">
                     <button
                         type="button"

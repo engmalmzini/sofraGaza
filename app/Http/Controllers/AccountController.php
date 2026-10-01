@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Concerns\ManagesAppNotifications;
 use App\Models\Address;
 use App\Models\AppNotification;
+use App\Models\GroupOrderMember;
 use App\Models\Order;
+use App\Services\ReferralService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -22,6 +24,10 @@ class AccountController extends Controller
             return redirect()->route('courier.dashboard');
         }
 
+        if (! $user->canShopAsCustomer()) {
+            return redirect()->to($user->staffHomeRoute());
+        }
+
         return view('account.show', [
             'user' => $user,
             'membership' => $user->activeMembership(),
@@ -30,21 +36,50 @@ class AccountController extends Controller
             'recentOrders' => $user->orders()->with('restaurant')->latest()->take(5)->get(),
             'ordersCount' => $user->orders()->count(),
             'addressesCount' => $user->addresses()->count(),
+            'favoritesCount' => $user->favorites()->count(),
+            'referredCount' => $user->referredUsers()->count(),
             'unreadNotifications' => $user->unreadNotificationsCount(),
+        ]);
+    }
+
+    public function invite(ReferralService $referrals): View|RedirectResponse
+    {
+        $user = auth()->user();
+
+        if ($user->isCourier() || ! $user->canShopAsCustomer()) {
+            return redirect()->to($user->staffHomeRoute());
+        }
+
+        $code = $user->ensureReferralCode();
+        $invites = $user->referredUsers()->latest()->take(30)->get();
+
+        return view('account.invite', [
+            'user' => $user,
+            'code' => $code,
+            'shareUrl' => $referrals->shareUrl($user),
+            'shareText' => $referrals->shareText($user),
+            'whatsappUrl' => $referrals->whatsappShareUrl($user),
+            'inviterPoints' => $referrals->inviterPoints(),
+            'inviteePoints' => $referrals->inviteePoints(),
+            'invites' => $invites,
+            'invitesCount' => $user->referredUsers()->count(),
         ]);
     }
 
     public function orders(): View
     {
-        $orders = auth()->user()->orders()->with('restaurant')->paginate(10);
+        $orders = $this->customerOrdersQuery()->paginate(10);
+        $ordersByStatus = Order::groupForBoard(
+            $this->customerOrdersQuery()->take(40)->get()
+        );
 
-        return view('account.orders', compact('orders'));
+        return view('account.orders', compact('orders', 'ordersByStatus'));
     }
 
     public function showOrder(Order $order): View
     {
-        abort_unless($order->user_id === auth()->id(), 403);
-        $order->load(['items', 'restaurant', 'review']);
+        $this->authorizeCustomerOrder($order);
+        $order->load(['items', 'restaurant', 'review', 'groupOrder.members.user']);
 
         return view('account.order-show', compact('order'));
     }
@@ -142,5 +177,34 @@ class AccountController extends Controller
     protected function notificationReadRoute(): string
     {
         return 'account.notifications.read';
+    }
+
+    private function customerOrdersQuery()
+    {
+        $userId = auth()->id();
+
+        return Order::query()
+            ->with('restaurant')
+            ->where(function ($query) use ($userId) {
+                $query->where('user_id', $userId)
+                    ->orWhereHas('groupOrder.members', function ($members) use ($userId) {
+                        $members->where('user_id', $userId)
+                            ->where('status', '!=', GroupOrderMember::STATUS_DECLINED);
+                    });
+            })
+            ->latest();
+    }
+
+    private function authorizeCustomerOrder(Order $order): void
+    {
+        $user = auth()->user();
+        abort_unless($user, 403);
+
+        if ((int) $order->user_id === (int) $user->id) {
+            return;
+        }
+
+        $order->loadMissing('groupOrder.members');
+        abort_unless($order->groupOrder?->memberFor($user), 403);
     }
 }

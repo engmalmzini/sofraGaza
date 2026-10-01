@@ -54,8 +54,14 @@ class HomeContent
             ],
             'app' => [
                 'label' => 'قسم التطبيق',
-                'hint' => 'عنوان بانر تحميل التطبيق',
+                'hint' => 'بانر تحميل التطبيق على الرئيسية. أخفه حتى يصبح التطبيق متاحاً على المتاجر.',
                 'fields' => [
+                    'app_section_visible' => [
+                        'label' => 'إظهار القسم في الصفحة الرئيسية',
+                        'type' => 'toggle',
+                        'default' => '0',
+                        'help' => 'فعّله بعد نشر التطبيق على Google Play و App Store حتى يظهر زر التحميل للزوار.',
+                    ],
                     'app_heading_line1' => ['label' => 'عنوان التطبيق — السطر الأول', 'type' => 'text', 'default' => 'حمّل'],
                     'app_heading_line2' => ['label' => 'عنوان التطبيق — السطر الثاني', 'type' => 'text', 'default' => 'تطبيقنا'],
                 ],
@@ -144,6 +150,13 @@ class HomeContent
         $values = static::values();
 
         return $values[$key] ?? $default ?? (static::defaults()[$key] ?? '');
+    }
+
+    public static function isOn(string $key): bool
+    {
+        $value = strtolower(trim((string) static::get($key, '0')));
+
+        return in_array($value, ['1', 'true', 'on', 'yes'], true);
     }
 
     public static function imageUrl(string $key): string

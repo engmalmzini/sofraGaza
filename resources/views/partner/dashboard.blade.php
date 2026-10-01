@@ -3,7 +3,11 @@
 @section('title', 'نظرة عامة')
 
 @section('content')
-@if($restaurant->isPending())
+@if($restaurant->panel_suspended)
+    <div class="admin-alert admin-alert--err">
+        تم إيقاف اللوحة. بياناتك محفوظة ولن يظهر {{ $restaurant->venueNounYours() }} على الموقع حتى تعيد الإدارة تفعيله.
+    </div>
+@elseif($restaurant->isPending())
     <div class="admin-alert admin-alert--wait">
         حالتك الآن: <strong>جاري التحقق</strong>. يمكنك تجهيز بيانات {{ $restaurant->venueNoun() }} والتصنيفات والمنيو من الآن. لن يظهر {{ $restaurant->venueNounYours() }} في الصفحة الرئيسية حتى توافق الإدارة.
     </div>
@@ -24,33 +28,6 @@
     </div>
 @endif
 
-@if($listing)
-    <section class="admin-card mb-4">
-        <div class="admin-toolbar">
-            <h2>اشتراكك</h2>
-            <a class="admin-btn admin-btn--ghost" href="{{ route('partner.subscription.index') }}">تفاصيل وتجديد</a>
-        </div>
-        @if($listing->isExpiringSoon())
-            <p class="mt-2 text-sm text-primary">تنبيه: باقي {{ $listing->daysRemaining() }} أيام على انتهاء الباقة.</p>
-        @endif
-        <div class="admin-metrics mt-3">
-            <article class="admin-metric admin-metric--accent">
-                <span>الباقة</span>
-                <strong class="!text-xl">{{ $listing->plan->name }}</strong>
-            </article>
-            <article class="admin-metric">
-                <span>المدة</span>
-                <strong class="!text-xl">{{ $listing->plan->durationLabel() }}</strong>
-            </article>
-            <article class="admin-metric">
-                <span>باقي</span>
-                <strong class="!text-xl">{{ $listing->daysRemaining() }} يوم</strong>
-            </article>
-        </div>
-        <p class="mt-2 text-sm text-on-surface-variant">من {{ $listing->starts_at?->format('Y-m-d') }} إلى {{ $listing->ends_at?->format('Y-m-d') }}</p>
-    </section>
-@endif
-
 <div class="admin-metrics">
     <article class="admin-metric admin-metric--accent">
         <span>الطلبات الواردة النشطة</span>
@@ -66,9 +43,21 @@
     </article>
     <article class="admin-metric">
         <span>الظهور للزبائن</span>
-        <strong class="!text-xl">{{ $restaurant->isVisible() ? 'ظاهر' : 'قيد المراجعة' }}</strong>
+        <strong class="!text-xl">{{ $restaurant->isVisible() ? 'ظاهر' : ($restaurant->isApproved() ? 'متوقف' : 'قيد المراجعة') }}</strong>
     </article>
 </div>
+
+@if($restaurant->isApproved() && ! $restaurant->panel_suspended)
+    <section class="admin-card mb-4 border border-amber-200 bg-amber-50/40">
+        <div class="admin-toolbar flex-wrap gap-2">
+            <div>
+                <h2>إعلان مدفوع — الظهور أولاً</h2>
+                <p class="text-sm text-slate-600 mt-1">{{ number_format(\App\Support\Finance::BOOST_DAILY_RATE, 0) }} ₪ لليوم. حدّد الأيام، يُحسب السعر، ثم حوّل وأرفق الإشعار.</p>
+            </div>
+            <a class="admin-btn admin-btn--primary text-xs" href="{{ route('partner.boosts.index') }}">شراء إعلان</a>
+        </div>
+    </section>
+@endif
 
 <section class="admin-card mb-4" id="partner-live-orders-section" data-last-id="{{ $activeOrders->max('id') ?? 0 }}" data-live-url="{{ route('partner.orders.live') }}">
     <div class="admin-toolbar flex-wrap gap-2">
@@ -87,10 +76,10 @@
             <a class="admin-btn admin-btn--ghost text-xs" href="{{ route('partner.orders.index') }}">كل الطلبات</a>
         </div>
     </div>
-    <p class="mt-1 text-xs text-on-surface-variant">تظهر الطلبات الجديدة هنا فور إرسال الزبون لها مع رنين إشعار (تزمير) دون الحاجة لتحديث الصفحة.</p>
+    <p class="mt-1 text-xs text-on-surface-variant">اسحب الطلب وأفلته في قيد التحضير ليبدأ التحضير تلقائياً. الطلبات الجديدة تظهر هنا فوراً مع رنين إشعار.</p>
 
-    <div id="partner-orders-container" class="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        @include('partner.orders.partials.order-cards', ['orders' => $activeOrders, 'restaurant' => $restaurant])
+    <div id="partner-orders-container" class="mt-4">
+        @include('partner.orders.partials.order-board', ['ordersByStatus' => $ordersByStatus])
     </div>
 </section>
 

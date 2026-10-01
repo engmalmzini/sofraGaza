@@ -59,7 +59,7 @@ class RestaurantController extends Controller
         } elseif ($sort === 'rating') {
             $query->orderByDesc('avg_rating')->latest();
         } else {
-            $query->orderByDesc('is_featured')->latest();
+            $query->boostedFirst()->orderByDesc('is_featured')->latest();
         }
 
         $restaurants = $query->paginate(12)->withQueryString();

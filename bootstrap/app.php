@@ -1,9 +1,13 @@
 <?php
 
+use App\Http\Middleware\EnsureAdminPermission;
+use App\Http\Middleware\EnsureCustomerShopping;
 use App\Http\Middleware\EnsurePartnerListingAccess;
+use App\Http\Middleware\EnsureSuperAdmin;
 use App\Http\Middleware\EnsureUserIsAdmin;
 use App\Http\Middleware\EnsureUserIsCourier;
 use App\Http\Middleware\EnsureUserIsRestaurantOwner;
+use App\Http\Middleware\RecordAdminAudit;
 use App\Services\ExpiryNoticeService;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Application;
@@ -22,9 +26,13 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
             'admin' => EnsureUserIsAdmin::class,
+            'admin.module' => EnsureAdminPermission::class,
+            'admin.super' => EnsureSuperAdmin::class,
+            'admin.audit' => RecordAdminAudit::class,
             'partner' => EnsureUserIsRestaurantOwner::class,
             'partner.listing' => EnsurePartnerListingAccess::class,
             'courier' => EnsureUserIsCourier::class,
+            'customer.shop' => EnsureCustomerShopping::class,
         ]);
         $middleware->validateCsrfTokens(except: [
             'logout',

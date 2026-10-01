@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'لوحة التحكم') — سفرة غزة</title>
+    @include('partials.icon-font')
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 @php
@@ -18,9 +18,9 @@
     $pendingCourierCount = \App\Models\User::query()->where('role', 'courier')->where('courier_status', \App\Models\User::COURIER_PENDING)->count();
     $waitingDeliveryCount = \App\Models\Order::query()->whereNull('courier_id')->whereIn('status', ['preparing', 'delivering'])->count() + $pendingCourierCount;
     $pendingSubsCount = \App\Models\MembershipSubscription::query()->where('status', 'pending')->count();
-    $pendingListingCount = \App\Models\RestaurantSubscription::query()->where('status', 'pending')->count();
-    $pendingRestaurantsCount = \App\Models\Restaurant::query()->pendingVerification()->count() + $pendingListingCount;
+    $pendingRestaurantsCount = \App\Models\Restaurant::query()->pendingVerification()->count();
     $pendingTopupsCount = \App\Models\WalletTopup::query()->where('status', 'pending')->count();
+    $pendingBoostsCount = \App\Models\RestaurantBoost::query()->pending()->count();
     $adminSearch = [
         'scope' => 'global',
         'action' => route('admin.dashboard'),
@@ -50,14 +50,6 @@
             'scope' => 'restaurants',
             'action' => route('admin.restaurants.index'),
             'placeholder' => 'ابحث عن مطعم أو كوفي',
-            'restaurant_id' => null,
-            'filter' => true,
-        ];
-    } elseif (request()->routeIs('admin.listings.*')) {
-        $adminSearch = [
-            'scope' => 'listings',
-            'action' => route('admin.listings.index'),
-            'placeholder' => 'ابحث في اشتراكات المطاعم',
             'restaurant_id' => null,
             'filter' => true,
         ];
@@ -93,6 +85,22 @@
             'restaurant_id' => null,
             'filter' => true,
         ];
+    } elseif (request()->routeIs('admin.finance.*')) {
+        $adminSearch = [
+            'scope' => 'finance',
+            'action' => route('admin.finance.index'),
+            'placeholder' => 'ابحث في المالية والتسويات',
+            'restaurant_id' => null,
+            'filter' => false,
+        ];
+    } elseif (request()->routeIs('admin.boosts.*')) {
+        $adminSearch = [
+            'scope' => 'finance',
+            'action' => route('admin.boosts.index'),
+            'placeholder' => 'ابحث في إعلانات المطاعم',
+            'restaurant_id' => null,
+            'filter' => false,
+        ];
     } elseif (request()->routeIs('admin.homepage.*')) {
         $adminSearch = [
             'scope' => 'homepage',
@@ -110,42 +118,67 @@
             'filter' => false,
         ];
     }
+    $adminViewer = auth()->user();
     $navGroups = [
         [
             'label' => 'الرئيسية',
             'items' => [
-                ['route' => 'admin.dashboard', 'icon' => 'dashboard', 'label' => 'نظرة عامة', 'match' => 'admin.dashboard'],
-                ['route' => 'admin.notifications.index', 'icon' => 'notifications', 'label' => 'الإشعارات', 'match' => 'admin.notifications.*', 'badge' => $unreadNotifications],
+                ['route' => 'admin.dashboard', 'icon' => 'dashboard', 'label' => 'نظرة عامة', 'match' => 'admin.dashboard', 'module' => 'dashboard'],
+                ['route' => 'admin.notifications.index', 'icon' => 'notifications', 'label' => 'الإشعارات', 'match' => 'admin.notifications.*', 'badge' => $unreadNotifications, 'module' => 'dashboard'],
             ],
         ],
         [
             'label' => 'التشغيل',
             'items' => [
-                ['route' => 'admin.orders.index', 'icon' => 'receipt_long', 'label' => 'الطلبات', 'match' => 'admin.orders.*', 'badge' => $pendingOrdersCount],
-                ['route' => 'admin.delivery.index', 'icon' => 'moped', 'label' => 'التوصيل والمندوبون', 'match' => 'admin.delivery.*', 'badge' => $waitingDeliveryCount],
-                ['route' => 'admin.restaurants.index', 'icon' => 'storefront', 'label' => 'المطاعم والكوفيهات', 'match' => 'admin.restaurants.*', 'badge' => $pendingRestaurantsCount],
-                ['route' => 'admin.listings.index', 'icon' => 'receipt_long', 'label' => 'اشتراكات المطاعم', 'match' => 'admin.listings.*', 'badge' => $pendingListingCount],
+                ['route' => 'admin.orders.index', 'icon' => 'receipt_long', 'label' => 'الطلبات', 'match' => 'admin.orders.*', 'badge' => $pendingOrdersCount, 'module' => 'orders'],
+                ['route' => 'admin.delivery.index', 'icon' => 'moped', 'label' => 'التوصيل والمندوبون', 'match' => 'admin.delivery.*', 'badge' => $waitingDeliveryCount, 'module' => 'delivery'],
+                ['route' => 'admin.restaurants.index', 'icon' => 'storefront', 'label' => 'المطاعم والكوفيهات', 'match' => 'admin.restaurants.*', 'badge' => $pendingRestaurantsCount, 'module' => 'restaurants'],
+            ],
+        ],
+        [
+            'label' => 'المالية',
+            'items' => [
+                ['route' => 'admin.finance.index', 'icon' => 'account_balance', 'label' => 'نظرة عامة', 'match' => 'admin.finance.index', 'module' => 'finance'],
+                ['route' => 'admin.finance.orders', 'icon' => 'receipt_long', 'label' => 'مالية الطلبات', 'match' => 'admin.finance.orders', 'module' => 'finance'],
+                ['route' => 'admin.finance.restaurants', 'icon' => 'payments', 'label' => 'مالية المطاعم', 'match' => 'admin.finance.restaurants*', 'module' => 'finance'],
+                ['route' => 'admin.boosts.index', 'icon' => 'campaign', 'label' => 'إعلانات المطاعم', 'match' => 'admin.boosts.*', 'badge' => $pendingBoostsCount, 'module' => 'finance'],
             ],
         ],
         [
             'label' => 'الزبائن والمحفظة',
             'items' => [
-                ['route' => 'admin.users.index', 'icon' => 'group', 'label' => 'الزبائن والنقاط', 'match' => 'admin.users.*'],
-                ['route' => 'admin.wallet-topups.index', 'icon' => 'account_balance_wallet', 'label' => 'شحن الرصيد', 'match' => 'admin.wallet-topups.*', 'badge' => $pendingTopupsCount],
-                ['route' => 'admin.memberships.index', 'icon' => 'workspace_premium', 'label' => 'العضويات', 'match' => 'admin.memberships.*'],
-                ['route' => 'admin.subscriptions.index', 'icon' => 'verified', 'label' => 'الاشتراكات', 'match' => 'admin.subscriptions.*', 'badge' => $pendingSubsCount],
-                ['route' => 'admin.reviews.index', 'icon' => 'star', 'label' => 'التقييمات والآراء', 'match' => 'admin.reviews.*'],
-                ['route' => 'admin.coupons.index', 'icon' => 'local_offer', 'label' => 'أكواد الخصم', 'match' => 'admin.coupons.*'],
+                ['route' => 'admin.users.index', 'icon' => 'group', 'label' => 'الزبائن والنقاط', 'match' => 'admin.users.*', 'module' => 'customers'],
+                ['route' => 'admin.wallet-topups.index', 'icon' => 'account_balance_wallet', 'label' => 'شحن الرصيد', 'match' => 'admin.wallet-topups.*', 'badge' => $pendingTopupsCount, 'module' => 'customers'],
+                ['route' => 'admin.memberships.index', 'icon' => 'workspace_premium', 'label' => 'العضويات', 'match' => 'admin.memberships.*', 'module' => 'memberships'],
+                ['route' => 'admin.subscriptions.index', 'icon' => 'verified', 'label' => 'الاشتراكات', 'match' => 'admin.subscriptions.*', 'badge' => $pendingSubsCount, 'module' => 'memberships'],
+                ['route' => 'admin.reviews.index', 'icon' => 'star', 'label' => 'التقييمات والآراء', 'match' => 'admin.reviews.*', 'module' => 'reviews'],
+                ['route' => 'admin.coupons.index', 'icon' => 'local_offer', 'label' => 'أكواد الخصم', 'match' => 'admin.coupons.*', 'module' => 'coupons'],
             ],
         ],
         [
             'label' => 'النظام',
             'items' => [
-                ['route' => 'admin.homepage.index', 'icon' => 'home_app_logo', 'label' => 'محتوى الرئيسية', 'match' => 'admin.homepage.*'],
-                ['route' => 'admin.settings.index', 'icon' => 'settings', 'label' => 'الإعدادات', 'match' => 'admin.settings.*'],
+                ['route' => 'admin.team.index', 'icon' => 'manage_accounts', 'label' => 'فريق الإدارة', 'match' => 'admin.team.*', 'module' => 'team'],
+                ['route' => 'admin.audit.index', 'icon' => 'history', 'label' => 'سجل التعديلات', 'match' => 'admin.audit.*', 'module' => 'audit'],
+                ['route' => 'admin.homepage.index', 'icon' => 'home_app_logo', 'label' => 'محتوى الرئيسية', 'match' => 'admin.homepage.*', 'module' => 'homepage'],
+                ['route' => 'admin.settings.index', 'icon' => 'settings', 'label' => 'الإعدادات', 'match' => 'admin.settings.*', 'module' => 'settings'],
             ],
         ],
     ];
+    $navGroups = array_values(array_filter(array_map(function (array $group) use ($adminViewer) {
+        $items = array_values(array_filter(
+            $group['items'],
+            fn (array $item) => $adminViewer?->canAccessAdmin($item['module'] ?? 'dashboard')
+        ));
+
+        if ($items === []) {
+            return null;
+        }
+
+        $group['items'] = $items;
+
+        return $group;
+    }, $navGroups)));
 @endphp
 <body class="admin-app">
     <div class="admin-scrim" id="admin-scrim" hidden></div>
@@ -218,16 +251,18 @@
                         <em>{{ $unreadNotifications > 9 ? '9+' : $unreadNotifications }}</em>
                     @endif
                 </a>
-                <button type="button" class="admin-topbar__icon js-order-sound-btn" title="اختبار نغمة تنبيه الطلبات (تزمير)">
-                    <span class="material-symbols-outlined">volume_up</span>
-                </button>
+                @if(auth()->user()->canAccessAdmin('orders'))
+                    <button type="button" class="admin-topbar__icon js-order-sound-btn" title="اختبار نغمة تنبيه الطلبات (تزمير)">
+                        <span class="material-symbols-outlined">volume_up</span>
+                    </button>
+                @endif
                 <details class="admin-topbar__user">
                     <summary class="admin-topbar__icon" title="{{ auth()->user()->name }}" aria-label="الحساب">
                         <span class="material-symbols-outlined">account_circle</span>
                     </summary>
                     <div class="admin-topbar__menu">
                         <strong>{{ auth()->user()->name }}</strong>
-                        <small>مدير المنصة</small>
+                        <small>{{ auth()->user()->adminRoleLabel() }}</small>
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
                             <button type="submit">خروج</button>

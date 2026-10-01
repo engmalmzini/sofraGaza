@@ -16,11 +16,7 @@ class WalletController extends Controller
         $user = $request->user();
         abort_unless($user->isCourierApproved(), 403);
 
-        $period = $request->string('period', 'today')->toString();
-        if (! in_array($period, ['today', 'yesterday', 'week', 'month', 'all'], true)) {
-            $period = 'today';
-        }
-
+        $period = $this->resolvedPeriod($request);
         $earnings = $user->courierEarningsForPeriod($period);
         $availableBalance = $user->courierAvailableBalance();
         $lifetimeNet = $user->courierLifetimeNetEarnings();
@@ -44,6 +40,17 @@ class WalletController extends Controller
             'payouts',
             'payoutMethods'
         ));
+    }
+
+    public function statement(Request $request): View
+    {
+        $user = $request->user();
+        abort_unless($user->isCourierApproved(), 403);
+
+        $period = $this->resolvedPeriod($request);
+        $earnings = $user->courierEarningsForPeriod($period);
+
+        return view('courier.wallet-statement', compact('user', 'period', 'earnings'));
     }
 
     public function requestPayout(Request $request, NotificationService $notifications): RedirectResponse
@@ -93,5 +100,14 @@ class WalletController extends Controller
         );
 
         return back()->with('success', 'تم إرسال طلب سحب الأرباح بنجاح. سيتم تحويل المبلغ وتأكيده من الإدارة قريباً.');
+    }
+
+    private function resolvedPeriod(Request $request): string
+    {
+        $period = $request->string('period', 'today')->toString();
+
+        return in_array($period, ['today', 'yesterday', 'week', 'month', 'all'], true)
+            ? $period
+            : 'today';
     }
 }

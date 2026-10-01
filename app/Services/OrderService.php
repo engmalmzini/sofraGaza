@@ -173,7 +173,59 @@ class OrderService
         return $order;
     }
 
-    public function changeStatus(Order $order, string $status, ?string $reason = null): void
+    public function moveToColumn(Order $order, string $column, array $allowedColumns = ['pending_confirmation', 'preparing', 'delivering', 'delivered']): void
+    {
+        if (! in_array($column, $allowedColumns, true)) {
+            throw new RuntimeException('لا يمكنك نقل الطلب إلى هذا العمود.');
+        }
+
+        $targetStatus = match ($column) {
+            'pending_confirmation' => 'pending_confirmation',
+            'preparing' => 'preparing',
+            'delivering' => 'delivering',
+            'delivered' => 'delivered',
+            default => throw new RuntimeException('عمود غير معروف.'),
+        };
+
+        if ($order->status === $targetStatus) {
+            return;
+        }
+
+        $rank = [
+            'pending_confirmation' => 0,
+            'confirmed' => 1,
+            'preparing' => 2,
+            'delivering' => 3,
+            'delivered' => 4,
+        ];
+
+        $currentRank = $rank[$order->status] ?? -1;
+        $targetRank = $rank[$targetStatus] ?? -1;
+
+        if ($targetRank < $currentRank) {
+            throw new RuntimeException('لا يمكن إرجاع الطلب لمرحلة سابقة من اللوحة.');
+        }
+
+        $forward = [
+            'pending_confirmation' => 'confirmed',
+            'confirmed' => 'preparing',
+            'preparing' => 'delivering',
+            'delivering' => 'delivered',
+        ];
+
+        $guard = 0;
+        while ($order->status !== $targetStatus && $guard++ < 8) {
+            $next = $forward[$order->status] ?? null;
+            if (! $next) {
+                throw new RuntimeException('لا يمكن تحويل حالة الطلب إلى هذه المرحلة.');
+            }
+
+            $this->changeStatus($order, $next, null, $next === $targetStatus);
+            $order->refresh();
+        }
+    }
+
+    public function changeStatus(Order $order, string $status, ?string $reason = null, bool $notify = true): void
     {
         $old = $order->status;
 
@@ -183,7 +235,7 @@ class OrderService
                 'rejection_reason' => $reason,
             ]);
 
-            if ($order->isPaidWithWallet()) {
+            if ($order->group_order_id || $order->isPaidWithWallet()) {
                 $this->wallet->refundOrder($order, $reason ?: 'رفض الطلب');
             }
 
@@ -209,7 +261,7 @@ class OrderService
         if ($status === 'cancelled' && $order->canCancel()) {
             $order->update(['status' => 'cancelled']);
 
-            if ($order->isPaidWithWallet()) {
+            if ($order->group_order_id || $order->isPaidWithWallet()) {
                 $this->wallet->refundOrder($order, 'إلغاء الطلب');
             }
 
@@ -248,12 +300,14 @@ class OrderService
             $this->points->earnForOrder($order->fresh());
         }
 
-        $this->notifications->notify(
-            $order->user,
-            'تحديث حالة الطلب',
-            "طلبك رقم #{$order->id} أصبح: ".$order->fresh()->statusLabel(),
-            route('account.orders.show', $order)
-        );
+        if ($notify) {
+            $this->notifications->notify(
+                $order->user,
+                'تحديث حالة الطلب',
+                "طلبك رقم #{$order->id} أصبح: ".$order->fresh()->statusLabel(),
+                route('account.orders.show', $order)
+            );
+        }
     }
 
     public function claimForCourier(Order $order, User $courier): void

@@ -124,12 +124,12 @@ class RegisterController
         $notifications->notify(
             $restaurant->owner,
             'تم استلام طلب انضمامك',
-            'حسابك جاهز. لازم تشترك وتختار باقة الظهور ثم ترفق إشعار الحوالة. بعد تأكيد الإدارة تقدر تضيف المنيو.',
-            route('partner.subscription.index')
+            'تم إنشاء حساب المطعم وهو قيد مراجعة الإدارة. يمكنك تجهيز البيانات والمنيو من الآن، وبعد الموافقة يظهر للزبائن.',
+            route('partner.dashboard')
         );
 
-        return redirect()->route('partner.subscription.index')
-            ->with('success', 'تم إنشاء حساب المطعم. لازم تشترك أولاً: اختر الباقة وأرفق إشعار الحوالة.');
+        return redirect()->route('partner.dashboard')
+            ->with('success', 'تم إنشاء حساب المطعم. بانتظار موافقة الإدارة ليظهر للزبائن.');
     }
 
     private function rememberRegistrationPassword(Request $request): void

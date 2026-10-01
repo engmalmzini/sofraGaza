@@ -7,6 +7,7 @@
 <div class="grid gap-4 lg:grid-cols-[1.6fr_1fr]">
     <div class="space-y-4">
         @include('partials.order-invoice', ['order' => $order])
+        @include('partials.group-order-receipts', ['order' => $order, 'tone' => 'admin'])
         @include('partials.order-receipt', ['order' => $order, 'receiptRoute' => route('admin.orders.receipt', $order)])
         <section class="admin-card text-sm leading-8">
             <h2>التواصل والتوصيل</h2>

@@ -86,6 +86,45 @@ class Restaurant extends Model
         return $this->hasMany(RestaurantSubscription::class)->latest();
     }
 
+    public function settlements(): HasMany
+    {
+        return $this->hasMany(RestaurantSettlement::class)->latest('paid_at');
+    }
+
+    public function boosts(): HasMany
+    {
+        return $this->hasMany(RestaurantBoost::class)->latest('starts_on');
+    }
+
+    public function activeBoost(): ?RestaurantBoost
+    {
+        return $this->boosts()
+            ->activeOn()
+            ->orderByDesc('ends_on')
+            ->first();
+    }
+
+    public function pendingBoost(): ?RestaurantBoost
+    {
+        return $this->boosts()->pending()->latest('id')->first();
+    }
+
+    public function isBoosted(): bool
+    {
+        if (array_key_exists('is_boosted', $this->attributes)) {
+            return (bool) $this->getAttribute('is_boosted');
+        }
+
+        return $this->activeBoost() !== null;
+    }
+
+    public function scopeBoostedFirst(Builder $query): Builder
+    {
+        return $query
+            ->withExists(['boosts as is_boosted' => fn (Builder $boosts) => $boosts->activeOn()])
+            ->orderByDesc('is_boosted');
+    }
+
     public function activeListing(): ?RestaurantSubscription
     {
         return $this->listingSubscriptions()
@@ -106,31 +145,23 @@ class Restaurant extends Model
 
     public function hasPaidAccess(): bool
     {
-        return ! $this->panel_suspended && $this->activeListing() !== null;
+        return ! $this->panel_suspended;
     }
 
     public function panelLockMessage(): string
     {
         if ($this->panel_suspended) {
-            return 'تم إيقاف لوحة '.$this->venueNounYours().'. جدّد الاشتراك حتى نعيد تفعيلها. بياناتك محفوظة.';
+            return 'تم إيقاف لوحة '.$this->venueNounYours().'. بياناتك محفوظة ولن يظهر '.$this->venueNounYours().' على الموقع حتى تعيد الإدارة تفعيله.';
         }
 
-        if ($this->listingSubscriptions()->where('status', 'approved')->exists()) {
-            return 'انتهى اشتراكك. قم بتجديد الاشتراك لفتح اللوحة وإعادة ظهور '.$this->venueNounYours().' على الموقع.';
-        }
-
-        return 'لازم تشترك أولاً. اختر الباقة وأرفق إشعار الحوالة. بعد تأكيد الإدارة تقدر تضيف المنيو وتظهر صفحتك.';
+        return '';
     }
 
     public function scopeVisible(Builder $query): Builder
     {
-        $today = now()->toDateString();
-
         return $query->where('is_active', true)
             ->where('panel_suspended', false)
-            ->where('verification_status', self::VERIFICATION_APPROVED)
-            ->whereDate('starts_at', '<=', $today)
-            ->whereDate('expires_at', '>=', $today);
+            ->where('verification_status', self::VERIFICATION_APPROVED);
     }
 
     public function scopePendingVerification(Builder $query): Builder
@@ -225,15 +256,9 @@ class Restaurant extends Model
 
     public function isVisible(): bool
     {
-        $today = now()->startOfDay();
-
         return $this->isApproved()
             && $this->is_active
-            && ! $this->panel_suspended
-            && $this->starts_at
-            && $this->expires_at
-            && $this->starts_at->lte($today)
-            && $this->expires_at->gte($today);
+            && ! $this->panel_suspended;
     }
 
     public function isPending(): bool
@@ -318,9 +343,9 @@ class Restaurant extends Model
                 'done' => $menuCount > 0,
             ],
             [
-                'key' => 'listing',
-                'label' => 'اشتراك الظهور على المنصة',
-                'done' => $this->hasPaidAccess(),
+                'key' => 'verification',
+                'label' => 'موافقة الإدارة',
+                'done' => $this->isApproved(),
             ],
         ];
     }
@@ -454,6 +479,10 @@ class Restaurant extends Model
 
     public function badgeLabel(): string
     {
+        if ($this->isBoosted()) {
+            return 'إعلان';
+        }
+
         if ($this->type === 'cafe') {
             return 'مشروب هدية';
         }

@@ -24,16 +24,6 @@
         <input name="address" value="{{ old('address', $restaurant->address ?? '') }}" class="w-full rounded-xl border px-3 py-3">
     </div>
 </div>
-<div class="grid gap-3 md:grid-cols-2">
-    <div>
-        <label class="mb-1 block text-sm font-bold">بداية العرض</label>
-        <input type="date" name="starts_at" value="{{ old('starts_at', isset($restaurant) ? $restaurant->starts_at->format('Y-m-d') : now()->format('Y-m-d')) }}" class="w-full rounded-xl border px-3 py-3">
-    </div>
-    <div>
-        <label class="mb-1 block text-sm font-bold">نهاية العرض</label>
-        <input type="date" name="expires_at" value="{{ old('expires_at', isset($restaurant) ? $restaurant->expires_at->format('Y-m-d') : now()->addDays(30)->format('Y-m-d')) }}" class="w-full rounded-xl border px-3 py-3">
-    </div>
-</div>
 <div>
     <label class="mb-1 block text-sm font-bold">صورة</label>
     <input type="file" name="image" accept="image/*">

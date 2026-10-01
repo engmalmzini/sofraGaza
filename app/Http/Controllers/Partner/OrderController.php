@@ -35,8 +35,14 @@ class OrderController extends Controller
 
         $orders = $query->paginate(15)->withQueryString();
         $activeCount = $restaurant->orders()->whereIn('status', ['pending_confirmation', 'confirmed', 'preparing', 'delivering'])->count();
+        $boardOrders = $restaurant->orders()
+            ->with(['user', 'items', 'courier'])
+            ->latest()
+            ->take(60)
+            ->get();
+        $ordersByStatus = Order::groupForBoard($boardOrders);
 
-        return view('partner.orders.index', compact('restaurant', 'orders', 'activeCount'));
+        return view('partner.orders.index', compact('restaurant', 'orders', 'activeCount', 'ordersByStatus'));
     }
 
     public function show(Order $order): View
@@ -44,7 +50,7 @@ class OrderController extends Controller
         $restaurant = $this->restaurant();
         abort_unless($order->restaurant_id === $restaurant->id, 403, 'غير مصرح بالوصول لهذا الطلب.');
 
-        $order->load(['user', 'items', 'courier', 'membership']);
+        $order->load(['user', 'items', 'courier', 'membership', 'groupOrder.members.user']);
 
         return view('partner.orders.show', compact('restaurant', 'order'));
     }
@@ -65,6 +71,31 @@ class OrderController extends Controller
         }
 
         return back()->with('success', 'تم تحديث حالة الطلب.');
+    }
+
+    public function move(Request $request, Order $order): JsonResponse
+    {
+        $restaurant = $this->restaurant();
+        abort_unless($order->restaurant_id === $restaurant->id, 403);
+
+        $data = $request->validate([
+            'column' => ['required', 'string', 'in:pending_confirmation,preparing,delivering,delivered'],
+        ]);
+
+        try {
+            $this->orders->moveToColumn($order, $data['column'], ['preparing']);
+        } catch (RuntimeException $e) {
+            return response()->json(['ok' => false, 'message' => $e->getMessage()], 422);
+        }
+
+        $order->refresh();
+
+        return response()->json([
+            'ok' => true,
+            'status' => $order->status,
+            'column' => $order->boardColumn(),
+            'status_label' => $order->statusLabel(),
+        ]);
     }
 
     public function markPrepared(Order $order, NotificationService $notifications): RedirectResponse
@@ -118,13 +149,22 @@ class OrderController extends Controller
             ->latest('id')
             ->get();
 
+        $deliveredOrders = $restaurant->orders()
+            ->with(['user', 'items', 'courier'])
+            ->where('status', 'delivered')
+            ->latest('id')
+            ->take(12)
+            ->get();
+
+        $boardOrders = $activeOrders->concat($deliveredOrders);
         $activeCount = $activeOrders->count();
         $hasNew = $hasLastId && $latestId > $lastId;
 
-        $html = view('partner.orders.partials.order-cards', [
-            'orders' => $activeOrders,
+        $html = view('partner.orders.partials.order-board', [
+            'ordersByStatus' => Order::groupForBoard($boardOrders),
             'restaurant' => $restaurant,
         ])->render();
+        $boardSignature = $boardOrders->map(fn (Order $order) => $order->id.':'.$order->status)->implode('|');
 
         return response()->json([
             'latest_id' => $latestId,
@@ -139,6 +179,8 @@ class OrderController extends Controller
                 'items_count' => $latest->items->count(),
             ] : null,
             'html' => $html,
+            'board_html' => $html,
+            'board_signature' => $boardSignature,
         ]);
     }
 }

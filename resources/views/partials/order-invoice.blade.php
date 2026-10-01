@@ -6,7 +6,12 @@
         <div>
             <p class="sg-invoice__kicker">فاتورة الطلب</p>
             <h2>طلب #{{ $order->id }}</h2>
-            <p class="sg-invoice__meta">{{ $order->restaurant->name }} · {{ $order->type === 'redemption' ? 'استبدال نقاط' : 'شراء' }}</p>
+            <p class="sg-invoice__meta">
+                {{ $order->restaurant->name }} · {{ $order->type === 'redemption' ? 'استبدال نقاط' : 'شراء' }}
+                @if($order->isGroupOrder())
+                    · طلب جماعي
+                @endif
+            </p>
         </div>
         <div class="sg-invoice__when">
             <span>{{ $order->created_at?->format('Y/m/d') }}</span>
@@ -25,26 +30,40 @@
                 </tr>
             </thead>
             <tbody>
-                @forelse($order->items as $item)
-                    <tr>
-                        <td>
-                            <strong>{{ $item->name }}</strong>
-                            @if($item->notes)
-                                <div class="mt-1 text-xs text-primary font-medium flex items-center gap-1">
-                                    <span class="material-symbols-outlined text-[14px]">edit_note</span>
-                                    <span>ملاحظات: {{ $item->notes }}</span>
-                                </div>
-                            @endif
-                        </td>
-                        <td>{{ number_format($item->price, 2) }} <span class="ils">₪</span></td>
-                        <td>{{ $item->quantity }}</td>
-                        <td>{{ number_format($item->line_total, 2) }} <span class="ils">₪</span></td>
-                    </tr>
-                @empty
+                @if($order->items->isEmpty())
                     <tr>
                         <td colspan="4">لا توجد أصناف مسجّلة على هذا الطلب.</td>
                     </tr>
-                @endforelse
+                @else
+                    @php
+                        $invoiceGroups = $order->isGroupOrder()
+                            ? $order->items->groupBy(fn ($item) => $item->ordered_by_name ?: 'غير معروف')
+                            : collect(['' => $order->items]);
+                    @endphp
+                    @foreach($invoiceGroups as $memberName => $memberItems)
+                        @if($order->isGroupOrder() && $memberName !== '')
+                            <tr class="sg-invoice__member">
+                                <td colspan="4">طلب {{ $memberName }}</td>
+                            </tr>
+                        @endif
+                        @foreach($memberItems as $item)
+                            <tr>
+                                <td>
+                                    <strong>{{ $item->name }}</strong>
+                                    @if($item->notes)
+                                        <div class="mt-1 text-xs text-primary font-medium flex items-center gap-1">
+                                            <span class="material-symbols-outlined text-[14px]">edit_note</span>
+                                            <span>ملاحظات: {{ $item->notes }}</span>
+                                        </div>
+                                    @endif
+                                </td>
+                                <td>{{ number_format($item->price, 2) }} <span class="ils">₪</span></td>
+                                <td>{{ $item->quantity }}</td>
+                                <td>{{ number_format($item->line_total, 2) }} <span class="ils">₪</span></td>
+                            </tr>
+                        @endforeach
+                    @endforeach
+                @endif
             </tbody>
         </table>
     </div>

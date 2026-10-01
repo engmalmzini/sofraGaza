@@ -11,6 +11,7 @@
     @include('restaurants.partials.show-mobile')
     @include('restaurants.partials.show-desktop')
 
+    @if($canShop ?? true)
     <div class="lg:hidden fixed inset-0 z-[60] bg-on-surface/50 backdrop-blur-sm flex-col justify-end" id="cartDrawer" hidden>
         <div class="bg-surface-container-lowest rounded-t-3xl p-6 flex flex-col max-h-[80vh] overflow-y-auto shadow-2xl">
             <div class="flex items-center justify-between pb-2">
@@ -62,7 +63,7 @@
                         <span data-cart-grand-total class="text-primary">{{ number_format($restaurantCart['items_total'] ?? $restaurantCart['subtotal'] ?? 0, 1) }} <span class="ils">₪</span></span>
                     </div>
                 </div>
-                <a href="{{ auth()->check() ? route('checkout.create') : route('login') }}" class="mt-4 w-full bg-primary text-on-primary py-3.5 rounded-full font-label-lg text-[15px] font-bold flex items-center justify-center gap-2 shadow-lg">
+                <a href="{{ $groupCheckoutUrl ?? (auth()->check() ? route('checkout.create') : route('login')) }}" class="mt-4 w-full bg-primary text-on-primary py-3.5 rounded-full font-label-lg text-[15px] font-bold flex items-center justify-center gap-2 shadow-lg">
                     <span>تأكيد الطلب والدفع الفوري</span>
                     <span class="material-symbols-outlined text-[20px]">check_circle</span>
                 </a>
@@ -135,4 +136,5 @@
             </form>
         </div>
     </div>
+    @endif
 @endsection

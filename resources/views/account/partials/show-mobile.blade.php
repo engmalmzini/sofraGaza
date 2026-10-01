@@ -237,7 +237,36 @@
             </div>
         </a>
 
-        {{-- عناويني المحفوظة --}}
+        <a href="{{ route('account.invite') }}" class="flex items-center justify-between p-3.5 hover:bg-stone-50 active:bg-stone-100 transition-colors">
+            <div class="flex items-center gap-3 min-w-0">
+                <div class="account-menu-icon w-9 h-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+                    <span class="material-symbols-outlined text-[19px]">group_add</span>
+                </div>
+                <div class="min-w-0">
+                    <h3 class="text-[13px] font-bold text-stone-900 leading-tight">ادعُ صديق</h3>
+                    <p class="text-[10.5px] text-stone-400 truncate">كودك — وكلاكما ياخذ نقاط</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-1.5 shrink-0">
+                <span class="text-[11px] font-bold text-stone-600 bg-stone-100 px-2 py-0.5 rounded-full">{{ $referredCount ?? 0 }}</span>
+                <span class="material-symbols-outlined text-[18px] text-stone-300">chevron_left</span>
+            </div>
+        </a>
+        <a href="{{ route('account.favorites') }}" class="flex items-center justify-between p-3.5 hover:bg-stone-50 active:bg-stone-100 transition-colors">
+            <div class="flex items-center gap-3 min-w-0">
+                <div class="account-menu-icon w-9 h-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+                    <span class="material-symbols-outlined text-[19px]">favorite</span>
+                </div>
+                <div class="min-w-0">
+                    <h3 class="text-[13px] font-bold text-stone-900 leading-tight">المفضلة</h3>
+                    <p class="text-[10.5px] text-stone-400 truncate">مطاعمك وأصنافك للوصول السريع</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-1.5 shrink-0">
+                <span class="text-[11px] font-bold text-stone-600 bg-stone-100 px-2 py-0.5 rounded-full">{{ $favoritesCount ?? 0 }}</span>
+                <span class="material-symbols-outlined text-[18px] text-stone-300">chevron_left</span>
+            </div>
+        </a>
         <a href="{{ route('account.addresses') }}" class="flex items-center justify-between p-3.5 hover:bg-stone-50 active:bg-stone-100 transition-colors">
             <div class="flex items-center gap-3 min-w-0">
                 <div class="account-menu-icon w-9 h-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">

@@ -42,6 +42,14 @@ class CartService
             throw new RuntimeException('السلة تحتوي أصنافاً من مطعم آخر. أفرغ السلة أولاً أو أكمل الطلب الحالي.');
         }
 
+        $groupId = Session::get('group_order_id');
+        if ($groupId) {
+            $groupRestaurantId = (int) Session::get('group_order_restaurant_id');
+            if ($groupRestaurantId && $groupRestaurantId !== (int) $item->restaurant_id) {
+                throw new RuntimeException('هذا طلب جماعي من مطعم آخر. اطلب من منيو الطلب الجماعي أو اخرج منه أولاً.');
+            }
+        }
+
         $items = $this->items();
         $existing = $items[$item->id] ?? null;
         $existingQty = is_array($existing) ? (int) ($existing['qty'] ?? 0) : (int) $existing;

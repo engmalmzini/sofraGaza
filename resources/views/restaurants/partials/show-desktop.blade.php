@@ -325,6 +325,7 @@
         gap: 1.35rem;
         align-items: start;
     }
+    .rd-layout--browse { grid-template-columns: minmax(0, 1fr); }
     .rd-section { scroll-margin-top: 9rem; }
     .rd-section__head {
         display: flex;
@@ -667,6 +668,7 @@
         .rd-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
         .rd-dish--wide { grid-column: span 2; }
         .rd-layout { grid-template-columns: minmax(0, 1fr) 280px; }
+        .rd-layout--browse { grid-template-columns: minmax(0, 1fr); }
     }
 </style>
 
@@ -728,6 +730,7 @@
                         </div>
                     </div>
                 </div>
+                @if($canShop ?? true)
                 <div class="rd-hero__vip">
                     <p>{{ $vip ? 'أنت مؤهل لخصم '.$membership->discount_percent.'% فوري على هذا الطلب' : 'اشترك واحصل على خصم 10% فوري مع كل طلب' }}</p>
                     @if($vip)
@@ -736,6 +739,13 @@
                         <a href="{{ route('memberships.index') }}">عضوية ذهبية</a>
                     @endif
                 </div>
+                <div class="mt-3">
+                    @include('partials.group-order-entry', [
+                        'restaurant' => $restaurant,
+                        'entryClass' => 'inline-flex items-center justify-center gap-1.5 rounded-xl border border-[#ead9c8] bg-white text-stone-800 font-extrabold text-sm px-4 py-2.5 hover:border-primary/50 hover:text-primary transition-colors shadow-xs',
+                    ])
+                </div>
+                @endif
             </div>
             <div class="rd-hero__photo">
                 <img src="{{ $restaurant->coverUrl() }}" alt="{{ $restaurant->name }}">
@@ -743,9 +753,11 @@
                     <button type="button" class="share-page" title="مشاركة">
                         <span class="material-symbols-outlined text-[20px]">share</span>
                     </button>
-                    <button type="button" class="fav-page" title="إضافة للمفضلة">
-                        <span class="material-symbols-outlined text-[20px]">favorite_border</span>
-                    </button>
+                    @include('partials.favorite-button', [
+                        'type' => 'restaurant',
+                        'id' => $restaurant->id,
+                        'class' => 'fav-page',
+                    ])
                 </div>
                 <div class="rd-hero__caption">
                     <div>
@@ -770,7 +782,7 @@
                         <span>{{ $section['name'] }}</span>
                     </button>
                 @endforeach
-                @if(count($rewards))
+                @if(($canShop ?? true) && count($rewards))
                     <button type="button" class="category-btn" data-section="rewards">
                         <span class="material-symbols-outlined">stars</span>
                         <span>استبدال النقاط</span>
@@ -785,7 +797,7 @@
     </div>
 
     <div class="rd-wrap" style="padding-top: 0;">
-        <div class="rd-layout">
+        <div class="rd-layout{{ ($canShop ?? true) ? '' : ' rd-layout--browse' }}">
             <div>
                 @forelse($menuSections as $section)
                     <section class="menu-section rd-section" id="section-{{ $section['key'] }}" data-section="{{ $section['key'] }}">
@@ -808,7 +820,7 @@
                     <p class="rd-empty">لا توجد أصناف في القائمة حالياً.</p>
                 @endforelse
 
-                @if(count($rewards))
+                @if(($canShop ?? true) && count($rewards))
                 <section class="menu-section rd-rewards" id="section-rewards" data-section="rewards">
                     <div class="rd-rewards__head">
                         <h2>
@@ -836,6 +848,7 @@
                 @include('partials.restaurant-reviews')
             </div>
 
+            @if($canShop ?? true)
             <aside>
                 <div class="rd-cart">
                     <div class="rd-cart__head">
@@ -904,7 +917,7 @@
                             </div>
                         </div>
                         <div class="p-3.5 pt-1 bg-surface-container-low/40">
-                            <a href="{{ auth()->check() ? route('checkout.create') : route('login') }}" class="w-full py-2.5 rounded-xl bg-primary text-white hover:bg-primary-container font-label-md text-[13px] font-semibold shadow-xs flex items-center justify-center gap-2">
+                            <a href="{{ $groupCheckoutUrl ?? (auth()->check() ? route('checkout.create') : route('login')) }}" class="w-full py-2.5 rounded-xl bg-primary text-white hover:bg-primary-container font-label-md text-[13px] font-semibold shadow-xs flex items-center justify-center gap-2">
                                 <span>متابعة الدفع</span>
                                 <span class="material-symbols-outlined text-[17px]">arrow_back</span>
                             </a>
@@ -916,6 +929,7 @@
                     </div>
                 </div>
             </aside>
+            @endif
         </div>
     </div>
 </div>

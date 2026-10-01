@@ -8,6 +8,7 @@ use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\Courier;
 use App\Http\Controllers\DeliveryAreaController;
+use App\Http\Controllers\GroupOrderController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\MembershipController;
 use App\Http\Controllers\Partner;
@@ -21,14 +22,16 @@ Route::post('/delivery-area', [DeliveryAreaController::class, 'update'])->name('
 Route::get('/search/suggest', [SearchController::class, 'suggest'])->name('search.suggest');
 Route::get('/restaurants', [RestaurantController::class, 'index'])->name('restaurants.index');
 Route::get('/restaurants/{restaurant}', [RestaurantController::class, 'show'])->name('restaurants.show');
-Route::get('/memberships', [MembershipController::class, 'index'])->name('memberships.index');
+Route::middleware('customer.shop')->group(function () {
+    Route::get('/memberships', [MembershipController::class, 'index'])->name('memberships.index');
 
-Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
-Route::post('/cart/coupon', [\App\Http\Controllers\CouponController::class, 'apply'])->name('cart.coupon.apply');
-Route::delete('/cart/coupon', [\App\Http\Controllers\CouponController::class, 'remove'])->name('cart.coupon.remove');
-Route::post('/cart/{item}', [CartController::class, 'store'])->name('cart.add');
-Route::patch('/cart', [CartController::class, 'update'])->name('cart.update');
-Route::delete('/cart', [CartController::class, 'destroy'])->name('cart.clear');
+    Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
+    Route::post('/cart/coupon', [\App\Http\Controllers\CouponController::class, 'apply'])->name('cart.coupon.apply');
+    Route::delete('/cart/coupon', [\App\Http\Controllers\CouponController::class, 'remove'])->name('cart.coupon.remove');
+    Route::post('/cart/{item}', [CartController::class, 'store'])->name('cart.add');
+    Route::patch('/cart', [CartController::class, 'update'])->name('cart.update');
+    Route::delete('/cart', [CartController::class, 'destroy'])->name('cart.clear');
+});
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', [LoginController::class, 'create'])->name('login');
@@ -48,36 +51,60 @@ Route::middleware('guest')->group(function () {
 Route::match(['get', 'post'], '/logout', [LoginController::class, 'destroy'])->name('logout');
 
 Route::middleware('auth')->group(function () {
-    Route::get('/checkout', [CheckoutController::class, 'create'])->name('checkout.create');
-    Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
+    Route::middleware('customer.shop')->group(function () {
+        Route::get('/checkout', [CheckoutController::class, 'create'])->name('checkout.create');
+        Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
 
-    Route::post('/memberships/{membership}/subscribe', [MembershipController::class, 'subscribe'])->name('memberships.subscribe');
-    Route::post('/memberships/card', [MembershipController::class, 'requestCard'])->name('memberships.card');
+        Route::get('/group-orders/create', [GroupOrderController::class, 'create'])->name('group-orders.create');
+        Route::post('/group-orders', [GroupOrderController::class, 'store'])->name('group-orders.store');
+        Route::get('/group-orders/{groupOrder}', [GroupOrderController::class, 'show'])->name('group-orders.show');
+        Route::get('/group-orders/{groupOrder}/pay', [GroupOrderController::class, 'pay'])->name('group-orders.pay');
+        Route::get('/group-orders/{groupOrder}/checkout', [GroupOrderController::class, 'checkout'])->name('group-orders.checkout');
+        Route::post('/group-orders/{groupOrder}/pay', [GroupOrderController::class, 'storePayment'])->name('group-orders.pay.store');
+        Route::post('/group-orders/{groupOrder}/decline', [GroupOrderController::class, 'decline'])->name('group-orders.decline');
+        Route::delete('/group-orders/{groupOrder}', [GroupOrderController::class, 'destroy'])->name('group-orders.destroy');
 
-    Route::get('/redeem', [RedemptionController::class, 'create'])->name('redeem.create');
-    Route::post('/redeem', [RedemptionController::class, 'store'])->name('redeem.store');
+        Route::post('/memberships/{membership}/subscribe', [MembershipController::class, 'subscribe'])->name('memberships.subscribe');
+        Route::post('/memberships/card', [MembershipController::class, 'requestCard'])->name('memberships.card');
 
-    Route::get('/account', [AccountController::class, 'show'])->name('account.show');
-    Route::get('/account/orders', [AccountController::class, 'orders'])->name('account.orders');
-    Route::get('/account/orders/{order}', [AccountController::class, 'showOrder'])->name('account.orders.show');
-    Route::post('/account/orders/{order}/cancel', [AccountController::class, 'cancelOrder'])->name('account.orders.cancel');
-    Route::get('/account/points', [AccountController::class, 'points'])->name('account.points');
-    Route::get('/account/addresses', [AccountController::class, 'addresses'])->name('account.addresses');
-    Route::post('/account/addresses', [AccountController::class, 'storeAddress'])->name('account.addresses.store');
-    Route::delete('/account/addresses/{address}', [AccountController::class, 'destroyAddress'])->name('account.addresses.destroy');
-    Route::get('/account/wallet', [App\Http\Controllers\Account\WalletController::class, 'index'])->name('account.wallet');
-    Route::get('/account/wallet/topup', [App\Http\Controllers\Account\WalletController::class, 'create'])->name('account.wallet.topup');
-    Route::post('/account/wallet/topup', [App\Http\Controllers\Account\WalletController::class, 'store'])->name('account.wallet.topup.store');
+        Route::get('/redeem', [RedemptionController::class, 'create'])->name('redeem.create');
+        Route::post('/redeem', [RedemptionController::class, 'store'])->name('redeem.store');
+
+        Route::get('/account', [AccountController::class, 'show'])->name('account.show');
+        Route::get('/account/favorites', [\App\Http\Controllers\FavoriteController::class, 'index'])->name('account.favorites');
+        Route::get('/account/invite', [AccountController::class, 'invite'])->name('account.invite');
+        Route::post('/favorites/toggle', [\App\Http\Controllers\FavoriteController::class, 'toggle'])->name('favorites.toggle');
+        Route::get('/account/orders', [AccountController::class, 'orders'])->name('account.orders');
+        Route::get('/account/orders/{order}', [AccountController::class, 'showOrder'])->name('account.orders.show');
+        Route::post('/account/orders/{order}/cancel', [AccountController::class, 'cancelOrder'])->name('account.orders.cancel');
+        Route::get('/account/points', [AccountController::class, 'points'])->name('account.points');
+        Route::get('/account/addresses', [AccountController::class, 'addresses'])->name('account.addresses');
+        Route::post('/account/addresses', [AccountController::class, 'storeAddress'])->name('account.addresses.store');
+        Route::delete('/account/addresses/{address}', [AccountController::class, 'destroyAddress'])->name('account.addresses.destroy');
+        Route::get('/account/wallet', [App\Http\Controllers\Account\WalletController::class, 'index'])->name('account.wallet');
+        Route::get('/account/wallet/topup', [App\Http\Controllers\Account\WalletController::class, 'create'])->name('account.wallet.topup');
+        Route::post('/account/wallet/topup', [App\Http\Controllers\Account\WalletController::class, 'store'])->name('account.wallet.topup.store');
+    });
 
     Route::post('/restaurants/{restaurant}/reviews', [App\Http\Controllers\ReviewController::class, 'store'])->name('restaurants.reviews.store');
 
     Route::get('/account/notifications', [AccountController::class, 'notifications'])->name('account.notifications');
     Route::get('/account/notifications/{notification}', [AccountController::class, 'openNotification'])->name('account.notifications.open');
     Route::post('/account/notifications/read', [AccountController::class, 'markNotifications'])->name('account.notifications.read');
+    Route::get('/group-orders/{groupOrder}/members/{member}/receipt', [GroupOrderController::class, 'memberReceipt'])->name('group-orders.receipt');
 });
 
-Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(function () {
+Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin', 'admin.module', 'admin.audit'])->group(function () {
     Route::get('/', [Admin\DashboardController::class, 'index'])->name('dashboard');
+    Route::middleware('admin.super')->group(function () {
+        Route::get('team', [Admin\TeamController::class, 'index'])->name('team.index');
+        Route::get('team/create', [Admin\TeamController::class, 'create'])->name('team.create');
+        Route::post('team', [Admin\TeamController::class, 'store'])->name('team.store');
+        Route::get('team/{adminUser}/edit', [Admin\TeamController::class, 'edit'])->name('team.edit');
+        Route::put('team/{adminUser}', [Admin\TeamController::class, 'update'])->name('team.update');
+        Route::delete('team/{adminUser}', [Admin\TeamController::class, 'destroy'])->name('team.destroy');
+    });
+    Route::get('audit', [Admin\AuditLogController::class, 'index'])->name('audit.index');
     Route::get('search/suggest', [Admin\SearchController::class, 'suggest'])->name('search.suggest');
     Route::resource('restaurants', Admin\RestaurantController::class)->except(['show']);
     Route::get('restaurants/{restaurant}', [Admin\RestaurantController::class, 'show'])->name('restaurants.show');
@@ -96,6 +123,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::get('orders/{order}', [Admin\OrderController::class, 'show'])->name('orders.show');
     Route::get('orders/{order}/receipt', [Admin\OrderController::class, 'receipt'])->name('orders.receipt');
     Route::patch('orders/{order}', [Admin\OrderController::class, 'update'])->name('orders.update');
+    Route::post('orders/{order}/move', [Admin\OrderController::class, 'move'])->name('orders.move');
     Route::get('delivery', [Admin\DeliveryController::class, 'index'])->name('delivery.index');
     Route::post('delivery', [Admin\DeliveryController::class, 'store'])->name('delivery.store');
     Route::post('delivery/orders/{order}/assign', [Admin\DeliveryController::class, 'assign'])->name('delivery.assign');
@@ -127,6 +155,23 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::delete('reviews/{review}', [Admin\ReviewController::class, 'destroy'])->name('reviews.destroy');
     Route::resource('coupons', Admin\CouponController::class)->only(['index', 'store', 'update', 'destroy']);
     Route::post('coupons/{coupon}/toggle', [Admin\CouponController::class, 'toggle'])->name('coupons.toggle');
+    Route::get('finance', [Admin\FinanceController::class, 'index'])->name('finance.index');
+    Route::get('finance/orders', [Admin\FinanceController::class, 'orders'])->name('finance.orders');
+    Route::get('finance/restaurants', [Admin\FinanceController::class, 'restaurants'])->name('finance.restaurants');
+    Route::get('finance/restaurants/{restaurant}', [Admin\FinanceController::class, 'restaurant'])->name('finance.restaurants.show');
+    Route::post('finance/restaurants/{restaurant}/settle', [Admin\FinanceController::class, 'settle'])->name('finance.restaurants.settle');
+    Route::delete('finance/settlements/{settlement}', [Admin\FinanceController::class, 'destroySettlement'])->name('finance.settlements.destroy');
+    Route::post('finance/boosts', [Admin\FinanceController::class, 'storeBoost'])->name('finance.boosts.store');
+    Route::delete('finance/boosts/{boost}', [Admin\FinanceController::class, 'destroyBoost'])->name('finance.boosts.destroy');
+    Route::post('finance/expenses', [Admin\FinanceController::class, 'storeExpense'])->name('finance.expenses.store');
+    Route::delete('finance/expenses/{expense}', [Admin\FinanceController::class, 'destroyExpense'])->name('finance.expenses.destroy');
+    Route::post('finance/incomes', [Admin\FinanceController::class, 'storeIncome'])->name('finance.incomes.store');
+    Route::delete('finance/incomes/{income}', [Admin\FinanceController::class, 'destroyIncome'])->name('finance.incomes.destroy');
+    Route::get('boosts', [Admin\BoostController::class, 'index'])->name('boosts.index');
+    Route::get('boosts/{boost}', [Admin\BoostController::class, 'show'])->name('boosts.show');
+    Route::get('boosts/{boost}/receipt', [Admin\BoostController::class, 'receipt'])->name('boosts.receipt');
+    Route::post('boosts/{boost}/approve', [Admin\BoostController::class, 'approve'])->name('boosts.approve');
+    Route::post('boosts/{boost}/reject', [Admin\BoostController::class, 'reject'])->name('boosts.reject');
     Route::get('homepage', [Admin\HomepageController::class, 'index'])->name('homepage.index');
     Route::post('homepage', [Admin\HomepageController::class, 'update'])->name('homepage.update');
     Route::post('homepage/partners', [Admin\HomepageController::class, 'storePartner'])->name('homepage.partners.store');
@@ -145,9 +190,12 @@ Route::prefix('partner')->name('partner.')->middleware(['auth', 'partner', 'part
     Route::get('orders/live', [Partner\OrderController::class, 'live'])->name('orders.live');
     Route::get('orders/{order}', [Partner\OrderController::class, 'show'])->name('orders.show');
     Route::patch('orders/{order}', [Partner\OrderController::class, 'update'])->name('orders.update');
+    Route::post('orders/{order}/move', [Partner\OrderController::class, 'move'])->name('orders.move');
     Route::post('orders/{order}/prepared', [Partner\OrderController::class, 'markPrepared'])->name('orders.prepared');
     Route::get('subscription', [Partner\SubscriptionController::class, 'index'])->name('subscription.index');
     Route::post('subscription/{plan}', [Partner\SubscriptionController::class, 'store'])->name('subscription.store');
+    Route::get('boosts', [Partner\BoostController::class, 'index'])->name('boosts.index');
+    Route::post('boosts', [Partner\BoostController::class, 'store'])->name('boosts.store');
     Route::get('restaurant', [Partner\RestaurantController::class, 'edit'])->name('restaurant.edit');
     Route::put('restaurant', [Partner\RestaurantController::class, 'update'])->name('restaurant.update');
     Route::post('restaurant/resubmit', [Partner\RestaurantController::class, 'resubmit'])->name('restaurant.resubmit');
@@ -164,6 +212,7 @@ Route::prefix('courier')->name('courier.')->middleware(['auth', 'courier'])->gro
     Route::get('orders/{order}', [Courier\OrderController::class, 'show'])->name('orders.show');
     Route::post('orders/{order}/complete', [Courier\OrderController::class, 'complete'])->name('orders.complete');
     Route::get('wallet', [Courier\WalletController::class, 'index'])->name('wallet');
+    Route::get('wallet/statement', [Courier\WalletController::class, 'statement'])->name('wallet.statement');
     Route::post('wallet/payout', [Courier\WalletController::class, 'requestPayout'])->name('wallet.payout');
     Route::get('notifications', [Courier\NotificationController::class, 'index'])->name('notifications.index');
     Route::get('notifications/{notification}', [Courier\NotificationController::class, 'open'])->name('notifications.open');
