@@ -1206,6 +1206,42 @@
     }
 }
 
+.sg-hero-courier-wrap {
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    align-self: end;
+    margin-top: auto;
+    height: 100%;
+    width: 100%;
+    overflow: visible;
+}
+.sg-hero-courier {
+    width: 105%;
+    max-width: 36rem;
+    height: auto;
+    max-height: 62vh;
+    object-fit: contain;
+    object-position: bottom center;
+    display: block;
+    user-select: none;
+    margin-bottom: -0.25rem;
+    background: transparent;
+    filter: drop-shadow(0 14px 24px rgba(80, 40, 10, 0.14));
+    transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.sg-hero-courier:hover {
+    transform: scale(1.02);
+}
+@media (min-width: 1280px) {
+    .sg-hero-courier {
+        width: 108%;
+        max-width: 42rem;
+        max-height: 66vh;
+    }
+}
+
 /* ── Mobile App Download Banner (Foodly-style Exact Replica) ── */
 .sg-app-section {
     width: 100%;
@@ -1758,7 +1794,7 @@
          ═══════════════════════════════════════════════════════════════════ --}}
     <div class="sg-hero-fullscreen">
 
-        <section class="relative px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full flex-1 flex flex-col justify-center pt-2 pb-0 overflow-hidden">
+        <section class="relative px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full flex-1 flex flex-col justify-center pt-2 pb-0 overflow-visible">
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 w-full flex-1 items-stretch">
                 
                 {{-- Right Column (Text Content in RTL - Tajawal Font) --}}
@@ -1817,10 +1853,10 @@
                 </div>
 
                 {{-- Left Column (Courier Hero Visual - Grounded Flush to Bottom) --}}
-                <div class="lg:col-span-6 relative flex items-end justify-center self-end mt-auto h-full w-full">
-                    <img src="{{ $heroImage }}" 
-                         alt="كابتن توصيل سفرة غزة" 
-                         class="w-full max-w-lg lg:max-w-xl xl:max-w-2xl 2xl:max-w-3xl h-auto max-h-[58vh] lg:max-h-[68vh] object-contain object-bottom block select-none -mb-1 transition-transform duration-500 hover:scale-[1.02]">
+                <div class="lg:col-span-6 sg-hero-courier-wrap">
+                    <img src="{{ $heroImage }}{{ str_contains($heroImage, 'hero-courier') && file_exists(public_path('images/hero-courier.png')) ? '?v=' . filemtime(public_path('images/hero-courier.png')) : '' }}"
+                         alt="كابتن توصيل سفرة غزة"
+                         class="sg-hero-courier">
                 </div>
 
             </div>

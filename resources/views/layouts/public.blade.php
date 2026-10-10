@@ -168,23 +168,25 @@
                 transition: all 0.3s ease !important;
             }
 
-            /* Brand Logo in Black Capsule */
+            /* Brand Logo in Black Capsule — white wordmark on dark */
+            #site-header-desktop .site-header__logo--light {
+                display: none;
+            }
             #site-header-desktop.is-scrolled .site-header__brand {
                 gap: 0.4rem !important;
             }
+            #site-header-desktop.is-scrolled .site-header__logo--dark {
+                display: none !important;
+            }
+            #site-header-desktop.is-scrolled .site-header__logo--light {
+                display: block !important;
+            }
             #site-header-desktop.is-scrolled .site-header__brand img {
-                height: 28px !important;
+                height: 32px !important;
                 width: auto !important;
             }
-            #site-header-desktop.is-scrolled .site-header__brand span.text-stone-900 {
-                color: #ffffff !important;
-                font-size: 13.5px !important;
-                white-space: nowrap !important;
-            }
-            #site-header-desktop.is-scrolled .site-header__brand span.text-stone-400 {
-                color: #9ca3af !important;
-                font-size: 7.5px !important;
-                white-space: nowrap !important;
+            #site-header-desktop.is-scrolled .site-header__brand .site-header__brand-copy {
+                display: none !important;
             }
             #site-header-desktop.is-scrolled .site-header__location {
                 display: none !important;
@@ -427,7 +429,9 @@
 </head>
 @php
     $logoPath = public_path('images/logo.png');
+    $logoWhitePath = public_path('images/logo-white.png');
     $logoSrc = file_exists($logoPath) ? asset('images/logo.png').'?v='.filemtime($logoPath) : config('brand.logo');
+    $logoWhiteSrc = file_exists($logoWhitePath) ? asset('images/logo-white.png').'?v='.filemtime($logoWhitePath) : $logoSrc;
     $pointsBalance = auth()->user()->points_balance ?? 0;
     $walletBalance = auth()->user()->wallet_balance ?? 0;
     $canShop = $canShop ?? \App\Models\User::currentCanShop();
@@ -514,8 +518,9 @@
             {{-- Brand Logo --}}
             <div class="site-header__start">
                 <a href="{{ route('home') }}" class="site-header__brand flex items-center gap-2.5">
-                    <img alt="شعار سفرة غزة" src="{{ $logoSrc }}" class="h-9 sm:h-11 w-auto object-contain">
-                    <div class="hidden sm:flex flex-col text-right">
+                    <img alt="شعار سفرة غزة" src="{{ $logoSrc }}" class="site-header__logo site-header__logo--dark h-9 sm:h-11 w-auto object-contain">
+                    <img alt="" src="{{ $logoWhiteSrc }}" class="site-header__logo site-header__logo--light h-9 sm:h-11 w-auto object-contain" aria-hidden="true">
+                    <div class="site-header__brand-copy hidden sm:flex flex-col text-right">
                         <span class="font-black text-stone-900 text-lg leading-tight tracking-tight">سُفرة <span class="text-[#c84500]">غزة</span></span>
                         <span class="text-[9px] font-bold text-stone-400 tracking-wider">SOFRA GAZA</span>
                     </div>
