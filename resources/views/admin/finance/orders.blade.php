@@ -13,7 +13,7 @@
         <span class="admin-metric__note">{{ $totals['count'] }} طلب مكتمل</span>
     </article>
     <article class="admin-metric">
-        <div class="admin-metric__top"><span>عمولة المنصة +10%</span></div>
+        <div class="admin-metric__top"><span>عمولة المنصة +{{ \App\Support\Finance::restaurantCommissionLabel() }}</span></div>
         <strong class="finance-in">{{ number_format($totals['commission'], 2) }} <span class="ils">₪</span></strong>
         <span class="admin-metric__note">من قيمة الطعام بعد الخصم</span>
     </article>
@@ -36,7 +36,7 @@
 
 <section class="admin-card mt-4">
     <h2>تفصيل كل طلب مكتمل</h2>
-    <p class="text-xs text-slate-500 mb-3">قيمة الطلب، عمولة المنصة (+10%)، أجرة الكابتن (−15%)، وصافي المطعم</p>
+    <p class="text-xs text-slate-500 mb-3">قيمة الطلب، عمولة المنصة (+{{ \App\Support\Finance::restaurantCommissionLabel() }})، أجرة الكابتن (−15%)، وصافي المطعم</p>
     <div class="admin-table-wrap">
         <table class="admin-table">
             <thead>
@@ -45,7 +45,7 @@
                     <th>المطعم</th>
                     <th>الزبون</th>
                     <th>قيمة الطلب</th>
-                    <th>عمولة المنصة +10%</th>
+                    <th>عمولة المنصة +{{ \App\Support\Finance::restaurantCommissionLabel() }}</th>
                     <th>أجرة الكابتن −15%</th>
                     <th>صافي المطعم</th>
                     <th>التاريخ</th>

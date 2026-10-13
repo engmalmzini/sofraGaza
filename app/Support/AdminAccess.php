@@ -77,6 +77,8 @@ class AdminAccess
             'admin.boosts.approve' => 'اعتماد إعلان مطعم',
             'admin.boosts.reject' => 'رفض إعلان مطعم',
             'admin.finance.restaurants.settle' => 'تسجيل تسوية مطعم',
+            'admin.finance.payouts.complete' => 'صرف مستحق مطعم',
+            'admin.finance.payouts.reject' => 'رفض طلب صرف مطعم',
             'admin.finance.settlements.destroy' => 'حذف تسوية مطعم',
             'admin.finance.boosts.store' => 'تسجيل إعلان من المالية',
             'admin.finance.boosts.destroy' => 'حذف إعلان',

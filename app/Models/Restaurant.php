@@ -45,6 +45,8 @@ class Restaurant extends Model
         'rejection_reason',
         'verified_at',
         'verified_by',
+        'payout_method',
+        'payout_details',
     ];
 
     protected function casts(): array
@@ -89,6 +91,108 @@ class Restaurant extends Model
     public function settlements(): HasMany
     {
         return $this->hasMany(RestaurantSettlement::class)->latest('paid_at');
+    }
+
+    public function payouts(): HasMany
+    {
+        return $this->hasMany(RestaurantPayout::class)->latest();
+    }
+
+    public function completedPurchaseOrders(): HasMany
+    {
+        return $this->orders()->purchase()->where('status', 'delivered');
+    }
+
+    public function lifetimeSales(): float
+    {
+        return round((float) $this->completedPurchaseOrders()->get()->sum(fn (Order $order) => $order->foodTotal()), 2);
+    }
+
+    public function lifetimeCommission(): float
+    {
+        return round((float) $this->completedPurchaseOrders()->get()->sum(fn (Order $order) => $order->platformCommission()), 2);
+    }
+
+    public function lifetimeNet(): float
+    {
+        return round($this->lifetimeSales() - $this->lifetimeCommission(), 2);
+    }
+
+    public function totalWithdrawn(): float
+    {
+        return (float) $this->payouts()->where('status', RestaurantPayout::STATUS_COMPLETED)->sum('amount');
+    }
+
+    public function pendingPayoutsAmount(): float
+    {
+        return (float) $this->payouts()->where('status', RestaurantPayout::STATUS_PENDING)->sum('amount');
+    }
+
+    public function hasPendingPayout(): bool
+    {
+        return $this->payouts()->where('status', RestaurantPayout::STATUS_PENDING)->exists();
+    }
+
+    public function availableBalance(): float
+    {
+        return max(0.0, round($this->lifetimeNet() - $this->totalWithdrawn(), 2));
+    }
+
+    public function earningsForPeriod(string $period = 'all'): array
+    {
+        $query = $this->completedPurchaseOrders()->with(['user', 'items']);
+        [$start, $end] = $this->periodRange($period);
+
+        if ($start && $end) {
+            $query->where(function ($inner) use ($start, $end) {
+                $inner->whereBetween('delivered_at', [$start, $end])
+                    ->orWhere(function ($fallback) use ($start, $end) {
+                        $fallback->whereNull('delivered_at')->whereBetween('updated_at', [$start, $end]);
+                    });
+            });
+        }
+
+        $orders = $query->latest('id')->get();
+        $sales = round($orders->sum(fn (Order $order) => $order->foodTotal()), 2);
+        $commission = round($orders->sum(fn (Order $order) => $order->platformCommission()), 2);
+        $net = round($sales - $commission, 2);
+
+        $withdrawnQuery = $this->payouts()->where('status', RestaurantPayout::STATUS_COMPLETED);
+        if ($start && $end) {
+            $withdrawnQuery->where(function ($query) use ($start, $end) {
+                $query->whereBetween('processed_at', [$start, $end])
+                    ->orWhere(function ($fallback) use ($start, $end) {
+                        $fallback->whereNull('processed_at')->whereBetween('updated_at', [$start, $end]);
+                    });
+            });
+        }
+        $withdrawn = round((float) $withdrawnQuery->sum('amount'), 2);
+        $remaining = max(0.0, min(round($net - $withdrawn, 2), $this->availableBalance()));
+
+        return [
+            'period' => $period,
+            'orders' => $orders,
+            'count' => $orders->count(),
+            'sales' => $sales,
+            'commission' => $commission,
+            'net' => $net,
+            'withdrawn' => $withdrawn,
+            'remaining' => $remaining,
+        ];
+    }
+
+    /**
+     * @return array{0: \Carbon\Carbon|null, 1: \Carbon\Carbon|null}
+     */
+    public function periodRange(string $period): array
+    {
+        return match ($period) {
+            'today' => [now()->copy()->startOfDay(), now()->copy()->endOfDay()],
+            'yesterday' => [now()->copy()->subDay()->startOfDay(), now()->copy()->subDay()->endOfDay()],
+            'week' => [now()->copy()->startOfWeek(), now()->copy()->endOfWeek()],
+            'month' => [now()->copy()->startOfMonth(), now()->copy()->endOfMonth()],
+            default => [null, null],
+        };
     }
 
     public function boosts(): HasMany

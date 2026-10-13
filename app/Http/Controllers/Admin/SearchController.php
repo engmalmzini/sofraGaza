@@ -240,7 +240,7 @@ class SearchController extends Controller
 
     private function finance(string $q, int $limit): Collection
     {
-        $haystack = 'مالية مالية الطلبات مالية المطاعم نظرة عامة تسوية عمولة إعلانات boost مصاريف دخل اشتراكات كباتن صافي';
+        $haystack = 'مالية مالية الطلبات مالية المطاعم نظرة عامة تسوية عمولة إعلانات boost مصاريف دخل اشتراكات كباتن صافي سحب';
         if (! str_contains($haystack, $q) && mb_stripos($haystack, $q) === false) {
             return collect();
         }
@@ -249,6 +249,7 @@ class SearchController extends Controller
             $this->row('نظرة عامة', 'الدخل الكلي والمصروف والصافي الحقيقي', route('admin.finance.index'), 'account_balance', $q, 'مالية دخل مصروف'),
             $this->row('مالية الطلبات', 'قيمة الطلبات والعمولة والإلغاء', route('admin.finance.orders'), 'receipt_long', $q, 'مالية الطلبات'),
             $this->row('مالية المطاعم', 'مبيعات وتسويات المطاعم', route('admin.finance.restaurants'), 'payments', $q, 'مالية المطاعم تسوية'),
+            $this->row('سحب المطاعم', 'طلبات سحب رصيد المطاعم', route('admin.finance.payouts'), 'account_balance_wallet', $q, 'سحب رصيد مطاعم'),
             $this->row('إعلانات المطاعم', 'حملات الظهور الأول بعد تأكيد الحوالة', route('admin.boosts.index'), 'campaign', $q, 'إعلانات boost'),
         ])->take($limit);
     }

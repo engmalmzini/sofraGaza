@@ -298,6 +298,6 @@ class DeliveryController extends Controller
             );
         }
 
-        return back()->with('success', 'تم رفض طلب السحب وإعادة الرصيد للمندوب مع إرسال إشعار بالسبب.');
+        return back()->with('success', 'تم رفض طلب السحب. الرصيد ما زال في محفظة المندوب لأنه لم يُخصم إلا عند تأكيد التحويل.');
     }
 }

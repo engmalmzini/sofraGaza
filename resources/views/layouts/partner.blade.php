@@ -16,6 +16,7 @@
             'items' => [
                 ['route' => 'partner.dashboard', 'icon' => 'dashboard', 'label' => 'نظرة عامة', 'match' => 'partner.dashboard'],
                 ['route' => 'partner.orders.index', 'icon' => 'receipt_long', 'label' => 'الطلبات الواردة', 'match' => 'partner.orders.*', 'badge' => $pendingPartnerOrdersCount],
+                ['route' => 'partner.wallet', 'icon' => 'account_balance_wallet', 'label' => 'الرصيد والسحب', 'match' => 'partner.wallet*'],
                 ['route' => 'partner.restaurant.edit', 'icon' => 'storefront', 'label' => 'بيانات '.($partnerRestaurant?->venueNoun() ?? 'المكان'), 'match' => 'partner.restaurant.*'],
                 ['route' => 'partner.boosts.index', 'icon' => 'campaign', 'label' => 'الإعلان والظهور الأول', 'match' => 'partner.boosts.*'],
                 ['route' => 'partner.menu-items.index', 'icon' => 'restaurant_menu', 'label' => 'المنيو والتصنيفات', 'match' => 'partner.menu-items.*'],

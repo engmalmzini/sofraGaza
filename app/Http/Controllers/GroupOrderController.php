@@ -28,8 +28,12 @@ class GroupOrderController extends Controller
             return redirect()->route('restaurants.index')->with('error', 'اختر مطعماً أولاً ثم ابدأ طلباً جماعياً.');
         }
 
+        $user = $request->user();
+
         return view('group-orders.create', [
             'restaurant' => $restaurant,
+            'inviteCode' => $user?->ensureReferralCode(),
+            'inviterPoints' => app(\App\Services\ReferralService::class)->inviterPoints(),
         ]);
     }
 

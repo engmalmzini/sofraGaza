@@ -121,7 +121,7 @@
     @if($tab === 'payouts')
         <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
             <p class="text-sm text-on-surface-variant">
-                يتم احتساب الرصيد تلقائياً (صافي 85% من رسوم التوصيل بعد خصم 15% نسبة المنصة). عند تحويل المبلغ للمندوب اضغط "تم التحويل" لإرسال إشعار له وتصفير الرصيد المسحوب.
+                يتم احتساب الرصيد تلقائياً (صافي 85% من رسوم التوصيل بعد خصم 15% نسبة المنصة). طلب السحب لا يخصم الرصيد إلا بعد الضغط على "تأكيد التحويل".
             </p>
             <div class="flex items-center gap-2">
                 <a href="{{ route('admin.delivery.index', ['tab' => 'payouts']) }}" class="admin-chip {{ !request('payout_status') ? 'is-active' : '' }}">الكل</a>

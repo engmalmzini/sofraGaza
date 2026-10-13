@@ -339,13 +339,17 @@ class User extends Authenticatable
         return (float) $this->courierPayouts()->where('status', CourierPayout::STATUS_PENDING)->sum('amount');
     }
 
+    public function hasPendingCourierPayout(): bool
+    {
+        return $this->courierPayouts()->where('status', CourierPayout::STATUS_PENDING)->exists();
+    }
+
     public function courierAvailableBalance(): float
     {
         $net = $this->courierLifetimeNetEarnings();
         $withdrawn = $this->courierTotalWithdrawn();
-        $pending = $this->courierPendingPayoutsAmount();
 
-        return max(0.0, round($net - $withdrawn - $pending, 2));
+        return max(0.0, round($net - $withdrawn, 2));
     }
 
     public function courierEarningsForPeriod(string $period = 'all'): array

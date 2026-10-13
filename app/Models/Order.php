@@ -88,7 +88,7 @@ class Order extends Model
 
     public function platformCommission(): float
     {
-        return round($this->foodTotal() * Finance::RESTAURANT_COMMISSION_RATE, 2);
+        return round($this->foodTotal() * Finance::restaurantCommissionRate(), 2);
     }
 
     public function restaurantNet(): float

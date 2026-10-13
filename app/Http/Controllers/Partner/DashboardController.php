@@ -40,6 +40,9 @@ class DashboardController extends Controller
             'activeOrders' => $activeOrders,
             'activeOrdersCount' => $activeOrdersCount,
             'ordersByStatus' => $ordersByStatus,
+            'availableBalance' => $restaurant->availableBalance(),
+            'totalWithdrawn' => $restaurant->totalWithdrawn(),
+            'commissionLabel' => \App\Support\Finance::restaurantCommissionLabel(),
         ]);
     }
 }

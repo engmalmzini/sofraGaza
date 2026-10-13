@@ -45,7 +45,19 @@
         <span>الظهور للزبائن</span>
         <strong class="!text-xl">{{ $restaurant->isVisible() ? 'ظاهر' : ($restaurant->isApproved() ? 'متوقف' : 'قيد المراجعة') }}</strong>
     </article>
+    <article class="admin-metric">
+        <span>الرصيد المتاح</span>
+        <strong>{{ number_format($availableBalance, 2) }} <span class="ils">₪</span></strong>
+    </article>
+    <article class="admin-metric">
+        <span>ما تم سحبه</span>
+        <strong>{{ number_format($totalWithdrawn, 2) }} <span class="ils">₪</span></strong>
+    </article>
 </div>
+<p class="text-xs text-slate-500 -mt-2 mb-4">
+    <a href="{{ route('partner.wallet') }}" class="font-bold text-primary hover:underline">سحب الرصيد يومي / أسبوعي / شهري</a>
+    — صافي المبيعات بعد خصم عمولة المنصة {{ $commissionLabel }}.
+</p>
 
 @if($restaurant->isApproved() && ! $restaurant->panel_suspended)
     <section class="admin-card mb-4 border border-amber-200 bg-amber-50/40">

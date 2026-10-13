@@ -76,6 +76,11 @@ class GroupOrderTest extends TestCase
             ->assertRedirect()
             ->assertSessionHas('error');
 
+        $error = session('error');
+        $this->assertIsString($error);
+        $this->assertStringContainsString('غير مسجّل', $error);
+        $this->assertStringContainsString($this->host->fresh()->referral_code, $error);
+
         $this->assertSame(0, GroupOrder::query()->count());
     }
 

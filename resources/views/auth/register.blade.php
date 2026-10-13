@@ -25,7 +25,7 @@
 @if(filled($referralCode ?? null) && $step !== 'account')
     <div style="margin-bottom: 1rem; padding: 0.75rem 1rem; border-radius: 0.95rem; background: #fffbeb; border: 1.5px solid #fef3c7; color: #92400e; font-size: 0.8rem; font-weight: 700; display: flex; align-items: center; gap: 0.45rem;">
         <span class="material-symbols-outlined text-[18px] text-amber-600">redeem</span>
-        <span>كود الدعوة محفوظ: <strong dir="ltr">{{ $referralCode }}</strong> — ستحصل على نقاط ترحيبية فور إتمام التسجيل!</span>
+        <span>كود الدعوة محفوظ: <strong dir="ltr">{{ $referralCode }}</strong> — بعد إتمام حسابك يوصل للشخص الذي دعاك {{ $inviterPoints ?? 10 }} نقاط.</span>
     </div>
 @endif
 
@@ -54,6 +54,7 @@
                     id="reg-phone"
                     name="phone"
                     type="tel"
+                    dir="ltr"
                     value="{{ old('phone') }}"
                     required
                     inputmode="numeric"
@@ -214,8 +215,17 @@
         </div>
 
         {{-- Referral Code --}}
+        @php $hasInviteCode = filled(old('referral_code', $referralCode)) || $errors->has('referral_code'); @endphp
         <div class="sg-form-group">
-            <label class="sg-form-label" for="reg-ref">كود الدعوة (اختياري)</label>
+            <label class="sg-checkbox-label" for="has-inviter">
+                <input type="checkbox" id="has-inviter" {{ $hasInviteCode ? 'checked' : '' }}>
+                <span>هل دعاك أحد للمنصة؟</span>
+            </label>
+            <p style="font-size: 0.72rem; color: #78716c; margin: 0.35rem 0 0;">إذا حدا دعاك، حط كوده وبعد ما تعمل تم يوصل له {{ $inviterPoints ?? 10 }} نقاط.</p>
+        </div>
+
+        <div class="sg-form-group" id="referral-field" @if(! $hasInviteCode) hidden @endif>
+            <label class="sg-form-label" for="reg-ref">كود الدعوة</label>
             <div class="sg-input-wrapper">
                 <span class="sg-input-icon">
                     <span class="material-symbols-outlined">card_giftcard</span>
@@ -228,14 +238,12 @@
                     autocomplete="off"
                     autocapitalize="characters"
                     spellcheck="false"
-                    placeholder="SOFRA2026"
+                    placeholder="ABC123"
                     dir="ltr"
                     class="sg-input-field"
+                    @if(! $hasInviteCode) disabled @endif
                 >
             </div>
-            <p style="font-size: 0.72rem; color: #78716c; margin-top: 0.35rem;">
-                إذا دعاك صديق، أدخل كوده لتحصل أنت وهو على {{ $inviteePoints ?? 50 }} نقطة إضافية.
-            </p>
             @error('referral_code')
                 <p class="sg-error-text">
                     <span class="material-symbols-outlined text-[14px]">error</span>
@@ -243,6 +251,21 @@
                 </p>
             @enderror
         </div>
+        <script>
+            (function () {
+                const toggle = document.getElementById('has-inviter');
+                const field = document.getElementById('referral-field');
+                const input = document.getElementById('reg-ref');
+                if (!toggle || !field || !input) return;
+                const sync = function () {
+                    const on = toggle.checked;
+                    field.hidden = !on;
+                    input.disabled = !on;
+                    if (on) input.focus();
+                };
+                toggle.addEventListener('change', sync);
+            })();
+        </script>
 
         <button type="submit" class="sg-submit-btn" style="margin-top: 1.25rem;">
             <span class="material-symbols-outlined text-[20px]">how_to_reg</span>

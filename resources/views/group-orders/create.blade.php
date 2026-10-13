@@ -74,6 +74,20 @@
         <p class="text-[11px] text-stone-400 text-center leading-relaxed">
             رح يوصل إشعار لكل واحد تدعوه عشان يطلب اللي بدو إياه ويدفع نصيبه.
         </p>
+        @if(filled($inviteCode ?? null))
+            <div class="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-xs text-amber-950 leading-relaxed">
+                <p class="font-extrabold mb-1">صاحبك ما عنده حساب؟</p>
+                <p>
+                    أرسل له كود دعوتك
+                    <strong class="font-mono tracking-widest" dir="ltr">{{ $inviteCode }}</strong>
+                    من صفحة إنشاء الحساب. بعد ما يعمل تم، بتوصلك {{ $inviterPoints ?? 10 }} نقاط، وبعدين تقدر تضيف رقمه هون.
+                </p>
+                <a href="{{ route('account.invite') }}" class="inline-flex items-center gap-1 mt-2 font-extrabold text-amber-800">
+                    <span class="material-symbols-outlined text-[16px]">ios_share</span>
+                    <span>نسخ الكود وإرساله</span>
+                </a>
+            </div>
+        @endif
     </form>
 </div>
 

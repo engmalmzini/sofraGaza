@@ -21,6 +21,7 @@
     $pendingRestaurantsCount = \App\Models\Restaurant::query()->pendingVerification()->count();
     $pendingTopupsCount = \App\Models\WalletTopup::query()->where('status', 'pending')->count();
     $pendingBoostsCount = \App\Models\RestaurantBoost::query()->pending()->count();
+    $pendingRestaurantPayoutsCount = \App\Models\RestaurantPayout::query()->pending()->count();
     $adminSearch = [
         'scope' => 'global',
         'action' => route('admin.dashboard'),
@@ -141,6 +142,7 @@
                 ['route' => 'admin.finance.index', 'icon' => 'account_balance', 'label' => 'نظرة عامة', 'match' => 'admin.finance.index', 'module' => 'finance'],
                 ['route' => 'admin.finance.orders', 'icon' => 'receipt_long', 'label' => 'مالية الطلبات', 'match' => 'admin.finance.orders', 'module' => 'finance'],
                 ['route' => 'admin.finance.restaurants', 'icon' => 'payments', 'label' => 'مالية المطاعم', 'match' => 'admin.finance.restaurants*', 'module' => 'finance'],
+                ['route' => 'admin.finance.payouts', 'icon' => 'account_balance_wallet', 'label' => 'سحب المطاعم', 'match' => 'admin.finance.payouts*', 'badge' => $pendingRestaurantPayoutsCount, 'module' => 'finance'],
                 ['route' => 'admin.boosts.index', 'icon' => 'campaign', 'label' => 'إعلانات المطاعم', 'match' => 'admin.boosts.*', 'badge' => $pendingBoostsCount, 'module' => 'finance'],
             ],
         ],

@@ -22,6 +22,7 @@ class RegisterController extends Controller
             'step' => $verification->step(),
             'verifiedPhone' => $verification->phone(),
             'referralCode' => old('referral_code', $referrals->incomingCode()),
+            'inviterPoints' => $referrals->inviterPoints(),
             'inviteePoints' => $referrals->inviteePoints(),
         ]);
     }
@@ -116,7 +117,7 @@ class RegisterController extends Controller
         Auth::login($user->fresh());
 
         $message = $awarded
-            ? 'تم إنشاء حسابك بنجاح. أهلاً بك — حصلت أنت والصديق على نقاط الدعوة.'
+            ? 'تم إنشاء حسابك بنجاح. وصلت نقاط الدعوة للشخص الذي دعاك.'
             : 'تم إنشاء حسابك بنجاح. أهلاً بك في سفرة غزة.';
 
         return redirect()->route('home')->with('success', $message);

@@ -31,7 +31,7 @@
             @if($pendingPayouts > 0)
                 <div class="flex items-center gap-1.5 text-xs text-amber-300 bg-amber-500/15 border border-amber-500/30 px-3 py-1.5 rounded-xl">
                     <span class="material-symbols-outlined text-[16px]">hourglass_top</span>
-                    <span>يوجد <strong>{{ number_format($pendingPayouts, 2) }} ₪</strong> قيد مراجعة التحويل حالياً.</span>
+                    <span>طلب سحب بقيمة <strong>{{ number_format($pendingPayouts, 2) }} ₪</strong> قيد المراجعة. لن يُخصم من رصيدك إلا بعد تأكيد الإدارة.</span>
                 </div>
             @endif
 
@@ -60,14 +60,25 @@
                 <span class="material-symbols-outlined text-primary text-[20px]">payments</span>
                 <span>طلب سحب الأرباح وتحويلها</span>
             </h2>
-            @if($availableBalance > 0)
+            @if($pendingPayouts > 0)
+                <span class="text-[11px] font-bold text-amber-800 bg-amber-50 px-2 py-0.5 rounded-lg border border-amber-200">
+                    قيد المراجعة
+                </span>
+            @elseif($availableBalance > 0)
                 <span class="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-200">
                     جاهز للسحب
                 </span>
             @endif
         </div>
 
-        @if($availableBalance > 0)
+        @if($pendingPayouts > 0)
+            <div class="p-3.5 rounded-xl bg-amber-50 text-xs text-amber-900 flex items-start gap-2 leading-relaxed border border-amber-200/70">
+                <span class="material-symbols-outlined text-amber-600 text-[18px] shrink-0 mt-0.5">hourglass_top</span>
+                <div>
+                    <span>طلب السحب قيد مراجعة الإدارة. سيبقى الرصيد ظاهراً في محفظتك، ويتم الخصم فقط بعد قبول الطلب وتأكيد التحويل من الإدارة.</span>
+                </div>
+            </div>
+        @elseif($availableBalance > 0)
             <form method="POST" action="{{ route('courier.wallet.payout') }}" class="space-y-3 text-xs">
                 @csrf
                 <div class="grid gap-3 sm:grid-cols-2">

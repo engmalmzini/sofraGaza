@@ -42,7 +42,9 @@ class GroupOrderService
 
         foreach ($normalized as $phone) {
             if (! $guests->has($phone)) {
-                throw new RuntimeException("الرقم {$phone} غير مسجّل كزبون في سفرة غزة. لازم يكون عندو حساب.");
+                $code = $host->ensureReferralCode();
+                $points = app(ReferralService::class)->inviterPoints();
+                throw new RuntimeException("الرقم {$phone} غير مسجّل في سفرة غزة. أرسل له كود دعوتك {$code} ليسجّل أولاً، وبعد ما يعمل حسابك توصلك {$points} نقاط وتقدر تضيفه للطلب الجماعي.");
             }
         }
 

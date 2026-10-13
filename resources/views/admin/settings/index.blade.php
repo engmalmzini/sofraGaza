@@ -11,9 +11,10 @@
     $pointsDeliveryVal = (string) ($settings->firstWhere('key', 'points_include_delivery')?->value ?? '1');
     $drinkPointsVal = $settings->firstWhere('key', 'drink_points')?->value ?? '20';
     $mealPointsVal = $settings->firstWhere('key', 'meal_points')?->value ?? '50';
-    $referralInviterVal = $settings->firstWhere('key', 'referral_inviter_points')?->value ?? '50';
-    $referralInviteeVal = $settings->firstWhere('key', 'referral_invitee_points')?->value ?? '50';
+    $referralInviterVal = $settings->firstWhere('key', 'referral_inviter_points')?->value ?? '10';
+    $referralInviteeVal = $settings->firstWhere('key', 'referral_invitee_points')?->value ?? '0';
     $membershipExpiryWarningDaysVal = $settings->firstWhere('key', 'membership_expiry_warning_days')?->value ?? '3';
+    $restaurantCommissionVal = $settings->firstWhere('key', 'restaurant_commission_percent')?->value ?? '10';
 
     $managedKeys = [
         'delivery_fee',
@@ -37,6 +38,7 @@
         'meal_points',
         'referral_inviter_points',
         'referral_invitee_points',
+        'restaurant_commission_percent',
         'restaurant_listing_days',
         'restaurant_expiry_warning_days',
         'membership_expiry_warning_days',
@@ -744,6 +746,24 @@
                             <span class="text-xs font-bold text-slate-500">يوم</span>
                         </div>
                         <p class="text-[11px] text-slate-400">عدد الأيام قبل انتهاء اشتراك بطاقة الزبون لتنبيهه بتجديد العضوية.</p>
+                    </div>
+
+                    <div class="p-4 rounded-xl bg-white border border-slate-200/90 shadow-2xs space-y-2">
+                        <label class="block text-xs font-bold text-stone-900 flex items-center gap-1.5">
+                            <span class="material-symbols-outlined text-primary text-[18px]">percent</span>
+                            <span>نسبة عمولة المنصة من مبيعات المطعم</span>
+                        </label>
+                        <div class="flex items-center gap-2">
+                            <input type="number"
+                                   min="0"
+                                   max="100"
+                                   step="0.5"
+                                   name="settings[restaurant_commission_percent]"
+                                   value="{{ $restaurantCommissionVal }}"
+                                   class="text-sm font-bold font-mono w-full !h-10">
+                            <span class="text-xs font-bold text-slate-500">%</span>
+                        </div>
+                        <p class="text-[11px] text-slate-400">تلقائياً 10%. صافي المطعم = المبيعات ناقص هذه النسبة. تقدر تغيّرها في أي وقت.</p>
                     </div>
                 </div>
 

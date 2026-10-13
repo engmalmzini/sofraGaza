@@ -160,6 +160,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin', 'admin.modu
     Route::get('finance/restaurants', [Admin\FinanceController::class, 'restaurants'])->name('finance.restaurants');
     Route::get('finance/restaurants/{restaurant}', [Admin\FinanceController::class, 'restaurant'])->name('finance.restaurants.show');
     Route::post('finance/restaurants/{restaurant}/settle', [Admin\FinanceController::class, 'settle'])->name('finance.restaurants.settle');
+    Route::get('finance/payouts', [Admin\FinanceController::class, 'payouts'])->name('finance.payouts');
+    Route::post('finance/payouts/{payout}/complete', [Admin\FinanceController::class, 'completeRestaurantPayout'])->name('finance.payouts.complete');
+    Route::post('finance/payouts/{payout}/reject', [Admin\FinanceController::class, 'rejectRestaurantPayout'])->name('finance.payouts.reject');
     Route::delete('finance/settlements/{settlement}', [Admin\FinanceController::class, 'destroySettlement'])->name('finance.settlements.destroy');
     Route::post('finance/boosts', [Admin\FinanceController::class, 'storeBoost'])->name('finance.boosts.store');
     Route::delete('finance/boosts/{boost}', [Admin\FinanceController::class, 'destroyBoost'])->name('finance.boosts.destroy');
@@ -187,6 +190,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin', 'admin.modu
 Route::prefix('partner')->name('partner.')->middleware(['auth', 'partner', 'partner.listing'])->group(function () {
     Route::get('/', [Partner\DashboardController::class, 'index'])->name('dashboard');
     Route::get('orders', [Partner\OrderController::class, 'index'])->name('orders.index');
+    Route::get('wallet', [Partner\WalletController::class, 'index'])->name('wallet');
+    Route::post('wallet/payout', [Partner\WalletController::class, 'requestPayout'])->name('wallet.payout');
     Route::get('orders/live', [Partner\OrderController::class, 'live'])->name('orders.live');
     Route::get('orders/{order}', [Partner\OrderController::class, 'show'])->name('orders.show');
     Route::patch('orders/{order}', [Partner\OrderController::class, 'update'])->name('orders.update');

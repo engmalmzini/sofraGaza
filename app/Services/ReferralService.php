@@ -15,9 +15,9 @@ class ReferralService
 
     public const SETTING_INVITEE = 'referral_invitee_points';
 
-    public const DEFAULT_INVITER = 50;
+    public const DEFAULT_INVITER = 10;
 
-    public const DEFAULT_INVITEE = 50;
+    public const DEFAULT_INVITEE = 0;
 
     public function __construct(
         private NotificationService $notifications,
@@ -156,9 +156,9 @@ class ReferralService
     public function shareText(User $user): string
     {
         $code = $user->ensureReferralCode();
-        $points = $this->inviteePoints();
+        $reward = $this->inviterPoints();
 
-        return "سجّل في سفرة غزة بكودي {$code} وكلاانا ناخذ {$points} نقطة.\n".$this->shareUrl($user);
+        return "سجّل في سفرة غزة بكودي {$code}. بعد ما تعمل حسابك بيوصلني {$reward} نقاط.\n".$this->shareUrl($user);
     }
 
     public function whatsappShareUrl(User $user): string

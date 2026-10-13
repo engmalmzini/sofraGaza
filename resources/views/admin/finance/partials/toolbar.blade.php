@@ -15,8 +15,13 @@
         <span class="material-symbols-outlined">storefront</span>
         مالية المطاعم
     </a>
+    <a href="{{ route('admin.finance.payouts') }}" class="finance-tab {{ request()->routeIs('admin.finance.payouts*') ? 'is-active' : '' }}">
+        <span class="material-symbols-outlined">account_balance_wallet</span>
+        سحب المطاعم
+    </a>
 </nav>
 
+@if(! empty($period))
 <form method="GET" action="{{ route($routeName, isset($restaurant) ? ['restaurant' => $restaurant] : []) }}" class="finance-period admin-card">
     <div>
         <span class="finance-period__label">الفترة</span>
@@ -46,3 +51,4 @@
     <button type="submit" class="admin-btn admin-btn--primary text-xs" onclick="(function (form) { if (form.from.value && form.to.value) { form.period.value = 'custom'; } else if (form.month.value && !form.date.value) { form.period.value = 'month'; } else if (form.date.value && form.period.value !== 'week') { form.period.value = 'day'; } })(this.form)">عرض</button>
 </form>
 <p class="finance-period__hint">الفترة الحالية: <strong>{{ $period['label'] }}</strong></p>
+@endif

@@ -7,8 +7,10 @@ use App\Models\FinanceExpense;
 use App\Models\FinanceIncome;
 use App\Models\Restaurant;
 use App\Models\RestaurantBoost;
+use App\Models\RestaurantPayout;
 use App\Models\RestaurantSettlement;
 use App\Services\FinanceService;
+use App\Services\NotificationService;
 use App\Support\Finance;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -229,6 +231,89 @@ class FinanceController extends Controller
         return redirect()
             ->route('admin.finance.index', $this->finance->queryFromPeriod($period))
             ->with('success', 'تم حذف الدخل الإضافي.');
+    }
+
+    public function payouts(Request $request): View
+    {
+        $status = $request->string('payout_status')->toString();
+        $query = RestaurantPayout::query()->with(['restaurant', 'processor'])->latest();
+
+        if (in_array($status, ['pending', 'completed', 'rejected'], true)) {
+            $query->where('status', $status);
+        }
+
+        $payouts = $query->paginate(20)->withQueryString();
+        $pendingCount = RestaurantPayout::query()->pending()->count();
+
+        return view('admin.finance.payouts', [
+            'payouts' => $payouts,
+            'pendingCount' => $pendingCount,
+            'status' => $status,
+            'commissionLabel' => Finance::restaurantCommissionLabel(),
+        ]);
+    }
+
+    public function completeRestaurantPayout(Request $request, RestaurantPayout $payout, NotificationService $notifications): RedirectResponse
+    {
+        if (! $payout->isPending()) {
+            return back()->with('error', 'تمت معالجة هذا الطلب مسبقاً.');
+        }
+
+        $notes = $request->input('admin_notes');
+
+        $payout->update([
+            'status' => RestaurantPayout::STATUS_COMPLETED,
+            'processed_by' => $request->user()->id,
+            'processed_at' => now(),
+            'admin_notes' => $notes,
+        ]);
+
+        $restaurant = $payout->restaurant;
+        if ($restaurant?->owner) {
+            $formatted = number_format((float) $payout->amount, 2);
+            $notifications->notify(
+                $restaurant->owner,
+                'تم تحويل مستحقات المطعم',
+                "تم تحويل مبلغ {$formatted} ₪ إلى حساب {$restaurant->name} ({$payout->methodLabel()}).".($notes ? " ملاحظات: {$notes}" : ''),
+                route('partner.wallet')
+            );
+        }
+
+        return back()->with('success', "تم تأكيد تحويل {$payout->amount} ₪ للمطعم. خُصم المبلغ من الرصيد المتاح.");
+    }
+
+    public function rejectRestaurantPayout(Request $request, RestaurantPayout $payout, NotificationService $notifications): RedirectResponse
+    {
+        if (! $payout->isPending()) {
+            return back()->with('error', 'تمت معالجة هذا الطلب مسبقاً.');
+        }
+
+        $data = $request->validate([
+            'admin_notes' => ['required', 'string', 'min:3', 'max:500'],
+        ], [
+            'admin_notes.required' => 'يرجى كتابة سبب رفض طلب السحب.',
+            'admin_notes.min' => 'سبب الرفض قصير جداً.',
+        ]);
+
+        $payout->update([
+            'status' => RestaurantPayout::STATUS_REJECTED,
+            'processed_by' => $request->user()->id,
+            'processed_at' => now(),
+            'admin_notes' => $data['admin_notes'],
+        ]);
+
+        $restaurant = $payout->restaurant;
+        if ($restaurant?->owner) {
+            $formatted = number_format((float) $payout->amount, 2);
+            $notifications->notify(
+                $restaurant->owner,
+                'تم رفض طلب سحب المستحقات',
+                "تم رفض طلب سحب {$formatted} ₪. السبب: {$data['admin_notes']}. المبلغ ما زال في رصيد المطعم.",
+                route('partner.wallet')
+            );
+        }
+
+        return back()->with('success', 'تم رفض طلب السحب. الرصيد ما زال متاحاً لأنه لم يُخصم إلا عند تأكيد التحويل.');
     }
 
     private function period(Request $request): array

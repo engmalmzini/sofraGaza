@@ -60,6 +60,10 @@ class WalletController extends Controller
 
         $availableBalance = $user->courierAvailableBalance();
 
+        if ($user->hasPendingCourierPayout()) {
+            return back()->with('error', 'لديك طلب سحب قيد المراجعة. لن يُخصم الرصيد إلا بعد تأكيد الإدارة، ولا يمكن إرسال طلب جديد قبل البتّ في الطلب الحالي.');
+        }
+
         if ($availableBalance <= 0) {
             return back()->with('error', 'لا يوجد رصيد متاح للسحب حالياً.');
         }
@@ -99,7 +103,7 @@ class WalletController extends Controller
             route('admin.delivery.index', ['tab' => 'payouts'])
         );
 
-        return back()->with('success', 'تم إرسال طلب سحب الأرباح بنجاح. سيتم تحويل المبلغ وتأكيده من الإدارة قريباً.');
+        return back()->with('success', 'تم إرسال طلب سحب الأرباح بنجاح. سيبقى الرصيد في محفظتك حتى تؤكد الإدارة التحويل.');
     }
 
     private function resolvedPeriod(Request $request): string

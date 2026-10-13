@@ -38,6 +38,7 @@
                 id="phone"
                 name="phone"
                 type="tel"
+                dir="ltr"
                 value="{{ old('phone') }}"
                 required
                 inputmode="numeric"
@@ -45,7 +46,7 @@
                 minlength="10"
                 maxlength="15"
                 pattern="{{ \App\Support\PalestinianPhone::HTML_PATTERN }}"
-                placeholder="059XXXXXXX أو 056XXXXXXX"
+                placeholder="059XXXXXXXX"
                 class="sg-input-field"
             >
         </div>

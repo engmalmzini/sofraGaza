@@ -187,9 +187,10 @@ class CourierPayoutAndEarningsTest extends TestCase
             'payout_method' => 'jawwal_pay',
         ]);
 
-        // Available balance is now 17 - 15 = 2.00
-        $this->assertEquals(2.0, $courier->fresh()->courierAvailableBalance());
+        // Balance stays until admin confirms the transfer.
+        $this->assertEquals(17.0, $courier->fresh()->courierAvailableBalance());
         $this->assertEquals(15.0, $courier->fresh()->courierPendingPayoutsAmount());
+        $this->assertEquals(0.0, $courier->fresh()->courierTotalWithdrawn());
 
         // Courier profile should have saved default payout details
         $this->assertSame('jawwal_pay', $courier->fresh()->payout_method);
@@ -199,6 +200,48 @@ class CourierPayoutAndEarningsTest extends TestCase
         $this->assertDatabaseHas('app_notifications', [
             'user_id' => $admin->id,
         ]);
+    }
+
+    public function test_courier_cannot_request_another_payout_while_one_is_pending(): void
+    {
+        $courier = User::factory()->courier()->create();
+        $customer = User::factory()->create();
+        $restaurant = $this->createRestaurant();
+
+        Order::query()->create([
+            'user_id' => $customer->id,
+            'restaurant_id' => $restaurant->id,
+            'courier_id' => $courier->id,
+            'type' => 'purchase',
+            'status' => 'delivered',
+            'delivered_at' => now(),
+            'address_details' => 'الرمال',
+            'phone' => $customer->phone,
+            'subtotal' => 50,
+            'delivery_fee' => 20,
+            'total' => 70,
+        ]);
+
+        CourierPayout::create([
+            'user_id' => $courier->id,
+            'amount' => 10.0,
+            'status' => CourierPayout::STATUS_PENDING,
+            'payout_method' => 'jawwal_pay',
+            'transfer_details' => '0599123456',
+        ]);
+
+        $this->assertEquals(17.0, $courier->fresh()->courierAvailableBalance());
+
+        $response = $this->actingAs($courier)->post(route('courier.wallet.payout'), [
+            'amount' => 7.0,
+            'payout_method' => 'jawwal_pay',
+            'transfer_details' => 'محفظة جوال باي برقم 0599123456 باسم المندوب',
+        ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHas('error');
+        $this->assertDatabaseCount('courier_payouts', 1);
+        $this->assertEquals(17.0, $courier->fresh()->courierAvailableBalance());
     }
 
     public function test_courier_cannot_request_payout_exceeding_available_balance(): void
@@ -322,7 +365,7 @@ class CourierPayoutAndEarningsTest extends TestCase
             'transfer_details' => 'رقم خاطئ',
         ]);
 
-        $this->assertEquals(0.0, $courier->fresh()->courierAvailableBalance());
+        $this->assertEquals(17.0, $courier->fresh()->courierAvailableBalance());
 
         // Admin rejects payout
         $response = $this->actingAs($admin)->post(route('admin.delivery.payouts.reject', $payout), [
@@ -335,8 +378,9 @@ class CourierPayoutAndEarningsTest extends TestCase
         $payout->refresh();
         $this->assertSame(CourierPayout::STATUS_REJECTED, $payout->status);
 
-        // Balance restored to 17.0
+        // Balance was never deducted, so it remains 17.0
         $this->assertEquals(17.0, $courier->fresh()->courierAvailableBalance());
+        $this->assertEquals(0.0, $courier->fresh()->courierTotalWithdrawn());
 
         // Courier receives notification
         $this->assertDatabaseHas('app_notifications', [

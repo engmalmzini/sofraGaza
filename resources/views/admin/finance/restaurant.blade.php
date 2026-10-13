@@ -19,7 +19,7 @@
     <article class="admin-metric">
         <div class="admin-metric__top"><span>العمولة المستحقة</span></div>
         <strong class="finance-in">{{ number_format($row['commission'] ?? 0, 2) }} <span class="ils">₪</span></strong>
-        <span class="admin-metric__note">10% من المبيعات</span>
+        <span class="admin-metric__note">{{ \App\Support\Finance::restaurantCommissionLabel() }} من المبيعات</span>
     </article>
     <article class="admin-metric">
         <div class="admin-metric__top"><span>صافي مستحقات المطعم</span></div>

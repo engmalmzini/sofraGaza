@@ -71,7 +71,7 @@
     <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
         <div>
             <h2>دخل الطلبات</h2>
-            <p class="text-xs text-slate-500 mt-1">تفصيل كل طلب: قيمته، عمولة المنصة منه (+10%)، أجرة الكابتن منه (−15%)</p>
+            <p class="text-xs text-slate-500 mt-1">تفصيل كل طلب: قيمته، عمولة المنصة منه (+{{ \App\Support\Finance::restaurantCommissionLabel() }})، أجرة الكابتن منه (−15%)</p>
         </div>
         <a class="admin-btn admin-btn--ghost text-xs" href="{{ route('admin.finance.orders', $periodQuery) }}">كافة الطلبات</a>
     </div>
@@ -82,7 +82,7 @@
                     <th>#</th>
                     <th>المطعم</th>
                     <th>قيمة الطلب</th>
-                    <th>عمولة المنصة +10%</th>
+                    <th>عمولة المنصة +{{ \App\Support\Finance::restaurantCommissionLabel() }}</th>
                     <th>أجرة الكابتن −15%</th>
                 </tr>
             </thead>

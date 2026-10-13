@@ -16,7 +16,7 @@ class AccountController extends Controller
 {
     use ManagesAppNotifications;
 
-    public function show(): View|RedirectResponse
+    public function show(ReferralService $referrals): View|RedirectResponse
     {
         $user = auth()->user();
 
@@ -38,6 +38,8 @@ class AccountController extends Controller
             'addressesCount' => $user->addresses()->count(),
             'favoritesCount' => $user->favorites()->count(),
             'referredCount' => $user->referredUsers()->count(),
+            'referralCode' => $user->ensureReferralCode(),
+            'inviterPoints' => $referrals->inviterPoints(),
             'unreadNotifications' => $user->unreadNotificationsCount(),
         ]);
     }

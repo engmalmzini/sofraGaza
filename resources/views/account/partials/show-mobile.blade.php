@@ -244,7 +244,7 @@
                 </div>
                 <div class="min-w-0">
                     <h3 class="text-[13px] font-bold text-stone-900 leading-tight">ادعُ صديق</h3>
-                    <p class="text-[10.5px] text-stone-400 truncate">كودك — وكلاكما ياخذ نقاط</p>
+                    <p class="text-[10.5px] text-stone-400 truncate">كودك {{ $referralCode ?? $user->referral_code }} · {{ $inviterPoints ?? 10 }} نقاط لكل صديق</p>
                 </div>
             </div>
             <div class="flex items-center gap-1.5 shrink-0">

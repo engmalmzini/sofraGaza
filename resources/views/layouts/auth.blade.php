@@ -125,42 +125,38 @@
             letter-spacing: 0.08em;
         }
 
-        /* Button: Return to Platform (العودة للمنصة) */
+        /* Quiet home link — matches the sand/terracotta auth palette */
         .sg-auth-back-btn {
             display: inline-flex;
             align-items: center;
-            gap: 0.45rem;
-            padding: 0.55rem 1.15rem;
+            gap: 0.35rem;
+            padding: 0.42rem 0.85rem 0.42rem 0.7rem;
             border-radius: 9999px;
-            background: #ffffff;
-            border: 1.5px solid rgba(163, 57, 0, 0.16);
-            color: #443833;
+            background: rgba(163, 57, 0, 0.08);
+            border: 0;
+            color: #7a2800;
             font-family: var(--font-alex);
-            font-size: 0.85rem;
-            font-weight: 700;
+            font-size: 0.8rem;
+            font-weight: 800;
             text-decoration: none;
-            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+            transition: background 0.2s ease, color 0.2s ease;
             white-space: nowrap;
+            box-shadow: none;
         }
 
         .sg-auth-back-btn .material-symbols-outlined {
             font-size: 1.15rem;
             color: #a33900;
-            transition: transform 0.25s;
+            transition: color 0.2s ease;
         }
 
         .sg-auth-back-btn:hover {
             background: #a33900;
             color: #ffffff !important;
-            border-color: #a33900;
-            transform: translateY(-1px);
-            box-shadow: 0 6px 18px rgba(163, 57, 0, 0.24);
         }
 
         .sg-auth-back-btn:hover .material-symbols-outlined {
             color: #ffffff;
-            transform: translateX(3px);
         }
 
         /* Mobile Hero Banner Pill */
@@ -724,6 +720,162 @@
         .auth-text-btn:hover {
             color: #7a2800;
         }
+
+        .sg-input-field[dir="ltr"] {
+            direction: ltr;
+            text-align: right;
+            unicode-bidi: isolate;
+        }
+
+        /* ── Phone / small tablet: keep login compact and unclipped ── */
+        @media (max-width: 1023px) {
+            .sg-split-form-panel {
+                justify-content: flex-start;
+                gap: 0.75rem;
+                padding: 1rem 1rem calc(1.35rem + env(safe-area-inset-bottom, 0px));
+            }
+
+            .sg-auth-nav {
+                margin-bottom: 0.35rem;
+                gap: 0.55rem;
+            }
+
+            .sg-auth-card-wrap {
+                margin: 0 auto;
+                padding: 0;
+            }
+
+            .sg-auth-footer {
+                flex-wrap: wrap;
+                margin-top: 1.15rem;
+                line-height: 1.55;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .sg-auth-brand__text {
+                display: none;
+            }
+
+            .sg-auth-brand img {
+                height: 36px;
+            }
+
+            .sg-auth-back-btn {
+                padding: 0.38rem 0.72rem 0.38rem 0.58rem;
+                font-size: 0.75rem;
+                gap: 0.28rem;
+            }
+
+            .sg-auth-back-btn .material-symbols-outlined {
+                font-size: 1.05rem;
+            }
+
+            .sg-mobile-banner-chip {
+                padding: 0.48rem 0.7rem;
+                font-size: 0.74rem;
+                margin-bottom: 0.35rem;
+                border-radius: 0.85rem;
+            }
+
+            .sg-auth-card {
+                padding: 1.2rem 0.95rem 1.35rem;
+                border-radius: 1.2rem;
+            }
+
+            .sg-auth-tabs,
+            .auth-tabs {
+                margin-bottom: 1.1rem;
+                padding: 3px;
+            }
+
+            .sg-auth-tab,
+            .auth-tab {
+                min-width: 0;
+                padding: 0.48rem 0.35rem;
+                font-size: 0.76rem;
+                gap: 0.2rem;
+            }
+
+            .sg-auth-tab .material-symbols-outlined,
+            .auth-tab .material-symbols-outlined {
+                display: none;
+            }
+
+            .sg-form-title,
+            .auth-title {
+                font-size: 1.22rem;
+            }
+
+            .sg-form-lead,
+            .auth-lead {
+                font-size: 0.8rem;
+                margin-bottom: 1.05rem;
+            }
+
+            .sg-input-field {
+                font-size: 16px;
+                padding: 0.78rem 0.4rem;
+            }
+
+            .sg-input-icon {
+                width: 40px;
+            }
+
+            .sg-partner-grid {
+                gap: 0.55rem;
+            }
+
+            .sg-partner-card {
+                padding: 0.7rem 0.4rem;
+            }
+
+            .sg-partner-card__title {
+                font-size: 0.76rem;
+            }
+
+            .sg-partner-card__sub {
+                font-size: 0.62rem;
+            }
+
+            .sg-auth-footer {
+                font-size: 0.68rem;
+            }
+
+            .auth-steps {
+                gap: 0.3rem;
+            }
+
+            .auth-steps li {
+                font-size: 0.68rem;
+                padding: 0.4rem 0.12rem;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .sg-split-form-panel {
+                padding-inline: 0.7rem;
+            }
+
+            .sg-auth-back-btn {
+                padding: 0.36rem 0.65rem 0.36rem 0.5rem;
+                font-size: 0.72rem;
+            }
+
+            .sg-auth-card {
+                padding: 1.05rem 0.8rem 1.2rem;
+            }
+
+            .sg-auth-tab,
+            .auth-tab {
+                font-size: 0.72rem;
+                padding: 0.45rem 0.25rem;
+            }
+
+            .sg-mobile-banner-chip {
+                font-size: 0.7rem;
+            }
+        }
     </style>
 </head>
 @php
@@ -743,9 +895,9 @@
                         <span class="sg-auth-brand__subtitle">SOFRA GAZA</span>
                     </div>
                 </a>
-                <a href="{{ route('home') }}" class="sg-auth-back-btn">
-                    <span class="material-symbols-outlined">arrow_forward</span>
-                    <span>العودة للمنصة</span>
+                <a href="{{ route('home') }}" class="sg-auth-back-btn" title="العودة إلى الصفحة الرئيسية">
+                    <span class="material-symbols-outlined">home</span>
+                    <span>الرئيسية</span>
                 </a>
             </header>
 
@@ -779,9 +931,9 @@
                         </div>
                     </a>
 
-                    <a href="{{ route('home') }}" class="sg-auth-back-btn" title="العودة لتصفح المطاعم">
-                        <span class="material-symbols-outlined">arrow_forward</span>
-                        <span>العودة للمنصة</span>
+                    <a href="{{ route('home') }}" class="sg-auth-back-btn" title="العودة إلى الصفحة الرئيسية">
+                        <span class="material-symbols-outlined">home</span>
+                        <span>الرئيسية</span>
                     </a>
                 </header>
 

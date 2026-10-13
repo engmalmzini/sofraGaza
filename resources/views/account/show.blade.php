@@ -243,7 +243,7 @@
                         </span>
                         <div class="min-w-0">
                             <span class="block text-[11px] font-bold text-stone-500">ادعُ صديق</span>
-                            <strong class="block text-xs sm:text-sm font-bold text-stone-900 truncate">وكلاكما ياخذ نقاط</strong>
+                            <strong class="block text-xs sm:text-sm font-bold text-stone-900 truncate">كودك {{ $referralCode ?? $user->referral_code }} — {{ $inviterPoints ?? 10 }} نقاط لكل صديق</strong>
                         </div>
                     </div>
                     <span class="text-[11px] font-bold text-stone-600 bg-white border border-stone-200 px-2 py-0.5 rounded-full shrink-0">{{ $referredCount ?? 0 }}</span>
@@ -341,7 +341,7 @@
                 </div>
                 <div class="mt-3">
                     <h3 class="text-sm font-bold text-stone-900 group-hover:text-primary transition-colors">ادعُ صديق</h3>
-                    <p class="text-[11px] text-stone-500 mt-0.5">كودك — وكلاكما ياخذ نقاط</p>
+                    <p class="text-[11px] text-stone-500 mt-0.5">كودك {{ $referralCode ?? $user->referral_code }} — {{ $inviterPoints ?? 10 }} نقاط لكل صديق</p>
                 </div>
             </a>
 

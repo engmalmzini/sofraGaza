@@ -39,9 +39,9 @@ class ReferralProgramTest extends TestCase
         $this->actingAs($customer)
             ->get(route('account.invite'))
             ->assertOk()
-            ->assertSee('ادعُ صديق، وكلاكما ياخذ نقاط', false)
+            ->assertSee('ادعُ صديق للمنصة', false)
             ->assertSee($customer->fresh()->referral_code, false)
-            ->assertSee('شخص دعاك', false);
+            ->assertSee('هل دعاك أحد للمنصة', false);
     }
 
     public function test_register_link_with_ref_remembers_the_code(): void
@@ -54,26 +54,36 @@ class ReferralProgramTest extends TestCase
             ->assertSee($inviter->referral_code, false);
     }
 
-    public function test_both_get_points_when_invitee_registers_with_code(): void
+    public function test_inviter_gets_points_when_friend_registers_with_code(): void
     {
         $inviter = User::factory()->create(['name' => 'أحمد الغزي', 'points_balance' => 10]);
 
-        $this->registerCustomer('0597000222', 'سارة الغزي', $inviter->referral_code)
+        $this->beginVerifiedPhone('0597000222');
+        $this->get(route('register'))
+            ->assertOk()
+            ->assertSee('هل دعاك أحد للمنصة', false)
+            ->assertSee('كود الدعوة', false);
+
+        $this->post(route('register'), [
+            'name' => 'سارة الغزي',
+            'password' => 'secret1',
+            'password_confirmation' => 'secret1',
+            'referral_code' => $inviter->referral_code,
+        ])
             ->assertRedirect(route('home'))
             ->assertSessionHas('success');
 
         $invitee = User::query()->where('phone', '0597000222')->first();
         $this->assertNotNull($invitee);
         $this->assertSame($inviter->id, $invitee->referred_by_id);
-        $this->assertSame(60, $inviter->fresh()->points_balance);
-        $this->assertSame(50, $invitee->points_balance);
+        $this->assertSame(20, $inviter->fresh()->points_balance);
+        $this->assertSame(0, $invitee->points_balance);
         $this->assertDatabaseHas('point_transactions', [
             'user_id' => $inviter->id,
-            'points' => 50,
+            'points' => 10,
         ]);
-        $this->assertDatabaseHas('point_transactions', [
+        $this->assertDatabaseMissing('point_transactions', [
             'user_id' => $invitee->id,
-            'points' => 50,
         ]);
     }
 
@@ -129,7 +139,7 @@ class ReferralProgramTest extends TestCase
         $this->post(route('logout'));
         $this->registerCustomer('0597000777', 'صديق ثاني', $inviter->referral_code);
 
-        $this->assertSame(100, $inviter->fresh()->points_balance);
+        $this->assertSame(20, $inviter->fresh()->points_balance);
         $this->assertSame(2, $inviter->referredUsers()->count());
     }
 
