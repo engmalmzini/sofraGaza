@@ -73,7 +73,7 @@ class Order extends Model
 
     public function foodTotal(): float
     {
-        return max(0.0, round((float) $this->subtotal - (float) $this->discount_amount, 2));
+        return max(0.0, round((float) $this->subtotal, 2));
     }
 
     public function isPurchase(): bool

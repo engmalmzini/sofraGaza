@@ -61,6 +61,20 @@ class BoostController extends Controller
         return redirect()->route('admin.boosts.show', $boost)->with('success', $message);
     }
 
+    public function updateBanner(Request $request, RestaurantBoost $boost): RedirectResponse
+    {
+        $request->validate([
+            'banner' => ['required', 'image', 'max:6144'],
+        ], [
+            'banner.required' => 'ارفع تصميم الإعلان.',
+            'banner.image' => 'تصميم الإعلان يجب أن يكون صورة.',
+        ]);
+
+        $boost->storeCreative($request->file('banner'));
+
+        return back()->with('success', 'تم حفظ تصميم الإعلان. يظهر في شريط الجوال ويربط الزبون بصفحة المطعم.');
+    }
+
     public function reject(Request $request, RestaurantBoost $boost): RedirectResponse
     {
         $data = $request->validate([

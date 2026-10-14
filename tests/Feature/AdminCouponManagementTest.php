@@ -75,6 +75,7 @@ class AdminCouponManagementTest extends TestCase
             'code' => 'MODIFIED15',
             'restaurant_id' => $restaurant->id,
             'type' => Coupon::TYPE_PERCENT,
+            'applies_to' => Coupon::APPLIES_TOTAL,
             'value' => 15,
             'min_order_amount' => 40,
             'max_discount' => 30,
@@ -89,6 +90,7 @@ class AdminCouponManagementTest extends TestCase
         $this->assertEquals('MODIFIED15', $coupon->code);
         $this->assertEquals($restaurant->id, $coupon->restaurant_id);
         $this->assertEquals(15.0, (float) $coupon->value);
+        $this->assertEquals(Coupon::APPLIES_TOTAL, $coupon->applies_to);
         $this->assertEquals(40.0, (float) $coupon->min_order_amount);
         $this->assertEquals(30.0, (float) $coupon->max_discount);
         $this->assertEquals(50, $coupon->usage_limit);

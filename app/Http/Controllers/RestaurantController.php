@@ -63,8 +63,9 @@ class RestaurantController extends Controller
         }
 
         $restaurants = $query->paginate(12)->withQueryString();
+        $boostedPlaces = Restaurant::currentlyBoosted(3);
 
-        return view('restaurants.index', compact('restaurants'));
+        return view('restaurants.index', compact('restaurants', 'boostedPlaces'));
     }
 
     public function show(Restaurant $restaurant): View

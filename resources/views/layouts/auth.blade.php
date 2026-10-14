@@ -650,20 +650,87 @@
         }
 
         /* ── 3. Centered Wizard Layout (for Partner / Courier) ── */
-        .sg-wizard-container {
-            max-width: 58rem;
-            margin: 2rem auto;
-            padding: 0 1rem;
+        .sg-wizard-page {
+            min-height: 100dvh;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 0.65rem 0.65rem calc(0.85rem + env(safe-area-inset-bottom, 0px));
+        }
+
+        .sg-wizard-header {
             width: 100%;
+            max-width: 72rem;
+            margin: 0 auto 0.65rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+        }
+
+        .sg-wizard-container {
+            width: 100%;
+            max-width: 72rem;
+            margin: 0 auto;
+            padding: 0;
+            flex: 1;
         }
 
         .sg-wizard-card {
             background: #ffffff;
-            border-radius: 1.85rem;
-            padding: 2.25rem;
+            border-radius: 1.25rem;
+            padding: 1rem 0.85rem 1.1rem;
             box-shadow:
-                0 20px 45px -12px rgba(22, 18, 14, 0.08),
+                0 16px 36px -14px rgba(22, 18, 14, 0.1),
                 0 0 0 1px rgba(163, 57, 0, 0.07);
+        }
+
+        .sg-wizard-card > .auth-card__bar {
+            margin-bottom: 0.85rem;
+        }
+
+        .sg-wizard-card .auth-tabs,
+        .sg-wizard-card .sg-auth-tabs {
+            margin-bottom: 0;
+        }
+
+        .sg-wizard-footer {
+            margin-top: 0.85rem;
+        }
+
+        @media (min-width: 640px) {
+            .sg-wizard-page {
+                padding: 1.15rem 1.1rem 1.25rem;
+            }
+
+            .sg-wizard-header {
+                margin-bottom: 0.95rem;
+            }
+
+            .sg-wizard-card {
+                border-radius: 1.65rem;
+                padding: 1.7rem 1.55rem 1.55rem;
+            }
+
+            .sg-wizard-card > .auth-card__bar {
+                margin-bottom: 1.25rem;
+            }
+
+            .sg-wizard-footer {
+                margin-top: 1.15rem;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .sg-wizard-page {
+                padding: 1.6rem 1.5rem 1.4rem;
+            }
+
+            .sg-wizard-card {
+                border-radius: 1.85rem;
+                padding: 2.1rem 2rem 1.9rem;
+            }
         }
 
         /* Steps and helpers for registration */
@@ -886,8 +953,8 @@
 <body class="auth-body">
     @if($isWizard)
         {{-- Centered Layout for Multi-Step Partner / Courier Wizards --}}
-        <div class="min-h-screen py-8 px-4 flex flex-col justify-between">
-            <header class="max-w-4xl mx-auto w-full flex items-center justify-between mb-6">
+        <div class="sg-wizard-page">
+            <header class="sg-wizard-header">
                 <a href="{{ route('home') }}" class="sg-auth-brand">
                     <img src="{{ $logoSrc }}" alt="سفرة غزة">
                     <div class="sg-auth-brand__text">
@@ -903,7 +970,7 @@
 
             <main class="sg-wizard-container">
                 <div class="sg-wizard-card">
-                    <div class="auth-card__bar mb-6">
+                    <div class="auth-card__bar">
                         <div class="auth-tabs" role="tablist">
                             @yield('tabs')
                         </div>
@@ -912,7 +979,7 @@
                 </div>
             </main>
 
-            <footer class="sg-auth-footer mt-8">
+            <footer class="sg-auth-footer sg-wizard-footer">
                 <span class="material-symbols-outlined text-[16px] text-emerald-600">verified_user</span>
                 <span>سُفرة غزة © جميع الحقوق محفوظة • بوابة انضمام الشركاء المعتمدة</span>
             </footer>

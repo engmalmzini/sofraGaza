@@ -8,6 +8,7 @@ use App\Models\MenuItem;
 use App\Models\Restaurant;
 use App\Models\Setting;
 use App\Models\User;
+use App\Services\CartService;
 use App\Services\ExpiryNoticeService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -24,7 +25,7 @@ class MembershipCardTest extends TestCase
             'name' => 'العضوية الأساسية',
             'monthly_price' => 50,
             'discount_percent' => 5,
-            'free_delivery' => false,
+            'free_delivery' => true,
             'points_multiplier' => 1.25,
             'is_active' => true,
             'sort_order' => 1,
@@ -127,9 +128,8 @@ class MembershipCardTest extends TestCase
             ->assertOk()
             ->assertSee('50', false)
             ->assertSee('100', false)
-            ->assertSee('خصم 5% على كل طلب', false)
-            ->assertSee('خصم 10% على كل طلب', false)
-            ->assertSee('توصيل مجاني', false)
+            ->assertSee('خصم 5% على التوصيل', false)
+            ->assertSee('خصم 10% على التوصيل', false)
             ->assertSee('1.25 نقطة لكل 10 شيكل بدل نقطة واحدة', false)
             ->assertSee('1.5 نقطة لكل 10 شيكل بدل نقطة واحدة', false);
     }
@@ -260,7 +260,60 @@ class MembershipCardTest extends TestCase
             ->get(route('partner.cards.show', ['q' => $subscription->cardNumber()]))
             ->assertOk()
             ->assertSee('يحيى داود', false)
-            ->assertSee('5%', false)
-            ->assertSee('الخصم داخل المطعم', false);
+            ->assertSee('خصم 5% على التوصيل', false)
+            ->assertSee('لا تمس سعر المطعم', false);
+    }
+
+    public function test_membership_discount_cuts_delivery_not_restaurant_meal(): void
+    {
+        $user = User::factory()->create();
+        $plan = Membership::query()->create([
+            'name' => 'عضوية التوصيل',
+            'monthly_price' => 50,
+            'discount_percent' => 50,
+            'free_delivery' => true,
+            'points_multiplier' => 1,
+            'is_active' => true,
+            'sort_order' => 3,
+        ]);
+        MembershipSubscription::query()->create([
+            'user_id' => $user->id,
+            'membership_id' => $plan->id,
+            'amount' => 50,
+            'status' => 'approved',
+            'transfer_receipt_path' => 'receipts/test.jpg',
+            'starts_at' => now()->subDay(),
+            'ends_at' => now()->addMonth(),
+        ]);
+
+        $owner = User::factory()->create(['role' => 'restaurant']);
+        $restaurant = Restaurant::query()->create([
+            'owner_id' => $owner->id,
+            'name' => 'مطعم العضوية',
+            'type' => 'restaurant',
+            'is_active' => true,
+            'verification_status' => Restaurant::VERIFICATION_APPROVED,
+            'starts_at' => now()->subDay(),
+            'expires_at' => now()->addMonth(),
+        ]);
+        $item = MenuItem::query()->create([
+            'restaurant_id' => $restaurant->id,
+            'name' => 'وجبة',
+            'category' => 'وجبات',
+            'price' => 20,
+            'is_available' => true,
+        ]);
+
+        $cart = app(CartService::class);
+        $cart->clear();
+        $cart->add($item, 1);
+        $quote = $cart->quote($user, 'الرمال');
+
+        $this->assertEquals(20.0, $quote['subtotal']);
+        $this->assertEquals(0.0, $quote['meal_discount']);
+        $this->assertEquals(5.0, $quote['vip_delivery_discount']);
+        $this->assertEquals(5.0, $quote['delivery_fee']);
+        $this->assertEquals(25.0, $quote['total']);
+        $this->assertEquals(20.0, $quote['items_total']);
     }
 }

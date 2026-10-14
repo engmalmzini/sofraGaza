@@ -552,6 +552,8 @@
                 </form>
             </div>
 
+            @include('partials.boosted-spotlight', ['boostedPlaces' => $boostedPlaces ?? $restaurants])
+
             <div class="sg-listing__grid">
                 @forelse($restaurants as $restaurant)
                     @include('partials.restaurant-card', ['restaurant' => $restaurant])

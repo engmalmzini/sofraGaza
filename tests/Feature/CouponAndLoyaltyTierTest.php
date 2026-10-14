@@ -264,4 +264,80 @@ class CouponAndLoyaltyTierTest extends TestCase
         $quoteA = $cart->quote($user);
         $this->assertEquals(15.0, $quoteA['coupon_discount']);
     }
+
+    public function test_coupon_can_target_meal_delivery_or_full_order(): void
+    {
+        $user = User::factory()->create();
+        [$restaurant, $item] = $this->makeRestaurantAndItem(20.0);
+        $this->withSession(['delivery_area' => ['key' => 'الرمال', 'label' => 'غزة • حي الرمال']]);
+
+        $cart = app(CartService::class);
+
+        Coupon::create([
+            'code' => 'DEL5',
+            'type' => 'fixed',
+            'value' => 5,
+            'applies_to' => Coupon::APPLIES_DELIVERY,
+            'is_active' => true,
+        ]);
+        Coupon::create([
+            'code' => 'MEAL5',
+            'type' => 'fixed',
+            'value' => 5,
+            'applies_to' => Coupon::APPLIES_MEAL,
+            'is_active' => true,
+        ]);
+        Coupon::create([
+            'code' => 'ALL5',
+            'type' => 'fixed',
+            'value' => 5,
+            'applies_to' => Coupon::APPLIES_TOTAL,
+            'is_active' => true,
+        ]);
+
+        $cart->clear();
+        $cart->add($item, 1);
+
+        $cart->applyCoupon('DEL5', 20.0, $restaurant->id);
+        $deliveryQuote = $cart->quote($user, 'الرمال');
+        $this->assertEquals(20.0, $deliveryQuote['subtotal']);
+        $this->assertEquals(0.0, $deliveryQuote['meal_discount']);
+        $this->assertEquals(5.0, $deliveryQuote['delivery_discount']);
+        $this->assertEquals(5.0, $deliveryQuote['delivery_fee']);
+        $this->assertEquals(25.0, $deliveryQuote['total']);
+
+        $cart->applyCoupon('MEAL5', 20.0, $restaurant->id);
+        $mealQuote = $cart->quote($user, 'الرمال');
+        $this->assertEquals(5.0, $mealQuote['meal_discount']);
+        $this->assertEquals(0.0, $mealQuote['delivery_discount']);
+        $this->assertEquals(10.0, $mealQuote['delivery_fee']);
+        $this->assertEquals(25.0, $mealQuote['total']);
+
+        $cart->applyCoupon('ALL5', 20.0, $restaurant->id);
+        $allQuote = $cart->quote($user, 'الرمال');
+        $this->assertEquals(5.0, $allQuote['coupon_discount']);
+        $this->assertEquals(30.0, $allQuote['subtotal'] + $allQuote['delivery_fee_base']);
+        $this->assertEquals(25.0, $allQuote['total']);
+        $this->assertEqualsWithDelta(3.33, $allQuote['meal_discount'], 0.02);
+        $this->assertEqualsWithDelta(1.67, $allQuote['delivery_discount'], 0.02);
+    }
+
+    public function test_admin_can_create_coupon_that_applies_to_delivery(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+
+        $this->actingAs($admin)->post(route('admin.coupons.store'), [
+            'code' => 'FREEDEL',
+            'type' => 'fixed',
+            'value' => 10,
+            'applies_to' => 'delivery',
+            'is_active' => 1,
+        ])->assertRedirect();
+
+        $this->assertDatabaseHas('coupons', [
+            'code' => 'FREEDEL',
+            'applies_to' => 'delivery',
+            'value' => 10,
+        ]);
+    }
 }

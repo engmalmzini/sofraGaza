@@ -1,5 +1,5 @@
 @php
-    $vip = (bool) ($membership?->discount_percent);
+    $vip = (bool) ($membership?->includesDeliveryBenefit());
     $itemCount = $menuSections->sum(fn ($section) => $section['items']->count());
     $areaShort = $restaurant->areaLabel();
     if (str_contains($areaShort, '•')) {
@@ -732,7 +732,7 @@
                 </div>
                 @if($canShop ?? true)
                 <div class="rd-hero__vip">
-                    <p>{{ $vip ? 'أنت مؤهل لخصم '.$membership->discount_percent.'% فوري على هذا الطلب' : 'اشترك واحصل على خصم 10% فوري مع كل طلب' }}</p>
+                    <p>{{ $vip ? 'أنت مؤهل لـ'.($membership->deliveryBenefitLabel() ?: 'خصم على التوصيل').' — سعر المطعم لا يتأثر' : 'اشترك واحصل على خصم على التوصيل مع العضوية' }}</p>
                     @if($vip)
                         <em>عضوية نشطة</em>
                     @else
@@ -904,9 +904,9 @@
                                 <span>المجموع الفرعي</span>
                                 <span data-cart-subtotal class="font-semibold text-on-surface">{{ number_format($restaurantCart['subtotal'] ?? 0, 0) }} <span class="ils">₪</span></span>
                             </div>
-                            <div data-cart-discount-row class="flex items-center justify-between text-secondary {{ ($restaurantCart['discount_percent'] ?? 0) ? '' : 'hidden' }}">
+                            <div data-cart-discount-row class="flex items-center justify-between text-secondary {{ (($restaurantCart['meal_discount'] ?? 0) > 0) ? '' : 'hidden' }}">
                                 <span class="flex items-center gap-1">
-                                    <span class="material-symbols-outlined text-[14px]">verified</span>خصم VIP (<span data-cart-discount-percent>{{ $restaurantCart['discount_percent'] ?? 0 }}</span>%)
+                                    <span class="material-symbols-outlined text-[14px]">verified</span>خصم كوبون
                                 </span>
                                 <span data-cart-discount-amount class="font-semibold">- {{ number_format($restaurantCart['discount_amount'] ?? 0, 1) }} <span class="ils">₪</span></span>
                             </div>

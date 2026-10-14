@@ -13,7 +13,7 @@ class RestaurantBoostService
 {
     public function __construct(private NotificationService $notifications) {}
 
-    public function request(Restaurant $restaurant, int $days, UploadedFile $receipt): RestaurantBoost
+    public function request(Restaurant $restaurant, int $days, UploadedFile $receipt, UploadedFile $banner): RestaurantBoost
     {
         if (! $restaurant->isApproved() || $restaurant->panel_suspended) {
             throw new RuntimeException('يجب أن يكون '.$restaurant->venueNounYours().' موثّقاً وظاهراً قبل شراء الإعلان.');
@@ -28,6 +28,7 @@ class RestaurantBoostService
         $start = $this->nextStartDate($restaurant);
         $end = $start->copy()->addDays($days - 1);
         $path = $receipt->store('receipts', 'public');
+        $bannerPath = $banner->store('boosts/banners', 'public');
 
         $boost = RestaurantBoost::query()->create([
             'restaurant_id' => $restaurant->id,
@@ -37,6 +38,7 @@ class RestaurantBoostService
             'days' => $days,
             'amount' => round($days * $rate, 2),
             'transfer_receipt_path' => $path,
+            'banner_path' => $bannerPath,
             'title' => 'إعلان لمدة '.$days.' يوم',
             'status' => RestaurantBoost::STATUS_PENDING,
         ]);

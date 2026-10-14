@@ -195,11 +195,16 @@ class CartService
         }
 
         $membership = $user?->activeMembership();
-        $vipPercent = (int) ($membership?->discount_percent ?? 0);
-        $vipDiscount = round($subtotal * ($vipPercent / 100), 2);
+        $resolvedAreaKey = $areaKey ?: (session('delivery_area')['key'] ?? null);
+        $areaDeliveryFee = (float) Setting::deliveryFeeForArea($resolvedAreaKey);
+        $afterMembership = $membership
+            ? $membership->discountedDeliveryFee($areaDeliveryFee)
+            : $areaDeliveryFee;
+        $vipDeliveryDiscount = max(0.0, round($areaDeliveryFee - $afterMembership, 2));
 
-        // Check for applied coupon
         $coupon = null;
+        $couponMealDiscount = 0.0;
+        $couponDeliveryDiscount = 0.0;
         $couponDiscount = 0.0;
         $codeToUse = $couponCode ?: Session::get('cart.coupon_code');
         $currentRestaurantId = $this->restaurantId();
@@ -210,19 +215,20 @@ class CartService
                 $validation = $candidate->validateForSubtotal($subtotal, $currentRestaurantId);
                 if ($validation['valid']) {
                     $coupon = $candidate;
-                    $couponDiscount = $candidate->calculateDiscount($subtotal);
+                    $allocation = $candidate->allocateDiscount($subtotal, $afterMembership);
+                    $couponMealDiscount = $allocation['meal'];
+                    $couponDeliveryDiscount = $allocation['delivery'];
+                    $couponDiscount = $allocation['total'];
                 }
             }
         }
 
-        $discountAmount = min($subtotal, round($vipDiscount + $couponDiscount, 2));
-        $discountPercent = $subtotal > 0 ? (int) round(($discountAmount / $subtotal) * 100) : 0;
-        $afterDiscount = max(0.0, $subtotal - $discountAmount);
-
-        $resolvedAreaKey = $areaKey ?: (session('delivery_area')['key'] ?? null);
-        $deliveryFee = $membership?->free_delivery
-            ? 0.0
-            : (float) Setting::deliveryFeeForArea($resolvedAreaKey);
+        $mealDiscount = min($subtotal, $couponMealDiscount);
+        $deliveryFee = max(0.0, round($afterMembership - $couponDeliveryDiscount, 2));
+        $deliveryDiscount = round($vipDeliveryDiscount + ($afterMembership - $deliveryFee), 2);
+        $discountAmount = round($mealDiscount + $deliveryDiscount, 2);
+        $discountPercent = $membership?->deliveryDiscountPercent() ?? 0;
+        $afterDiscount = max(0.0, $subtotal - $mealDiscount);
         $total = $afterDiscount + $deliveryFee;
         $multiplier = (float) ($membership?->points_multiplier ?? 1);
         $restaurant = Restaurant::find($this->restaurantId());
@@ -230,7 +236,7 @@ class CartService
             $restaurant,
             $lines,
             $subtotal,
-            $discountAmount,
+            $mealDiscount,
             $deliveryFee,
             $multiplier,
         );
@@ -243,6 +249,9 @@ class CartService
             'subtotal' => $subtotal,
             'discount_percent' => $discountPercent,
             'discount_amount' => $discountAmount,
+            'meal_discount' => $mealDiscount,
+            'delivery_discount' => $deliveryDiscount,
+            'delivery_fee_base' => $areaDeliveryFee,
             'delivery_fee' => $deliveryFee,
             'delivery_area' => $currentArea,
             'total' => $total,
@@ -253,7 +262,8 @@ class CartService
             'coupon' => $coupon,
             'coupon_code' => $coupon?->code,
             'coupon_discount' => $couponDiscount,
-            'vip_discount' => $vipDiscount,
+            'vip_discount' => 0.0,
+            'vip_delivery_discount' => $vipDeliveryDiscount,
         ];
     }
 
@@ -273,6 +283,8 @@ class CartService
             'subtotal' => $quote['subtotal'],
             'discount_percent' => $quote['discount_percent'],
             'discount_amount' => $quote['discount_amount'],
+            'meal_discount' => $quote['meal_discount'],
+            'delivery_discount' => $quote['delivery_discount'],
             'delivery_fee' => $quote['delivery_fee'],
             'delivery_area' => $quote['delivery_area'],
             'total' => $quote['total'],

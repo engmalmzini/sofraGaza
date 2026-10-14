@@ -126,6 +126,20 @@ class DeliveryController extends Controller
         return back()->with('success', 'تم إضافة مندوب التوصيل. يدخل بنفس صفحة الدخول برقم هاتفه.');
     }
 
+    public function photo(User $courier)
+    {
+        abort_unless($courier->isCourier(), 404);
+
+        return $courier->photoResponse();
+    }
+
+    public function bikePhoto(User $courier)
+    {
+        abort_unless($courier->isCourier(), 404);
+
+        return $courier->bikePhotoResponse();
+    }
+
     public function show(User $courier): View
     {
         abort_unless($courier->isCourier(), 404);

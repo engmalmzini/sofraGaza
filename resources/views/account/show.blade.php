@@ -260,7 +260,7 @@
                                 <span class="block text-[11px] font-bold text-stone-500">عضوية نشطة</span>
                                 <div class="flex items-baseline gap-1 mt-0.5">
                                     <strong class="text-sm font-black text-stone-900">{{ $subscription->membership->name }}</strong>
-                                    <span class="text-[11px] text-primary font-bold">(-{{ $subscription->membership->discount_percent }}%)</span>
+                                    <span class="text-[11px] text-primary font-bold">{{ $subscription->membership->deliveryBenefitLabel() ? '('.$subscription->membership->deliveryBenefitLabel().')' : '' }}</span>
                                 </div>
                             @else
                                 <span class="block text-[11px] font-bold text-stone-500">عضويات VIP الرقمية</span>

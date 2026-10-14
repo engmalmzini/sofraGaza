@@ -19,6 +19,8 @@ class HomeController extends Controller
 
     public function index(): View
     {
+        $boostedPlaces = Restaurant::currentlyBoosted(3);
+
         $restaurants = Restaurant::query()
             ->visible()
             ->inDeliveryArea()
@@ -27,6 +29,8 @@ class HomeController extends Controller
             ->latest()
             ->take(24)
             ->get();
+
+        $restaurants = $boostedPlaces->concat($restaurants)->unique('id')->values();
 
         $restaurantCount = Restaurant::query()->visible()->count();
         $memberships = Membership::query()->where('is_active', true)->orderBy('sort_order')->get();
@@ -54,6 +58,7 @@ class HomeController extends Controller
 
         return view('home', [
             'restaurants' => $restaurants,
+            'boostedPlaces' => $boostedPlaces,
             'restaurantCount' => $restaurantCount,
             'latestDishes' => $latestDishes,
             'memberships' => $memberships,

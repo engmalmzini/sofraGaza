@@ -49,7 +49,7 @@ class RestaurantSettlement extends Model
 
     public function statusLabel(): string
     {
-        return $this->isPaid() ? 'تم الدفع' : 'قيد الانتظار';
+        return $this->isPaid() ? 'مُقفلة' : 'غير مُقفلة';
     }
 
     public function periodLabel(): string

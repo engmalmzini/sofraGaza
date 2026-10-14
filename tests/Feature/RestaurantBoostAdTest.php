@@ -29,13 +29,11 @@ class RestaurantBoostAdTest extends TestCase
             ->get(route('partner.boosts.index'))
             ->assertOk()
             ->assertSee('اشترِ إعلاناً', false)
+            ->assertSee('تصميم الإعلان', false)
             ->assertSee('20', false);
 
         $this->actingAs($owner)
-            ->post(route('partner.boosts.store'), [
-                'days' => 5,
-                'receipt' => UploadedFile::fake()->image('receipt.jpg'),
-            ])
+            ->post(route('partner.boosts.store'), $this->boostRequest(5))
             ->assertRedirect(route('partner.boosts.index'));
 
         $this->assertDatabaseHas('restaurant_boosts', [
@@ -60,10 +58,7 @@ class RestaurantBoostAdTest extends TestCase
         $this->approvedVenue('مطعم عادي', now()->subHour());
 
         $this->actingAs($owner)
-            ->post(route('partner.boosts.store'), [
-                'days' => 3,
-                'receipt' => UploadedFile::fake()->image('receipt.jpg'),
-            ])
+            ->post(route('partner.boosts.store'), $this->boostRequest(3))
             ->assertRedirect();
 
         $boost = RestaurantBoost::query()->first();
@@ -89,8 +84,10 @@ class RestaurantBoostAdTest extends TestCase
 
         $home = $this->get(route('home'));
         $home->assertOk()
-            ->assertSee('إعلانات تظهر أولاً', false)
-            ->assertSee('مطعم الظاهر أولاً', false);
+            ->assertDontSee('إعلانات تظهر أولاً', false)
+            ->assertSee('إعلان مميز', false)
+            ->assertSee('مطعم الظاهر أولاً', false)
+            ->assertSee('sg-ad-hero', false);
 
         $html = $home->getContent();
         $adPos = mb_strpos($html, 'مطعم الظاهر أولاً');
@@ -98,6 +95,32 @@ class RestaurantBoostAdTest extends TestCase
         $this->assertNotFalse($adPos);
         $this->assertNotFalse($plainPos);
         $this->assertLessThan($plainPos, $adPos);
+        $this->assertSame(2, substr_count($html, 'إعلان مميز'));
+        $home->assertSee('/storage/boosts/banners/', false);
+        $home->assertSee(route('restaurants.show', $boosted, false), false);
+        $home->assertSee('إعلان مطعم الظاهر أولاً', false);
+    }
+
+    public function test_boosted_restaurant_still_appears_when_outside_selected_delivery_area(): void
+    {
+        $admin = User::factory()->admin()->create();
+        [$owner, $boosted] = $this->approvedVenue('أحمد علي', ['area' => 'خانيونس']);
+        $this->approvedVenue('مطعم الرمال', ['area' => 'الرمال']);
+
+        $this->actingAs($owner)
+            ->post(route('partner.boosts.store'), $this->boostRequest(3));
+
+        $boost = \App\Models\RestaurantBoost::query()->first();
+        $this->actingAs($admin)->post(route('admin.boosts.approve', $boost));
+
+        $this->withSession(['delivery_area' => ['key' => 'الرمال', 'label' => 'غزة • حي الرمال']])
+            ->get(route('home'))
+            ->assertOk()
+            ->assertSee('أحمد علي', false)
+            ->assertSee('إعلان مميز', false)
+            ->assertSee('sg-ad-hero', false)
+            ->assertSee(route('restaurants.show', $boosted, false), false)
+            ->assertSee('إعلان أحمد علي', false);
     }
 
     public function test_admin_can_reject_boost_request(): void
@@ -106,10 +129,7 @@ class RestaurantBoostAdTest extends TestCase
         [$owner] = $this->approvedVenue('مطعم مرفوض إعلانه');
 
         $this->actingAs($owner)
-            ->post(route('partner.boosts.store'), [
-                'days' => 2,
-                'receipt' => UploadedFile::fake()->image('receipt.jpg'),
-            ]);
+            ->post(route('partner.boosts.store'), $this->boostRequest(2));
 
         $boost = RestaurantBoost::query()->first();
 
@@ -141,22 +161,36 @@ class RestaurantBoostAdTest extends TestCase
         ]);
 
         $this->actingAs($owner)
-            ->post(route('partner.boosts.store'), [
-                'days' => 3,
-                'receipt' => UploadedFile::fake()->image('receipt.jpg'),
-            ])
+            ->post(route('partner.boosts.store'), $this->boostRequest(3))
             ->assertSessionHas('error');
 
         $this->assertDatabaseCount('restaurant_boosts', 0);
     }
 
     /**
+     * @return array{days: int, receipt: UploadedFile, banner: UploadedFile}
+     */
+    private function boostRequest(int $days): array
+    {
+        return [
+            'days' => $days,
+            'receipt' => UploadedFile::fake()->image('receipt.jpg'),
+            'banner' => UploadedFile::fake()->image('ad-design.jpg', 1200, 300),
+        ];
+    }
+
+    /**
      * @return array{0: User, 1: Restaurant}
      */
-    private function approvedVenue(string $name, $createdAt = null): array
+    private function approvedVenue(string $name, $createdAt = null, array $extra = []): array
     {
+        if (is_array($createdAt)) {
+            $extra = $createdAt;
+            $createdAt = null;
+        }
+
         $owner = User::factory()->restaurantOwner()->create();
-        $restaurant = Restaurant::query()->create([
+        $restaurant = Restaurant::query()->create(array_merge([
             'owner_id' => $owner->id,
             'name' => $name,
             'type' => 'restaurant',
@@ -166,7 +200,7 @@ class RestaurantBoostAdTest extends TestCase
             'panel_suspended' => false,
             'verification_status' => Restaurant::VERIFICATION_APPROVED,
             'created_at' => $createdAt ?? now(),
-        ]);
+        ], $extra));
 
         return [$owner, $restaurant];
     }

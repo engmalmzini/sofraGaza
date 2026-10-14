@@ -17,20 +17,37 @@
         <div>الهاتف: <span dir="ltr">{{ $courier->phone }}</span></div>
         <div>نوع الدراجة: {{ $courier->bikeTypeLabel() }}</div>
         <div>البريد: {{ $courier->email ?: '—' }}</div>
-        @if($courier->photoUrl() || $courier->bikePhotoUrl())
+        @if($courier->photo_path || $courier->bike_photo_path)
             <div class="grid gap-3 sm:grid-cols-2 pt-2">
-                @if($courier->photoUrl())
-                    <div>
-                        <div class="text-xs text-on-surface-variant mb-1">صورة شخصية</div>
-                        <img src="{{ $courier->photoUrl() }}" alt="" class="h-40 w-full rounded-xl object-cover">
-                    </div>
-                @endif
-                @if($courier->bikePhotoUrl())
-                    <div>
-                        <div class="text-xs text-on-surface-variant mb-1">صورة الدراجة</div>
-                        <img src="{{ $courier->bikePhotoUrl() }}" alt="" class="h-40 w-full rounded-xl object-cover">
-                    </div>
-                @endif
+                @foreach([
+                    [
+                        'label' => 'صورة شخصية',
+                        'stored' => filled($courier->photo_path),
+                        'url' => $courier->hasPhotoFile() ? route('admin.delivery.photo', $courier) : null,
+                    ],
+                    [
+                        'label' => 'صورة الدراجة',
+                        'stored' => filled($courier->bike_photo_path),
+                        'url' => $courier->hasBikePhotoFile() ? route('admin.delivery.bike-photo', $courier) : null,
+                    ],
+                ] as $shot)
+                    @if($shot['stored'])
+                        <div>
+                            <div class="text-xs text-on-surface-variant mb-1">{{ $shot['label'] }}</div>
+                            @if($shot['url'])
+                                <a href="{{ $shot['url'] }}" target="_blank" rel="noopener" class="admin-id-photo">
+                                    <img src="{{ $shot['url'] }}" alt="{{ $shot['label'] }}">
+                                </a>
+                                <a href="{{ $shot['url'] }}" target="_blank" rel="noopener" class="sg-receipt-open">
+                                    فتح الصورة بحجم كامل
+                                    <span class="material-symbols-outlined text-[16px]">open_in_new</span>
+                                </a>
+                            @else
+                                <p class="sg-receipt-empty">تم رفع الصورة لكن تعذر عرضها من التخزين.</p>
+                            @endif
+                        </div>
+                    @endif
+                @endforeach
             </div>
         @endif
         @if($courier->isCourierPending())

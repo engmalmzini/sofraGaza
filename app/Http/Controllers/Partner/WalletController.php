@@ -8,6 +8,7 @@ use App\Support\Finance;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class WalletController extends Controller
 {
@@ -105,6 +106,13 @@ class WalletController extends Controller
         );
 
         return back()->with('success', 'تم إرسال طلب السحب. سيبقى الرصيد ظاهراً حتى تؤكد الإدارة التحويل.');
+    }
+
+    public function receipt(RestaurantPayout $payout): BinaryFileResponse
+    {
+        abort_unless($payout->restaurant_id === $this->restaurant()->id, 403);
+
+        return $payout->receiptResponse();
     }
 
     private function resolvedPeriod(Request $request): string

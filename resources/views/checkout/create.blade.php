@@ -180,7 +180,7 @@
                 <div class="flex items-center justify-between text-stone-600">
                     <span>التوصيل</span>
                     <span id="summary-delivery-wrap" class="font-mono font-bold text-stone-900">
-                        <span id="summary-delivery-val">{{ number_format($quote['delivery_fee'], 2) }}</span> ₪
+                        <span id="summary-delivery-val">{{ number_format($quote['delivery_fee_base'] ?? $quote['delivery_fee'], 2) }}</span> ₪
                     </span>
                 </div>
 
@@ -230,7 +230,7 @@
 
                 <div class="flex items-center justify-between text-xs text-stone-600">
                     <span>المجموع <span class="font-mono font-bold text-stone-800">{{ number_format($quote['subtotal'], 2) }} ₪</span></span>
-                    <span>التوصيل <span class="font-mono font-bold text-stone-800" id="step3-delivery-val">{{ number_format($quote['delivery_fee'], 2) }} ₪</span></span>
+                    <span>التوصيل <span class="font-mono font-bold text-stone-800" id="step3-delivery-val">{{ number_format($quote['delivery_fee_base'] ?? $quote['delivery_fee'], 2) }} ₪</span></span>
                 </div>
             </div>
 
@@ -581,7 +581,7 @@
 let currentStep = 2; // Step 1 is cart.index, Step 2 is order confirmation, Step 3 is payment
 let currentSubtotal = {{ (float) $quote['subtotal'] }};
 let currentDiscountAmount = {{ (float) ($quote['discount_amount'] ?? 0) }};
-let currentDeliveryFee = {{ (float) ($quote['delivery_fee'] ?? 0) }};
+let currentDeliveryFee = {{ (float) ($quote['delivery_fee_base'] ?? $quote['delivery_fee'] ?? 0) }};
 const isFreeDelivery = {{ ($quote['membership']?->free_delivery ?? false) ? 'true' : 'false' }};
 const userWalletBalance = {{ (float) auth()->user()->wallet_balance }};
 const csrfToken = '{{ csrf_token() }}';
@@ -686,7 +686,7 @@ function saveAddressFromModal() {
         document.getElementById('selected-area').value = selectedArea;
         document.getElementById('card-area-name').textContent = opt.dataset.label || selectedArea;
 
-        currentDeliveryFee = isFreeDelivery ? 0 : fee;
+        currentDeliveryFee = fee;
 
         // Sync backend session
         fetch('{{ route("delivery-area.update") }}', {
@@ -848,6 +848,9 @@ function handleApplyCoupon() {
             if (removeBtn) removeBtn.classList.remove('hidden');
 
             currentDiscountAmount = parseFloat(data.quote.discount_amount);
+            if (data.quote.delivery_fee !== undefined) {
+                currentDeliveryFee = parseFloat(data.quote.delivery_fee);
+            }
             if (discountRow) discountRow.classList.remove('hidden');
             if (discountVal) discountVal.textContent = currentDiscountAmount.toFixed(2);
 
@@ -895,6 +898,9 @@ function handleRemoveCoupon() {
             if (removeBtn) removeBtn.classList.add('hidden');
 
             currentDiscountAmount = parseFloat(data.quote.discount_amount);
+            if (data.quote.delivery_fee !== undefined) {
+                currentDeliveryFee = parseFloat(data.quote.delivery_fee);
+            }
             if (currentDiscountAmount > 0) {
                 if (discountVal) discountVal.textContent = currentDiscountAmount.toFixed(2);
             } else {

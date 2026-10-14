@@ -318,7 +318,7 @@
     <section class="admin-card">
         <h2>تسجيل حملة إعلان (Boost)</h2>
         <p class="text-xs text-slate-500 mb-3">السعر = عدد الأيام × {{ number_format($boostRate, 0) }} ₪</p>
-        <form method="POST" action="{{ route('admin.finance.boosts.store') }}" class="grid gap-3 text-xs sm:grid-cols-2">
+        <form method="POST" action="{{ route('admin.finance.boosts.store') }}" enctype="multipart/form-data" class="grid gap-3 text-xs sm:grid-cols-2">
             @csrf
             @foreach($periodQuery as $key => $value)
                 <input type="hidden" name="{{ $key }}" value="{{ $value }}">
@@ -347,6 +347,11 @@
             <label>
                 <span class="block font-bold mb-1">عنوان اختياري</span>
                 <input type="text" name="title" placeholder="Boost الصفحة الرئيسية" class="w-full !h-10">
+            </label>
+            <label class="sm:col-span-2">
+                <span class="block font-bold mb-1">تصميم الإعلان (شريط الجوال)</span>
+                <input type="file" name="banner" accept="image/*" class="w-full rounded-xl border border-dashed border-slate-300 p-2 bg-white">
+                <span class="block text-[11px] text-slate-500 mt-1">الصورة تظهر في قائمة إعلانات الجوال، والضغط عليها يفتح صفحة المطعم.</span>
             </label>
             <div class="sm:col-span-2">
                 <button class="admin-btn admin-btn--primary text-xs" type="submit">حفظ الحملة</button>

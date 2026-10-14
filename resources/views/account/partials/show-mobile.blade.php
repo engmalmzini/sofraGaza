@@ -208,7 +208,7 @@
                 </div>
                 <div>
                     <span class="text-[10px] text-amber-300 font-bold block">عضوية VIP نشطة</span>
-                    <strong class="text-xs font-bold text-white">{{ $subscription->membership->name }} (خصم {{ $subscription->membership->discount_percent }}%)</strong>
+                    <strong class="text-xs font-bold text-white">{{ $subscription->membership->name }}{{ $subscription->membership->deliveryBenefitLabel() ? ' ('.$subscription->membership->deliveryBenefitLabel().')' : '' }}</strong>
                     <span class="text-[9.5px] text-stone-400 block mt-0.5 font-mono">تنتهي في {{ $subscription->ends_at?->format('Y/m/d') }}</span>
                 </div>
             </div>

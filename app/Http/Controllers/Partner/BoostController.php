@@ -36,22 +36,30 @@ class BoostController extends Controller
         $data = $request->validate([
             'days' => ['required', 'integer', 'min:1', 'max:30'],
             'receipt' => ['required', 'image', 'max:5120'],
+            'banner' => ['required', 'image', 'max:6144'],
         ], [
             'days.required' => 'حدد عدد أيام الإعلان.',
             'days.min' => 'أقل مدة يوم واحد.',
             'days.max' => 'أقصى مدة 30 يوماً.',
             'receipt.required' => 'أرفق صورة إشعار الحوالة.',
             'receipt.image' => 'إشعار الحوالة يجب أن يكون صورة.',
+            'banner.required' => 'ارفع تصميم الإعلان الذي يظهر في شريط الجوال.',
+            'banner.image' => 'تصميم الإعلان يجب أن يكون صورة.',
         ]);
 
         try {
-            $this->boosts->request($this->restaurant(), (int) $data['days'], $request->file('receipt'));
+            $this->boosts->request(
+                $this->restaurant(),
+                (int) $data['days'],
+                $request->file('receipt'),
+                $request->file('banner')
+            );
         } catch (RuntimeException $exception) {
             return back()->with('error', $exception->getMessage())->withInput();
         }
 
         return redirect()
             ->route('partner.boosts.index')
-            ->with('success', 'تم إرسال طلب الإعلان. بعد تأكيد الإدارة يظهر '.$this->restaurant()->venueNounYours().' في المقدمة.');
+            ->with('success', 'تم إرسال طلب الإعلان. بعد تأكيد الإدارة يظهر التصميم في شريط الجوال ويأخذ الزبون لصفحة '.$this->restaurant()->venueNounYours().'.');
     }
 }

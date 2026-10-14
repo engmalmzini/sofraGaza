@@ -462,12 +462,14 @@ const applyCart = (cart) => {
     });
 
     document.querySelectorAll('[data-cart-vip]').forEach((el) => {
-        el.textContent = `مشمول خصم الـ VIP (${cart.discount_percent}%)`;
+        el.textContent = cart.discount_percent
+            ? `خصم ${cart.discount_percent}% على التوصيل`
+            : '';
         el.classList.toggle('hidden', !cart.discount_percent);
     });
 
     document.querySelectorAll('[data-cart-discount-row]').forEach((el) => {
-        el.classList.toggle('hidden', !cart.discount_percent);
+        el.classList.toggle('hidden', !(Number(cart.meal_discount || 0) > 0));
     });
 
     document.querySelectorAll('[data-cart-discount-percent]').forEach((el) => {
@@ -1213,6 +1215,114 @@ const initPartnerWizard = () => {
 };
 
 initPartnerWizard();
+
+const initAuthUploads = () => {
+    document.querySelectorAll('.auth-upload').forEach((label) => {
+        const input = label.querySelector('input[type="file"]');
+        if (!input || input.dataset.uploadBound === '1') {
+            return;
+        }
+
+        input.dataset.uploadBound = '1';
+
+        const icon = label.querySelector('.auth-upload__icon');
+        const thumb = label.querySelector('.auth-upload__thumb');
+        const nameEl = label.querySelector('.auth-upload__name');
+        const extEl = label.querySelector('.auth-upload__ext');
+        const fileRow = label.querySelector('.auth-upload__file');
+        let objectUrl = '';
+
+        const splitName = (filename) => {
+            const lastDot = filename.lastIndexOf('.');
+            if (lastDot <= 0 || lastDot === filename.length - 1) {
+                return { name: filename, ext: '' };
+            }
+
+            return {
+                name: filename.slice(0, lastDot),
+                ext: filename.slice(lastDot + 1).toUpperCase(),
+            };
+        };
+
+        const clearPreview = () => {
+            label.classList.remove('is-filled');
+
+            if (fileRow) {
+                fileRow.hidden = true;
+            }
+
+            if (nameEl) {
+                nameEl.textContent = '';
+            }
+
+            if (extEl) {
+                extEl.textContent = '';
+                extEl.hidden = true;
+            }
+
+            if (thumb) {
+                thumb.hidden = true;
+                thumb.removeAttribute('src');
+            }
+
+            if (icon) {
+                icon.hidden = false;
+            }
+
+            if (objectUrl) {
+                URL.revokeObjectURL(objectUrl);
+                objectUrl = '';
+            }
+        };
+
+        const render = () => {
+            const file = input.files?.[0];
+            if (!file) {
+                clearPreview();
+                return;
+            }
+
+            const { name, ext } = splitName(file.name);
+            label.classList.add('is-filled');
+
+            if (nameEl) {
+                nameEl.textContent = name;
+            }
+
+            if (extEl) {
+                extEl.textContent = ext;
+                extEl.hidden = !ext;
+            }
+
+            if (fileRow) {
+                fileRow.hidden = false;
+            }
+
+            const canPreview = Boolean(thumb && file.type.startsWith('image/'));
+            if (icon) {
+                icon.hidden = canPreview;
+            }
+
+            if (canPreview) {
+                if (objectUrl) {
+                    URL.revokeObjectURL(objectUrl);
+                }
+
+                objectUrl = URL.createObjectURL(file);
+                thumb.src = objectUrl;
+                thumb.alt = file.name;
+                thumb.hidden = false;
+            } else if (thumb) {
+                thumb.hidden = true;
+                thumb.removeAttribute('src');
+            }
+        };
+
+        input.addEventListener('change', render);
+    });
+};
+
+initAuthUploads();
 
 const initNiceSelects = () => {
     const instances = [];

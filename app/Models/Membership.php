@@ -35,12 +35,56 @@ class Membership extends Model
         return $this->hasMany(MembershipSubscription::class);
     }
 
+    public function includesDeliveryBenefit(): bool
+    {
+        return (bool) $this->free_delivery;
+    }
+
+    public function deliveryDiscountPercent(): int
+    {
+        if (! $this->includesDeliveryBenefit()) {
+            return 0;
+        }
+
+        return min(100, max(0, (int) $this->discount_percent));
+    }
+
+    public function discountedDeliveryFee(float $baseFee): float
+    {
+        $baseFee = max(0.0, $baseFee);
+        $percent = $this->deliveryDiscountPercent();
+
+        if ($percent <= 0) {
+            return $baseFee;
+        }
+
+        return round($baseFee * (1 - ($percent / 100)), 2);
+    }
+
+    public function deliveryBenefitLabel(): ?string
+    {
+        if (! $this->includesDeliveryBenefit()) {
+            return null;
+        }
+
+        $percent = $this->deliveryDiscountPercent();
+        if ($percent >= 100) {
+            return 'توصيل مجاني';
+        }
+
+        if ($percent <= 0) {
+            return null;
+        }
+
+        return "خصم {$percent}% على التوصيل";
+    }
+
     public function benefitsList(): array
     {
-        $benefits = ["خصم {$this->discount_percent}% على كل طلب"];
+        $benefits = [];
 
-        if ($this->free_delivery) {
-            $benefits[] = 'توصيل مجاني';
+        if ($label = $this->deliveryBenefitLabel()) {
+            $benefits[] = $label;
         }
 
         $benefits[] = $this->extraPointsLabel();

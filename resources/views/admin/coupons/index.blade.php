@@ -190,6 +190,15 @@
                     </div>
 
                     <div>
+                        <label class="block font-bold text-on-surface mb-1">على ماذا ينطبق الخصم <span class="text-primary">*</span></label>
+                        <select name="applies_to" required class="text-xs w-full !h-10 rounded-lg">
+                            <option value="meal" @selected(old('applies_to', 'meal') === 'meal')>سعر الوجبة فقط</option>
+                            <option value="delivery" @selected(old('applies_to') === 'delivery')>رسوم التوصيل فقط</option>
+                            <option value="total" @selected(old('applies_to') === 'total')>الطلب كامل (الوجبة + التوصيل)</option>
+                        </select>
+                    </div>
+
+                    <div>
                         <label class="block font-bold text-on-surface mb-1">قيمة الخصم <span class="text-primary">*</span></label>
                         <input type="number" 
                                step="0.5" 
@@ -235,6 +244,10 @@
                                name="expires_at" 
                                value="{{ old('expires_at') }}" 
                                class="text-xs w-full !h-10">
+                    </div>
+
+                    <div class="sm:col-span-2 lg:col-span-4 rounded-xl bg-amber-50/70 border border-amber-100 px-3 py-2 text-[11px] text-stone-700 leading-6">
+                        مثال: وجبة 20 ₪ وتوصيل 10 ₪. خصم التوصيل ينزّل من الـ 10 والمطعم يأخذ الـ 20 كاملة. خصم الوجبة ينزّل من الـ 20 والتوصيل يبقى 10. خصم الطلب كامل ينزّل من الـ 30.
                     </div>
 
                     <div class="sm:col-span-2 lg:col-span-3">
@@ -336,6 +349,9 @@
                                     <span class="text-[11px] font-semibold text-slate-400">
                                         {{ $coupon->type === 'percent' ? 'نسبة مئوية' : 'مبلغ ثابت' }}
                                     </span>
+                                </div>
+                                <div class="text-[11px] text-slate-500 mt-0.5">
+                                    {{ $coupon->appliesToLabel() }}
                                 </div>
                                 @if($coupon->max_discount && $coupon->type === 'percent')
                                     <div class="text-[11px] text-slate-500 mt-0.5">
@@ -447,6 +463,7 @@
                                             data-code="{{ $coupon->code }}"
                                             data-restaurant-id="{{ $coupon->restaurant_id ?? '' }}"
                                             data-type="{{ $coupon->type }}"
+                                            data-applies-to="{{ $coupon->appliesToTarget() }}"
                                             data-value="{{ $coupon->value }}"
                                             data-min-order="{{ $coupon->min_order_amount ?? '' }}"
                                             data-max-discount="{{ $coupon->max_discount ?? '' }}"
@@ -571,6 +588,19 @@
                     </div>
 
                     <div>
+                        <label class="block font-bold text-on-surface mb-1">على ماذا ينطبق الخصم <span class="text-primary">*</span></label>
+                        <select id="edit-field-applies_to" name="applies_to" required class="text-xs w-full !h-10 rounded-lg">
+                            <option value="meal">سعر الوجبة فقط</option>
+                            <option value="delivery">رسوم التوصيل فقط</option>
+                            <option value="total">الطلب كامل (الوجبة + التوصيل)</option>
+                        </select>
+                    </div>
+
+                    <div class="sm:col-span-2 rounded-xl bg-amber-50/70 border border-amber-100 px-3 py-2 text-[11px] text-stone-700 leading-6">
+                        وجبة 20 ₪ وتوصيل 10 ₪: خصم التوصيل من الـ 10 (المطعم يأخذ 20). خصم الوجبة من الـ 20 (التوصيل 10). الطلب كامل من الـ 30.
+                    </div>
+
+                    <div>
                         <label class="block font-bold text-on-surface mb-1">قيمة الخصم <span class="text-primary">*</span></label>
                         <input type="number" 
                                id="edit-field-value"
@@ -681,6 +711,7 @@
         const code = btn.getAttribute('data-code') || '';
         const restaurantId = btn.getAttribute('data-restaurant-id') || '';
         const type = btn.getAttribute('data-type') || 'percent';
+        const appliesTo = btn.getAttribute('data-applies-to') || 'meal';
         const value = btn.getAttribute('data-value') || '';
         const minOrder = btn.getAttribute('data-min-order') || '';
         const maxDiscount = btn.getAttribute('data-max-discount') || '';
@@ -698,6 +729,7 @@
         document.getElementById('edit-field-code').value = code;
         document.getElementById('edit-field-restaurant_id').value = restaurantId;
         document.getElementById('edit-field-type').value = type;
+        document.getElementById('edit-field-applies_to').value = appliesTo;
         document.getElementById('edit-field-value').value = value;
         document.getElementById('edit-field-min_order_amount').value = minOrder;
         document.getElementById('edit-field-max_discount').value = maxDiscount;

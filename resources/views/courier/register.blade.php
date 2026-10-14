@@ -105,13 +105,29 @@
                     </select>
                 </label>
                 <label class="auth-upload">
-                    <span class="material-symbols-outlined">person</span>
-                    <span>صورة شخصية</span>
+                    <span class="auth-upload__icon material-symbols-outlined">person</span>
+                    <img class="auth-upload__thumb" alt="" hidden>
+                    <span class="auth-upload__copy">
+                        <strong class="auth-upload__title">صورة شخصية</strong>
+                        <em class="auth-upload__file" hidden>
+                            <span class="auth-upload__name"></span>
+                            <span class="auth-upload__ext"></span>
+                        </em>
+                    </span>
+                    <span class="auth-upload__ok material-symbols-outlined" aria-hidden="true">check_circle</span>
                     <input type="file" name="photo" accept="image/*" required>
                 </label>
                 <label class="auth-upload">
-                    <span class="material-symbols-outlined">pedal_bike</span>
-                    <span>صورة الدراجة</span>
+                    <span class="auth-upload__icon material-symbols-outlined">pedal_bike</span>
+                    <img class="auth-upload__thumb" alt="" hidden>
+                    <span class="auth-upload__copy">
+                        <strong class="auth-upload__title">صورة الدراجة</strong>
+                        <em class="auth-upload__file" hidden>
+                            <span class="auth-upload__name"></span>
+                            <span class="auth-upload__ext"></span>
+                        </em>
+                    </span>
+                    <span class="auth-upload__ok material-symbols-outlined" aria-hidden="true">check_circle</span>
                     <input type="file" name="bike_photo" accept="image/*" required>
                 </label>
                 <label class="auth-remember auth-remember--start">

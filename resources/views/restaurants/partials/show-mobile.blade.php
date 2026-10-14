@@ -1,7 +1,7 @@
 @php
     $logoPath = public_path('images/logo.png');
     $logoSrc = file_exists($logoPath) ? asset('images/logo.png').'?v='.filemtime($logoPath) : config('brand.logo');
-    $vip = (bool) ($membership?->discount_percent);
+    $vip = (bool) ($membership?->includesDeliveryBenefit());
     $itemCount = $menuSections->sum(fn ($section) => $section['items']->count());
     $pointsBalance = $pointsBalance ?? (auth()->user()->points_balance ?? 0);
 @endphp
@@ -93,11 +93,11 @@
                 </div>
             </div>
 
-            @if(($canShop ?? true) && $membership?->discount_percent)
+            @if(($canShop ?? true) && $membership?->includesDeliveryBenefit())
                 <div class="mt-2.5 bg-primary/10 border border-primary/20 px-2.5 py-1.5 rounded-xl flex items-center justify-between gap-2">
                     <div class="flex items-center gap-1.5 min-w-0">
                         <span class="material-symbols-outlined text-primary text-[15px]">local_activity</span>
-                        <span class="text-[11px] text-primary font-bold">خصم {{ $membership->discount_percent }}% فوري للأعضاء</span>
+                        <span class="text-[11px] text-primary font-bold">{{ $membership->deliveryBenefitLabel() }} — بدون خصم على المطعم</span>
                     </div>
                     <span class="text-[10px] text-primary font-extrabold shrink-0">{{ $vip ? 'مُفعل تلقائياً' : 'للأعضاء' }}</span>
                 </div>
@@ -335,7 +335,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <span class="ils">₪</span>
                     </div>
                     <span data-cart-vip class="font-label-sm text-[11px] text-secondary-fixed {{ ($restaurantCart['discount_percent'] ?? 0) ? '' : 'hidden' }}">
-                        مشمول خصم الـ VIP ({{ $restaurantCart['discount_percent'] ?? 0 }}%)
+                        {{ ($restaurantCart['discount_percent'] ?? 0) ? 'خصم '.$restaurantCart['discount_percent'].'% على التوصيل' : '' }}
                     </span>
                 </div>
             </div>

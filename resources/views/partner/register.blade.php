@@ -178,8 +178,16 @@
             <section class="partner-wizard__panel" data-step-panel="5" @if($startStep !== 5) hidden @endif>
                 <p class="auth-kicker">الخطوة 5 من 5 — المراجعة والنشر</p>
                 <label class="auth-upload">
-                    <span class="material-symbols-outlined">add_photo_alternate</span>
-                    <span>صورة الغلاف (اختياري)</span>
+                    <span class="auth-upload__icon material-symbols-outlined">add_photo_alternate</span>
+                    <img class="auth-upload__thumb" alt="" hidden>
+                    <span class="auth-upload__copy">
+                        <strong class="auth-upload__title">صورة الغلاف (اختياري)</strong>
+                        <em class="auth-upload__file" hidden>
+                            <span class="auth-upload__name"></span>
+                            <span class="auth-upload__ext"></span>
+                        </em>
+                    </span>
+                    <span class="auth-upload__ok material-symbols-outlined" aria-hidden="true">check_circle</span>
                     <input type="file" name="image" accept="image/*">
                 </label>
                 <label class="auth-remember auth-remember--start">

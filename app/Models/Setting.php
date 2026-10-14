@@ -175,4 +175,44 @@ class Setting extends Model
             return \Illuminate\Support\Facades\Storage::disk('public')->url($path);
         }, $items);
     }
+
+    /**
+     * Mobile home slider: restaurant ads first (linked to the venue), then platform banners.
+     *
+     * @return list<array{image: string, href: ?string, alt: string, kind: string}>
+     */
+    public static function mobileHomeSlides(): array
+    {
+        $restaurantAds = RestaurantBoost::liveCreatives()->map(function (RestaurantBoost $boost) {
+            $image = $boost->creativeUrl();
+
+            if ($image === '') {
+                return null;
+            }
+
+            return [
+                'image' => $image,
+                'href' => $boost->restaurantHref(),
+                'alt' => 'إعلان '.$boost->restaurant->name,
+                'kind' => 'restaurant',
+            ];
+        })->filter()->values()->all();
+
+        $customPromos = static::rawHomeBanners();
+        $promoUrls = $customPromos !== []
+            ? static::homeBanners()
+            : (empty($restaurantAds) ? static::homeBanners() : []);
+
+        $promos = [];
+        foreach ($promoUrls as $index => $url) {
+            $promos[] = [
+                'image' => $url,
+                'href' => null,
+                'alt' => 'إعلان '.($index + 1),
+                'kind' => 'promo',
+            ];
+        }
+
+        return array_values(array_merge($restaurantAds, $promos));
+    }
 }

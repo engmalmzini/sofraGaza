@@ -25,7 +25,7 @@
             @endif
         </div>
         @if($boost->isPending())
-            <p class="mt-3 text-sm text-on-surface-variant">راجع إشعار الحوالة ثم أكّد ليظهر المطعم أولاً في الصفحة الرئيسية وقائمة المطاعم.</p>
+            <p class="mt-3 text-sm text-on-surface-variant">راجع إشعار الحوالة وتصميم الإعلان ثم أكّد ليظهر في شريط الجوال ويربط الزبون بصفحة المطعم.</p>
             <form method="POST" action="{{ route('admin.boosts.approve', $boost) }}" class="mt-4">
                 @csrf
                 <button class="admin-btn admin-btn--primary">تأكيد الدفع وتفعيل الإعلان</button>
@@ -42,6 +42,21 @@
         @if($boost->approver)
             <p class="mt-3 text-xs text-slate-500">أكّده {{ $boost->approver->name }} في {{ $boost->approved_at?->format('Y/m/d H:i') }}</p>
         @endif
+        <div class="mt-5 pt-4 border-t border-slate-100">
+            <h2 class="text-sm font-bold mb-2">تصميم الإعلان (شريط الجوال)</h2>
+            @if($boost->creativeUrl())
+                <a href="{{ $boost->restaurantHref() }}" class="block overflow-hidden rounded-xl border border-slate-200 mb-3">
+                    <img src="{{ $boost->creativeUrl() }}" alt="تصميم إعلان {{ $boost->restaurant->name }}" class="h-28 w-full object-cover">
+                </a>
+            @else
+                <p class="text-xs text-slate-500 mb-3">لا يوجد تصميم مرفوع بعد. ارفع صورة شريطية لتظهر في قائمة إعلانات الجوال.</p>
+            @endif
+            <form method="POST" action="{{ route('admin.boosts.banner', $boost) }}" enctype="multipart/form-data" class="grid gap-2">
+                @csrf
+                <input type="file" name="banner" accept="image/*" required class="w-full rounded-xl border border-dashed border-slate-300 p-2 text-sm bg-white">
+                <button class="admin-btn admin-btn--ghost" type="submit">حفظ تصميم الإعلان</button>
+            </form>
+        </div>
     </section>
     <section class="admin-card sg-receipt-card">
         <h2>إشعار الحوالة</h2>

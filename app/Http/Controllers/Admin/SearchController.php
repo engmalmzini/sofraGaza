@@ -190,7 +190,7 @@ class SearchController extends Controller
             ->get()
             ->map(fn (Membership $membership) => $this->row(
                 $membership->name,
-                number_format((float) $membership->monthly_price).' ₪ • خصم '.$membership->discount_percent.'%',
+                number_format((float) $membership->monthly_price).' ₪ • '.($membership->deliveryBenefitLabel() ?: 'بدون خصم توصيل'),
                 route('admin.memberships.edit', $membership),
                 'workspace_premium',
                 $q,

@@ -130,6 +130,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin', 'admin.modu
     Route::post('delivery/orders/{order}/unassign', [Admin\DeliveryController::class, 'unassign'])->name('delivery.unassign');
     Route::post('delivery/{courier}/approve', [Admin\DeliveryController::class, 'approve'])->name('delivery.approve');
     Route::post('delivery/{courier}/reject', [Admin\DeliveryController::class, 'reject'])->name('delivery.reject');
+    Route::get('delivery/{courier}/photo', [Admin\DeliveryController::class, 'photo'])->name('delivery.photo');
+    Route::get('delivery/{courier}/bike-photo', [Admin\DeliveryController::class, 'bikePhoto'])->name('delivery.bike-photo');
     Route::get('delivery/{courier}', [Admin\DeliveryController::class, 'show'])->name('delivery.show');
     Route::put('delivery/{courier}', [Admin\DeliveryController::class, 'update'])->name('delivery.update');
     Route::post('delivery/payouts/{payout}/complete', [Admin\DeliveryController::class, 'completePayout'])->name('delivery.payouts.complete');
@@ -162,6 +164,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin', 'admin.modu
     Route::post('finance/restaurants/{restaurant}/settle', [Admin\FinanceController::class, 'settle'])->name('finance.restaurants.settle');
     Route::get('finance/payouts', [Admin\FinanceController::class, 'payouts'])->name('finance.payouts');
     Route::post('finance/payouts/{payout}/complete', [Admin\FinanceController::class, 'completeRestaurantPayout'])->name('finance.payouts.complete');
+    Route::get('finance/payouts/{payout}/receipt', [Admin\FinanceController::class, 'restaurantPayoutReceipt'])->name('finance.payouts.receipt');
     Route::post('finance/payouts/{payout}/reject', [Admin\FinanceController::class, 'rejectRestaurantPayout'])->name('finance.payouts.reject');
     Route::delete('finance/settlements/{settlement}', [Admin\FinanceController::class, 'destroySettlement'])->name('finance.settlements.destroy');
     Route::post('finance/boosts', [Admin\FinanceController::class, 'storeBoost'])->name('finance.boosts.store');
@@ -174,6 +177,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin', 'admin.modu
     Route::get('boosts/{boost}', [Admin\BoostController::class, 'show'])->name('boosts.show');
     Route::get('boosts/{boost}/receipt', [Admin\BoostController::class, 'receipt'])->name('boosts.receipt');
     Route::post('boosts/{boost}/approve', [Admin\BoostController::class, 'approve'])->name('boosts.approve');
+    Route::post('boosts/{boost}/banner', [Admin\BoostController::class, 'updateBanner'])->name('boosts.banner');
     Route::post('boosts/{boost}/reject', [Admin\BoostController::class, 'reject'])->name('boosts.reject');
     Route::get('homepage', [Admin\HomepageController::class, 'index'])->name('homepage.index');
     Route::post('homepage', [Admin\HomepageController::class, 'update'])->name('homepage.update');
@@ -192,6 +196,7 @@ Route::prefix('partner')->name('partner.')->middleware(['auth', 'partner', 'part
     Route::get('orders', [Partner\OrderController::class, 'index'])->name('orders.index');
     Route::get('wallet', [Partner\WalletController::class, 'index'])->name('wallet');
     Route::post('wallet/payout', [Partner\WalletController::class, 'requestPayout'])->name('wallet.payout');
+    Route::get('wallet/payouts/{payout}/receipt', [Partner\WalletController::class, 'receipt'])->name('wallet.payout.receipt');
     Route::get('orders/live', [Partner\OrderController::class, 'live'])->name('orders.live');
     Route::get('orders/{order}', [Partner\OrderController::class, 'show'])->name('orders.show');
     Route::patch('orders/{order}', [Partner\OrderController::class, 'update'])->name('orders.update');

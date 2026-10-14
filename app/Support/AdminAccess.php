@@ -75,6 +75,7 @@ class AdminAccess
             'admin.wallet-topups.approve' => 'اعتماد شحن محفظة',
             'admin.wallet-topups.reject' => 'رفض شحن محفظة',
             'admin.boosts.approve' => 'اعتماد إعلان مطعم',
+            'admin.boosts.banner' => 'رفع تصميم إعلان مطعم',
             'admin.boosts.reject' => 'رفض إعلان مطعم',
             'admin.finance.restaurants.settle' => 'تسجيل تسوية مطعم',
             'admin.finance.payouts.complete' => 'صرف مستحق مطعم',

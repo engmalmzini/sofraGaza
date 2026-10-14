@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Support\Facades\Storage;
+use App\Support\Media;
 
 class Restaurant extends Model
 {
@@ -227,6 +227,18 @@ class Restaurant extends Model
         return $query
             ->withExists(['boosts as is_boosted' => fn (Builder $boosts) => $boosts->activeOn()])
             ->orderByDesc('is_boosted');
+    }
+
+    public static function currentlyBoosted(int $limit = 3)
+    {
+        return static::query()
+            ->visible()
+            ->whereHas('boosts', fn (Builder $boosts) => $boosts->activeOn())
+            ->withCount('menuItems')
+            ->withExists(['boosts as is_boosted' => fn (Builder $boosts) => $boosts->activeOn()])
+            ->latest('id')
+            ->take($limit)
+            ->get();
     }
 
     public function activeListing(): ?RestaurantSubscription
@@ -511,26 +523,18 @@ class Restaurant extends Model
 
     public function imageUrl(): ?string
     {
-        if (! $this->image_path) {
-            return null;
-        }
-
-        if (str_starts_with($this->image_path, 'http://') || str_starts_with($this->image_path, 'https://')) {
-            return $this->image_path;
-        }
-
-        return Storage::disk('public')->url($this->image_path);
+        return Media::url($this->image_path);
     }
 
     public function coverUrl(): string
     {
-        if ($this->imageUrl()) {
-            return $this->imageUrl();
+        if ($url = $this->imageUrl()) {
+            return $url;
         }
 
         $covers = config('brand.covers', []);
         if (isset($covers[$this->name])) {
-            return $covers[$this->name];
+            return Media::url($covers[$this->name]) ?? $covers[$this->name];
         }
 
         $categories = config('brand.categories', []);
@@ -539,35 +543,26 @@ class Restaurant extends Model
             $catImages[$cat['key']] = $cat['image'];
         }
 
+        $fallback = $this->type === 'cafe' ? config('brand.cafe_cover') : config('brand.restaurant_cover');
+        $pick = null;
+
         if ($this->cuisine && isset($catImages[$this->cuisine])) {
-            return $catImages[$this->cuisine];
+            $pick = $catImages[$this->cuisine];
+        } else {
+            $name = mb_strtolower($this->name);
+            $pick = match (true) {
+                str_contains($name, 'شاورما'), str_contains($name, 'صاج') => $catImages['shawarma'] ?? null,
+                str_contains($name, 'برجر'), str_contains($name, 'سناك'), str_contains($name, 'ساندويش') => $catImages['burger'] ?? null,
+                str_contains($name, 'مشاوي'), str_contains($name, 'مشويات'), str_contains($name, 'طاجن') => $catImages['grill'] ?? null,
+                str_contains($name, 'بيتزا'), str_contains($name, 'معجنات'), str_contains($name, 'فطائر') => $catImages['pizza'] ?? null,
+                str_contains($name, 'سمك'), str_contains($name, 'بحري'), str_contains($name, 'جمبري') => $catImages['seafood'] ?? null,
+                str_contains($name, 'حلو'), str_contains($name, 'كنافة'), str_contains($name, 'مجدوع'), str_contains($name, 'كيك') => $catImages['sweets'] ?? null,
+                str_contains($name, 'فول'), str_contains($name, 'فطور'), str_contains($name, 'حمص') => $catImages['breakfast'] ?? null,
+                default => null,
+            };
         }
 
-        // Match based on keywords in name
-        $name = mb_strtolower($this->name);
-        if (str_contains($name, 'شاورما') || str_contains($name, 'صاج')) {
-            return $catImages['shawarma'] ?? config('brand.restaurant_cover');
-        }
-        if (str_contains($name, 'برجر') || str_contains($name, 'سناك') || str_contains($name, 'ساندويش')) {
-            return $catImages['burger'] ?? config('brand.restaurant_cover');
-        }
-        if (str_contains($name, 'مشاوي') || str_contains($name, 'مشويات') || str_contains($name, 'طاجن')) {
-            return $catImages['grill'] ?? config('brand.restaurant_cover');
-        }
-        if (str_contains($name, 'بيتزا') || str_contains($name, 'معجنات') || str_contains($name, 'فطائر')) {
-            return $catImages['pizza'] ?? config('brand.restaurant_cover');
-        }
-        if (str_contains($name, 'سمك') || str_contains($name, 'بحري') || str_contains($name, 'جمبري')) {
-            return $catImages['seafood'] ?? config('brand.restaurant_cover');
-        }
-        if (str_contains($name, 'حلو') || str_contains($name, 'كنافة') || str_contains($name, 'مجدوع') || str_contains($name, 'كيك')) {
-            return $catImages['sweets'] ?? config('brand.restaurant_cover');
-        }
-        if (str_contains($name, 'فول') || str_contains($name, 'فطور') || str_contains($name, 'حمص')) {
-            return $catImages['breakfast'] ?? config('brand.restaurant_cover');
-        }
-
-        return $this->type === 'cafe' ? config('brand.cafe_cover') : config('brand.restaurant_cover');
+        return Media::url($pick) ?: Media::url($fallback) ?: asset('images/categories/shawarma.png');
     }
 
     public function cuisineLabel(): string

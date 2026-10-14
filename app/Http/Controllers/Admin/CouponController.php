@@ -75,6 +75,7 @@ class CouponController extends Controller
             'code' => ['required', 'string', 'max:50', 'unique:coupons,code'],
             'restaurant_id' => ['nullable', 'exists:restaurants,id'],
             'type' => ['required', 'in:percent,fixed'],
+            'applies_to' => ['nullable', 'in:meal,delivery,total'],
             'value' => ['required', 'numeric', 'min:0.5', 'max:1000'],
             'min_order_amount' => ['nullable', 'numeric', 'min:0', 'max:10000'],
             'max_discount' => ['nullable', 'numeric', 'min:0', 'max:10000'],
@@ -86,10 +87,12 @@ class CouponController extends Controller
             'code.unique' => 'رمز كود الخصم هذا مستخدم مسبقاً.',
             'value.required' => 'أدخل قيمة الخصم.',
             'restaurant_id.exists' => 'المطعم المحدد غير موجود.',
+            'applies_to.in' => 'حدد إن كان الخصم على الوجبة أو التوصيل أو الطلب كامل.',
         ]);
 
         $data['code'] = strtoupper(trim($data['code']));
         $data['restaurant_id'] = filled($data['restaurant_id'] ?? null) ? (int) $data['restaurant_id'] : null;
+        $data['applies_to'] = $data['applies_to'] ?? Coupon::APPLIES_MEAL;
         $data['is_active'] = $request->has('is_active') ? $request->boolean('is_active') : true;
 
         Coupon::create($data);
@@ -103,6 +106,7 @@ class CouponController extends Controller
             'code' => ['required', 'string', 'max:50', 'unique:coupons,code,' . $coupon->id],
             'restaurant_id' => ['nullable', 'exists:restaurants,id'],
             'type' => ['required', 'in:percent,fixed'],
+            'applies_to' => ['nullable', 'in:meal,delivery,total'],
             'value' => ['required', 'numeric', 'min:0.5', 'max:1000'],
             'min_order_amount' => ['nullable', 'numeric', 'min:0', 'max:10000'],
             'max_discount' => ['nullable', 'numeric', 'min:0', 'max:10000'],
@@ -115,10 +119,12 @@ class CouponController extends Controller
             'code.unique' => 'رمز كود الخصم هذا مستخدم مسبقاً لكود آخر.',
             'value.required' => 'أدخل قيمة الخصم.',
             'restaurant_id.exists' => 'المطعم المحدد غير موجود.',
+            'applies_to.in' => 'حدد إن كان الخصم على الوجبة أو التوصيل أو الطلب كامل.',
         ]);
 
         $data['code'] = strtoupper(trim($data['code']));
         $data['restaurant_id'] = filled($data['restaurant_id'] ?? null) ? (int) $data['restaurant_id'] : null;
+        $data['applies_to'] = $data['applies_to'] ?? Coupon::APPLIES_MEAL;
         if ($request->has('is_active')) {
             $data['is_active'] = $request->boolean('is_active');
         }

@@ -13,7 +13,9 @@
 </head>
 @php
     $logoPath = public_path('images/logo.png');
+    $logoWhitePath = public_path('images/logo-white.png');
     $logoSrc = file_exists($logoPath) ? asset('images/logo.png').'?v='.filemtime($logoPath) : config('brand.logo');
+    $logoWhiteSrc = file_exists($logoWhitePath) ? asset('images/logo-white.png').'?v='.filemtime($logoWhitePath) : $logoSrc;
     $pendingOrdersCount = \App\Models\Order::query()->where('status', 'pending_confirmation')->count();
     $pendingCourierCount = \App\Models\User::query()->where('role', 'courier')->where('courier_status', \App\Models\User::COURIER_PENDING)->count();
     $waitingDeliveryCount = \App\Models\Order::query()->whereNull('courier_id')->whereIn('status', ['preparing', 'delivering'])->count() + $pendingCourierCount;
@@ -186,7 +188,7 @@
     <div class="admin-scrim" id="admin-scrim" hidden></div>
     <aside class="admin-sidebar" id="admin-sidebar">
         <a href="{{ route('admin.dashboard') }}" class="admin-brand">
-            <img src="{{ $logoSrc }}" alt="سفرة غزة">
+            <img src="{{ $logoWhiteSrc }}" alt="سفرة غزة">
             <span>
                 <small>لوحة التحكم</small>
             </span>

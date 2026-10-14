@@ -79,6 +79,25 @@ class RestaurantListingTest extends TestCase
             ->assertDontSee('اشتراكك', false);
     }
 
+    public function test_restaurant_cover_uses_absolute_asset_url(): void
+    {
+        [, $restaurant] = $this->makeApprovedVenue();
+        $restaurant->update([
+            'name' => 'شاورما العمدة',
+            'cuisine' => 'shawarma',
+            'image_path' => null,
+        ]);
+
+        $url = $restaurant->fresh()->coverUrl();
+        $this->assertStringContainsString('/images/categories/shawarma.png', $url);
+        $this->assertTrue(str_starts_with($url, 'http://') || str_starts_with($url, 'https://'));
+
+        $this->get(route('restaurants.show', $restaurant))
+            ->assertOk()
+            ->assertSee('/images/categories/shawarma.png', false)
+            ->assertDontSee('restaurants/'.$restaurant->id.'/images/', false);
+    }
+
     public function test_approved_restaurant_stays_visible_after_old_listing_date_passes(): void
     {
         [, $restaurant] = $this->makeApprovedVenue();

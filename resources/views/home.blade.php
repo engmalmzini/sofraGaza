@@ -2088,29 +2088,7 @@
             </div>
         </div>
 
-        @php
-            $boostedPlaces = $restaurants->filter(fn ($place) => $place->isBoosted())->values();
-        @endphp
-        @if($boostedPlaces->isNotEmpty())
-            <div class="sg-ad-rail" aria-label="إعلانات مدفوعة">
-                <div class="sg-ad-rail__head">
-                    <span class="material-symbols-outlined">campaign</span>
-                    <span>إعلانات تظهر أولاً</span>
-                </div>
-                <div class="sg-ad-rail__grid">
-                    @foreach($boostedPlaces->take(3) as $place)
-                        <a href="{{ route('restaurants.show', $place) }}" class="sg-ad-card">
-                            <img src="{{ $place->coverUrl() }}" alt="{{ $place->name }}">
-                            <div>
-                                <em>إعلان</em>
-                                <strong>{{ $place->name }}</strong>
-                                <span>{{ $place->cuisineLabel() }} • {{ $place->areaLabel() }}</span>
-                            </div>
-                        </a>
-                    @endforeach
-                </div>
-            </div>
-        @endif
+        @include('partials.boosted-spotlight', ['boostedPlaces' => $boostedPlaces ?? $restaurants])
 
         {{-- Dynamic Restaurant Grid --}}
         <div class="sg-place-grid" id="restaurants-grid">

@@ -166,7 +166,7 @@ class GroupOrderService
                 'status' => GroupOrderMember::STATUS_PAID,
                 'items_json' => $this->snapshotLines($quote['lines']),
                 'subtotal' => $quote['subtotal'],
-                'discount_amount' => $quote['discount_amount'],
+                'discount_amount' => $quote['meal_discount'] ?? $quote['discount_amount'],
                 'total' => $foodTotal,
                 'payment_method' => $paymentMethod,
                 'transfer_receipt_path' => $path,
@@ -229,7 +229,7 @@ class GroupOrderService
             $hostFood = (float) $quote['items_total'];
             $hostLines = $quote['lines'];
             $hostSubtotal = (float) $quote['subtotal'];
-            $hostDiscount = (float) $quote['discount_amount'];
+            $hostDiscount = (float) ($quote['meal_discount'] ?? $quote['discount_amount']);
         } else {
             $hostFood = 0.0;
             $hostLines = [];

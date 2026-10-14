@@ -16,6 +16,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use RuntimeException;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class FinanceController extends Controller
 {
@@ -74,6 +75,8 @@ class FinanceController extends Controller
             'salesTotal' => round($rows->sum('sales'), 2),
             'commissionTotal' => round($rows->sum('commission'), 2),
             'netTotal' => round($rows->sum('net'), 2),
+            'availableTotal' => round($rows->sum('available'), 2),
+            'pendingPayoutTotal' => round($rows->sum('pending_payout'), 2),
         ]);
     }
 
@@ -111,7 +114,7 @@ class FinanceController extends Controller
 
         return redirect()
             ->route('admin.finance.restaurants.show', array_merge(['restaurant' => $restaurant], $this->finance->queryFromPeriod($period)))
-            ->with('success', 'تم تسجيل تسوية '.$restaurant->name.' لهذه الفترة.');
+            ->with('success', 'تم إقفال حساب الفترة لـ '.$restaurant->name.' محاسبياً. هذا لا يحوّل فلوس؛ التحويل الفعلي من صفحة سحب المطاعم.');
     }
 
     public function destroySettlement(Request $request, RestaurantSettlement $settlement): RedirectResponse
@@ -122,7 +125,7 @@ class FinanceController extends Controller
 
         return redirect()
             ->route('admin.finance.restaurants.show', array_merge(['restaurant' => $restaurant], $this->finance->queryFromPeriod($period)))
-            ->with('success', 'تم حذف التسوية من الأرشيف.');
+            ->with('success', 'تم حذف إقفال الفترة من الأرشيف.');
     }
 
     public function storeBoost(Request $request): RedirectResponse
@@ -135,12 +138,16 @@ class FinanceController extends Controller
             'daily_rate' => ['nullable', 'numeric', 'min:0', 'max:1000'],
             'title' => ['nullable', 'string', 'max:120'],
             'notes' => ['nullable', 'string', 'max:1000'],
+            'banner' => ['nullable', 'image', 'max:6144'],
         ]);
 
         $start = \Carbon\Carbon::parse($data['starts_on'])->startOfDay();
         $end = \Carbon\Carbon::parse($data['ends_on'])->startOfDay();
         $rate = (float) ($data['daily_rate'] ?? Finance::BOOST_DAILY_RATE);
         $days = max(1, (int) round($start->diffInDays($end, true)) + 1);
+        $bannerPath = $request->hasFile('banner')
+            ? $request->file('banner')->store('boosts/banners', 'public')
+            : null;
 
         RestaurantBoost::query()->create([
             'restaurant_id' => $data['restaurant_id'],
@@ -151,6 +158,7 @@ class FinanceController extends Controller
             'amount' => round($days * $rate, 2),
             'title' => $data['title'] ?? 'حملة إعلان',
             'notes' => $data['notes'] ?? null,
+            'banner_path' => $bannerPath,
             'status' => RestaurantBoost::STATUS_APPROVED,
             'approved_at' => now(),
             'approved_by' => $request->user()->id,
@@ -259,27 +267,43 @@ class FinanceController extends Controller
             return back()->with('error', 'تمت معالجة هذا الطلب مسبقاً.');
         }
 
-        $notes = $request->input('admin_notes');
+        $data = $request->validate([
+            'admin_notes' => ['nullable', 'string', 'max:500'],
+            'receipt' => ['required', 'image', 'max:6144'],
+        ], [
+            'receipt.required' => 'ارفع صورة إشعار التحويل قبل تأكيد الصرف.',
+            'receipt.image' => 'إشعار التحويل يجب أن يكون صورة.',
+            'receipt.max' => 'حجم صورة الإشعار يجب ألا يتجاوز 6 ميغابايت.',
+        ]);
+
+        $path = $request->file('receipt')->store('payouts/restaurants', 'public');
 
         $payout->update([
             'status' => RestaurantPayout::STATUS_COMPLETED,
             'processed_by' => $request->user()->id,
             'processed_at' => now(),
-            'admin_notes' => $notes,
+            'admin_notes' => $data['admin_notes'] ?? null,
+            'transfer_receipt_path' => $path,
         ]);
 
         $restaurant = $payout->restaurant;
         if ($restaurant?->owner) {
             $formatted = number_format((float) $payout->amount, 2);
+            $notes = $data['admin_notes'] ?? null;
             $notifications->notify(
                 $restaurant->owner,
                 'تم تحويل مستحقات المطعم',
-                "تم تحويل مبلغ {$formatted} ₪ إلى حساب {$restaurant->name} ({$payout->methodLabel()}).".($notes ? " ملاحظات: {$notes}" : ''),
+                "تم تحويل مبلغ {$formatted} ₪ إلى حساب {$restaurant->name} ({$payout->methodLabel()}). يمكنك مراجعة إشعار التحويل من الرصيد والسحب.".($notes ? " ملاحظات: {$notes}" : ''),
                 route('partner.wallet')
             );
         }
 
-        return back()->with('success', "تم تأكيد تحويل {$payout->amount} ₪ للمطعم. خُصم المبلغ من الرصيد المتاح.");
+        return back()->with('success', "تم تأكيد تحويل {$payout->amount} ₪ للمطعم مع إشعار التحويل. خُصم المبلغ من الرصيد المتاح.");
+    }
+
+    public function restaurantPayoutReceipt(RestaurantPayout $payout): BinaryFileResponse
+    {
+        return $payout->receiptResponse();
     }
 
     public function rejectRestaurantPayout(Request $request, RestaurantPayout $payout, NotificationService $notifications): RedirectResponse

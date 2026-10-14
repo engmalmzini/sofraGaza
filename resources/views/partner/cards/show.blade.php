@@ -29,12 +29,9 @@
                 <div>المتبقي: <strong>{{ $subscription->daysRemaining() }} يوم</strong></div>
             </div>
             <div class="mt-5 rounded-2xl bg-secondary-fixed text-on-secondary-fixed px-4 py-4">
-                <div class="text-sm font-bold">الخصم داخل المطعم</div>
-                <p class="mt-1 text-3xl font-extrabold">{{ $subscription->membership->discount_percent }}%</p>
-                @if($subscription->membership->free_delivery)
-                    <p class="mt-1 text-sm font-semibold">مع توصيل مجاني لطلبات المنصة.</p>
-                @endif
-                <p class="mt-2 text-sm">طبّق هذا الخصم على فاتورة الزبون بعد مطابقة الاسم مع البطاقة.</p>
+                <div class="text-sm font-bold">مزايا التوصيل (لا تمس سعر المطعم)</div>
+                <p class="mt-1 text-3xl font-extrabold">{{ $subscription->membership->deliveryBenefitLabel() ?: 'بدون خصم توصيل' }}</p>
+                <p class="mt-2 text-sm">خصم العضوية على رسوم التوصيل فقط عبر التطبيق. سعر الوجبة للمطعم يبقى كاملاً.</p>
             </div>
         </section>
     @else

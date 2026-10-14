@@ -68,7 +68,7 @@ class MembershipController extends Controller
         $data = $request->validate([
             'name' => ['required', 'string', 'max:100'],
             'monthly_price' => ['required', 'numeric', 'min:0'],
-            'discount_percent' => ['required', 'integer', 'min:0', 'max:90'],
+            'discount_percent' => ['required', 'integer', 'min:0', 'max:100'],
             'points_multiplier' => ['required', 'numeric', 'min:1', 'max:5'],
             'description' => ['nullable', 'string'],
             'sort_order' => ['nullable', 'integer', 'min:0'],

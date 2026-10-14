@@ -32,28 +32,36 @@
     <article class="admin-metric">
         <div class="admin-metric__top"><span>ما يفعله الإعلان</span></div>
         <strong class="!text-base">الظهور أولاً</strong>
-        <span class="admin-metric__note">تصميم إعلاني في الصفحة الرئيسية وقائمة المطاعم</span>
+        <span class="admin-metric__note">تصميم يظهر في شريط الجوال ويأخذ الزبون لصفحة المطعم</span>
     </article>
 </div>
 
 @if($active)
     <section class="admin-card mt-4 border-2 border-amber-200 bg-amber-50/40">
         <h2>إعلانك ظاهر الآن</h2>
-        <p class="text-sm text-slate-600 mt-1">{{ $restaurant->venueNounYours() }} يظهر في المقدمة حتى {{ $active->ends_on->format('Y/m/d') }} (باقي {{ $active->remainingDays() }} يوم).</p>
+        <p class="text-sm text-slate-600 mt-1">{{ $restaurant->venueNounYours() }} يظهر في شريط إعلانات الجوال حتى {{ $active->ends_on->format('Y/m/d') }} (باقي {{ $active->remainingDays() }} يوم). الضغط على الصورة يفتح صفحة المطعم.</p>
+        @if($active->creativeUrl())
+            <a href="{{ $active->restaurantHref() }}" class="mt-3 block overflow-hidden rounded-xl border border-amber-200">
+                <img src="{{ $active->creativeUrl() }}" alt="تصميم إعلان {{ $restaurant->name }}" class="h-24 w-full object-cover">
+            </a>
+        @endif
     </section>
 @endif
 
 @if($pending)
     <section class="admin-card mt-4">
         <h2>بانتظار تأكيد الإدارة</h2>
-        <p class="text-sm mt-2">طلب إعلان لمدة <strong>{{ $pending->days }}</strong> يوم بقيمة <strong>{{ number_format($pending->amount, 0) }} ₪</strong>. بعد مراجعة الحوالة يظهر {{ $restaurant->venueNounYours() }} أولاً.</p>
+        <p class="text-sm mt-2">طلب إعلان لمدة <strong>{{ $pending->days }}</strong> يوم بقيمة <strong>{{ number_format($pending->amount, 0) }} ₪</strong>. بعد مراجعة الحوالة يظهر التصميم في شريط الجوال.</p>
+        @if($pending->creativeUrl())
+            <img src="{{ $pending->creativeUrl() }}" alt="تصميم الإعلان" class="mt-3 h-24 w-full rounded-xl object-cover border border-slate-200">
+        @endif
     </section>
 @endif
 
 @if($canRequest)
     <section class="admin-card mt-4">
         <h2>اشترِ إعلاناً</h2>
-        <p class="text-sm text-slate-500 mb-4">حدد عدد الأيام، يُحسب السعر تلقائياً ({{ number_format($rate, 0) }} ₪ × الأيام). حوّل المبلغ ثم أرفق إشعار الحوالة.</p>
+        <p class="text-sm text-slate-500 mb-4">حدد عدد الأيام، ارفع تصميم الإعلان (صورة شريطية تظهر أعلى شاشة الجوال)، ثم حوّل المبلغ وأرفق إشعار الحوالة.</p>
 
         <div class="boost-price-box mb-4">
             <div>
@@ -77,6 +85,11 @@
             <label>
                 <span class="block font-bold text-sm mb-1">إشعار الحوالة</span>
                 <input type="file" name="receipt" accept="image/*" required class="w-full rounded-xl border border-dashed border-slate-300 p-2 text-sm bg-white">
+            </label>
+            <label class="sm:col-span-2">
+                <span class="block font-bold text-sm mb-1">تصميم الإعلان (صورة الشريط)</span>
+                <input type="file" name="banner" accept="image/*" required class="w-full rounded-xl border border-dashed border-amber-300 p-2 text-sm bg-white">
+                <span class="block text-xs text-slate-500 mt-1">المقاس الموصى به 1200×300. الصورة تظهر في قائمة إعلانات الجوال، والضغط عليها يفتح صفحة المطعم.</span>
             </label>
             <div class="sm:col-span-2">
                 <button class="admin-btn admin-btn--primary" type="submit">إرسال الحوالة وطلب الإعلان</button>

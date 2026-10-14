@@ -615,7 +615,7 @@
                     </div>
                     <div>
                         <h2 class="text-base font-bold text-stone-900">إدارة البانرات الإعلانية (الشريط العلوي في شاشة الهاتف)</h2>
-                        <p class="text-xs text-slate-500">تظهر هذه الصور كشريط إعلاني مدمج بدون نصوص أسفل الهيدر مباشرة في شاشات الجوال</p>
+                        <p class="text-xs text-slate-500">تظهر هذه الصور كشريط إعلاني أسفل الهيدر على الجوال. إعلانات المطاعم المفعّلة (بتصميمها المرفوع) تظهر أولاً في نفس الشريط، والضغط عليها يفتح صفحة المطعم.</p>
                     </div>
                 </div>
                 <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-slate-100 text-stone-800">

@@ -30,8 +30,8 @@ class RegisterController
             'phone' => PalestinianPhone::rules(uniqueUser: true),
             'password' => ['required', 'string', 'min:6', 'confirmed'],
             'bike_type' => ['required', 'in:bicycle,electric'],
-            'photo' => ['required', 'image', 'max:4096'],
-            'bike_photo' => ['required', 'image', 'max:4096'],
+            'photo' => ['required', 'image', 'mimes:jpeg,jpg,png,webp', 'max:4096'],
+            'bike_photo' => ['required', 'image', 'mimes:jpeg,jpg,png,webp', 'max:4096'],
             'terms' => ['accepted'],
         ], [
             'name.required' => 'الاسم مطلوب.',
@@ -40,7 +40,11 @@ class RegisterController
             'password.confirmed' => 'تأكيد كلمة المرور غير مطابق.',
             'bike_type.required' => 'حدد نوع الدراجة.',
             'photo.required' => 'صورة شخصية مطلوبة.',
+            'photo.image' => 'الصورة الشخصية يجب أن تكون صورة (JPG أو PNG أو WEBP).',
+            'photo.mimes' => 'الصورة الشخصية يجب أن تكون JPG أو PNG أو WEBP.',
             'bike_photo.required' => 'صورة الدراجة مطلوبة.',
+            'bike_photo.image' => 'صورة الدراجة يجب أن تكون صورة (JPG أو PNG أو WEBP).',
+            'bike_photo.mimes' => 'صورة الدراجة يجب أن تكون JPG أو PNG أو WEBP.',
             'terms.accepted' => 'يجب الموافقة على مراجعة الإدارة قبل تفعيل الحساب.',
         ]);
 

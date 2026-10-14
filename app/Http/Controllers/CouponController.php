@@ -60,7 +60,8 @@ class CouponController extends Controller
                     'subtotal' => $newQuote['subtotal'],
                     'discount_amount' => $newQuote['discount_amount'],
                     'discount_percent' => $newQuote['discount_percent'],
-                    'delivery_fee' => $newQuote['delivery_fee'],
+                    'delivery_fee' => $newQuote['delivery_fee_base'] ?? $newQuote['delivery_fee'],
+                    'delivery_fee_paid' => $newQuote['delivery_fee'],
                     'total' => $newQuote['total'],
                 ],
             ]);
@@ -82,7 +83,8 @@ class CouponController extends Controller
                     'subtotal' => $newQuote['subtotal'],
                     'discount_amount' => $newQuote['discount_amount'],
                     'discount_percent' => $newQuote['discount_percent'],
-                    'delivery_fee' => $newQuote['delivery_fee'],
+                    'delivery_fee' => $newQuote['delivery_fee_base'] ?? $newQuote['delivery_fee'],
+                    'delivery_fee_paid' => $newQuote['delivery_fee'],
                     'total' => $newQuote['total'],
                 ],
             ]);

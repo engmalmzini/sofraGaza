@@ -1,6 +1,6 @@
 @php
     $points = auth()->user()->points_balance ?? 0;
-    $mobileBanners = \App\Models\Setting::homeBanners();
+    $mobileBanners = \App\Models\Setting::mobileHomeSlides();
 @endphp
 
 <style>
@@ -31,10 +31,22 @@
             <div class="relative w-full">
                 {{-- Slim horizontal banner strip: height is very low (~82px) --}}
                 <div id="mobile-banner-slider" class="flex gap-2.5 overflow-x-auto snap-x snap-mandatory scrollbar-none scroll-smooth rounded-xl h-[82px] sm:h-[90px]">
-                    @foreach($mobileBanners as $slideIndex => $bannerImg)
-                        <div class="snap-center shrink-0 w-full h-full relative rounded-xl overflow-hidden bg-stone-100 shadow-2xs cursor-pointer group" data-slide="{{ $slideIndex }}">
-                            <img src="{{ $bannerImg }}" alt="إعلان {{ $slideIndex + 1 }}" class="w-full h-full object-cover rounded-xl" loading="lazy">
-                        </div>
+                    @foreach($mobileBanners as $slideIndex => $slide)
+                        @php
+                            $bannerImg = is_array($slide) ? ($slide['image'] ?? '') : (string) $slide;
+                            $bannerHref = is_array($slide) ? ($slide['href'] ?? null) : null;
+                            $bannerAlt = is_array($slide) ? ($slide['alt'] ?? 'إعلان '.($slideIndex + 1)) : 'إعلان '.($slideIndex + 1);
+                            $slideClass = 'snap-center shrink-0 w-full h-full relative rounded-xl overflow-hidden bg-stone-100 shadow-2xs group';
+                        @endphp
+                        @if($bannerHref)
+                            <a href="{{ $bannerHref }}" class="{{ $slideClass }}" data-slide="{{ $slideIndex }}" aria-label="{{ $bannerAlt }}">
+                                <img src="{{ $bannerImg }}" alt="{{ $bannerAlt }}" class="w-full h-full object-cover rounded-xl" loading="lazy">
+                            </a>
+                        @else
+                            <div class="{{ $slideClass }}" data-slide="{{ $slideIndex }}">
+                                <img src="{{ $bannerImg }}" alt="{{ $bannerAlt }}" class="w-full h-full object-cover rounded-xl" loading="lazy">
+                            </div>
+                        @endif
                     @endforeach
                 </div>
 
@@ -457,14 +469,18 @@
 
     {{-- 3. المطاعم (Restaurant Cards - 2 per row) --}}
     <section class="pt-1">
+        <div class="px-3.5">
+            @include('partials.boosted-spotlight', ['boostedPlaces' => $boostedPlaces ?? $restaurants])
+        </div>
         <div class="grid grid-cols-2 gap-3 px-3.5" id="mobile-restaurants-grid">
             @forelse($restaurants as $index => $restaurant)
                 @php
                     $rating = number_format($restaurant->averageRating(), 1);
+                    $isAd = $restaurant->isBoosted();
                     $isNew = $index === 1 || $index === 6 || $restaurant->created_at->diffInDays(now()) < 14;
                 @endphp
                 <a href="{{ route('restaurants.show', $restaurant) }}" 
-                   class="mobile-place-card group bg-white rounded-2xl overflow-hidden shadow-[0_4px_16px_rgba(0,0,0,0.08)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.12)] transition-all duration-200 flex flex-col active:scale-[0.98]"
+                   class="mobile-place-card group bg-white rounded-2xl overflow-hidden shadow-[0_4px_16px_rgba(0,0,0,0.08)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.12)] transition-all duration-200 flex flex-col active:scale-[0.98] {{ $isAd ? 'ring-2 ring-orange-400' : '' }}"
                    data-cuisine="{{ $restaurant->cuisine }}"
                    data-area="{{ $restaurant->area }}"
                    data-name="{{ $restaurant->name }}">
@@ -476,8 +492,14 @@
                              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                              loading="lazy">
                         
+                        @if($isAd)
+                            <div class="absolute top-2 right-2 bg-[#ea580c] text-white font-extrabold text-[10px] px-2 py-0.5 rounded-full shadow-xs">
+                                إعلان
+                            </div>
+                        @endif
+
                         {{-- Top Badges: 'جديد' or Rating Pill '★ 4.8' (Top-Left) --}}
-                        @if($isNew && $index % 3 === 1)
+                        @if($isNew && $index % 3 === 1 && ! $isAd)
                             <div class="absolute top-2 left-2 bg-amber-400 text-stone-900 font-extrabold text-[10px] px-2.5 py-0.5 rounded-full shadow-xs">
                                 جديد
                             </div>

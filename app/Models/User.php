@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class User extends Authenticatable
 {
@@ -266,12 +267,74 @@ class User extends Authenticatable
 
     public function photoUrl(): ?string
     {
-        return $this->photo_path ? Storage::disk('public')->url($this->photo_path) : null;
+        return $this->publicStoredUrl($this->photo_path);
     }
 
     public function bikePhotoUrl(): ?string
     {
-        return $this->bike_photo_path ? Storage::disk('public')->url($this->bike_photo_path) : null;
+        return $this->publicStoredUrl($this->bike_photo_path);
+    }
+
+    public function hasPhotoFile(): bool
+    {
+        return $this->storedFilePath($this->photo_path) !== null;
+    }
+
+    public function hasBikePhotoFile(): bool
+    {
+        return $this->storedFilePath($this->bike_photo_path) !== null;
+    }
+
+    public function photoResponse(): BinaryFileResponse
+    {
+        $full = $this->storedFilePath($this->photo_path);
+        abort_unless($full, 404, 'الصورة الشخصية غير متوفرة.');
+
+        return response()->file($full);
+    }
+
+    public function bikePhotoResponse(): BinaryFileResponse
+    {
+        $full = $this->storedFilePath($this->bike_photo_path);
+        abort_unless($full, 404, 'صورة الدراجة غير متوفرة.');
+
+        return response()->file($full);
+    }
+
+    private function publicStoredUrl(?string $path): ?string
+    {
+        $path = trim(str_replace('\\', '/', (string) $path), '/');
+
+        return $path !== '' ? '/storage/'.$path : null;
+    }
+
+    private function storedFilePath(?string $path): ?string
+    {
+        $path = trim(str_replace('\\', '/', (string) $path), '/');
+
+        if ($path === '') {
+            return null;
+        }
+
+        $candidates = [
+            Storage::disk('public')->path($path),
+            storage_path('app/public/'.$path),
+            storage_path('app/'.$path),
+            public_path('storage/'.$path),
+            public_path($path),
+        ];
+
+        if (str_contains($path, '/')) {
+            $candidates[] = Storage::disk('public')->path(basename($path));
+        }
+
+        foreach ($candidates as $full) {
+            if (is_string($full) && is_file($full)) {
+                return $full;
+            }
+        }
+
+        return null;
     }
 
     public function ownedRestaurant(): HasOne

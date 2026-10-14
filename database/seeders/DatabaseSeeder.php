@@ -64,9 +64,9 @@ class DatabaseSeeder extends Seeder
             [
                 'monthly_price' => 50,
                 'discount_percent' => 5,
-                'free_delivery' => false,
+                'free_delivery' => true,
                 'points_multiplier' => 1.25,
-                'description' => 'خصم 5% على كل طلب، ونقاط إضافية بمعدل 1.25 نقطة بدل نقطة واحدة.',
+                'description' => 'خصم 5% على التوصيل، ونقاط إضافية بمعدل 1.25 نقطة بدل نقطة واحدة. سعر المطعم لا يتأثر.',
                 'is_active' => true,
                 'sort_order' => 1,
             ]
@@ -76,10 +76,10 @@ class DatabaseSeeder extends Seeder
             ['name' => 'العضوية المميزة'],
             [
                 'monthly_price' => 100,
-                'discount_percent' => 10,
+                'discount_percent' => 100,
                 'free_delivery' => true,
                 'points_multiplier' => 1.50,
-                'description' => 'خصم 10% على كل طلب، توصيل مجاني، ونقاط إضافية بمعدل 1.5 نقطة بدل نقطة واحدة.',
+                'description' => 'توصيل مجاني على كل طلب، ونقاط إضافية بمعدل 1.5 نقطة بدل نقطة واحدة. سعر المطعم لا يتأثر.',
                 'is_active' => true,
                 'sort_order' => 2,
             ]

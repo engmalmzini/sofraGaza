@@ -706,7 +706,7 @@
 
                     <div class="ms-plan__top">
                         <h2>{{ $membership->name }}</h2>
-                        <span class="ms-plan__disc">خصم {{ $membership->discount_percent }}%</span>
+                        <span class="ms-plan__disc">{{ $membership->deliveryBenefitLabel() ?: 'بدون خصم توصيل' }}</span>
                     </div>
 
                     @if($membership->description)

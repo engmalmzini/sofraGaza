@@ -8,6 +8,9 @@ use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Storage;
 
 class RestaurantBoost extends Model
 {
@@ -31,6 +34,7 @@ class RestaurantBoost extends Model
         'days',
         'amount',
         'transfer_receipt_path',
+        'banner_path',
         'title',
         'notes',
         'status',
@@ -192,5 +196,71 @@ class RestaurantBoost extends Model
     public function defaultDailyRate(): float
     {
         return (float) ($this->daily_rate ?: Finance::BOOST_DAILY_RATE);
+    }
+
+    public function storeCreative(UploadedFile $file): string
+    {
+        $path = $file->store('boosts/banners', 'public');
+        $old = $this->banner_path;
+
+        $this->forceFill(['banner_path' => $path])->save();
+
+        if (filled($old) && $old !== $path && ! str_starts_with((string) $old, 'http://') && ! str_starts_with((string) $old, 'https://')) {
+            Storage::disk('public')->delete($old);
+        }
+
+        return $path;
+    }
+
+    public function hasCreative(): bool
+    {
+        return filled($this->banner_path);
+    }
+
+    public function creativeUrl(): string
+    {
+        $path = trim((string) $this->banner_path);
+
+        if ($path !== '') {
+            if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
+                return $path;
+            }
+
+            if (str_starts_with($path, '/')) {
+                return url($path);
+            }
+
+            if (is_file(public_path($path))) {
+                return asset($path);
+            }
+
+            return Storage::disk('public')->url($path);
+        }
+
+        return $this->restaurant?->coverUrl() ?: '';
+    }
+
+    public function restaurantHref(): ?string
+    {
+        if (! $this->restaurant) {
+            return null;
+        }
+
+        return route('restaurants.show', $this->restaurant);
+    }
+
+    /**
+     * @return Collection<int, self>
+     */
+    public static function liveCreatives(int $limit = 6): Collection
+    {
+        return static::query()
+            ->activeOn()
+            ->with('restaurant')
+            ->latest('id')
+            ->limit($limit)
+            ->get()
+            ->filter(fn (self $boost) => $boost->restaurant && $boost->restaurant->isVisible())
+            ->values();
     }
 }

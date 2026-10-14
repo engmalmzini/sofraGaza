@@ -6,7 +6,7 @@
     $mapsDrop = 'https://www.google.com/maps/search/?api=1&query='.urlencode($order->address_details);
     $restaurantPhone = $order->restaurant->phone;
     $backTab = $order->status === 'delivered' ? 'done' : 'mine';
-    $foodCost = max(0, (float)$order->subtotal - (float)$order->discount_amount);
+    $foodCost = $order->foodTotal();
     $isPrepaid = $order->isPaidWithWallet() || $order->confirmed_at;
     $deliveryFee = (float) $order->delivery_fee;
     $courierNet = round($deliveryFee * 0.85, 2);

@@ -23,8 +23,9 @@
         </div>
     </div>
     <div class="relative w-24 h-24 rounded-lg overflow-hidden flex-shrink-0 bg-surface-container">
-        @if($item->imageUrl())
-            <img src="{{ $item->imageUrl() }}" alt="{{ $item->name }}" class="w-full h-full object-cover">
+        @php $dishPhoto = $item->imageUrl() ?: $restaurant->coverUrl(); @endphp
+        @if($dishPhoto)
+            <img src="{{ $dishPhoto }}" alt="{{ $item->name }}" class="w-full h-full object-cover">
         @else
             <div class="w-full h-full bg-primary-fixed/40 text-primary flex items-center justify-center">
                 <span class="material-symbols-outlined text-[28px]">restaurant</span>

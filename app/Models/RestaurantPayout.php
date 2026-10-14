@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasStoredReceipt;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class RestaurantPayout extends Model
 {
+    use HasStoredReceipt;
+
     public const STATUS_PENDING = 'pending';
 
     public const STATUS_COMPLETED = 'completed';
@@ -37,6 +40,7 @@ class RestaurantPayout extends Model
         'payout_method',
         'transfer_details',
         'admin_notes',
+        'transfer_receipt_path',
         'processed_by',
         'processed_at',
     ];

@@ -69,7 +69,7 @@ class OrderService
                 'notes' => $data['notes'] ?? null,
                 'subtotal' => $quote['subtotal'],
                 'discount_percent' => $quote['discount_percent'],
-                'discount_amount' => $quote['discount_amount'],
+                'discount_amount' => $quote['meal_discount'] ?? $quote['discount_amount'],
                 'delivery_fee' => $quote['delivery_fee'],
                 'total' => $quote['total'],
                 'coupon_id' => $quote['coupon']?->id,

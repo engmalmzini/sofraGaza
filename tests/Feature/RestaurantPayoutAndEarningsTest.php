@@ -10,6 +10,8 @@ use App\Models\Setting;
 use App\Models\User;
 use App\Support\Finance;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class RestaurantPayoutAndEarningsTest extends TestCase
@@ -26,6 +28,7 @@ class RestaurantPayoutAndEarningsTest extends TestCase
     {
         parent::setUp();
 
+        Storage::fake('public');
         $this->admin = User::factory()->admin()->create();
         [$this->owner, $this->restaurant] = $this->approvedVenue();
     }
@@ -80,11 +83,14 @@ class RestaurantPayoutAndEarningsTest extends TestCase
         $payout = RestaurantPayout::query()->first();
 
         $this->actingAs($this->admin)
-            ->post(route('admin.finance.payouts.complete', $payout))
+            ->post(route('admin.finance.payouts.complete', $payout), [
+                'receipt' => UploadedFile::fake()->image('transfer.jpg'),
+            ])
             ->assertRedirect()
             ->assertSessionHas('success');
 
         $this->assertTrue($payout->fresh()->isCompleted());
+        $this->assertNotEmpty($payout->fresh()->transfer_receipt_path);
         $this->assertSame(0.0, $this->restaurant->fresh()->availableBalance());
         $this->assertSame(180.0, $this->restaurant->fresh()->totalWithdrawn());
 
@@ -100,6 +106,54 @@ class RestaurantPayoutAndEarningsTest extends TestCase
 
         $this->assertTrue($second->fresh()->isRejected());
         $this->assertSame(90.0, $this->restaurant->fresh()->availableBalance());
+    }
+
+    public function test_admin_cannot_complete_payout_without_receipt_image(): void
+    {
+        $this->deliverOrder(100);
+        $this->actingAs($this->owner)->post(route('partner.wallet.payout'), $this->payoutPayload(90));
+        $payout = RestaurantPayout::query()->first();
+
+        $this->actingAs($this->admin)
+            ->post(route('admin.finance.payouts.complete', $payout))
+            ->assertSessionHasErrors('receipt');
+
+        $this->assertTrue($payout->fresh()->isPending());
+    }
+
+    public function test_admin_and_owner_can_view_payout_receipt_after_transfer(): void
+    {
+        $this->deliverOrder(100);
+        $this->actingAs($this->owner)->post(route('partner.wallet.payout'), $this->payoutPayload(90));
+        $payout = RestaurantPayout::query()->first();
+
+        $this->actingAs($this->admin)
+            ->post(route('admin.finance.payouts.complete', $payout), [
+                'receipt' => UploadedFile::fake()->image('notice.png'),
+            ])
+            ->assertRedirect();
+
+        $payout->refresh();
+        $this->assertTrue($payout->hasReceiptFile());
+
+        $this->actingAs($this->admin)
+            ->get(route('admin.finance.payouts'))
+            ->assertOk()
+            ->assertSee('عرض إشعار التحويل', false);
+
+        $this->actingAs($this->admin)
+            ->get(route('admin.finance.payouts.receipt', $payout))
+            ->assertOk();
+
+        $this->actingAs($this->owner)
+            ->get(route('partner.wallet.payout.receipt', $payout))
+            ->assertOk()
+            ->assertHeader('content-type', 'image/png');
+
+        $this->actingAs($this->owner)
+            ->get(route('partner.wallet'))
+            ->assertOk()
+            ->assertSee('عرض الإشعار', false);
     }
 
     public function test_cannot_request_second_payout_while_one_is_pending(): void

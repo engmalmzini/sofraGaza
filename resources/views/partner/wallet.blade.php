@@ -141,6 +141,7 @@
                     <th>الحالة</th>
                     <th>التاريخ</th>
                     <th>ملاحظة الإدارة</th>
+                    <th>إشعار التحويل</th>
                 </tr>
             </thead>
             <tbody>
@@ -153,10 +154,20 @@
                         <td><span class="inline-flex px-2.5 py-1 rounded-full text-[11px] font-bold {{ $payout->statusClass() }}">{{ $payout->statusLabel() }}</span></td>
                         <td class="text-xs">{{ $payout->created_at->format('Y/m/d H:i') }}</td>
                         <td class="text-xs text-slate-500">{{ $payout->admin_notes ?: '—' }}</td>
+                        <td class="text-xs">
+                            @if($payout->hasReceiptFile())
+                                <a href="{{ route('partner.wallet.payout.receipt', $payout) }}" target="_blank" rel="noopener" class="inline-flex items-center gap-1 font-bold text-primary hover:underline">
+                                    <span class="material-symbols-outlined text-[16px]">image</span>
+                                    عرض الإشعار
+                                </a>
+                            @else
+                                <span class="text-slate-400">—</span>
+                            @endif
+                        </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="7" class="text-center text-slate-500 py-8">ما في طلبات سحب بعد.</td>
+                        <td colspan="8" class="text-center text-slate-500 py-8">ما في طلبات سحب بعد.</td>
                     </tr>
                 @endforelse
             </tbody>

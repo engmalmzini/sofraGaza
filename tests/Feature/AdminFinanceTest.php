@@ -101,7 +101,9 @@ class AdminFinanceTest extends TestCase
             ->get(route('admin.finance.restaurants'))
             ->assertOk()
             ->assertSee('مطعم المالية', false)
-            ->assertSee('قيد الانتظار', false)
+            ->assertSee('غير مُقفلة', false)
+            ->assertSee('رصيد لم يُحوَّل', false)
+            ->assertSee('لم يُحوَّل بعد', false)
             ->assertSee('20.00', false)
             ->assertSee('180.00', false);
 
@@ -123,8 +125,8 @@ class AdminFinanceTest extends TestCase
         $this->actingAs($this->admin)
             ->get(route('admin.finance.restaurants.show', $this->restaurant))
             ->assertOk()
-            ->assertSee('تم الدفع', false)
-            ->assertSee('السجل التاريخي للتسويات', false)
+            ->assertSee('مُقفل محاسبياً', false)
+            ->assertSee('أرشيف إقفال الفترات', false)
             ->assertSee('حوالة بنك فلسطين', false);
     }
 

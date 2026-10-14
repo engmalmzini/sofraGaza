@@ -52,6 +52,22 @@ class CourierRegistrationTest extends TestCase
             ->assertSee('طلبات انضمام المندوبين', false);
 
         $this->actingAs($admin)
+            ->get(route('admin.delivery.show', $courier))
+            ->assertOk()
+            ->assertSee('صورة شخصية', false)
+            ->assertSee('صورة الدراجة', false)
+            ->assertSee(route('admin.delivery.photo', $courier, false), false)
+            ->assertSee(route('admin.delivery.bike-photo', $courier, false), false);
+
+        $this->actingAs($admin)
+            ->get(route('admin.delivery.photo', $courier))
+            ->assertOk();
+
+        $this->actingAs($admin)
+            ->get(route('admin.delivery.bike-photo', $courier))
+            ->assertOk();
+
+        $this->actingAs($admin)
             ->post(route('admin.delivery.approve', $courier))
             ->assertRedirect();
 

@@ -53,8 +53,8 @@
                         <span>المجموع الفرعي</span>
                         <span data-cart-subtotal>{{ number_format($restaurantCart['subtotal'] ?? 0, 1) }} <span class="ils">₪</span></span>
                     </div>
-                    <div data-cart-discount-row class="flex justify-between text-secondary font-medium {{ ($restaurantCart['discount_percent'] ?? 0) ? '' : 'hidden' }}">
-                        <span>خصم خاص <span data-cart-discount-percent>{{ $restaurantCart['discount_percent'] ?? 0 }}</span>% (VIP)</span>
+                    <div data-cart-discount-row class="flex justify-between text-secondary font-medium {{ (($restaurantCart['meal_discount'] ?? 0) > 0) ? '' : 'hidden' }}">
+                        <span>خصم كوبون</span>
                         <span data-cart-discount-amount>- {{ number_format($restaurantCart['discount_amount'] ?? 0, 1) }} <span class="ils">₪</span></span>
                     </div>
                     <div class="h-px bg-outline/30 my-1"></div>

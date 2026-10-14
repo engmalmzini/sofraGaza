@@ -200,6 +200,8 @@ class FinanceService
             $net = round($sales - $commission, 2);
             $periodSettlement = $current->get($restaurant->id);
             $archive = $history->get($restaurant->id, collect());
+            $available = $restaurant->availableBalance();
+            $pendingPayout = $restaurant->pendingPayoutsAmount();
 
             return [
                 'restaurant' => $restaurant,
@@ -208,6 +210,9 @@ class FinanceService
                 'commission' => $commission,
                 'delivery' => $delivery,
                 'net' => $net,
+                'available' => $available,
+                'withdrawn' => $restaurant->totalWithdrawn(),
+                'pending_payout' => $pendingPayout,
                 'settlement' => $periodSettlement,
                 'status' => $periodSettlement ? 'paid' : 'pending',
                 'last_settled_at' => $archive->first()?->paid_at,
