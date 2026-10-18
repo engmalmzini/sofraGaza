@@ -1830,10 +1830,10 @@
                     {{-- Social Proof / Happy Customers (Matching Foodly reference) --}}
                     <div class="flex items-center gap-4 pt-1">
                         <div class="flex items-center -space-x-2.5 space-x-reverse shrink-0 p-1">
-                            <img class="relative inline-block h-11 w-11 rounded-full ring-2 ring-white object-cover shadow-xs z-40" src="{{ asset('images/avatars/customer_arab_gaza_1.jpg') }}?v={{ filemtime(public_path('images/avatars/customer_arab_gaza_1.jpg')) }}" alt="عميل من غزة">
-                            <img class="relative inline-block h-11 w-11 rounded-full ring-2 ring-white object-cover shadow-xs z-30" src="{{ asset('images/avatars/customer_arab_hijab_1.jpg') }}?v={{ filemtime(public_path('images/avatars/customer_arab_hijab_1.jpg')) }}" alt="أخت فلسطينية محجبة">
-                            <img class="relative inline-block h-11 w-11 rounded-full ring-2 ring-white object-cover shadow-xs z-20" src="{{ asset('images/avatars/customer_arab_1.jpg') }}?v={{ filemtime(public_path('images/avatars/customer_arab_1.jpg')) }}" alt="عميل من غزة">
-                            <img class="relative inline-block h-11 w-11 rounded-full ring-2 ring-white object-cover shadow-xs z-10" src="{{ asset('images/avatars/customer_arab_3.jpg') }}?v={{ filemtime(public_path('images/avatars/customer_arab_3.jpg')) }}" alt="عميل من غزة">
+                            <img class="relative inline-block h-11 w-11 rounded-full ring-2 ring-white object-cover shadow-xs z-40" src="{{ asset('images/avatars/customer_arab_gaza_1.jpg') }}?v={{ filemtime(public_path('images/avatars/customer_arab_gaza_1.jpg')) }}" alt="" decoding="async">
+                            <img class="relative inline-block h-11 w-11 rounded-full ring-2 ring-white object-cover shadow-xs z-30" src="{{ asset('images/avatars/customer_arab_hijab_1.jpg') }}?v={{ filemtime(public_path('images/avatars/customer_arab_hijab_1.jpg')) }}" alt="" decoding="async">
+                            <img class="relative inline-block h-11 w-11 rounded-full ring-2 ring-white object-cover shadow-xs z-20" src="{{ asset('images/avatars/customer_arab_1.jpg') }}?v={{ filemtime(public_path('images/avatars/customer_arab_1.jpg')) }}" alt="" decoding="async">
+                            <img class="relative inline-block h-11 w-11 rounded-full ring-2 ring-white object-cover shadow-xs z-10" src="{{ asset('images/avatars/customer_arab_3.jpg') }}?v={{ filemtime(public_path('images/avatars/customer_arab_3.jpg')) }}" alt="" decoding="async">
                         </div>
                         <div class="flex flex-col text-right justify-center">
                             <div class="flex items-center gap-1.5 leading-none mb-1.5">
@@ -1855,8 +1855,8 @@
                 {{-- Left Column (Courier Hero Visual - Grounded Flush to Bottom) --}}
                 <div class="lg:col-span-6 sg-hero-courier-wrap">
                     <img src="{{ $heroImage }}{{ str_contains($heroImage, 'hero-courier') && file_exists(public_path('images/hero-courier.png')) ? '?v=' . filemtime(public_path('images/hero-courier.png')) : '' }}"
-                         alt="كابتن توصيل سفرة غزة"
-                         class="sg-hero-courier">
+                         alt=""
+                         class="sg-hero-courier" decoding="async">
                 </div>
 
             </div>
@@ -2034,7 +2034,7 @@
 
                             {{-- Food Cut-out Layer (Overflowing Disc) --}}
                             <div class="sg-cat-food-wrap {{ $foodClass }}">
-                                <img src="{{ asset($category['image']) }}?v={{ @filemtime(public_path($category['image'])) ?: time() }}" alt="{{ $category['name'] }}" class="sg-cat-food-img" loading="lazy">
+                                <img src="{{ asset($category['image']) }}?v={{ @filemtime(public_path($category['image'])) ?: time() }}" alt="" class="sg-cat-food-img" loading="lazy" decoding="async">
                             </div>
                         </div>
 
@@ -2106,7 +2106,7 @@
                     
                     {{-- Media --}}
                     <div class="sg-card__media">
-                        <img src="{{ $restaurant->coverUrl() }}" alt="{{ $restaurant->name }}" class="sg-card__img" loading="lazy">
+                        <img src="{{ $restaurant->coverUrl() }}" alt="" class="sg-card__img" loading="lazy" decoding="async">
                         
                         {{-- Top Badge --}}
                         <span class="sg-card__badge-promo {{ $isAd ? 'sg-card__badge-promo--ad' : '' }}">
@@ -2125,6 +2125,9 @@
                             <span class="material-symbols-outlined text-[14px] text-amber-400">schedule</span>
                             <span>{{ $eta }}</span>
                         </div>
+                        @if($restaurant->orderStatusKind() !== 'open')
+                            <span class="hours-closed-badge">{{ $restaurant->orderStatusLabel() }}</span>
+                        @endif
                     </div>
 
                     {{-- Body --}}
@@ -2197,11 +2200,11 @@
                     @foreach($partnerLoop as $partner)
                         @if($partner->url)
                             <a class="sg-partners-logo" href="{{ $partner->url }}" target="_blank" rel="noopener noreferrer">
-                                <img src="{{ $partner->imageUrl() }}" alt="{{ $partner->name }}">
+                                <img src="{{ $partner->imageUrl() }}" alt="" loading="lazy" decoding="async">
                             </a>
                         @else
                             <div class="sg-partners-logo">
-                                <img src="{{ $partner->imageUrl() }}" alt="{{ $partner->name }}">
+                                <img src="{{ $partner->imageUrl() }}" alt="" loading="lazy" decoding="async">
                             </div>
                         @endif
                     @endforeach
@@ -2249,7 +2252,7 @@
                         @else
                             <div class="sg-gold-ticket">
                         @endif
-                            <img src="{{ $reward['image'] }}" alt="{{ $reward['name'] }}" loading="lazy">
+                            <img src="{{ $reward['image'] }}" alt="" loading="lazy" decoding="async">
                             <div class="sg-gold-ticket__meta">
                                 <span class="sg-gold-ticket__pts">
                                     <span class="material-symbols-outlined">stars</span>

@@ -6,6 +6,12 @@
 @section('actions')
 <a href="{{ route('admin.restaurants.edit', $restaurant) }}" class="admin-btn admin-btn--ghost">تعديل</a>
 <a href="{{ route('admin.restaurants.menu-items.index', $restaurant) }}" class="admin-btn admin-btn--primary">المنيو</a>
+@include('admin.partials.delete-form', [
+    'action' => route('admin.restaurants.destroy', $restaurant),
+    'confirm' => "حذف {$restaurant->name}؟ الطلبات القديمة تبقى في السجل باسم المطعم.",
+    'label' => 'حذف المطعم',
+    'buttonClass' => 'admin-btn admin-btn--danger',
+])
 @endsection
 
 @section('content')
@@ -16,7 +22,7 @@
         <div>الهاتف: {{ $restaurant->phone ?: '—' }}</div>
         <div>المنطقة: {{ $restaurant->areaLabel() }}</div>
         <div>العنوان: {{ $restaurant->address ?: '—' }}</div>
-        <div>ساعات العمل: {{ $restaurant->hoursLabel() }}</div>
+        <div>أيام وساعات العمل: {{ $restaurant->hoursLabel() }}</div>
         <div>الرخصة: {{ $restaurant->license_number ?: '—' }}</div>
         <div>أصناف المنيو: {{ $restaurant->menu_items_count }}</div>
         <div>اكتساب النقاط: {{ $restaurant->points_per_amount ? 'كل '.$restaurant->points_per_amount.' ₪ = نقطة (خاص بالمطعم)' : 'حسب الإعداد العام' }}</div>

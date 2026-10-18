@@ -72,6 +72,16 @@
                 @endif
             @endif
         </section>
+        <section class="admin-card">
+            <h2>حذف الطلب</h2>
+            <p class="mt-2 text-sm text-on-surface-variant">يحذف الطلب وسطوره من المنصة. لا يؤثر على حساب الزبون أو المطعم.</p>
+            @include('admin.partials.delete-form', [
+                'action' => route('admin.orders.destroy', $order),
+                'confirm' => "حذف الطلب #{$order->id} نهائياً؟",
+                'label' => 'حذف الطلب',
+                'buttonClass' => 'admin-btn admin-btn--danger w-full mt-3',
+            ])
+        </section>
     </div>
 </div>
 @endsection

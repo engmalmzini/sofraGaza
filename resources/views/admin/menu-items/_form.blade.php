@@ -49,7 +49,36 @@
     <label class="mb-1 block text-sm font-bold">صورة</label>
     <input type="file" name="image" accept="image/*">
 </div>
-<label class="flex items-center gap-2"><input type="checkbox" name="is_available" value="1" @checked(old('is_available', $item->is_available ?? true))> متوفر</label>
+@php
+    $stockMode = old('stock_mode', ($item && ! ($item->stock_unlimited ?? true)) ? 'limited' : 'unlimited');
+    $stockQty = old('stock_qty', ($item && ! ($item->stock_unlimited ?? true)) ? $item->stock_qty : '');
+@endphp
+<fieldset class="rounded-2xl border border-slate-200 p-4 space-y-3">
+    <legend class="px-1 text-sm font-extrabold">الكمية</legend>
+    <p class="text-xs leading-6 text-on-surface-variant">حدد كم قطعة متوفرة من هذا الصنف، أو اختر أنها لا تنتهي.</p>
+    <label class="flex items-start gap-2 text-sm font-bold">
+        <input type="radio" name="stock_mode" value="unlimited" class="mt-1" data-stock-mode @checked($stockMode === 'unlimited') required>
+        <span>
+            لا نهائية (لا تنتهي)
+            <small class="block font-medium text-on-surface-variant">الزبون يطلب بلا حد للكمية</small>
+        </span>
+    </label>
+    <label class="flex items-start gap-2 text-sm font-bold">
+        <input type="radio" name="stock_mode" value="limited" class="mt-1" data-stock-mode @checked($stockMode === 'limited')>
+        <span>
+            كمية محددة
+            <small class="block font-medium text-on-surface-variant">تنقص مع كل طلب، وتعود إذا أُلغي أو رُفض</small>
+        </span>
+    </label>
+    <div data-stock-qty-wrap @if($stockMode !== 'limited') hidden @endif>
+        <label class="mb-1 block text-sm font-bold">العدد المتوفر الآن</label>
+        <input type="number" min="0" step="1" name="stock_qty" value="{{ $stockQty }}" class="w-full rounded-xl border px-3 py-3" placeholder="مثال: 20">
+        @error('stock_qty')
+            <p class="mt-1 text-xs text-rose-600">{{ $message }}</p>
+        @enderror
+    </div>
+</fieldset>
+<label class="flex items-center gap-2"><input type="checkbox" name="is_available" value="1" @checked(old('is_available', $item->is_available ?? true))> متوفر للطلب</label>
 <script>
     document.querySelectorAll('[data-category-select]').forEach((select) => {
         const wrap = select.form?.querySelector('[data-category-custom]');
@@ -58,4 +87,17 @@
         select.addEventListener('change', toggle);
         toggle();
     });
+
+    const qtyWrap = document.querySelector('[data-stock-qty-wrap]');
+    const qtyInput = qtyWrap?.querySelector('input[name="stock_qty"]');
+    const syncStock = () => {
+        if (!qtyWrap || !qtyInput) return;
+        const limited = document.querySelector('[data-stock-mode][value="limited"]')?.checked;
+        qtyWrap.hidden = !limited;
+        qtyInput.required = Boolean(limited);
+    };
+    document.querySelectorAll('[data-stock-mode]').forEach((radio) => {
+        radio.addEventListener('change', syncStock);
+    });
+    syncStock();
 </script>

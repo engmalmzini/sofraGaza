@@ -59,12 +59,17 @@ class CartController extends Controller
         ]);
 
         $hasNotesField = $request->has('notes');
-        $this->cart->update(
-            (int) $request->item_id,
-            (int) $request->quantity,
-            $request->input('notes'),
-            $hasNotesField
-        );
+
+        try {
+            $this->cart->update(
+                (int) $request->item_id,
+                (int) $request->quantity,
+                $request->input('notes'),
+                $hasNotesField
+            );
+        } catch (RuntimeException $e) {
+            return $this->respond($request, $e->getMessage(), false);
+        }
 
         return $this->respond($request, 'تم تحديث السلة.');
     }

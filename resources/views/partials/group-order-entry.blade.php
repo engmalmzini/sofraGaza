@@ -1,9 +1,10 @@
 @php
     $canShopHere = $canShop ?? true;
+    $canOrderHere = $canOrder ?? ($restaurant->isAcceptingOrders());
     $activeGroup = $activeGroupOrder ?? null;
     $sameRestaurant = $activeGroup && (int) $activeGroup->restaurant_id === (int) $restaurant->id;
 @endphp
-@if($canShopHere)
+@if($canShopHere && ($sameRestaurant || $canOrderHere))
     @if($sameRestaurant)
         <a href="{{ route('group-orders.show', $activeGroup) }}"
            class="{{ $entryClass ?? 'inline-flex items-center justify-center gap-1.5 rounded-xl border border-primary/30 bg-primary/10 text-primary font-extrabold text-xs px-3 py-2 hover:bg-primary/15 transition-colors' }}">

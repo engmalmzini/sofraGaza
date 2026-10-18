@@ -38,6 +38,10 @@
                                 <span class="material-symbols-outlined">rate_review</span>
                                 <span>مراجعة</span>
                             </a>
+                            @include('admin.partials.delete-form', [
+                                'action' => route('admin.subscriptions.destroy', $subscription),
+                                'confirm' => 'حذف هذا الاشتراك؟',
+                            ])
                         </div>
                     </td>
                 </tr>

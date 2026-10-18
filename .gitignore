@@ -22,6 +22,8 @@ __pycache__/
 /storage/pail
 /vendor
 /database/*.sqlite
+/hostinger-dist
+/sofragaza-hostinger*.zip
 /public/test_mockup.html
 /public/current_section.png
 Homestead.json

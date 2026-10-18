@@ -32,6 +32,7 @@
     ];
 @endphp
     <title>@yield('title', $panelTitle) — سفرة غزة</title>
+    @include('partials.favicon')
     @include('partials.icon-font')
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

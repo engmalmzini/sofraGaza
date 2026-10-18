@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\GroupOrder;
 use App\Models\GroupOrderMember;
+use App\Models\MenuItem;
 use App\Models\Order;
 use App\Models\Restaurant;
 use App\Models\User;
@@ -27,6 +28,8 @@ class GroupOrderService
         if (! $restaurant->isVisible()) {
             throw new RuntimeException('هذا المطعم غير متاح للطلب حالياً.');
         }
+
+        $restaurant->assertAcceptingOrders();
 
         $normalized = $this->uniqueGuestPhones($host, $phones);
 
@@ -130,6 +133,7 @@ class GroupOrderService
     {
         $group->load(['members.user', 'restaurant']);
         $this->assertCollecting($group);
+        $group->restaurant?->assertAcceptingOrders();
 
         $member = $group->memberFor($user);
         if (! $member || $member->is_host) {
@@ -211,6 +215,7 @@ class GroupOrderService
     {
         $group->load(['members.user', 'restaurant', 'host']);
         $this->assertCollecting($group);
+        $group->restaurant?->assertAcceptingOrders();
 
         if ($group->host_user_id !== $host->id) {
             throw new RuntimeException('صاحب الطلب الجماعي فقط يقدر يرسله.');
@@ -312,8 +317,13 @@ class GroupOrderService
                 'transfer_receipt_path' => $path,
             ]);
 
+            $needed = [];
             foreach ($group->members()->orderByDesc('is_host')->get() as $member) {
                 foreach ($member->items() as $line) {
+                    $itemId = $line['menu_item_id'] ?? null;
+                    if ($itemId) {
+                        $needed[(int) $itemId] = ($needed[(int) $itemId] ?? 0) + (int) ($line['qty'] ?? 0);
+                    }
                     $order->items()->create([
                         'menu_item_id' => $line['menu_item_id'] ?? null,
                         'group_member_id' => $member->id,
@@ -325,6 +335,11 @@ class GroupOrderService
                         'notes' => $line['notes'] ?? null,
                     ]);
                 }
+            }
+
+            foreach ($needed as $itemId => $qty) {
+                $item = MenuItem::query()->whereKey($itemId)->lockForUpdate()->first();
+                $item?->consumeStock((int) $qty);
             }
 
             $group->update([
@@ -346,7 +361,7 @@ class GroupOrderService
 
         $this->notifications->notifyAdmins(
             'طلب جماعي جديد بانتظار التأكيد',
-            "طلب جماعي #{$order->id} من {$host->name} في {$order->restaurant->name} بقيمة {$order->total} ₪ — ".($group->members->count()).' أشخاص.',
+            "طلب جماعي #{$order->id} من {$host->name} في {$order->venueName()} بقيمة {$order->total} ₪ — ".($group->members->count()).' أشخاص.',
             route('admin.orders.show', $order)
         );
 
@@ -365,7 +380,7 @@ class GroupOrderService
                 $this->notifications->notify(
                     $member->user,
                     'تم إرسال الطلب الجماعي',
-                    "{$host->name} أرسل طلبكم الجماعي من {$order->restaurant->name}. رقم الطلب #{$order->id}.",
+                    "{$host->name} أرسل طلبكم الجماعي من {$order->venueName()}. رقم الطلب #{$order->id}.",
                     route('account.orders.show', $order)
                 );
             }

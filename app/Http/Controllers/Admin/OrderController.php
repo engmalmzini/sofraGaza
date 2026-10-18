@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Services\OrderService;
+use App\Services\SafeDeletion;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -135,7 +136,7 @@ class OrderController extends Controller
             'latest_order' => $latest ? [
                 'id' => $latest->id,
                 'customer' => $latest->user?->name,
-                'restaurant' => $latest->restaurant?->name,
+                'restaurant' => $latest->venueName(),
                 'total' => (float) $latest->total,
                 'status' => $latest->status,
                 'status_label' => $latest->statusLabel(),
@@ -144,5 +145,13 @@ class OrderController extends Controller
             'board_html' => $boardHtml,
             'board_signature' => $boardSignature,
         ]);
+    }
+
+    public function destroy(Order $order, SafeDeletion $deletion): RedirectResponse
+    {
+        $id = $order->id;
+        $deletion->deleteOrder($order);
+
+        return redirect()->route('admin.orders.index')->with('success', "تم حذف الطلب #{$id}.");
     }
 }

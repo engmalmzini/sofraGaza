@@ -40,11 +40,11 @@
                         @endphp
                         @if($bannerHref)
                             <a href="{{ $bannerHref }}" class="{{ $slideClass }}" data-slide="{{ $slideIndex }}" aria-label="{{ $bannerAlt }}">
-                                <img src="{{ $bannerImg }}" alt="{{ $bannerAlt }}" class="w-full h-full object-cover rounded-xl" loading="lazy">
+                                <img src="{{ $bannerImg }}" alt="" class="w-full h-full object-cover rounded-xl" loading="lazy" decoding="async">
                             </a>
                         @else
                             <div class="{{ $slideClass }}" data-slide="{{ $slideIndex }}">
-                                <img src="{{ $bannerImg }}" alt="{{ $bannerAlt }}" class="w-full h-full object-cover rounded-xl" loading="lazy">
+                                <img src="{{ $bannerImg }}" alt="" class="w-full h-full object-cover rounded-xl" loading="lazy" decoding="async">
                             </div>
                         @endif
                     @endforeach
@@ -488,14 +488,17 @@
                     {{-- Cover Image --}}
                     <div class="relative w-full aspect-[4/3] bg-stone-100 overflow-hidden">
                         <img src="{{ $restaurant->coverUrl() }}" 
-                             alt="{{ $restaurant->name }}" 
+                             alt="" 
                              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                             loading="lazy">
+                             loading="lazy" decoding="async">
                         
                         @if($isAd)
                             <div class="absolute top-2 right-2 bg-[#ea580c] text-white font-extrabold text-[10px] px-2 py-0.5 rounded-full shadow-xs">
                                 إعلان
                             </div>
+                        @endif
+                        @if($restaurant->orderStatusKind() !== 'open')
+                            <span class="hours-closed-badge">{{ $restaurant->orderStatusLabel() }}</span>
                         @endif
 
                         {{-- Top Badges: 'جديد' or Rating Pill '★ 4.8' (Top-Left) --}}
@@ -515,7 +518,7 @@
                     <div class="p-2.5 pb-3 flex flex-col gap-0.5 text-right bg-white">
                         {{-- Line 1: Green indicator dot + Restaurant Name --}}
                         <div class="flex items-center gap-1.5 min-w-0">
-                            <span class="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span>
+                            <span class="w-2 h-2 rounded-full {{ $restaurant->isAcceptingOrders() ? 'bg-emerald-500' : 'bg-rose-400' }} shrink-0"></span>
                             <h4 class="font-bold text-[13px] text-stone-900 truncate leading-snug group-hover:text-primary transition-colors">
                                 {{ $restaurant->name }}
                             </h4>

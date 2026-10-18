@@ -4,22 +4,22 @@
     $photo = $item->imageUrl() ?: $restaurant->coverUrl();
 @endphp
 <article
-    class="dish-item rd-dish{{ $featured ? ' rd-dish--wide' : '' }}{{ $item->is_available ? '' : ' is-off' }}"
+    class="dish-item rd-dish{{ $featured ? ' rd-dish--wide' : '' }}{{ $item->isOrderable() ? '' : ' is-off' }}"
     data-name="{{ $item->name }}"
     data-category="{{ $sectionKey }}"
     data-dish-id="{{ $item->id }}"
 >
     <div class="rd-dish__media">
         @if($photo)
-            <img alt="{{ $item->name }}" src="{{ $photo }}" loading="lazy">
+            <img alt="" src="{{ $photo }}" loading="lazy" decoding="async">
         @else
             <span class="rd-dish__fallback material-symbols-outlined">restaurant</span>
         @endif
         @if($popular)
             <span class="rd-dish__badge">الأكثر طلباً</span>
         @endif
-        @unless($item->is_available)
-            <span class="rd-dish__badge is-muted">غير متوفر</span>
+        @unless($item->isOrderable())
+            <span class="rd-dish__badge is-muted">{{ $item->is_available ? 'نفدت الكمية' : 'غير متوفر' }}</span>
         @endunless
         @include('partials.favorite-button', [
             'type' => 'menu_item',
@@ -32,9 +32,12 @@
         @if($item->description)
             <p class="rd-dish__desc">{{ $item->description }}</p>
         @endif
+        @if($item->isOrderable() && ! $item->isUnlimitedStock())
+            @include('partials.dish-stock', ['item' => $item, 'class' => 'rd-dish__stock'])
+        @endif
         <div class="rd-dish__foot">
             <span class="rd-dish__price">{{ number_format((float) $item->price, 0) }} <span class="ils">₪</span></span>
-            @if($item->is_available && ($canShop ?? true))
+            @if($item->isOrderable() && ($canShop ?? true) && ($canOrder ?? true))
                 <div class="rd-dish__actions">
                     <button
                         type="button"

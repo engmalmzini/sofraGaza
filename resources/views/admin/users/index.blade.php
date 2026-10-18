@@ -38,6 +38,10 @@
                                 <span class="material-symbols-outlined">visibility</span>
                                 <span>عرض الحساب</span>
                             </a>
+                            @include('admin.partials.delete-form', [
+                                'action' => route('admin.users.destroy', $user),
+                                'confirm' => "حذف حساب {$user->name} نهائياً؟ طلباته ستُحذف معه.",
+                            ])
                         </div>
                     </td>
                 </tr>

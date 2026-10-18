@@ -4,9 +4,14 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Setting;
+use App\Services\DatabaseBackupService;
+use App\Services\PlatformResetService;
+use App\Support\OperatingHours;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use RuntimeException;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class SettingController extends Controller
 {
@@ -16,12 +21,30 @@ class SettingController extends Controller
         $areasWithFees = Setting::areasWithFees();
         $paymentAccounts = Setting::paymentAccounts();
         $homeBanners = Setting::rawHomeBanners();
+        $platformHoursEnabled = Setting::platformHoursEnabled();
+        $platformOpensAt = Setting::platformOpensAt() ?: '09:00';
+        $platformClosesAt = Setting::platformClosesAt() ?: '00:00';
+        $platformWorkingDays = Setting::platformWorkingDays();
 
-        return view('admin.settings.index', compact('settings', 'areasWithFees', 'paymentAccounts', 'homeBanners'));
+        return view('admin.settings.index', compact(
+            'settings',
+            'areasWithFees',
+            'paymentAccounts',
+            'homeBanners',
+            'platformHoursEnabled',
+            'platformOpensAt',
+            'platformClosesAt',
+            'platformWorkingDays'
+        ));
     }
 
     public function update(Request $request): RedirectResponse
     {
+        $request->merge([
+            'platform_opens_at' => $this->normalizePostedTime($request->input('platform_opens_at')),
+            'platform_closes_at' => $this->normalizePostedTime($request->input('platform_closes_at')),
+        ]);
+
         $values = $request->validate([
             'settings' => ['nullable', 'array'],
             'settings.*' => ['nullable', 'string', 'max:1000'],
@@ -39,6 +62,11 @@ class SettingController extends Controller
             'new_banners.*' => ['nullable', 'image', 'max:6144'],
             'new_banner_url' => ['nullable', 'url', 'max:1000'],
             'remove_banner' => ['nullable', 'string'],
+            'platform_hours_enabled' => ['nullable', 'boolean'],
+            'platform_opens_at' => ['nullable', 'date_format:H:i'],
+            'platform_closes_at' => ['nullable', 'date_format:H:i'],
+            'platform_working_days' => ['nullable', 'array'],
+            'platform_working_days.*' => ['integer', 'in:0,1,2,3,4,5,6'],
         ]);
 
         if (! empty($values['settings'])) {
@@ -199,6 +227,35 @@ class SettingController extends Controller
             }
         }
 
+        if ($request->filled('platform_opens_at') || $request->filled('platform_closes_at') || $request->has('platform_hours_enabled')) {
+            $opensAt = $this->normalizePostedTime($request->input('platform_opens_at')) ?? '09:00';
+            $closesAt = $this->normalizePostedTime($request->input('platform_closes_at')) ?? '00:00';
+            $platformDays = OperatingHours::submittedDays((array) $request->input('platform_working_days', []));
+            if ($platformDays === []) {
+                $platformDays = OperatingHours::allDayNumbers();
+            }
+
+            Setting::query()->updateOrCreate(
+                ['key' => 'platform_hours_enabled'],
+                ['label' => 'تفعيل ساعات عمل منصة سفرة', 'value' => $request->boolean('platform_hours_enabled') ? '1' : '0']
+            );
+            Setting::query()->updateOrCreate(
+                ['key' => 'platform_opens_at'],
+                ['label' => 'ساعة افتتاح منصة سفرة', 'value' => $opensAt]
+            );
+            Setting::query()->updateOrCreate(
+                ['key' => 'platform_closes_at'],
+                ['label' => 'ساعة إغلاق منصة سفرة', 'value' => $closesAt]
+            );
+            Setting::query()->updateOrCreate(
+                ['key' => 'platform_working_days'],
+                [
+                    'label' => 'أيام عمل منصة سفرة',
+                    'value' => json_encode($platformDays, JSON_UNESCAPED_UNICODE),
+                ]
+            );
+        }
+
         if ($bannersChanged) {
             Setting::query()->updateOrCreate(
                 ['key' => 'home_banners'],
@@ -212,5 +269,55 @@ class SettingController extends Controller
         Setting::forgetCache();
 
         return back()->with('success', 'تم حفظ إعدادات المنصة والبانرات بنجاح.');
+    }
+
+    public function backup(Request $request, DatabaseBackupService $backup): StreamedResponse
+    {
+        abort_unless($request->user()?->isSuperAdmin(), 403);
+
+        $filename = $backup->filename();
+
+        return response()->streamDownload(function () use ($backup) {
+            $backup->streamDump(function (string $chunk): void {
+                echo $chunk;
+            });
+        }, $filename, [
+            'Content-Type' => 'application/sql; charset=utf-8',
+        ]);
+    }
+
+    public function wipe(Request $request, PlatformResetService $reset): RedirectResponse
+    {
+        abort_unless($request->user()?->isSuperAdmin(), 403);
+
+        $request->validate([
+            'confirmation' => ['required', 'string'],
+            'password' => ['required', 'current_password'],
+        ], [
+            'confirmation.required' => 'اكتب «حذف الكل» للتأكيد.',
+            'password.required' => 'أدخل كلمة مرور حسابك للتأكيد.',
+            'password.current_password' => 'كلمة المرور غير صحيحة.',
+        ]);
+
+        if (trim((string) $request->input('confirmation')) !== 'حذف الكل') {
+            return back()->with('error', 'للتأكيد اكتب بالضبط: حذف الكل');
+        }
+
+        try {
+            $kept = $reset->wipeAllExceptAdmins($request->user());
+        } catch (RuntimeException $e) {
+            return back()->with('error', $e->getMessage());
+        }
+
+        return redirect()
+            ->route('admin.dashboard')
+            ->with('success', "تم حذف بيانات المنصة. بقي {$kept} حساب إداري في قاعدة البيانات.");
+    }
+
+    private function normalizePostedTime(mixed $value): ?string
+    {
+        $time = substr((string) $value, 0, 5);
+
+        return preg_match('/^\d{2}:\d{2}$/', $time) ? $time : null;
     }
 }

@@ -94,6 +94,8 @@ class AdminAccess
             'admin.reviews.toggle' => 'إظهار/إخفاء تقييم',
             'admin.reviews.destroy' => 'حذف تقييم',
             'admin.settings.update' => 'تعديل إعدادات المنصة',
+            'admin.settings.backup' => 'تنزيل نسخة احتياطية من قاعدة البيانات',
+            'admin.settings.wipe' => 'حذف كل بيانات المنصة مع الإبقاء على حسابات الإدارة',
             'admin.homepage.update' => 'تعديل محتوى الرئيسية',
             'admin.homepage.partners.store' => 'إضافة شريك للرئيسية',
             'admin.homepage.partners.update' => 'تعديل شريك للرئيسية',
@@ -129,6 +131,7 @@ class AdminAccess
             'admin.search.suggest',
             'admin.notifications.read',
             'admin.notifications.open',
+            'admin.settings.wipe',
         ], true);
     }
 }

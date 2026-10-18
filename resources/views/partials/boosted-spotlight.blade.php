@@ -15,7 +15,7 @@
     <section class="sg-ad-spotlight" aria-label="إعلانات">
         <div class="sg-ad-spotlight__stage{{ $spotRest->isNotEmpty() ? ' has-side' : '' }}">
             <a href="{{ route('restaurants.show', $spotHero) }}" class="sg-ad-hero">
-                <img src="{{ $spotHero->coverUrl() }}" alt="{{ $spotHero->name }}" class="sg-ad-hero__img">
+                <img src="{{ $spotHero->coverUrl() }}" alt="" class="sg-ad-hero__img" decoding="async">
                 <span class="sg-ad-hero__shade" aria-hidden="true"></span>
                 <span class="sg-ad-hero__glow" aria-hidden="true"></span>
                 <div class="sg-ad-hero__copy">
@@ -38,7 +38,7 @@
                 <div class="sg-ad-spotlight__side">
                     @foreach($spotRest as $place)
                         <a href="{{ route('restaurants.show', $place) }}" class="sg-ad-side">
-                            <img src="{{ $place->coverUrl() }}" alt="{{ $place->name }}">
+                            <img src="{{ $place->coverUrl() }}" alt="" loading="lazy" decoding="async">
                             <div>
                                 <em>إعلان</em>
                                 <strong>{{ $place->name }}</strong>

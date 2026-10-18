@@ -171,7 +171,7 @@
             <div>{{ $restaurant->areaLabel() }}</div>
             <div>{{ $restaurant->address }}</div>
             <div>الهاتف: {{ $restaurant->phone }}</div>
-            <div>ساعات العمل: {{ $restaurant->hoursLabel() }}</div>
+            <div>أيام وساعات العمل: {{ $restaurant->hoursLabel() }}</div>
         </div>
         @if($restaurant->isVisible())
             <a class="mt-4 inline-flex admin-btn admin-btn--ghost" href="{{ route('restaurants.show', $restaurant) }}">عرض صفحة {{ $restaurant->venueNoun() }}</a>

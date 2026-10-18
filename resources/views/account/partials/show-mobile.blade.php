@@ -360,7 +360,7 @@
                             <span class="material-symbols-outlined text-[18px]">restaurant</span>
                         </div>
                         <div class="min-w-0">
-                            <h4 class="text-xs font-bold text-stone-900 truncate">{{ $order->restaurant->name }}</h4>
+                            <h4 class="text-xs font-bold text-stone-900 truncate">{{ $order->venueName() }}</h4>
                             <div class="text-[10px] text-stone-400 mt-0.5 font-mono">
                                 <span>#{{ $order->id }}</span> • <span>{{ $order->created_at->format('m/d H:i') }}</span>
                             </div>

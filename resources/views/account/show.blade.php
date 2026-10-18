@@ -431,7 +431,7 @@
                             </div>
                             <div>
                                 <div class="flex items-center gap-2 flex-wrap">
-                                    <span class="font-bold text-sm text-stone-900">{{ $order->restaurant->name }}</span>
+                                    <span class="font-bold text-sm text-stone-900">{{ $order->venueName() }}</span>
                                     <span class="text-xs font-mono text-stone-400">#{{ $order->id }}</span>
                                     @if($order->isPaidWithWallet())
                                         <span class="text-[10px] font-semibold bg-stone-100 text-stone-800 border border-stone-200 px-2 py-0.5 rounded-full">مدفوع بالمحفظة</span>

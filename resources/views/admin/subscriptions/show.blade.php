@@ -3,6 +3,15 @@
 @section('kicker', 'الزبائن')
 @section('title', 'طلب عضوية')
 
+@section('actions')
+@include('admin.partials.delete-form', [
+    'action' => route('admin.subscriptions.destroy', $subscription),
+    'confirm' => 'حذف هذا الاشتراك؟',
+    'label' => 'حذف الاشتراك',
+    'buttonClass' => 'admin-btn admin-btn--danger',
+])
+@endsection
+
 @section('content')
 <div class="grid gap-4 lg:grid-cols-[1.15fr_0.85fr]">
     <section class="admin-card leading-8">

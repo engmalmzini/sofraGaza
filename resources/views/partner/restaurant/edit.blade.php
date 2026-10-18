@@ -50,13 +50,19 @@
             <label class="mb-1 block text-sm font-bold">العنوان التفصيلي</label>
             <input name="address" value="{{ old('address', $restaurant->address) }}">
         </div>
+        @include('partials.working-days-picker', [
+            'wrapperClass' => 'md:col-span-2',
+            'defaultDays' => $restaurant->workingDays(),
+        ])
         <div>
             <label class="mb-1 block text-sm font-bold">يفتح الساعة</label>
             <input type="time" name="opens_at" value="{{ old('opens_at', $restaurant->opens_at ? substr($restaurant->opens_at, 0, 5) : '09:00') }}">
+            <p class="mt-1 text-[11px] text-on-surface-variant">خارج هذه الساعات لا يستطيع الزبون الطلب من مطعمك.</p>
         </div>
         <div>
             <label class="mb-1 block text-sm font-bold">يغلق الساعة</label>
             <input type="time" name="closes_at" value="{{ old('closes_at', $restaurant->closes_at ? substr($restaurant->closes_at, 0, 5) : '23:00') }}">
+            <p class="mt-1 text-[11px] text-on-surface-variant">إذا كان الإغلاق بعد منتصف الليل (مثلاً 01:00) اختر الساعة كما هي.</p>
         </div>
         <div class="md:col-span-2">
             <label class="mb-1 block text-sm font-bold">الوصف</label>

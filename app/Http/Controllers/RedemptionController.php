@@ -28,7 +28,7 @@ class RedemptionController extends Controller
         if ($selectedRestaurant) {
             $items = MenuItem::query()
                 ->where('restaurant_id', $selectedRestaurant->id)
-                ->where('is_available', true)
+                ->orderable()
                 ->orderBy('category')
                 ->orderBy('name')
                 ->get()

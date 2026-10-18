@@ -101,6 +101,8 @@ class RestaurantController extends Controller
 
         return view('restaurants.show', [
             'restaurant' => $restaurant,
+            'canOrder' => $restaurant->isAcceptingOrders(),
+            'orderingBlockReason' => $restaurant->orderingBlockReason(),
             'menuSections' => $menuSections,
             'restaurantCart' => $restaurantCart,
             'rewards' => $this->points->rewardsForRestaurant($restaurant, 4),

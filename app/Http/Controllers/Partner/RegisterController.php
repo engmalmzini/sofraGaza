@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Partner;
 use App\Models\Restaurant;
 use App\Models\User;
 use App\Services\NotificationService;
+use App\Support\OperatingHours;
 use App\Support\PalestinianPhone;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -32,6 +33,7 @@ class RegisterController
             'restaurant_phone' => PalestinianPhone::digits($request->input('restaurant_phone')),
             'opens_at' => substr((string) $request->input('opens_at'), 0, 5),
             'closes_at' => substr((string) $request->input('closes_at'), 0, 5),
+            'working_days' => OperatingHours::submittedDays((array) $request->input('working_days', [])),
         ]);
 
         $data = $request->validate([
@@ -50,6 +52,7 @@ class RegisterController
             'address' => ['required', 'string', 'max:255'],
             'opens_at' => ['required', 'date_format:H:i'],
             'closes_at' => ['required', 'date_format:H:i', 'different:opens_at'],
+            ...OperatingHours::daysValidationRules(),
             'image' => ['nullable', 'image', 'max:4096'],
             'terms' => ['accepted'],
         ], [
@@ -73,6 +76,7 @@ class RegisterController
             'opens_at.required' => 'حدد ساعة الافتتاح.',
             'closes_at.required' => 'حدد ساعة الإغلاق.',
             'closes_at.different' => 'ساعة الإغلاق يجب أن تختلف عن ساعة الافتتاح.',
+            ...OperatingHours::daysValidationMessages(),
             'terms.accepted' => 'يجب الموافقة على شروط الانضمام للمنصة.',
         ]);
 
@@ -102,6 +106,7 @@ class RegisterController
                 'area' => $data['area'],
                 'opens_at' => $data['opens_at'],
                 'closes_at' => $data['closes_at'],
+                'working_days' => OperatingHours::submittedDays($data['working_days'] ?? []),
                 'image_path' => $imagePath,
                 'starts_at' => now()->toDateString(),
                 'expires_at' => now()->addYear()->toDateString(),

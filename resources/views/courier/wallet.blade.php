@@ -193,7 +193,7 @@
                                     </span>
                                 </div>
                                 <div class="text-slate-600 font-medium truncate">
-                                    {{ $order->restaurant->name }} ← {{ $order->deliveryAreaLabel() ?: $order->address_details }}
+                                    {{ $order->venueName() }} ← {{ $order->deliveryAreaLabel() ?: $order->address_details }}
                                 </div>
                             </div>
                             <div class="text-left shrink-0">

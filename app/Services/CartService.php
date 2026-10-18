@@ -29,13 +29,17 @@ class CartService
 
     public function add(MenuItem $item, int $qty = 1, ?string $notes = null): void
     {
-        if (! $item->is_available) {
-            throw new RuntimeException('هذا الصنف غير متوفر حالياً.');
+        if (! $item->isOrderable()) {
+            throw new RuntimeException($item->is_available
+                ? "الصنف {$item->name} نفدت كميته."
+                : 'هذا الصنف غير متوفر حالياً.');
         }
 
         if (! $item->restaurant?->isVisible()) {
             throw new RuntimeException('هذا المطعم غير متاح للطلب حالياً.');
         }
+
+        $item->restaurant->assertAcceptingOrders();
 
         $currentRestaurant = $this->restaurantId();
         if ($currentRestaurant && $currentRestaurant !== $item->restaurant_id) {
@@ -56,6 +60,7 @@ class CartService
         $existingNotes = is_array($existing) ? ($existing['notes'] ?? null) : null;
 
         $newQty = $existingQty + max(1, $qty);
+        $item->assertCanSell($newQty);
         $newNotes = filled($notes) ? trim($notes) : $existingNotes;
 
         $items[$item->id] = [
@@ -74,6 +79,11 @@ class CartService
         if ($qty <= 0) {
             unset($items[$itemId]);
         } else {
+            $item = MenuItem::query()->find($itemId);
+            if ($item) {
+                $item->assertCanSell($qty);
+            }
+
             $existing = $items[$itemId] ?? null;
             $existingNotes = is_array($existing) ? ($existing['notes'] ?? null) : null;
             $newNotes = $updateNotes ? (filled($notes) ? trim($notes) : null) : $existingNotes;

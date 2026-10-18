@@ -5,6 +5,12 @@
 
 @section('actions')
     <a href="{{ route('admin.boosts.index') }}" class="admin-btn admin-btn--ghost">كل الإعلانات</a>
+    @include('admin.partials.delete-form', [
+        'action' => route('admin.boosts.destroy', $boost),
+        'confirm' => 'حذف هذا الإعلان؟',
+        'label' => 'حذف الإعلان',
+        'buttonClass' => 'admin-btn admin-btn--danger',
+    ])
 @endsection
 
 @section('content')

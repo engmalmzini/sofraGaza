@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\MembershipSubscription;
 use App\Services\MembershipService;
+use App\Services\SafeDeletion;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -84,5 +85,12 @@ class SubscriptionController extends Controller
         }
 
         return back()->with('success', $message);
+    }
+
+    public function destroy(MembershipSubscription $subscription, SafeDeletion $deletion): RedirectResponse
+    {
+        $deletion->deleteSubscription($subscription);
+
+        return redirect()->route('admin.subscriptions.index')->with('success', 'تم حذف الاشتراك.');
     }
 }

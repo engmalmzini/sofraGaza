@@ -17,7 +17,7 @@
         <div>
             <h1 class="text-xl sm:text-2xl font-black text-stone-900 tracking-tight">طلب #{{ $order->id }}</h1>
             <p class="text-xs sm:text-sm text-stone-500 mt-0.5">
-                {{ $order->restaurant->name }} · {{ $order->statusLabel() }}
+                {{ $order->venueName() }} · {{ $order->statusLabel() }}
                 @if($order->isGroupOrder())
                     · طلب جماعي
                 @endif
@@ -126,16 +126,20 @@
         <div class="flex items-center justify-between gap-3">
             <div class="flex items-center gap-3 min-w-0">
                 <div class="w-11 h-11 rounded-2xl bg-orange-50 border border-orange-200/60 flex items-center justify-center text-primary shrink-0 overflow-hidden shadow-2xs">
-                    @if($order->restaurant->logo_path)
-                        <img src="{{ asset('storage/' . $order->restaurant->logo_path) }}" alt="{{ $order->restaurant->name }}" class="w-full h-full object-cover">
+                    @if($order->restaurant?->imageUrl())
+                        <img src="{{ $order->restaurant->imageUrl() }}" alt="{{ $order->venueName() }}" class="w-full h-full object-cover">
                     @else
                         <span class="material-symbols-outlined text-[24px]">restaurant</span>
                     @endif
                 </div>
                 <div class="min-w-0">
-                    <a href="{{ route('restaurants.show', $order->restaurant) }}" class="font-extrabold text-sm sm:text-base text-stone-900 hover:text-primary transition-colors truncate block">
-                        {{ $order->restaurant->name }}
-                    </a>
+                    @if($order->restaurant)
+                        <a href="{{ route('restaurants.show', $order->restaurant) }}" class="font-extrabold text-sm sm:text-base text-stone-900 hover:text-primary transition-colors truncate block">
+                            {{ $order->venueName() }}
+                        </a>
+                    @else
+                        <span class="font-extrabold text-sm sm:text-base text-stone-900 truncate block">{{ $order->venueName() }}</span>
+                    @endif
                     <span class="text-xs text-stone-500 block mt-0.5">
                         {{ $order->type === 'redemption' ? 'استبدال نقاط مكافآت' : 'طلب شراء أونلاين' }}
                     </span>
@@ -357,11 +361,11 @@
                     <span>تم توثيق تقييمك كطلب مؤكد وحقيقي لهذا المطعم. شكراً لمشاركتك!</span>
                 </div>
             </div>
-        @else
+        @elseif($order->restaurant)
             <div class="rounded-3xl bg-gradient-to-br from-amber-50/70 via-white to-orange-50/30 border border-amber-200/80 p-4 sm:p-5 shadow-2xs mb-4">
                 <div class="flex items-center gap-2 mb-1">
                     <span class="material-symbols-outlined text-amber-500 text-[24px] fill-1">rate_review</span>
-                    <h2 class="font-extrabold text-sm sm:text-base text-stone-900">شاركنا رأيك في وجبتك من {{ $order->restaurant->name }}</h2>
+                    <h2 class="font-extrabold text-sm sm:text-base text-stone-900">شاركنا رأيك في وجبتك من {{ $order->venueName() }}</h2>
                 </div>
                 <p class="text-xs text-stone-500 mb-4">تقييمك يظهر للزبائن ويساعد في تطوير جودة الطعام وسرعة التوصيل.</p>
 

@@ -8,10 +8,7 @@
     $deliveryFee = isset($deliveryArea['key'])
         ? \App\Models\Setting::deliveryFeeForArea($deliveryArea['key'])
         : \App\Models\Setting::deliveryFeeForArea();
-    $hours = null;
-    if ($restaurant->opens_at && $restaurant->closes_at) {
-        $hours = substr((string) $restaurant->opens_at, 0, 5).' – '.substr((string) $restaurant->closes_at, 0, 5);
-    }
+    $hours = $restaurant->opens_at && $restaurant->closes_at ? $restaurant->hoursLabel() : null;
 @endphp
 
 <style>
@@ -690,10 +687,10 @@
                 <div>
                     <h1>
                         {{ $restaurant->name }}
-                        @if($restaurant->isOpen())
+                        @if($restaurant->orderStatusKind() === 'open')
                             <span class="rd-hero__status is-open"><i></i> مفتوح</span>
                         @else
-                            <span class="rd-hero__status is-closed"><i></i> مغلق</span>
+                            <span class="rd-hero__status is-closed"><i></i> {{ $restaurant->orderStatusLabel() }}</span>
                         @endif
                     </h1>
                     @if($restaurant->description)
@@ -712,7 +709,7 @@
                         <span class="material-symbols-outlined">schedule</span>
                         <div>
                             <b>{{ $eta[0] }}–{{ $eta[1] }} د</b>
-                            <span>{{ $hours ? 'العمل '.$hours : 'وقت التوصيل المتوقع' }}</span>
+                            <span>{{ $hours ?: 'وقت التوصيل المتوقع' }}</span>
                         </div>
                     </div>
                     <div class="rd-stat">
@@ -730,6 +727,11 @@
                         </div>
                     </div>
                 </div>
+                @if(($canShop ?? true) && empty($canOrder ?? $restaurant->isAcceptingOrders()) && filled($orderingBlockReason ?? $restaurant->orderingBlockReason()))
+                    <div class="mt-3 rounded-xl bg-rose-50 border border-rose-100 px-4 py-3 text-sm font-bold text-rose-700 leading-relaxed">
+                        {{ $orderingBlockReason ?? $restaurant->orderingBlockReason() }}
+                    </div>
+                @endif
                 @if($canShop ?? true)
                 <div class="rd-hero__vip">
                     <p>{{ $vip ? 'أنت مؤهل لـ'.($membership->deliveryBenefitLabel() ?: 'خصم على التوصيل').' — سعر المطعم لا يتأثر' : 'اشترك واحصل على خصم على التوصيل مع العضوية' }}</p>
@@ -833,7 +835,7 @@
                     <div class="rd-rewards__grid">
                         @foreach($rewards as $reward)
                             <div class="rd-reward">
-                                <img alt="{{ $reward['name'] }}" src="{{ $reward['image'] }}">
+                                <img alt="" src="{{ $reward['image'] }}" loading="lazy" decoding="async">
                                 <div>
                                     <b>{{ $reward['name'] }}</b>
                                     <span>مجاناً بـ {{ $reward['points'] }} نقطة</span>

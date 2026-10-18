@@ -4,13 +4,18 @@ namespace App\Http\Controllers\Partner;
 
 use App\Models\MenuItem;
 use App\Services\NotificationService;
+use App\Services\SafeDeletion;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use RuntimeException;
 
 class MenuItemController extends Controller
 {
-    public function __construct(private NotificationService $notifications) {}
+    public function __construct(
+        private NotificationService $notifications,
+        private SafeDeletion $deletion,
+    ) {}
 
     public function index(Request $request): View
     {
@@ -96,11 +101,28 @@ class MenuItemController extends Controller
     {
         $this->authorizeItem($menuItem);
         $name = $menuItem->name;
-        $menuItem->delete();
+        $this->deletion->deleteMenuItem($menuItem);
 
         $this->notifyMenuChange($this->restaurant()->name, "حُذف الصنف «{$name}» من المنيو.");
 
-        return back()->with('success', 'تم حذف الصنف. وصل إشعار للإدارة.');
+        return back()->with('success', 'تم حذف الصنف. الطلبات القديمة لم تتأثر. وصل إشعار للإدارة.');
+    }
+
+    public function destroyCategory(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'category' => ['required', 'string', 'max:50'],
+        ]);
+
+        try {
+            $count = $this->deletion->deleteMenuCategory($this->restaurant(), $data['category']);
+        } catch (RuntimeException $e) {
+            return back()->with('error', $e->getMessage());
+        }
+
+        $this->notifyMenuChange($this->restaurant()->name, "حُذف تصنيف «{$data['category']}» مع {$count} صنفاً.");
+
+        return back()->with('success', "تم حذف التصنيف «{$data['category']}». أصناف الطلبات القديمة بقيت في الفواتير.");
     }
 
     private function authorizeItem(MenuItem $menuItem): void
@@ -118,6 +140,10 @@ class MenuItemController extends Controller
             'price' => ['required', 'numeric', 'min:0'],
             'image' => ['nullable', 'image', 'max:4096'],
             'is_available' => ['nullable'],
+            ...MenuItem::stockInputRules(),
+        ], [
+            'stock_mode.required' => 'حدد إذا كانت الكمية لا نهائية أو محددة.',
+            'stock_qty.required' => 'أدخل الكمية المتوفرة لهذا الصنف.',
         ]);
 
         if ($data['category'] === '__custom__') {
@@ -125,9 +151,10 @@ class MenuItemController extends Controller
         }
 
         $data['is_available'] = $request->boolean('is_available');
-        unset($data['image'], $data['category_custom']);
+        $stock = MenuItem::stockAttributes($data);
+        unset($data['image'], $data['category_custom'], $data['stock_mode'], $data['stock_qty']);
 
-        return $data;
+        return array_merge($data, $stock);
     }
 
     private function notifyMenuChange(string $restaurantName, string $body): void

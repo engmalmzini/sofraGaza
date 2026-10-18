@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use App\Support\Media;
+use App\Support\OperatingHours;
+use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use App\Support\Media;
+use RuntimeException;
 
 class Restaurant extends Model
 {
@@ -33,6 +36,7 @@ class Restaurant extends Model
         'area',
         'opens_at',
         'closes_at',
+        'working_days',
         'image_path',
         'starts_at',
         'expires_at',
@@ -58,6 +62,7 @@ class Restaurant extends Model
             'is_active' => 'boolean',
             'panel_suspended' => 'boolean',
             'is_featured' => 'boolean',
+            'working_days' => 'array',
             'points_per_amount' => 'decimal:2',
             'points_redeem_per_amount' => 'decimal:2',
         ];
@@ -397,31 +402,85 @@ class Restaurant extends Model
         return self::VERIFICATION_STATUSES[$this->verification_status] ?? $this->verification_status;
     }
 
-    public function hoursLabel(): string
+    /**
+     * @return list<int>
+     */
+    public function workingDays(): array
     {
-        if (! $this->opens_at || ! $this->closes_at) {
-            return 'ساعات العمل غير محددة';
-        }
-
-        return substr((string) $this->opens_at, 0, 5).' — '.substr((string) $this->closes_at, 0, 5);
+        return OperatingHours::normalizeDays(is_array($this->working_days) ? $this->working_days : null);
     }
 
-    public function isOpen(): bool
+    public function hoursLabel(): string
+    {
+        return OperatingHours::fullLabel($this->opens_at, $this->closes_at, $this->working_days);
+    }
+
+    public function isWithinOwnHours(?CarbonInterface $at = null): bool
+    {
+        return OperatingHours::isOpen($this->opens_at, $this->closes_at, $this->workingDays(), $at);
+    }
+
+    public function isOpen(?CarbonInterface $at = null): bool
     {
         if (! $this->is_active || $this->panel_suspended) {
             return false;
         }
 
-        if ($this->opens_at && $this->closes_at) {
-            $now = now()->format('H:i:s');
-            if ($this->opens_at <= $this->closes_at) {
-                return $now >= $this->opens_at && $now <= $this->closes_at;
-            }
+        return $this->isWithinOwnHours($at);
+    }
 
-            return $now >= $this->opens_at || $now <= $this->closes_at;
+    public function isAcceptingOrders(?CarbonInterface $at = null): bool
+    {
+        return $this->isVisible()
+            && $this->isWithinOwnHours($at)
+            && Setting::platformIsOpen($at);
+    }
+
+    public function orderStatusKind(?CarbonInterface $at = null): string
+    {
+        if (! $this->isVisible() || ! $this->isWithinOwnHours($at)) {
+            return 'restaurant_closed';
         }
 
-        return true;
+        if (! Setting::platformIsOpen($at)) {
+            return 'platform_closed';
+        }
+
+        return 'open';
+    }
+
+    public function orderStatusLabel(?CarbonInterface $at = null): string
+    {
+        return match ($this->orderStatusKind($at)) {
+            'platform_closed' => 'التوصيل متوقف',
+            'restaurant_closed' => 'مغلق',
+            default => 'مفتوح',
+        };
+    }
+
+    public function orderingBlockReason(?CarbonInterface $at = null): ?string
+    {
+        if (! $this->isVisible()) {
+            return 'هذا المطعم غير متاح للطلب حالياً.';
+        }
+
+        if (! Setting::platformIsOpen($at)) {
+            return Setting::platformClosedReason($at);
+        }
+
+        if (! $this->isWithinOwnHours($at)) {
+            return 'لا يمكن الطلب من '.$this->name.' الآن. أوقات العمل: '.$this->hoursLabel().'.';
+        }
+
+        return null;
+    }
+
+    public function assertAcceptingOrders(?CarbonInterface $at = null): void
+    {
+        $reason = $this->orderingBlockReason($at);
+        if ($reason) {
+            throw new RuntimeException($reason);
+        }
     }
 
     public function areaLabel(): string

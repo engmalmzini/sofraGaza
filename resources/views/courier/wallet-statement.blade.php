@@ -75,7 +75,7 @@
                                 <b>طلب #{{ $order->id }}</b>
                                 <time>{{ $order->delivered_at ? $order->delivered_at->format('Y/m/d H:i') : $order->created_at->format('Y/m/d H:i') }}</time>
                             </div>
-                            <h4>{{ $order->restaurant->name }}</h4>
+                            <h4>{{ $order->venueName() }}</h4>
                             <p>{{ $order->deliveryAreaLabel() ?: $order->address_details }}</p>
                             <div class="cw-statement__chips">
                                 <span>رسم {{ number_format($fee, 2) }} ₪</span>

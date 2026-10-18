@@ -136,7 +136,7 @@
                 <a class="admin-row" href="{{ route('admin.orders.show', $order) }}">
                     <div>
                         <span class="font-bold text-slate-900">#{{ $order->id }}</span>
-                        <span class="text-slate-600 mr-1">{{ $order->restaurant->name }}</span>
+                        <span class="text-slate-600 mr-1">{{ $order->venueName() }}</span>
                         <div class="text-[11px] text-slate-400">{{ $order->created_at->format('Y/m/d H:i') }} • {{ number_format($order->grand_total, 1) }} ₪</div>
                     </div>
                     @include('admin.partials.pill', ['status' => $order->status, 'label' => $order->statusLabel()])
@@ -147,4 +147,35 @@
         </div>
     </section>
 </div>
+
+<section class="admin-card mt-4">
+    <h2 class="text-base font-bold text-on-surface mb-3">تعديل بيانات الحساب</h2>
+    <form method="POST" action="{{ route('admin.users.update', $user) }}" class="grid gap-3 sm:grid-cols-2">
+        @csrf
+        @method('PUT')
+        <div>
+            <label class="block text-xs font-bold text-on-surface mb-1">الاسم</label>
+            <input type="text" name="name" value="{{ old('name', $user->name) }}" required class="text-sm">
+        </div>
+        <div>
+            <label class="block text-xs font-bold text-on-surface mb-1">الهاتف</label>
+            <input type="text" name="phone" value="{{ old('phone', $user->phone) }}" required class="text-sm" dir="ltr">
+        </div>
+        <div class="sm:col-span-2">
+            <label class="block text-xs font-bold text-on-surface mb-1">البريد</label>
+            <input type="email" name="email" value="{{ old('email', $user->email) }}" class="text-sm">
+        </div>
+        <div class="sm:col-span-2 flex flex-wrap gap-2">
+            <button class="admin-btn admin-btn--primary">حفظ التعديلات</button>
+        </div>
+    </form>
+    <div class="mt-3">
+        @include('admin.partials.delete-form', [
+            'action' => route('admin.users.destroy', $user),
+            'confirm' => "حذف حساب {$user->name} نهائياً؟ طلباته ستُحذف معه.",
+            'label' => 'حذف الحساب',
+            'buttonClass' => 'admin-btn admin-btn--danger',
+        ])
+    </div>
+</section>
 @endsection

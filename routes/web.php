@@ -103,6 +103,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin', 'admin.modu
         Route::get('team/{adminUser}/edit', [Admin\TeamController::class, 'edit'])->name('team.edit');
         Route::put('team/{adminUser}', [Admin\TeamController::class, 'update'])->name('team.update');
         Route::delete('team/{adminUser}', [Admin\TeamController::class, 'destroy'])->name('team.destroy');
+        Route::post('settings/backup', [Admin\SettingController::class, 'backup'])->name('settings.backup');
+        Route::post('settings/wipe', [Admin\SettingController::class, 'wipe'])->name('settings.wipe');
     });
     Route::get('audit', [Admin\AuditLogController::class, 'index'])->name('audit.index');
     Route::get('search/suggest', [Admin\SearchController::class, 'suggest'])->name('search.suggest');
@@ -112,6 +114,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin', 'admin.modu
     Route::post('restaurants/{restaurant}/reject', [Admin\RestaurantController::class, 'reject'])->name('restaurants.reject');
     Route::post('restaurants/{restaurant}/suspend', [Admin\RestaurantController::class, 'suspend'])->name('restaurants.suspend');
     Route::post('restaurants/{restaurant}/unsuspend', [Admin\RestaurantController::class, 'unsuspend'])->name('restaurants.unsuspend');
+    Route::delete('restaurants/{restaurant}/menu-categories', [Admin\MenuItemController::class, 'destroyCategory'])->name('restaurants.menu-categories.destroy');
     Route::get('listings', [Admin\ListingController::class, 'index'])->name('listings.index');
     Route::get('listings/{listing}', [Admin\ListingController::class, 'show'])->name('listings.show');
     Route::get('listings/{listing}/receipt', [Admin\ListingController::class, 'receipt'])->name('listings.receipt');
@@ -123,6 +126,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin', 'admin.modu
     Route::get('orders/{order}', [Admin\OrderController::class, 'show'])->name('orders.show');
     Route::get('orders/{order}/receipt', [Admin\OrderController::class, 'receipt'])->name('orders.receipt');
     Route::patch('orders/{order}', [Admin\OrderController::class, 'update'])->name('orders.update');
+    Route::delete('orders/{order}', [Admin\OrderController::class, 'destroy'])->name('orders.destroy');
     Route::post('orders/{order}/move', [Admin\OrderController::class, 'move'])->name('orders.move');
     Route::get('delivery', [Admin\DeliveryController::class, 'index'])->name('delivery.index');
     Route::post('delivery', [Admin\DeliveryController::class, 'store'])->name('delivery.store');
@@ -134,6 +138,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin', 'admin.modu
     Route::get('delivery/{courier}/bike-photo', [Admin\DeliveryController::class, 'bikePhoto'])->name('delivery.bike-photo');
     Route::get('delivery/{courier}', [Admin\DeliveryController::class, 'show'])->name('delivery.show');
     Route::put('delivery/{courier}', [Admin\DeliveryController::class, 'update'])->name('delivery.update');
+    Route::delete('delivery/{courier}', [Admin\DeliveryController::class, 'destroy'])->name('delivery.destroy');
     Route::post('delivery/payouts/{payout}/complete', [Admin\DeliveryController::class, 'completePayout'])->name('delivery.payouts.complete');
     Route::post('delivery/payouts/{payout}/reject', [Admin\DeliveryController::class, 'rejectPayout'])->name('delivery.payouts.reject');
     Route::post('memberships/{membership}/toggle', [Admin\MembershipController::class, 'toggle'])->name('memberships.toggle');
@@ -144,8 +149,11 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin', 'admin.modu
     Route::post('subscriptions/{subscription}/approve', [Admin\SubscriptionController::class, 'approve'])->name('subscriptions.approve');
     Route::post('subscriptions/{subscription}/reject', [Admin\SubscriptionController::class, 'reject'])->name('subscriptions.reject');
     Route::post('subscriptions/{subscription}/card', [Admin\SubscriptionController::class, 'markCard'])->name('subscriptions.card');
+    Route::delete('subscriptions/{subscription}', [Admin\SubscriptionController::class, 'destroy'])->name('subscriptions.destroy');
     Route::get('users', [Admin\UserController::class, 'index'])->name('users.index');
     Route::get('users/{user}', [Admin\UserController::class, 'show'])->name('users.show');
+    Route::put('users/{user}', [Admin\UserController::class, 'update'])->name('users.update');
+    Route::delete('users/{user}', [Admin\UserController::class, 'destroy'])->name('users.destroy');
     Route::post('users/{user}/points', [Admin\UserController::class, 'adjustPoints'])->name('users.points');
     Route::post('users/{user}/wallet', [Admin\UserController::class, 'adjustWallet'])->name('users.wallet');
     Route::get('wallet-topups', [Admin\WalletTopupController::class, 'index'])->name('wallet-topups.index');
@@ -179,6 +187,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin', 'admin.modu
     Route::post('boosts/{boost}/approve', [Admin\BoostController::class, 'approve'])->name('boosts.approve');
     Route::post('boosts/{boost}/banner', [Admin\BoostController::class, 'updateBanner'])->name('boosts.banner');
     Route::post('boosts/{boost}/reject', [Admin\BoostController::class, 'reject'])->name('boosts.reject');
+    Route::delete('boosts/{boost}', [Admin\BoostController::class, 'destroy'])->name('boosts.destroy');
     Route::get('homepage', [Admin\HomepageController::class, 'index'])->name('homepage.index');
     Route::post('homepage', [Admin\HomepageController::class, 'update'])->name('homepage.update');
     Route::post('homepage/partners', [Admin\HomepageController::class, 'storePartner'])->name('homepage.partners.store');
@@ -209,6 +218,7 @@ Route::prefix('partner')->name('partner.')->middleware(['auth', 'partner', 'part
     Route::get('restaurant', [Partner\RestaurantController::class, 'edit'])->name('restaurant.edit');
     Route::put('restaurant', [Partner\RestaurantController::class, 'update'])->name('restaurant.update');
     Route::post('restaurant/resubmit', [Partner\RestaurantController::class, 'resubmit'])->name('restaurant.resubmit');
+    Route::delete('menu-categories', [Partner\MenuItemController::class, 'destroyCategory'])->name('menu-categories.destroy');
     Route::resource('menu-items', Partner\MenuItemController::class)->except(['show']);
     Route::get('card', [Partner\CardController::class, 'show'])->name('cards.show');
     Route::get('notifications', [Partner\NotificationController::class, 'index'])->name('notifications.index');

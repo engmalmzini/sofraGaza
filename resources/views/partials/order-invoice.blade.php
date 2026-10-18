@@ -7,7 +7,7 @@
             <p class="sg-invoice__kicker">فاتورة الطلب</p>
             <h2>طلب #{{ $order->id }}</h2>
             <p class="sg-invoice__meta">
-                {{ $order->restaurant->name }} · {{ $order->type === 'redemption' ? 'استبدال نقاط' : 'شراء' }}
+                {{ $order->venueName() }} · {{ $order->type === 'redemption' ? 'استبدال نقاط' : 'شراء' }}
                 @if($order->isGroupOrder())
                     · طلب جماعي
                 @endif

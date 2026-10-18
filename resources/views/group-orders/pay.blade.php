@@ -10,7 +10,7 @@
 @endphp
 <div class="mx-auto max-w-lg px-3 sm:px-4 py-5 sm:py-8 pb-36">
     <div class="mb-5">
-        <p class="text-xs font-extrabold text-primary mb-1">{{ $group->restaurant->name }}</p>
+        <p class="text-xs font-extrabold text-primary mb-1">{{ $group->venueName() }}</p>
         <h1 class="text-2xl font-black text-stone-900 tracking-tight">
             {{ $forHost ? 'إرسال الطلب الجماعي' : 'ادفع نصيبك' }}
         </h1>

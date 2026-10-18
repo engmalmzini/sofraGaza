@@ -12,8 +12,11 @@
 @endphp
 <a href="{{ route('restaurants.show', $restaurant) }}" class="sg-dish-card group {{ $restaurant->isBoosted() ? 'sg-dish-card--ad' : '' }}">
     <div class="sg-dish-card__media">
-        <img src="{{ $restaurant->coverUrl() }}" alt="{{ $restaurant->name }}" loading="lazy">
+        <img src="{{ $restaurant->coverUrl() }}" alt="" loading="lazy" decoding="async">
         <span class="sg-dish-card__badge {{ $restaurant->isBoosted() ? 'sg-dish-card__badge--ad' : '' }}">{{ $restaurant->isBoosted() ? 'إعلان' : $badge }}</span>
+        @if($restaurant->orderStatusKind() !== 'open')
+            <span class="hours-closed-badge">{{ $restaurant->orderStatusLabel() }}</span>
+        @endif
         @include('partials.favorite-button', [
             'type' => 'restaurant',
             'id' => $restaurant->id,

@@ -80,7 +80,7 @@
         @forelse($orders as $order)
             <a href="{{ route('account.orders.show', $order) }}" class="flex items-center justify-between gap-3 rounded-2xl bg-surface-container-lowest border border-slate-100 p-4 shadow-xs">
                 <div>
-                    <div class="font-bold text-on-surface">#{{ $order->id }} — {{ $order->restaurant->name }}</div>
+                    <div class="font-bold text-on-surface">#{{ $order->id }} — {{ $order->venueName() }}</div>
                     <div class="text-sm text-on-surface-variant">{{ $order->created_at->format('Y-m-d H:i') }}</div>
                 </div>
                 <div class="text-left shrink-0">

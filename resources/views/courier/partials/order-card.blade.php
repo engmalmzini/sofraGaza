@@ -9,7 +9,7 @@
             <span class="courier-pill courier-pill--{{ $status }}">{{ $order->statusLabel() }}</span>
             <span class="courier-card__id">#{{ $order->id }}</span>
         </div>
-        <h2>{{ $order->restaurant->name }}</h2>
+        <h2>{{ $order->venueName() }}</h2>
         <ol class="courier-route">
             <li>
                 <span>استلام</span>

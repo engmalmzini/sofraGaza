@@ -20,7 +20,18 @@
     <section class="admin-card partner-menu-group-card">
         <div class="partner-menu-group__head">
             <h2>{{ $category ?: 'بدون تصنيف' }} <small>{{ $groupItems->count() }}</small></h2>
-            <a class="admin-btn admin-btn--ghost" href="{{ route('partner.menu-items.create', ['category' => $category]) }}">إضافة لصنف {{ $category }}</a>
+            <div class="partner-menu-group__head-actions">
+                <a class="admin-btn admin-btn--ghost" href="{{ route('partner.menu-items.create', ['category' => $category]) }}">إضافة لصنف {{ $category }}</a>
+                @if($category)
+                    @include('admin.partials.delete-form', [
+                        'action' => route('partner.menu-categories.destroy'),
+                        'confirm' => "حذف تصنيف {$category} وكل أصنافه؟ فواتير الطلبات القديمة تبقى كما هي.",
+                        'label' => 'حذف التصنيف',
+                        'hidden' => ['category' => $category],
+                        'buttonClass' => 'admin-btn admin-btn--danger',
+                    ])
+                @endif
+            </div>
         </div>
         <div class="admin-table-wrap">
             <table>
@@ -28,6 +39,7 @@
                     <tr>
                         <th>الصنف</th>
                         <th>السعر</th>
+                        <th>الكمية</th>
                         <th>التوفر</th>
                         <th class="text-center">الإجراءات</th>
                     </tr>
@@ -37,7 +49,13 @@
                         <tr>
                             <td class="font-bold text-slate-900">{{ $item->name }}</td>
                             <td class="font-mono font-bold text-slate-900">{{ number_format($item->price, 2) }} <span class="ils">₪</span></td>
-                            <td>@include('admin.partials.pill', ['status' => $item->is_available ? 'approved' : 'cancelled', 'label' => $item->is_available ? 'متوفر' : 'غير متوفر'])</td>
+                            <td>
+                                @include('admin.partials.pill', [
+                                    'status' => $item->isUnlimitedStock() ? 'approved' : ($item->remainingStock() > 0 ? 'pending' : 'cancelled'),
+                                    'label' => $item->stockLabel(),
+                                ])
+                            </td>
+                            <td>@include('admin.partials.pill', ['status' => $item->isOrderable() ? 'approved' : 'cancelled', 'label' => $item->isOrderable() ? 'متوفر' : 'غير متوفر'])</td>
                             <td class="whitespace-nowrap">
                                 <div class="admin-table-actions">
                                     <a class="admin-action-btn admin-action-btn--outline admin-action-btn--sm" href="{{ route('partner.menu-items.edit', $item) }}">

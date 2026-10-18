@@ -27,12 +27,12 @@ class OrderService
             throw new RuntimeException('السلة فارغة.');
         }
 
+        $quote['restaurant']->assertAcceptingOrders();
+
         foreach ($quote['lines'] as $line) {
             /** @var MenuItem $item */
             $item = $line['item'];
-            if (! $item->is_available) {
-                throw new RuntimeException("الصنف {$item->name} لم يعد متوفراً.");
-            }
+            $item->assertCanSell((int) $line['qty']);
         }
 
         $paymentMethod = $data['payment_method'] ?? 'receipt';
@@ -78,10 +78,14 @@ class OrderService
             ]);
 
             foreach ($quote['lines'] as $line) {
+                $item = MenuItem::query()->whereKey($line['item']->id)->lockForUpdate()->first()
+                    ?? $line['item'];
+                $item->consumeStock((int) $line['qty']);
+
                 $order->items()->create([
-                    'menu_item_id' => $line['item']->id,
-                    'name' => $line['item']->name,
-                    'price' => $line['item']->price,
+                    'menu_item_id' => $item->id,
+                    'name' => $item->name,
+                    'price' => $item->price,
                     'quantity' => $line['qty'],
                     'line_total' => $line['line_total'],
                     'notes' => $line['notes'] ?? null,
@@ -123,9 +127,13 @@ class OrderService
 
     public function placeRedemption(User $user, MenuItem $item, array $data): Order
     {
-        if (! $item->is_available || ! $item->restaurant->isVisible()) {
+        if (! $item->isOrderable() || ! $item->restaurant->isVisible()) {
             throw new RuntimeException('لا يمكن استبدال هذا الصنف حالياً.');
         }
+
+        $item->assertCanSell(1);
+
+        $item->restaurant->assertAcceptingOrders();
 
         $cost = $this->points->redeemCost($item);
 
@@ -151,9 +159,12 @@ class OrderService
                 'points_spent' => $cost,
             ]);
 
+            $locked = MenuItem::query()->whereKey($item->id)->lockForUpdate()->first() ?? $item;
+            $locked->consumeStock(1);
+
             $order->items()->create([
-                'menu_item_id' => $item->id,
-                'name' => $item->name.' (استبدال نقاط)',
+                'menu_item_id' => $locked->id,
+                'name' => $locked->name.' (استبدال نقاط)',
                 'price' => 0,
                 'quantity' => 1,
                 'line_total' => 0,
@@ -230,10 +241,13 @@ class OrderService
         $old = $order->status;
 
         if ($status === 'rejected' && in_array($old, ['pending_confirmation', 'confirmed'], true)) {
-            $order->update([
-                'status' => 'rejected',
-                'rejection_reason' => $reason,
-            ]);
+            DB::transaction(function () use ($order, $reason) {
+                $this->restoreOrderStock($order);
+                $order->update([
+                    'status' => 'rejected',
+                    'rejection_reason' => $reason,
+                ]);
+            });
 
             if ($order->group_order_id || $order->isPaidWithWallet()) {
                 $this->wallet->refundOrder($order, $reason ?: 'رفض الطلب');
@@ -259,7 +273,10 @@ class OrderService
         }
 
         if ($status === 'cancelled' && $order->canCancel()) {
-            $order->update(['status' => 'cancelled']);
+            DB::transaction(function () use ($order) {
+                $this->restoreOrderStock($order);
+                $order->update(['status' => 'cancelled']);
+            });
 
             if ($order->group_order_id || $order->isPaidWithWallet()) {
                 $this->wallet->refundOrder($order, 'إلغاء الطلب');
@@ -396,5 +413,19 @@ class OrderService
         }
 
         $this->changeStatus($order, 'delivered');
+    }
+
+    private function restoreOrderStock(Order $order): void
+    {
+        $order->loadMissing('items');
+
+        foreach ($order->items as $line) {
+            if (! $line->menu_item_id) {
+                continue;
+            }
+
+            $item = MenuItem::query()->whereKey($line->menu_item_id)->first();
+            $item?->restoreStock((int) $line->quantity);
+        }
     }
 }

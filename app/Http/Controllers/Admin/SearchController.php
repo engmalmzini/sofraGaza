@@ -103,6 +103,7 @@ class SearchController extends Controller
             ->where(function ($builder) use ($q) {
                 $builder->where('id', $q)
                     ->orWhere('phone', 'like', "%{$q}%")
+                    ->orWhere('restaurant_name', 'like', "%{$q}%")
                     ->orWhereHas('user', fn ($user) => $user->where('name', 'like', "%{$q}%")->orWhere('phone', 'like', "%{$q}%"))
                     ->orWhereHas('restaurant', fn ($restaurant) => $restaurant->where('name', 'like', "%{$q}%"));
             })
@@ -110,8 +111,8 @@ class SearchController extends Controller
             ->limit($limit)
             ->get()
             ->map(fn (Order $order) => $this->row(
-                '#'.$order->id.' — '.$order->user->name,
-                $order->restaurant->name.' • '.number_format((float) $order->total, 2).' ₪ • '.$order->statusLabel(),
+                '#'.$order->id.' — '.($order->user?->name ?? 'زبون'),
+                $order->venueName().' • '.number_format((float) $order->total, 2).' ₪ • '.$order->statusLabel(),
                 route('admin.orders.show', $order),
                 'receipt_long',
                 $q,

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Membership;
+use App\Services\SafeDeletion;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -56,11 +57,11 @@ class MembershipController extends Controller
             : 'تم إيقاف العضوية ولن تظهر للزبائن الجدد.');
     }
 
-    public function destroy(Membership $membership): RedirectResponse
+    public function destroy(Membership $membership, SafeDeletion $deletion): RedirectResponse
     {
-        $membership->delete();
+        $deletion->deleteMembership($membership);
 
-        return back()->with('success', 'تم حذف العضوية.');
+        return back()->with('success', 'تم حذف العضوية واشتراكاتها.');
     }
 
     private function validated(Request $request): array

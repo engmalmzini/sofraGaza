@@ -336,7 +336,7 @@
                             </div>
                         </td>
                         <td>
-                            <span class="font-semibold text-slate-800">{{ $order->restaurant->name ?? '—' }}</span>
+                            <span class="font-semibold text-slate-800">{{ $order->venueName() }}</span>
                         </td>
                         <td>
                             @if($order->courier)
@@ -446,4 +446,7 @@
         </a>
     @endif
 </div>
+
+@include('admin.partials.database-backup')
+@include('admin.partials.platform-wipe')
 @endsection

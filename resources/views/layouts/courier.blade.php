@@ -8,6 +8,7 @@
         <meta http-equiv="refresh" content="20">
     @endif
     <title>@yield('title', 'توصيل') — سفرة غزة</title>
+    @include('partials.favicon')
     @include('partials.icon-font')
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

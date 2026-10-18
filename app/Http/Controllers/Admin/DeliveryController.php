@@ -8,6 +8,7 @@ use App\Models\Order;
 use App\Models\User;
 use App\Services\NotificationService;
 use App\Services\OrderService;
+use App\Services\SafeDeletion;
 use App\Support\PalestinianPhone;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -313,5 +314,18 @@ class DeliveryController extends Controller
         }
 
         return back()->with('success', 'تم رفض طلب السحب. الرصيد ما زال في محفظة المندوب لأنه لم يُخصم إلا عند تأكيد التحويل.');
+    }
+
+    public function destroy(User $courier, SafeDeletion $deletion): RedirectResponse
+    {
+        abort_unless($courier->isCourier(), 404);
+
+        try {
+            $deletion->deleteUser($courier, auth()->user());
+        } catch (RuntimeException $e) {
+            return back()->with('error', $e->getMessage());
+        }
+
+        return redirect()->route('admin.delivery.index')->with('success', 'تم حذف المندوب. الطلبات السابقة بقيت بدون تعيين.');
     }
 }

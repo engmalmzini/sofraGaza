@@ -17,13 +17,14 @@ use Illuminate\Http\Request;
 use Illuminate\Session\TokenMismatchException;
 use Illuminate\Support\Facades\Auth;
 
-return Application::configure(basePath: dirname(__DIR__))
+$app = Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
         web: __DIR__.'/../routes/web.php',
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->trustProxies(at: '*');
         $middleware->alias([
             'admin' => EnsureUserIsAdmin::class,
             'admin.module' => EnsureAdminPermission::class,
@@ -58,6 +59,9 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withSchedule(function (Schedule $schedule): void {
         $schedule->call(fn () => app(ExpiryNoticeService::class)->dispatch())->daily();
+        $schedule->command('queue:work --stop-when-empty --tries=1 --max-time=50')
+            ->everyMinute()
+            ->withoutOverlapping(5);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->render(function (TokenMismatchException $e, Request $request) {
@@ -72,3 +76,15 @@ return Application::configure(basePath: dirname(__DIR__))
             return redirect()->back()->with('error', 'انتهت صلاحية الصفحة. أعد المحاولة.');
         });
     })->create();
+
+$base = $app->basePath();
+$publicHtml = $base.DIRECTORY_SEPARATOR.'public_html';
+$public = $base.DIRECTORY_SEPARATOR.'public';
+
+if (is_dir($publicHtml) && ! is_dir($public)) {
+    $app->usePublicPath($publicHtml);
+} elseif (! is_dir($public) && is_file($base.DIRECTORY_SEPARATOR.'index.php') && is_dir($base.DIRECTORY_SEPARATOR.'app')) {
+    $app->usePublicPath($base);
+}
+
+return $app;

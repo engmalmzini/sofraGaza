@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Partner;
 
 use App\Models\Restaurant;
 use App\Services\NotificationService;
+use App\Support\OperatingHours;
 use App\Support\PalestinianPhone;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -71,6 +72,7 @@ class RestaurantController extends Controller
             'phone' => PalestinianPhone::digits($request->input('phone')),
             'opens_at' => substr((string) $request->input('opens_at'), 0, 5),
             'closes_at' => substr((string) $request->input('closes_at'), 0, 5),
+            'working_days' => OperatingHours::submittedDays((array) $request->input('working_days', [])),
         ]);
 
         $data = $request->validate([
@@ -85,6 +87,7 @@ class RestaurantController extends Controller
             'address' => ['required', 'string', 'max:255'],
             'opens_at' => ['required', 'date_format:H:i'],
             'closes_at' => ['required', 'date_format:H:i', 'different:opens_at'],
+            ...OperatingHours::daysValidationRules(),
             'image' => ['nullable', 'image', 'max:4096'],
         ], [
             'description.min' => 'اكتب وصفاً أوضح لمطعمك (20 حرفاً على الأقل).',
@@ -92,9 +95,11 @@ class RestaurantController extends Controller
             'owner_national_id.digits' => 'رقم الهوية يجب أن يتكون من 9 أرقام.',
             'owner_national_id.unique' => 'رقم الهوية مسجّل مسبقاً.',
             'closes_at.different' => 'ساعة الإغلاق يجب أن تختلف عن ساعة الافتتاح.',
+            ...OperatingHours::daysValidationMessages(),
         ]);
 
         unset($data['image']);
+        $data['working_days'] = OperatingHours::submittedDays($data['working_days'] ?? []);
 
         return $data;
     }

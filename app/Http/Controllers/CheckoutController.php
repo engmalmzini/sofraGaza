@@ -32,6 +32,10 @@ class CheckoutController extends Controller
             return redirect()->route('cart.index')->with('error', 'السلة فارغة.');
         }
 
+        if ($quote['restaurant'] && ! $quote['restaurant']->isAcceptingOrders()) {
+            return redirect()->route('cart.index')->with('error', $quote['restaurant']->orderingBlockReason());
+        }
+
         return view('checkout.create', [
             'quote' => $quote,
             'user' => $user,

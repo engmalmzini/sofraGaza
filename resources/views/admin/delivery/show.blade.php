@@ -6,6 +6,12 @@
 @section('actions')
 <a href="{{ route('admin.delivery.index') }}" class="admin-btn admin-btn--ghost">عودة للتوصيل</a>
 <a href="tel:{{ $courier->phone }}" class="admin-btn admin-btn--secondary">اتصال</a>
+@include('admin.partials.delete-form', [
+    'action' => route('admin.delivery.destroy', $courier),
+    'confirm' => "حذف المندوب {$courier->name}؟ الطلبات السابقة تبقى بدون مندوب.",
+    'label' => 'حذف المندوب',
+    'buttonClass' => 'admin-btn admin-btn--danger',
+])
 @endsection
 
 @section('content')
@@ -64,13 +70,13 @@
             <p class="pt-2">سبب الرفض: {{ $courier->courier_rejection_reason ?: '—' }}</p>
         @endif
         @if($current)
-            <p class="pt-2">الطلب الحالي: <a class="font-bold text-primary" href="{{ route('admin.orders.show', $current) }}">#{{ $current->id }}</a> — {{ $current->restaurant?->name }}</p>
+            <p class="pt-2">الطلب الحالي: <a class="font-bold text-primary" href="{{ route('admin.orders.show', $current) }}">#{{ $current->id }}</a> — {{ $current->venueName() }}</p>
             <p>التسليم إلى: {{ $current->address_details }}</p>
         @endif
         <h2 class="pt-4">طلبات قيد التوصيل</h2>
         @forelse($active as $order)
             <a class="admin-row" href="{{ route('admin.orders.show', $order) }}">
-                <span>#{{ $order->id }} {{ $order->restaurant?->name }} → {{ $order->user?->name }}</span>
+                <span>#{{ $order->id }} {{ $order->venueName() }} → {{ $order->user?->name }}</span>
                 @include('admin.partials.pill', ['status' => $order->status, 'label' => $order->statusLabel()])
             </a>
         @empty
@@ -79,7 +85,7 @@
         <h2 class="pt-4">سجل التوصيل</h2>
         @forelse($history as $order)
             <a class="admin-row" href="{{ route('admin.orders.show', $order) }}">
-                <span>#{{ $order->id }} {{ $order->restaurant?->name }}</span>
+                <span>#{{ $order->id }} {{ $order->venueName() }}</span>
                 @include('admin.partials.pill', ['status' => $order->status, 'label' => $order->statusLabel()])
             </a>
         @empty

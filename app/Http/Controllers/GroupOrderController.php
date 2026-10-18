@@ -28,6 +28,11 @@ class GroupOrderController extends Controller
             return redirect()->route('restaurants.index')->with('error', 'اختر مطعماً أولاً ثم ابدأ طلباً جماعياً.');
         }
 
+        if (! $restaurant->isAcceptingOrders()) {
+            return redirect()->route('restaurants.show', $restaurant)
+                ->with('error', $restaurant->orderingBlockReason());
+        }
+
         $user = $request->user();
 
         return view('group-orders.create', [

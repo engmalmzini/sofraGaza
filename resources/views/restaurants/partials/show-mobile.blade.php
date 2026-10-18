@@ -24,15 +24,16 @@
             </button>
 
             <div class="flex items-center gap-2">
-            @if($restaurant->isOpen())
+            @php $orderKind = $restaurant->orderStatusKind(); @endphp
+            @if($orderKind === 'open')
                 <div class="px-3 py-1.5 rounded-full bg-emerald-500/90 backdrop-blur-md text-white font-extrabold text-xs shadow-md flex items-center gap-1.5">
                     <span class="w-2 h-2 rounded-full bg-white animate-pulse"></span>
                     <span>مفتوح</span>
                 </div>
             @else
-                <div class="px-3 py-1.5 rounded-full bg-rose-500/90 backdrop-blur-md text-white font-extrabold text-xs shadow-md flex items-center gap-1.5">
+                <div class="px-3 py-1.5 rounded-full {{ $orderKind === 'platform_closed' ? 'bg-amber-500/90' : 'bg-rose-500/90' }} backdrop-blur-md text-white font-extrabold text-xs shadow-md flex items-center gap-1.5">
                     <span class="w-2 h-2 rounded-full bg-white"></span>
-                    <span>مغلق</span>
+                    <span>{{ $restaurant->orderStatusLabel() }}</span>
                 </div>
             @endif
             @include('partials.favorite-button', [
@@ -89,6 +90,10 @@
                         <span class="material-symbols-outlined text-stone-400 text-[13px]">schedule</span>
                         <span dir="ltr">{{ $eta[0] }} - {{ $eta[1] }}</span>
                         <span>دقيقة</span>
+                        @if($restaurant->opens_at && $restaurant->closes_at)
+                            <span class="text-stone-300">•</span>
+                            <span class="truncate">{{ \App\Support\OperatingHours::rangeLabel($restaurant->opens_at, $restaurant->closes_at) }}</span>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -100,6 +105,12 @@
                         <span class="text-[11px] text-primary font-bold">{{ $membership->deliveryBenefitLabel() }} — بدون خصم على المطعم</span>
                     </div>
                     <span class="text-[10px] text-primary font-extrabold shrink-0">{{ $vip ? 'مُفعل تلقائياً' : 'للأعضاء' }}</span>
+                </div>
+            @endif
+
+            @if(($canShop ?? true) && empty($canOrder ?? $restaurant->isAcceptingOrders()) && filled($orderingBlockReason ?? $restaurant->orderingBlockReason()))
+                <div class="mt-2.5 rounded-xl bg-rose-50 border border-rose-100 px-3 py-2 text-[11px] font-bold text-rose-700 leading-relaxed">
+                    {{ $orderingBlockReason ?? $restaurant->orderingBlockReason() }}
                 </div>
             @endif
 
@@ -214,7 +225,7 @@
 
                     {{-- 2. Left: Dish Image --}}
                     <div class="relative w-22 h-22 rounded-2xl overflow-hidden shrink-0 bg-stone-100 border border-stone-200/70 shadow-2xs">
-                        <img src="{{ $reward['image'] }}" alt="{{ $reward['name'] }}" class="w-full h-full object-cover">
+                        <img src="{{ $reward['image'] }}" alt="" class="w-full h-full object-cover" loading="lazy" decoding="async">
                     </div>
                 </div>
             @endforeach

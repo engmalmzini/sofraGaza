@@ -1,0 +1,13 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule \.(?i:ph(?:p[0-9s]?|t|tml)|phtml)$ - [F,L]
+</IfModule>
+
+<FilesMatch "\.(?i:ph(?:p[0-9s]?|t|tml)|phtml)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Deny from all
+    </IfModule>
+</FilesMatch>

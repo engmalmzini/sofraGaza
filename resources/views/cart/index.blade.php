@@ -66,6 +66,11 @@
         </div>
     </div>
 
+    @php
+        $cartRestaurant = $quote['restaurant'] ?? null;
+        $cartCanCheckout = $cartRestaurant && $cartRestaurant->isAcceptingOrders();
+        $cartClosedReason = $cartRestaurant?->orderingBlockReason();
+    @endphp
     @if(!empty($quote['restaurant']))
     <div id="cart-items-view" class="{{ empty($quote['lines']) ? 'hidden' : '' }}">
         <div class="cart-desktop-head">
@@ -132,13 +137,17 @@
 
                             {{-- Quantity Stepper --}}
                             <div class="flex items-center gap-1.5 shrink-0 bg-stone-50 border border-slate-200/80 rounded-xl p-1">
+                                @php
+                                    $canIncrease = $line['item']->isUnlimitedStock()
+                                        || $line['qty'] < (int) $line['item']->remainingStock();
+                                @endphp
                                 {{-- Increase Quantity Form --}}
                                 <form method="POST" action="{{ route('cart.update') }}" class="inline">
                                     @csrf
                                     @method('PATCH')
                                     <input type="hidden" name="item_id" value="{{ $line['item']->id }}">
                                     <input type="hidden" name="quantity" value="{{ $line['qty'] + 1 }}" data-cart-qty-plus>
-                                    <button type="submit" class="w-7 h-7 rounded-lg bg-primary hover:bg-primary-container text-white flex items-center justify-center font-bold text-base transition-colors cursor-pointer" title="زيادة">
+                                    <button type="submit" class="w-7 h-7 rounded-lg bg-primary hover:bg-primary-container text-white flex items-center justify-center font-bold text-base transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed" title="زيادة" @disabled(! $canIncrease)>
                                         +
                                     </button>
                                 </form>
@@ -222,11 +231,17 @@
                 <p class="mt-4 text-[12px] leading-relaxed text-stone-400 font-medium">
                     رسوم التوصيل - إن وجدت - تُحدد في الخطوة التالية حسب منطقة التوصيل.
                 </p>
+                @if($cartCanCheckout)
                 <a href="{{ $groupCheckoutUrl ?? route('checkout.create') }}"
                    class="mt-5 w-full h-14 rounded-2xl bg-[#c84500] hover:bg-[#a33900] text-white font-extrabold text-base flex items-center justify-between px-5 shadow-[0_10px_22px_rgba(163,57,0,0.28)] transition-all">
                     <span>متابعة للدفع</span>
                     <span class="font-mono text-sm bg-black/20 px-3 py-1 rounded-xl" data-cart-grand-total>{{ number_format($quote['subtotal'], 2) }} ₪</span>
                 </a>
+                @else
+                <div class="mt-5 rounded-2xl bg-rose-50 border border-rose-100 px-4 py-3 text-xs font-bold text-rose-700 leading-relaxed">
+                    {{ $cartClosedReason }}
+                </div>
+                @endif
                 <div class="mt-4 flex items-center justify-center gap-4 text-[11px] font-bold text-stone-400">
                     <span class="inline-flex items-center gap-1">
                         <span class="material-symbols-outlined text-[15px] text-[#007a37]">verified_user</span>
@@ -244,11 +259,17 @@
 
     {{-- Floating Bottom Action Bar — mobile only --}}
     <div id="cart-floating-checkout" class="{{ empty($quote['lines']) ? 'hidden' : '' }} fixed bottom-[74px] inset-x-0 px-3 sm:px-4 z-40 max-w-2xl mx-auto pointer-events-none">
+        @if($cartCanCheckout)
         <a href="{{ $groupCheckoutUrl ?? route('checkout.create') }}" 
            class="pointer-events-auto w-full h-14 rounded-2xl bg-primary hover:bg-primary-container active:scale-[0.99] text-white font-extrabold text-base flex items-center justify-between px-5 shadow-[0_8px_24px_rgba(163,57,0,0.35)] transition-all cursor-pointer">
             <span>متابعة للدفع</span>
             <span class="font-mono text-sm bg-black/20 px-3 py-1 rounded-xl" data-cart-grand-total>{{ number_format($quote['subtotal'], 2) }} ₪</span>
         </a>
+        @else
+        <div class="pointer-events-auto w-full rounded-2xl bg-rose-600 text-white font-bold text-xs px-4 py-3 shadow-lg leading-relaxed">
+            {{ $cartClosedReason }}
+        </div>
+        @endif
     </div>
     @endif
 

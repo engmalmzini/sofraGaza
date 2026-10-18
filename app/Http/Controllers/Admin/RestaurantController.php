@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Restaurant;
 use App\Services\NotificationService;
 use App\Services\RestaurantListingService;
+use App\Services\SafeDeletion;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -156,11 +157,13 @@ class RestaurantController extends Controller
         }
     }
 
-    public function destroy(Restaurant $restaurant): RedirectResponse
+    public function destroy(Restaurant $restaurant, SafeDeletion $deletion): RedirectResponse
     {
-        $restaurant->delete();
+        $name = $restaurant->name;
+        $deletion->deleteRestaurant($restaurant);
 
-        return back()->with('success', 'تم حذف المطعم.');
+        return redirect()->route('admin.restaurants.index')
+            ->with('success', "تم حذف {$name}. الطلبات القديمة بقيت في السجل باسم المطعم.");
     }
 
     private function validated(Request $request): array

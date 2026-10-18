@@ -237,6 +237,7 @@ class PointsRewardsTest extends TestCase
                 'category' => 'وجبات',
                 'price' => 30,
                 'is_available' => 1,
+                'stock_mode' => 'unlimited',
                 'earn_points' => 7,
                 'redeem_points' => 9,
             ])
@@ -309,6 +310,7 @@ class PointsRewardsTest extends TestCase
                 'category' => 'وجبات',
                 'price' => 18,
                 'is_available' => 1,
+                'stock_mode' => 'unlimited',
                 'earn_points' => 99,
                 'redeem_points' => 88,
             ])

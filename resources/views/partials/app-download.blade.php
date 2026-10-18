@@ -150,14 +150,14 @@
 
                 <div class="sg-app-screen-products">
                     <div class="sg-app-item-card">
-                        <img src="{{ asset('images/categories/test_burger.jpg') }}" alt="برجر">
+                        <img src="{{ asset('images/categories/test_burger.jpg') }}" alt="" loading="lazy" decoding="async">
                         <div class="sg-app-item-title">برجر جامبو</div>
                         <div class="sg-app-item-sub">برجر دجاج حار</div>
                         <div class="sg-app-item-cals">🔥 78 سعرة</div>
                         <div class="sg-app-item-price">9.80 ₪</div>
                     </div>
                     <div class="sg-app-item-card">
-                        <img src="{{ asset('images/categories/shawarma.jpg') }}" alt="شاورما">
+                        <img src="{{ asset('images/categories/shawarma.jpg') }}" alt="" loading="lazy" decoding="async">
                         <div class="sg-app-item-title">شاورما دجاج</div>
                         <div class="sg-app-item-sub">دجاج حار</div>
                         <div class="sg-app-item-cals">🔥 45 سعرة</div>

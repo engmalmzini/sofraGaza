@@ -254,7 +254,7 @@
                                 <div class="text-xs font-mono font-bold text-slate-600">{{ number_format((float) $order->total, 2) }} ₪</div>
                             </td>
                             <td>
-                                <div class="font-bold text-slate-900">{{ $order->restaurant?->name }}</div>
+                                <div class="font-bold text-slate-900">{{ $order->venueName() }}</div>
                                 <div class="text-xs text-on-surface-variant">{{ $order->user?->name }} · {{ $order->phone }}</div>
                             </td>
                             <td class="text-sm text-slate-700">{{ $order->address_details }}</td>

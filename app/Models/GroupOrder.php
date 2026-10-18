@@ -43,6 +43,13 @@ class GroupOrder extends Model
         return $this->belongsTo(Restaurant::class);
     }
 
+    public function venueName(): string
+    {
+        return $this->restaurant?->name
+            ?: $this->order?->venueName()
+            ?: 'مطعم محذوف';
+    }
+
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class);

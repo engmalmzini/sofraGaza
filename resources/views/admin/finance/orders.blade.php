@@ -55,7 +55,7 @@
                 @forelse($completed as $order)
                     <tr>
                         <td class="font-mono"><a href="{{ route('admin.orders.show', $order) }}" class="font-bold hover:text-primary">#{{ $order->id }}</a></td>
-                        <td>{{ $order->restaurant->name }}</td>
+                        <td>{{ $order->venueName() }}</td>
                         <td>{{ $order->user->name }}</td>
                         <td class="font-mono font-bold">{{ number_format($order->foodTotal(), 2) }} ₪</td>
                         <td class="font-mono finance-in">+{{ number_format($order->platformCommission(), 2) }} ₪</td>
@@ -94,7 +94,7 @@
                 @forelse($incomplete as $order)
                     <tr>
                         <td class="font-mono"><a href="{{ route('admin.orders.show', $order) }}" class="font-bold hover:text-primary">#{{ $order->id }}</a></td>
-                        <td>{{ $order->restaurant->name }}</td>
+                        <td>{{ $order->venueName() }}</td>
                         <td>{{ $order->user->name }}</td>
                         <td>
                             <span class="inline-flex px-2.5 py-1 rounded-full bg-rose-100 text-rose-900 font-bold text-[11px]">{{ $order->statusLabel() }}</span>

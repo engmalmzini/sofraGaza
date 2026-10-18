@@ -90,7 +90,7 @@
                 @forelse($orders->take(20) as $order)
                     <tr>
                         <td class="font-mono"><a href="{{ route('admin.orders.show', $order) }}" class="font-bold hover:text-primary">#{{ $order->id }}</a></td>
-                        <td>{{ $order->restaurant->name ?? '—' }}</td>
+                        <td>{{ $order->venueName() }}</td>
                         <td class="font-mono font-bold">{{ number_format($order->foodTotal(), 2) }} ₪</td>
                         <td class="font-mono finance-in">+{{ number_format($order->platformCommission(), 2) }} ₪</td>
                         <td class="font-mono finance-out">−{{ number_format($order->courierFinanceShare(), 2) }} ₪</td>

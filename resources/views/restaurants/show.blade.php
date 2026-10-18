@@ -11,7 +11,7 @@
     @include('restaurants.partials.show-mobile')
     @include('restaurants.partials.show-desktop')
 
-    @if($canShop ?? true)
+    @if(($canShop ?? true) && ($canOrder ?? true))
     <div class="lg:hidden fixed inset-0 z-[60] bg-on-surface/50 backdrop-blur-sm flex-col justify-end" id="cartDrawer" hidden>
         <div class="bg-surface-container-lowest rounded-t-3xl p-6 flex flex-col max-h-[80vh] overflow-y-auto shadow-2xl">
             <div class="flex items-center justify-between pb-2">

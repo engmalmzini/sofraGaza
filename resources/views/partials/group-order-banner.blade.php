@@ -5,7 +5,7 @@
             <div class="flex items-center gap-2 min-w-0">
                 <span class="material-symbols-outlined text-[22px] shrink-0">groups</span>
                 <div class="min-w-0">
-                    <p class="text-xs font-extrabold truncate">طلب جماعي من {{ $activeGroupOrder->restaurant->name }}</p>
+                    <p class="text-xs font-extrabold truncate">طلب جماعي من {{ $activeGroupOrder->venueName() }}</p>
                     <p class="text-[11px] font-semibold text-primary/80 truncate">كل واحد يدفع نصيبه — توصيل واحد وفاتورة واحدة</p>
                 </div>
             </div>

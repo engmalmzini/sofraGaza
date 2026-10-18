@@ -18,7 +18,7 @@
         1 => ['owner_name', 'owner_national_id', 'phone', 'email'],
         2 => ['password', 'password_confirmation'],
         3 => ['restaurant_name', 'type', 'cuisine', 'restaurant_phone', 'license_number'],
-        4 => ['area', 'address', 'opens_at', 'closes_at', 'description'],
+        4 => ['area', 'address', 'opens_at', 'closes_at', 'working_days', 'description'],
         5 => ['image', 'terms'],
     ];
     $skipPasswordStep = filled(session('partner_register.password'))
@@ -165,6 +165,11 @@
                         <input type="time" name="closes_at" value="{{ old('closes_at', '23:00') }}" required aria-label="يغلق الساعة">
                     </label>
                 </div>
+                @include('partials.working-days-picker', [
+                    'wrapperClass' => 'mt-3',
+                    'labelClass' => 'mb-2 block text-sm font-bold',
+                    'errorClass' => 'partner-wizard__error',
+                ])
                 <label class="auth-field auth-field--area">
                     <textarea name="description" rows="3" required minlength="20" maxlength="1000" placeholder="وصف المطعم وأشهر أطباقه">{{ old('description') }}</textarea>
                 </label>

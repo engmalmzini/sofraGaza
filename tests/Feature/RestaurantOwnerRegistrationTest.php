@@ -47,6 +47,7 @@ class RestaurantOwnerRegistrationTest extends TestCase
             'description' => 'مسخن على أصوله',
             'price' => 22,
             'is_available' => 1,
+            'stock_mode' => 'unlimited',
         ])->assertRedirect(route('partner.menu-items.index'));
 
         $this->assertDatabaseHas('menu_items', [
@@ -195,6 +196,7 @@ class RestaurantOwnerRegistrationTest extends TestCase
             'address' => 'شارع الجلاء، غزة',
             'opens_at' => '10:00',
             'closes_at' => '23:00',
+            'working_days' => [6, 0, 1, 2, 3, 4, 5],
             'terms' => '1',
         ];
     }

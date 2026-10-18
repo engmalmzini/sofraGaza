@@ -2,13 +2,25 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="utf-8">
+    @if(request()->routeIs('home'))
+    <script>
+        (function () {
+            try {
+                if (sessionStorage.getItem('sg-splash-seen') === '1') {
+                    document.documentElement.classList.add('sg-splash-skip');
+                }
+            } catch (e) {}
+        })();
+    </script>
+    @endif
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'سفرة غزة') — سفرة غزة</title>
+    @include('partials.favicon')
     @include('partials.icon-font')
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Alexandria:wght@400;600;700;800;900&family=Amiri:wght@400;700&family=Cairo:wght@400;500;600;700;800;900&family=Tajawal:wght@400;500;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Serif+Display&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Alexandria:wght@400;700;800&family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
         .font-alexandria { font-family: 'Alexandria', sans-serif !important; }
@@ -438,6 +450,9 @@
     $accountHomeUrl = $accountHomeUrl ?? (auth()->user()?->publicAccountUrl() ?? route('login'));
 @endphp
 <body class="bg-surface font-body-md text-body-md text-on-surface antialiased {{ request()->routeIs('home') ? 'is-home-page' : 'is-sub-page' }} @yield('body_class')" data-auth="{{ auth()->check() && auth()->user()->canShopAsCustomer() ? '1' : '0' }}">
+    @if(request()->routeIs('home'))
+        @include('partials.splash')
+    @endif
 
     {{-- ═══════════════════════════════════════════════════════════════════
          1. NATIVE MOBILE HEADER (MOBILE ONLY: < 1024px)
@@ -445,8 +460,8 @@
     <header id="site-header-mobile" class="site-header site-header--mobile {{ request()->routeIs('home') ? '' : 'is-subpage-hidden' }}">
         <div class="site-header__bar">
             <div class="site-header__start">
-                <a href="{{ route('home') }}" class="site-header__brand">
-                    <img alt="شعار سفرة غزة" src="{{ $logoSrc }}">
+                <a href="{{ route('home') }}" class="site-header__brand" aria-label="سفرة غزة">
+                    <img alt="" src="{{ $logoSrc }}">
                 </a>
 
                 <div class="site-header__location">
@@ -517,8 +532,8 @@
         <div class="site-header__bar">
             {{-- Brand Logo --}}
             <div class="site-header__start">
-                <a href="{{ route('home') }}" class="site-header__brand flex items-center gap-2.5">
-                    <img alt="شعار سفرة غزة" src="{{ $logoSrc }}" class="site-header__logo site-header__logo--dark h-9 sm:h-11 w-auto object-contain">
+                <a href="{{ route('home') }}" class="site-header__brand flex items-center gap-2.5" aria-label="سفرة غزة">
+                    <img alt="" src="{{ $logoSrc }}" class="site-header__logo site-header__logo--dark h-9 sm:h-11 w-auto object-contain">
                     <img alt="" src="{{ $logoWhiteSrc }}" class="site-header__logo site-header__logo--light h-9 sm:h-11 w-auto object-contain" aria-hidden="true">
                     <div class="site-header__brand-copy hidden sm:flex flex-col text-right">
                         <span class="font-black text-stone-900 text-lg leading-tight tracking-tight">سُفرة <span class="text-[#c84500]">غزة</span></span>
@@ -664,6 +679,13 @@
 
     <main class="w-full bg-surface pb-28 lg:pb-0 site-main">
         @include('partials.group-order-banner')
+        @if(($canShop ?? true) && empty($platformIsOpen ?? true) && filled($platformClosedMessage ?? null))
+            <div class="px-3 sm:px-4 pt-3">
+                <div class="max-w-5xl mx-auto rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs sm:text-sm font-bold px-3.5 py-2.5 leading-relaxed">
+                    {{ $platformClosedMessage }}
+                </div>
+            </div>
+        @endif
         @yield('content')
     </main>
 
@@ -698,8 +720,8 @@
             <div class="sg-footer__panel">
                 <div class="sg-footer__grid">
                     <div>
-                        <a href="{{ route('home') }}" class="sg-footer__brand-row">
-                            <img alt="شعار سفرة غزة" src="{{ $logoSrc }}">
+                        <a href="{{ route('home') }}" class="sg-footer__brand-row" aria-label="سفرة غزة">
+                            <img alt="" src="{{ $logoSrc }}">
                         </a>
                         <p class="sg-footer__blurb">
                             منصة الضيافة وتوصيل الطعام الأولى في قطاع غزة. كل احتياجاتك في مكان واحد، بجودة وسرعة ومكافآت مع كل طلب.
@@ -765,10 +787,10 @@
                 <div class="sg-footer__bottom">
                     <span class="sg-footer__copy">حقوق النشر © {{ date('Y') }} سفرة غزة</span>
                     <div class="sg-footer__pays" aria-label="طرق الدفع المعتمدة">
-                        <img src="{{ asset('images/payments/palpay.png') }}" alt="محفظتي PalPay" title="محفظتي PalPay">
-                        <img src="{{ asset('images/payments/jawwalpay.png') }}" alt="جوال باي" title="جوال باي">
-                        <img src="{{ asset('images/payments/bop.png') }}" alt="بنك فلسطين" title="بنك فلسطين">
-                        <img src="{{ asset('images/payments/iburaq.png') }}" alt="بُراق" title="بُراق">
+                        <img src="{{ asset('images/payments/palpay.png') }}" alt="" loading="lazy">
+                        <img src="{{ asset('images/payments/jawwalpay.png') }}" alt="" loading="lazy">
+                        <img src="{{ asset('images/payments/bop.png') }}" alt="" loading="lazy">
+                        <img src="{{ asset('images/payments/iburaq.png') }}" alt="" loading="lazy">
                     </div>
                 </div>
             </div>

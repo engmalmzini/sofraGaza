@@ -79,6 +79,7 @@ class PartnerVenueMenuTest extends TestCase
                 'category_custom' => 'فطور',
                 'price' => 8,
                 'is_available' => 1,
+                'stock_mode' => 'unlimited',
             ])
             ->assertRedirect(route('partner.menu-items.index'));
 
@@ -111,6 +112,7 @@ class PartnerVenueMenuTest extends TestCase
                 'category' => 'مشاوي',
                 'price' => 25,
                 'is_available' => 1,
+                'stock_mode' => 'unlimited',
             ])
             ->assertRedirect(route('partner.menu-items.index'));
 

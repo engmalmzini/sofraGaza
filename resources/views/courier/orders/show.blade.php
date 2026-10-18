@@ -1,10 +1,10 @@
 @extends('layouts.courier')
 
 @php
-    $pickup = $order->restaurant->address ?: $order->restaurant->areaLabel();
-    $mapsPickup = 'https://www.google.com/maps/search/?api=1&query='.urlencode($pickup);
-    $mapsDrop = 'https://www.google.com/maps/search/?api=1&query='.urlencode($order->address_details);
-    $restaurantPhone = $order->restaurant->phone;
+    $pickup = $order->restaurant?->address ?: $order->restaurant?->areaLabel() ?: $order->venueName();
+    $mapsPickup = 'https://www.google.com/maps/search/?api=1&query='.urlencode((string) $pickup);
+    $mapsDrop = 'https://www.google.com/maps/search/?api=1&query='.urlencode((string) $order->address_details);
+    $restaurantPhone = $order->restaurant?->phone;
     $backTab = $order->status === 'delivered' ? 'done' : 'mine';
     $foodCost = $order->foodTotal();
     $isPrepaid = $order->isPaidWithWallet() || $order->confirmed_at;
@@ -87,7 +87,7 @@
     {{-- Stop 1: Pickup / Restaurant --}}
     <section class="courier-stop">
         <div class="courier-stop__label">1 · استلام وطلب من المطعم</div>
-        <h2>{{ $order->restaurant->name }}</h2>
+        <h2>{{ $order->venueName() }}</h2>
         <p>{{ $pickup }}</p>
         <div class="courier-card__actions">
             @if($restaurantPhone)

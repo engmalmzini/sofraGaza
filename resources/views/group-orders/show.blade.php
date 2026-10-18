@@ -10,7 +10,7 @@
 @endphp
 <div class="mx-auto max-w-lg px-3 sm:px-4 py-5 sm:py-8 pb-32">
     <div class="mb-5">
-        <p class="text-xs font-extrabold text-primary mb-1">{{ $group->restaurant->name }}</p>
+        <p class="text-xs font-extrabold text-primary mb-1">{{ $group->venueName() }}</p>
         <h1 class="text-2xl font-black text-stone-900 tracking-tight">طلب جماعي</h1>
         <p class="mt-1 text-sm text-stone-500">{{ $group->statusLabel() }} · ينتهي {{ $group->expires_at?->diffForHumans() }}</p>
     </div>
@@ -20,7 +20,7 @@
             @if($isHost)
                 اطلب أصنافك من المنيو. لما كل المدعوين يخلّصوا ويدفعوا، بتكمّل الطلب بعنوان واحد وتوصيل واحد.
             @else
-                اطلب اللي بدك إياه من منيو {{ $group->restaurant->name }} وادفع نصيبك. التوصيل على صاحب الطلب.
+                اطلب اللي بدك إياه من منيو {{ $group->venueName() }} وادفع نصيبك. التوصيل على صاحب الطلب.
             @endif
         </div>
     @endif

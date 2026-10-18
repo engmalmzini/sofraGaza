@@ -57,6 +57,10 @@
                                 <span class="material-symbols-outlined">edit</span>
                                 <span>تعديل</span>
                             </a>
+                            @include('admin.partials.delete-form', [
+                                'action' => route('admin.restaurants.destroy', $restaurant),
+                                'confirm' => "حذف {$restaurant->name}؟ الطلبات القديمة تبقى في السجل باسم المطعم.",
+                            ])
                         </div>
                     </td>
                 </tr>

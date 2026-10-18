@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\RestaurantBoost;
 use App\Services\RestaurantBoostService;
+use App\Services\SafeDeletion;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -90,5 +91,12 @@ class BoostController extends Controller
         }
 
         return redirect()->route('admin.boosts.show', $boost)->with('success', $message);
+    }
+
+    public function destroy(RestaurantBoost $boost, SafeDeletion $deletion): RedirectResponse
+    {
+        $deletion->deleteBoost($boost);
+
+        return redirect()->route('admin.boosts.index')->with('success', 'تم حذف الإعلان.');
     }
 }

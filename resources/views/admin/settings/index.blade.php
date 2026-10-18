@@ -15,6 +15,10 @@
     $referralInviteeVal = $settings->firstWhere('key', 'referral_invitee_points')?->value ?? '0';
     $membershipExpiryWarningDaysVal = $settings->firstWhere('key', 'membership_expiry_warning_days')?->value ?? '3';
     $restaurantCommissionVal = $settings->firstWhere('key', 'restaurant_commission_percent')?->value ?? '10';
+    $platformHoursEnabled = $platformHoursEnabled ?? false;
+    $platformOpensAt = $platformOpensAt ?? '09:00';
+    $platformClosesAt = $platformClosesAt ?? '00:00';
+    $platformWorkingDays = $platformWorkingDays ?? \App\Support\OperatingHours::allDayNumbers();
 
     $managedKeys = [
         'delivery_fee',
@@ -43,6 +47,10 @@
         'restaurant_expiry_warning_days',
         'membership_expiry_warning_days',
         'home_banners',
+        'platform_hours_enabled',
+        'platform_opens_at',
+        'platform_closes_at',
+        'platform_working_days',
     ];
 
     $otherSettings = $settings->whereNotIn('key', $managedKeys);
@@ -72,6 +80,15 @@
                 <span class="material-symbols-outlined app-tab-icon">local_shipping</span>
                 <span>رسوم ومناطق التوصيل</span>
                 <span class="app-tab-badge">{{ count($areasWithFees) }}</span>
+            </button>
+            <button type="button" 
+                    onclick="switchSettingsTab('hours')" 
+                    id="tab-btn-hours"
+                    class="app-tab-item"
+                    role="tab"
+                    aria-selected="false">
+                <span class="material-symbols-outlined app-tab-icon">schedule</span>
+                <span>ساعات عمل سفرة</span>
             </button>
             <button type="button" 
                     onclick="switchSettingsTab('points')" 
@@ -456,6 +473,72 @@
     </div>
 
     {{-- ========================================================= --}}
+    {{-- TAB: ساعات عمل منصة سفرة (Platform Hours)                   --}}
+    {{-- ========================================================= --}}
+    <div id="section-hours" class="settings-section space-y-6 hidden">
+        <div class="admin-card !p-0 overflow-hidden shadow-sm">
+            <div class="px-5 py-4 border-b border-slate-100 flex flex-wrap items-center justify-between gap-3 bg-white">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-stone-900 text-white flex items-center justify-center shrink-0 shadow-sm">
+                        <span class="material-symbols-outlined text-primary text-[24px]">schedule</span>
+                    </div>
+                    <div>
+                        <h2 class="text-base font-bold text-stone-900">ساعات عمل منصة سفرة للتوصيل</h2>
+                        <p class="text-xs text-slate-500">حتى لو كان المطعم مفتوحاً، الزبون لا يستطيع الطلب إذا كانت المنصة مغلقة</p>
+                    </div>
+                </div>
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-slate-100 text-stone-800">
+                    <span class="w-2 h-2 rounded-full {{ $platformHoursEnabled ? 'bg-emerald-500' : 'bg-slate-400' }}"></span>
+                    <span>{{ $platformHoursEnabled ? 'التقييد مفعّل' : 'مفتوحة 24 ساعة' }}</span>
+                </span>
+            </div>
+
+            <div class="p-6 space-y-6">
+                <label class="flex items-start gap-3 p-4 rounded-2xl bg-slate-50 border border-slate-200/80 cursor-pointer">
+                    <input type="checkbox"
+                           name="platform_hours_enabled"
+                           value="1"
+                           class="mt-1 rounded text-primary focus:ring-primary"
+                           @checked(old('platform_hours_enabled', $platformHoursEnabled))>
+                    <span>
+                        <strong class="block text-sm font-bold text-stone-900">تفعيل ساعات عمل المنصة</strong>
+                        <span class="block text-xs text-slate-500 mt-0.5">عند التفعيل: لا يُقبل أي طلب خارج الأيام والساعات أدناه، حتى من مطاعم ما زالت مفتوحة.</span>
+                    </span>
+                </label>
+
+                <div class="grid gap-4 sm:grid-cols-2">
+                    <div class="p-4 rounded-xl bg-white border border-slate-200/90 space-y-2">
+                        <label class="block text-xs font-bold text-stone-900">يفتح التوصيل الساعة</label>
+                        <input type="time"
+                               name="platform_opens_at"
+                               value="{{ old('platform_opens_at', $platformOpensAt) }}"
+                               class="text-sm font-bold font-mono w-full !h-11">
+                    </div>
+                    <div class="p-4 rounded-xl bg-white border border-slate-200/90 space-y-2">
+                        <label class="block text-xs font-bold text-stone-900">يغلق التوصيل الساعة</label>
+                        <input type="time"
+                               name="platform_closes_at"
+                               value="{{ old('platform_closes_at', $platformClosesAt) }}"
+                               class="text-sm font-bold font-mono w-full !h-11">
+                        <p class="text-[11px] text-slate-400">للإغلاق منتصف الليل اختر 12:00 صباحاً (00:00). للإغلاق الساعة 1 فجراً اختر 01:00.</p>
+                    </div>
+                </div>
+
+                @include('partials.working-days-picker', [
+                    'field' => 'platform_working_days',
+                    'defaultDays' => $platformWorkingDays,
+                    'labelClass' => 'mb-2 block text-xs font-bold text-stone-900',
+                ])
+
+                <div class="p-4 rounded-xl bg-amber-50 border border-amber-100 text-xs text-stone-700 leading-relaxed">
+                    <strong class="text-stone-900 block mb-1">كيف يعمل التقييد؟</strong>
+                    كل مطعم يحدد أيام وساعات عمله من لوحة الشريك. الزبون يطلب فقط إذا كان المطعم مفتوحاً <em>ومنصة سفرة</em> ضمن ساعات التوصيل في نفس الوقت.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- ========================================================= --}}
     {{-- TAB 3: برنامج نقاط الولاء والمكافآت (Points & Rewards)       --}}
     {{-- ========================================================= --}}
     <div id="section-points" class="settings-section space-y-6 hidden">
@@ -807,6 +890,9 @@
     </div>
 </form>
 
+@include('admin.partials.database-backup')
+@include('admin.partials.platform-wipe')
+
 {{-- Scripts --}}
 <script>
     // Tab switching logic with URL Hash support
@@ -926,7 +1012,7 @@
 
         // Check URL hash on page load
         const hash = window.location.hash.replace('#', '');
-        const validTabs = ['payments', 'delivery', 'points', 'banners', 'system'];
+        const validTabs = ['payments', 'delivery', 'hours', 'points', 'banners', 'system'];
         if (validTabs.includes(hash)) {
             switchSettingsTab(hash);
         }

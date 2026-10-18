@@ -123,6 +123,10 @@ class DatabaseSeeder extends Seeder
             ['key' => 'palpay_number', 'value' => '0599000000', 'label' => 'رقم محفظة بال باي (PalPay)'],
             ['key' => 'palpay_name', 'value' => 'محفظة بال باي — سفرة غزة', 'label' => 'اسم صاحب محفظة بال باي'],
             ['key' => 'payment_instructions_note', 'value' => 'يرجى كتابة رقم هاتفك أو رقم الطلب في ملاحظات التحويل، ورفع صورة الإشعار للمراجعة الفورية.', 'label' => 'ملاحظات التحويل للزبائن'],
+            ['key' => 'platform_hours_enabled', 'value' => '0', 'label' => 'تفعيل ساعات عمل منصة سفرة'],
+            ['key' => 'platform_opens_at', 'value' => '09:00', 'label' => 'ساعة افتتاح منصة سفرة'],
+            ['key' => 'platform_closes_at', 'value' => '00:00', 'label' => 'ساعة إغلاق منصة سفرة'],
+            ['key' => 'platform_working_days', 'value' => json_encode([6, 0, 1, 2, 3, 4, 5], JSON_UNESCAPED_UNICODE), 'label' => 'أيام عمل منصة سفرة'],
         ];
 
         foreach ($settings as $setting) {
@@ -330,6 +334,10 @@ class DatabaseSeeder extends Seeder
                     'is_active' => true,
                     'is_featured' => $place['is_featured'],
                     'verification_status' => Restaurant::VERIFICATION_APPROVED,
+                    'opens_at' => $place['opens_at'] ?? '09:00',
+                    'closes_at' => $place['closes_at'] ?? '23:00',
+                    'working_days' => $place['working_days'] ?? [6, 0, 1, 2, 3, 4, 5],
+                ]
                 ]
             );
 

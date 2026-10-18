@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Support\OperatingHours;
+use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
 
@@ -214,5 +216,79 @@ class Setting extends Model
         }
 
         return array_values(array_merge($restaurantAds, $promos));
+    }
+
+    public static function platformHoursEnabled(): bool
+    {
+        return (string) static::value('platform_hours_enabled', '0') === '1';
+    }
+
+    public static function platformOpensAt(): ?string
+    {
+        $value = static::value('platform_opens_at');
+
+        return $value ? substr((string) $value, 0, 5) : null;
+    }
+
+    public static function platformClosesAt(): ?string
+    {
+        $value = static::value('platform_closes_at');
+
+        return $value ? substr((string) $value, 0, 5) : null;
+    }
+
+    /**
+     * @return list<int>
+     */
+    public static function platformWorkingDays(): array
+    {
+        $raw = static::value('platform_working_days');
+        if (! $raw) {
+            return OperatingHours::allDayNumbers();
+        }
+
+        if (is_array($raw)) {
+            return OperatingHours::normalizeDays($raw);
+        }
+
+        $decoded = json_decode((string) $raw, true);
+
+        return OperatingHours::normalizeDays(is_array($decoded) ? $decoded : null);
+    }
+
+    public static function platformIsOpen(?CarbonInterface $at = null): bool
+    {
+        if (! static::platformHoursEnabled()) {
+            return true;
+        }
+
+        return OperatingHours::isOpen(
+            static::platformOpensAt(),
+            static::platformClosesAt(),
+            static::platformWorkingDays(),
+            $at
+        );
+    }
+
+    public static function platformHoursLabel(): string
+    {
+        if (! static::platformHoursEnabled()) {
+            return 'التوصيل متاح على مدار الساعة';
+        }
+
+        return OperatingHours::fullLabel(
+            static::platformOpensAt(),
+            static::platformClosesAt(),
+            static::platformWorkingDays()
+        );
+    }
+
+    public static function platformClosedReason(?CarbonInterface $at = null): ?string
+    {
+        if (static::platformIsOpen($at)) {
+            return null;
+        }
+
+        return 'منصة سفرة لا تستقبل طلبات الآن. التوصيل متاح '.static::platformHoursLabel().'.';
     }
 }

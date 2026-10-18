@@ -35,7 +35,7 @@
     @if($cardContext !== 'partner')
         <div class="admin-order-card__venue">
             <span class="material-symbols-outlined">storefront</span>
-            <span class="truncate">{{ $order->restaurant->name ?? 'مطعم' }}</span>
+            <span class="truncate">{{ $order->venueName() }}</span>
         </div>
     @else
         <div class="admin-order-card__venue">

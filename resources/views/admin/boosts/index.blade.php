@@ -45,7 +45,13 @@
                         @endif
                     </td>
                     <td>
-                        <a href="{{ route('admin.boosts.show', $boost) }}" class="admin-action-btn admin-action-btn--outline admin-action-btn--sm">مراجعة</a>
+                        <div class="admin-table-actions">
+                            <a href="{{ route('admin.boosts.show', $boost) }}" class="admin-action-btn admin-action-btn--outline admin-action-btn--sm">مراجعة</a>
+                            @include('admin.partials.delete-form', [
+                                'action' => route('admin.boosts.destroy', $boost),
+                                'confirm' => 'حذف إعلان '.$boost->restaurant?->name.'؟',
+                            ])
+                        </div>
                     </td>
                 </tr>
             @empty

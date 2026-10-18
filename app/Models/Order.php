@@ -27,6 +27,7 @@ class Order extends Model
     protected $fillable = [
         'user_id',
         'restaurant_id',
+        'restaurant_name',
         'group_order_id',
         'courier_id',
         'membership_id',
@@ -64,6 +65,24 @@ class Order extends Model
             'prepared_at' => 'datetime',
             'delivered_at' => 'datetime',
         ];
+    }
+
+    protected static function booted(): void
+    {
+        static::creating(function (Order $order) {
+            if (filled($order->restaurant_name) || ! $order->restaurant_id) {
+                return;
+            }
+
+            $order->restaurant_name = Restaurant::query()->where('id', $order->restaurant_id)->value('name');
+        });
+    }
+
+    public function venueName(): string
+    {
+        $name = trim((string) ($this->restaurant_name ?: $this->restaurant?->name));
+
+        return $name !== '' ? $name : 'مطعم محذوف';
     }
 
     public function isPrepared(): bool

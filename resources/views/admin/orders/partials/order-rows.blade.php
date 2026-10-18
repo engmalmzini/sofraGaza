@@ -5,7 +5,7 @@
             <div class="font-bold text-slate-900">{{ $order->user->name }}</div>
             <div class="text-xs text-on-surface-variant font-mono" dir="ltr">{{ $order->phone }}</div>
         </td>
-        <td><span class="font-semibold text-slate-800">{{ $order->restaurant->name }}</span></td>
+        <td><span class="font-semibold text-slate-800">{{ $order->venueName() }}</span></td>
         <td><span class="font-mono font-bold text-slate-900">{{ number_format($order->total, 2) }}</span> <span class="ils">₪</span></td>
         <td><span class="text-xs text-slate-600">{{ $order->type === 'redemption' ? 'استبدال نقاط' : 'شراء' }}</span></td>
         <td>
