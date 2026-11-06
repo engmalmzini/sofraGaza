@@ -27,12 +27,12 @@
         <h3 class="sg-dish-card__title">{{ $restaurant->name }}</h3>
         <p class="sg-dish-card__sub">{{ $restaurant->cuisineLabel() }} • {{ $restaurant->areaLabel() }}</p>
         <div class="sg-dish-card__meta">
-            @include('partials.star-icon', ['class' => 'sg-dish-card__star'])
-            <span class="sg-dish-card__rating">{{ $rating }}</span>
             @if($reviewsCount > 0)
+                @include('partials.star-icon', ['class' => 'sg-dish-card__star'])
+                <span class="sg-dish-card__rating">{{ $rating }}</span>
                 <span class="sg-dish-card__reviews">({{ $reviewsCount }})</span>
+                <span class="sg-dish-card__dot"></span>
             @endif
-            <span class="sg-dish-card__dot"></span>
             <span class="material-symbols-outlined sg-dish-card__clock">schedule</span>
             <span>{{ $eta }}</span>
         </div>

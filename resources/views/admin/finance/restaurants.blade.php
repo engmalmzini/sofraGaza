@@ -7,9 +7,10 @@
 @include('admin.finance.partials.toolbar', ['routeName' => 'admin.finance.restaurants'])
 
 <p class="text-xs text-slate-500 mb-3">
-    هذه الصفحة لحساب المبيعات والعمولة وإقفال الفترة محاسبياً. <strong>الدفع الفعلي للمطعم يتم من
-    <a href="{{ route('admin.finance.payouts') }}" class="text-primary font-bold hover:underline">سحب المطاعم</a></strong>
-    بعد ما يطلب المطعم السحب وتأكيد التحويل مع إشعار.
+    هذه الصفحة لحساب المبيعات والعمولة وإقفال الفترة محاسبياً. <strong>تسوية المطعم يمكن أن تتم مباشرة من صفحة حسابه</strong>
+    بدون انتظار طلب سحب، أو من
+    <a href="{{ route('admin.finance.payouts') }}" class="text-primary font-bold hover:underline">سحب المطاعم</a>
+    إذا أرسل المطعم طلباً.
 </p>
 
 <div class="admin-metrics !grid-cols-2 lg:!grid-cols-4">
@@ -21,7 +22,7 @@
     <article class="admin-metric">
         <div class="admin-metric__top"><span>العمولة المستحقة</span></div>
         <strong class="finance-in">{{ number_format($commissionTotal, 2) }} <span class="ils">₪</span></strong>
-        <span class="admin-metric__note">{{ \App\Support\Finance::restaurantCommissionLabel() }} من إجمالي المبيعات</span>
+        <span class="admin-metric__note">حسب نسبة كل مطعم من مبيعاته</span>
     </article>
     <article class="admin-metric">
         <div class="admin-metric__top"><span>صافي الفترة</span></div>
@@ -50,7 +51,7 @@
                     <th>المطعم</th>
                     <th>الطلبات</th>
                     <th>المبيعات</th>
-                    <th>العمولة {{ \App\Support\Finance::restaurantCommissionLabel() }}</th>
+                    <th>العمولة</th>
                     <th>صافي الفترة</th>
                     <th>رصيد متاح</th>
                     <th>إقفال الفترة</th>
@@ -67,7 +68,10 @@
                         </td>
                         <td>{{ $row['orders_count'] }}</td>
                         <td class="font-mono font-bold">{{ number_format($row['sales'], 2) }} ₪</td>
-                        <td class="font-mono finance-in">{{ number_format($row['commission'], 2) }} ₪</td>
+                        <td class="font-mono finance-in">
+                            {{ number_format($row['commission'], 2) }} ₪
+                            <div class="text-[11px] text-slate-500">{{ $row['restaurant']->commissionLabel() }}</div>
+                        </td>
                         <td class="font-mono">{{ number_format($row['net'], 2) }} ₪</td>
                         <td>
                             <div class="font-mono font-bold">{{ number_format($row['available'], 2) }} ₪</div>
@@ -88,7 +92,7 @@
                             @endif
                         </td>
                         <td class="whitespace-nowrap">
-                            <a href="{{ route('admin.finance.restaurants.show', array_merge(['restaurant' => $row['restaurant']], $periodQuery)) }}" class="admin-action-btn admin-action-btn--outline admin-action-btn--sm">السجل</a>
+                            <a href="{{ route('admin.finance.restaurants.show', array_merge(['restaurant' => $row['restaurant']], $periodQuery)) }}" class="admin-action-btn admin-action-btn--outline admin-action-btn--sm">{{ $row['available'] > 0.009 ? 'تسوية / السجل' : 'السجل' }}</a>
                             @if($row['status'] !== 'paid')
                                 <form method="POST" action="{{ route('admin.finance.restaurants.settle', $row['restaurant']) }}" class="inline" onsubmit="return confirm('هذا إقفال محاسبي للفترة فقط، ولا يحوّل فلوس للمطعم. التحويل الفعلي من صفحة سحب المطاعم. متابعة؟');">
                                     @csrf

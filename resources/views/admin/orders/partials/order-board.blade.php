@@ -8,9 +8,10 @@
     $moveUrl = $moveUrl ?? '';
     $allowedColumns = $allowedColumns ?? '';
     $readonly = $moveUrl === '';
+    $hiddenColumns = $hiddenColumns ?? [];
     $columns = [
         'pending_confirmation' => [
-            'title' => 'بانتظار التأكيد',
+            'title' => 'بانتظار تأكيد الدفع',
             'icon' => 'pending_actions',
             'empty_icon' => 'done_all',
             'empty' => 'لا توجد طلبات معلقة',
@@ -38,6 +39,7 @@
             'mod' => 'delivered',
         ],
     ];
+    $columns = array_filter($columns, fn ($key) => ! in_array($key, $hiddenColumns, true), ARRAY_FILTER_USE_KEY);
 @endphp
 
 <div

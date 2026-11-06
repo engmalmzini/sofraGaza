@@ -163,7 +163,7 @@ class OrderNotesAndLiveAlertsTest extends TestCase
         $response->assertOk()
             ->assertSee('تدفعه للمطعم (قيمة الأكل)')
             ->assertSee('35.00')
-            ->assertSee('أجرة التوصيل (لك)')
+            ->assertSee('أجرة التوصيل الأصلية')
             ->assertSee('5.00')
             ->assertSee('زيادة فلفل حار وبدون بصل')
             ->assertSee('ملاحظة الزبون للصنف');
@@ -212,6 +212,10 @@ class OrderNotesAndLiveAlertsTest extends TestCase
                 'latest_id' => $order->id,
                 'has_new' => true,
             ]);
+        $responseWithOldId->assertJsonPath('latest_order.phone', '0599112233')
+            ->assertJsonPath('latest_order.customer', $customer->name)
+            ->assertJsonPath('latest_order.items_count', 1);
+        $this->assertStringContainsString($item->name, (string) $responseWithOldId->json('latest_order.items'));
     }
 
     public function test_admin_orders_live_endpoint_returns_json(): void
@@ -226,10 +230,18 @@ class OrderNotesAndLiveAlertsTest extends TestCase
             'type' => 'purchase',
             'payment_method' => 'receipt',
             'status' => 'pending_confirmation',
+            'delivery_area' => 'الرمال',
             'address_details' => 'غزة',
             'phone' => '0599112233',
             'subtotal' => 35.00,
             'total' => 40.00,
+        ]);
+        $order->items()->create([
+            'menu_item_id' => $item->id,
+            'name' => $item->name,
+            'price' => 35.00,
+            'quantity' => 2,
+            'line_total' => 35.00,
         ]);
 
         $response = $this->actingAs($admin)->getJson(route('admin.orders.live', ['last_id' => $order->id]));
@@ -238,7 +250,12 @@ class OrderNotesAndLiveAlertsTest extends TestCase
                 'latest_id' => $order->id,
                 'pending_count' => 1,
                 'has_new' => false,
-            ]);
+            ])
+            ->assertJsonPath('latest_order.phone', '0599112233')
+            ->assertJsonPath('latest_order.restaurant', $restaurant->name)
+            ->assertJsonPath('latest_order.items_count', 1);
+        $this->assertStringContainsString('2×', (string) $response->json('latest_order.items'));
+        $this->assertStringContainsString($item->name, (string) $response->json('latest_order.items'));
     }
 
     public function test_customer_can_remove_item_via_json_cart_update(): void

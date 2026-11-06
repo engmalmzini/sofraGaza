@@ -68,11 +68,13 @@ class RestaurantController extends Controller
 
     private function validated(Request $request, Restaurant $restaurant): array
     {
+        $workingDays = OperatingHours::submittedDays((array) $request->input('working_days', []));
+        $customDayHours = $request->boolean('custom_day_hours');
         $request->merge([
             'phone' => PalestinianPhone::digits($request->input('phone')),
             'opens_at' => substr((string) $request->input('opens_at'), 0, 5),
             'closes_at' => substr((string) $request->input('closes_at'), 0, 5),
-            'working_days' => OperatingHours::submittedDays((array) $request->input('working_days', [])),
+            'working_days' => $workingDays,
         ]);
 
         $data = $request->validate([
@@ -85,21 +87,25 @@ class RestaurantController extends Controller
             'license_number' => ['nullable', 'string', 'max:50'],
             'area' => ['required', Rule::in(collect(config('brand.areas', []))->pluck('key')->all())],
             'address' => ['required', 'string', 'max:255'],
-            'opens_at' => ['required', 'date_format:H:i'],
-            'closes_at' => ['required', 'date_format:H:i', 'different:opens_at'],
-            ...OperatingHours::daysValidationRules(),
+            ...OperatingHours::hoursValidationRules($customDayHours, $workingDays),
             'image' => ['nullable', 'image', 'max:4096'],
         ], [
             'description.min' => 'اكتب وصفاً أوضح لمطعمك (20 حرفاً على الأقل).',
             ...PalestinianPhone::messages(),
             'owner_national_id.digits' => 'رقم الهوية يجب أن يتكون من 9 أرقام.',
             'owner_national_id.unique' => 'رقم الهوية مسجّل مسبقاً.',
-            'closes_at.different' => 'ساعة الإغلاق يجب أن تختلف عن ساعة الافتتاح.',
-            ...OperatingHours::daysValidationMessages(),
+            ...OperatingHours::hoursValidationMessages($workingDays),
         ]);
 
-        unset($data['image']);
-        $data['working_days'] = OperatingHours::submittedDays($data['working_days'] ?? []);
+        unset($data['image'], $data['custom_day_hours']);
+        $data['working_days'] = $workingDays;
+        $data['day_hours'] = OperatingHours::submittedDayHours(
+            $request->input('day_hours'),
+            $workingDays,
+            $data['opens_at'],
+            $data['closes_at'],
+            $customDayHours
+        );
 
         return $data;
     }

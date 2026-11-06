@@ -38,7 +38,7 @@
         @elseif(!empty($quote['lines']))
             @foreach($quote['lines'] as $line)
                 <div class="flex justify-between text-xs text-stone-600">
-                    <span>{{ $line['qty'] }}× {{ $line['item']->name }}</span>
+                    <span>{{ $line['qty'] }}× {{ $line['name'] ?? $line['item']->name }}</span>
                     <span class="font-mono font-bold">{{ number_format($line['line_total'], 2) }} ₪</span>
                 </div>
             @endforeach

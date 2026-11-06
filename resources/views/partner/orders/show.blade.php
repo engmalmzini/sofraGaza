@@ -11,10 +11,17 @@
         </a>
         <h1 class="text-xl font-bold text-on-surface">طلب #{{ $order->id }}</h1>
     </div>
-    <div>
+    <div class="flex items-center gap-2">
         <span class="admin-pill {{ in_array($order->status, ['pending_confirmation', 'confirmed']) ? 'admin-pill--wait' : ($order->status === 'preparing' ? 'admin-pill--warn' : 'admin-pill--ok') }}">
             {{ $order->statusLabel() }}
         </span>
+        @if($order->shouldShowPaidBadge())
+            <span class="admin-pill admin-pill--ok">تم الدفع</span>
+        @endif
+        @include('partials.order-print-button', [
+            'printUrl' => route('partner.orders.print', $order),
+            'class' => 'admin-btn admin-btn--primary text-xs',
+        ])
     </div>
 </div>
 
@@ -62,6 +69,9 @@
                 <span class="admin-pill {{ in_array($order->status, ['pending_confirmation', 'confirmed']) ? 'admin-pill--wait' : ($order->status === 'preparing' ? 'admin-pill--warn' : 'admin-pill--ok') }}">
                     {{ $order->statusLabel() }}
                 </span>
+                @if($order->shouldShowPaidBadge())
+                    <span class="admin-pill admin-pill--ok">تم الدفع</span>
+                @endif
                 @if($order->isPrepared())
                     <span class="inline-flex items-center gap-1 text-xs font-bold text-emerald-800 bg-emerald-100 px-2.5 py-1 rounded-full">
                         <span class="material-symbols-outlined text-[15px]">task_alt</span>
@@ -69,6 +79,13 @@
                     </span>
                 @endif
             </div>
+
+            @if($order->status === 'confirmed' && $order->shouldShowPaidBadge())
+                <div class="mt-3 p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-sm font-bold flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-emerald-600 text-[20px]">paid</span>
+                    <span>تم تأكيد الدفع من الإدارة — يمكن بدء التحضير</span>
+                </div>
+            @endif
 
             @if($order->status === 'confirmed')
                 <form method="POST" action="{{ route('partner.orders.update', $order) }}" class="mt-4">

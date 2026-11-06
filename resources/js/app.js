@@ -386,8 +386,8 @@ const syncCartIndexPage = (cart) => {
     page.classList.add('pb-36');
 
     page.querySelectorAll('[data-cart-line]').forEach((row) => {
-        const id = Number(row.dataset.cartLine);
-        const line = lines.find((item) => Number(item.id) === id);
+        const id = String(row.dataset.cartLine || '');
+        const line = lines.find((item) => String(item.key || item.id) === id);
 
         if (!line) {
             row.remove();
@@ -517,8 +517,11 @@ const applyCart = (cart) => {
     widenShekels(document.body);
 };
 
-const cartLineForms = (id, qty, compact) => {
+const cartLineForms = (line, compact) => {
     const token = csrfToken();
+    const id = line.id;
+    const key = line.key || line.id;
+    const qty = line.qty;
     const minus = Math.max(0, qty - 1);
     const btnClass = compact
         ? 'w-6 h-6 rounded-full flex items-center justify-center text-on-surface'
@@ -535,10 +538,20 @@ const cartLineForms = (id, qty, compact) => {
         <input type="hidden" name="_token" value="${token}">
         <input type="hidden" name="_method" value="PATCH">
         <input type="hidden" name="item_id" value="${id}">
+        <input type="hidden" name="line_key" value="${escapeHtml(String(key))}">
         <button type="submit" name="quantity" value="${minus}" class="${btnClass}">${compact ? '<span class="material-symbols-outlined text-[16px]">remove</span>' : '-'}</button>
         <span class="${qtyClass}">${qty}</span>
         <button type="submit" name="quantity" value="${qty + 1}" class="${plusClass}">${compact ? '<span class="material-symbols-outlined text-[16px]">add</span>' : '+'}</button>
     </form>`;
+};
+
+const choicesMarkup = (line) => {
+    const label = line.choices_label || '';
+    if (!label) {
+        return '';
+    }
+
+    return `<div class="text-[11px] text-stone-500 leading-4 truncate">${escapeHtml(label)}</div>`;
 };
 
 const escapeHtml = (value) => String(value ?? '')
@@ -554,13 +567,16 @@ const renderCartLines = (cart) => {
     if (desktop) {
         desktop.innerHTML = cart.lines?.length
             ? cart.lines.map((line) => `
-                <div class="pt-2 first:pt-0 flex flex-col gap-1.5 border-t border-slate-100 first:border-0" data-line-id="${line.id}">
+                <div class="pt-2 first:pt-0 flex flex-col gap-1.5 border-t border-slate-100 first:border-0" data-line-id="${escapeHtml(String(line.key || line.id))}">
                     <div class="flex items-start justify-between gap-2">
-                        <span class="text-[13px] font-semibold text-on-surface truncate">${escapeHtml(line.name)}</span>
+                        <div class="min-w-0">
+                            <span class="text-[13px] font-semibold text-on-surface truncate block">${escapeHtml(line.name)}</span>
+                            ${choicesMarkup(line)}
+                        </div>
                         <span class="text-[13px] font-bold text-on-surface shrink-0">${money(line.line_total, 0)} ${ilsMark}</span>
                     </div>
                     <div class="flex items-center justify-between">
-                        ${cartLineForms(line.id, line.qty, false)}
+                        ${cartLineForms(line, false)}
                     </div>
                 </div>
             `).join('')
@@ -570,12 +586,13 @@ const renderCartLines = (cart) => {
     if (drawer) {
         drawer.innerHTML = cart.lines?.length
             ? cart.lines.map((line) => `
-                <div class="flex items-center justify-between p-2.5 rounded-lg bg-surface-container-low" data-line-id="${line.id}">
+                <div class="flex items-center justify-between p-2.5 rounded-lg bg-surface-container-low" data-line-id="${escapeHtml(String(line.key || line.id))}">
                     <div class="flex-1 min-w-0 pl-2">
                         <h4 class="font-label-md text-[13px] text-on-surface font-bold truncate">${escapeHtml(line.name)}</h4>
+                        ${choicesMarkup(line)}
                         <span class="font-label-md text-[13px] text-primary font-bold">${money(line.line_total, 0)} ${ilsMark}</span>
                     </div>
-                    ${cartLineForms(line.id, line.qty, true)}
+                    ${cartLineForms(line, true)}
                 </div>
             `).join('')
             : '<p data-cart-empty class="text-sm text-on-surface-variant text-center py-6">سلتك فارغة. أضف طبقاً للبدء.</p>';
@@ -642,7 +659,7 @@ const isCartForm = (form) => {
 
     const action = form.getAttribute('action') || '';
 
-    if (/\/cart\/\d+/.test(action)) {
+    if (/\/cart\/(\d+|offers\/\d+)/.test(action)) {
         return true;
     }
 
@@ -699,6 +716,8 @@ const initRestaurantShow = () => {
     const totalLabel = document.getElementById('modalTotalCalculated');
     const titleLabel = document.getElementById('modalDishTitle');
     const descLabel = document.getElementById('modalDishDesc');
+    const groupsBox = document.getElementById('customize-groups');
+    const dishImage = document.getElementById('modalDishImage');
     let unitPrice = 0;
     let quantity = 1;
 
@@ -713,6 +732,9 @@ const initRestaurantShow = () => {
         document.body.style.overflow = open ? 'hidden' : '';
     };
 
+    const selectedExtras = () => [...(customForm?.querySelectorAll('[data-option-choice]:checked') || [])]
+        .reduce((sum, input) => sum + Number(input.dataset.price || 0), 0);
+
     const recalcModal = () => {
         if (qtyInput) {
             qtyInput.value = String(quantity);
@@ -723,20 +745,108 @@ const initRestaurantShow = () => {
         }
 
         if (totalLabel) {
-            totalLabel.innerHTML = `${Math.round(unitPrice * quantity)} ${ilsMark}`;
+            totalLabel.innerHTML = `${Math.round((unitPrice + selectedExtras()) * quantity)} ${ilsMark}`;
         }
+    };
+
+    const parseOptionGroups = (raw) => {
+        if (!raw) {
+            return [];
+        }
+
+        const attempts = [
+            raw,
+            raw.replaceAll('&amp;quot;', '"').replaceAll('&quot;', '"').replaceAll('&amp;', '&'),
+            raw.replaceAll('&quot;', '"').replaceAll('&amp;', '&'),
+        ];
+
+        for (const candidate of attempts) {
+            try {
+                const parsed = JSON.parse(candidate);
+                if (Array.isArray(parsed)) {
+                    return parsed;
+                }
+            } catch {
+                // try the next encoding
+            }
+        }
+
+        return [];
+    };
+
+    const renderOptionGroups = (raw) => {
+        if (!groupsBox) {
+            return;
+        }
+
+        const groups = parseOptionGroups(raw);
+
+        if (!Array.isArray(groups) || groups.length === 0) {
+            groupsBox.innerHTML = '';
+            return;
+        }
+
+        groupsBox.innerHTML = groups.map((group, gi) => {
+            const required = Boolean(group.required);
+            const multi = group.type === 'multi';
+            const title = `${escapeHtml(group.name || 'الخيارات')}${required ? '' : ' (اختياري)'}`;
+            const defaultIndex = (!multi && required)
+                ? (group.choices || []).reduce((best, choice, index) => (
+                    Number(choice.price || 0) < Number((group.choices[best] || {}).price || 0) ? index : best
+                ), 0)
+                : 0;
+            const choices = (group.choices || []).map((choice, ci) => {
+                const price = Number(choice.price || 0);
+                const priceLabel = price > 0 ? `₪ ${price.toFixed(2)} +` : '₪ 0.00 +';
+                const inputName = multi ? `option_groups[${gi}][]` : `option_groups[${gi}]`;
+                const checked = !multi && required && ci === defaultIndex ? 'checked' : '';
+                return `<label class="flex items-start justify-between gap-3 p-2.5 rounded-xl border border-slate-200 hover:border-primary/40 cursor-pointer has-[:checked]:border-primary has-[:checked]:bg-primary/5">
+                    <span class="flex items-start gap-2 min-w-0">
+                        <input class="mt-1 accent-primary" type="${multi ? 'checkbox' : 'radio'}" name="${inputName}" value="${ci}" data-option-choice data-price="${price}" ${required && !multi ? 'required' : ''} ${checked}>
+                        <span class="font-body-sm text-[13px] text-on-surface leading-5">${escapeHtml(choice.name || '')}</span>
+                    </span>
+                    <span class="font-label-sm text-[12px] font-bold text-on-surface-variant shrink-0 font-mono">${priceLabel}</span>
+                </label>`;
+            }).join('');
+
+            return `<div class="flex flex-col gap-2">
+                <span class="font-label-lg text-[15px] text-on-surface font-semibold">${title}</span>
+                <div class="flex flex-col gap-1.5">${choices}</div>
+            </div>`;
+        }).join('');
+    };
+
+    const syncMenuGroups = (root) => {
+        root?.querySelectorAll('[data-menu-section]').forEach((group) => {
+            const visible = [...group.querySelectorAll('.dish-item')].some((item) => !item.classList.contains('hidden'));
+            group.classList.toggle('hidden', !visible);
+        });
+    };
+
+    const applyMobileMenuFilter = () => {
+        if (!mobileRoot) {
+            return;
+        }
+
+        const active = mobileRoot.querySelector('.category-pill.is-active');
+        const filter = active?.dataset.filter || 'all';
+        const term = (mobileRoot.querySelector('.menu-search')?.value || '').trim().toLowerCase();
+
+        mobileRoot.querySelectorAll('.dish-item').forEach((item) => {
+            const catMatch = filter === 'all' || item.dataset.category === filter || item.classList.contains(filter);
+            const name = (item.dataset.name || '').toLowerCase();
+            const searchMatch = !term || name.includes(term);
+            item.classList.toggle('hidden', !(catMatch && searchMatch));
+        });
+
+        syncMenuGroups(mobileRoot);
     };
 
     mobileRoot?.querySelectorAll('.category-pill').forEach((pill) => {
         pill.addEventListener('click', () => {
             mobileRoot.querySelectorAll('.category-pill').forEach((btn) => btn.classList.remove('is-active'));
             pill.classList.add('is-active');
-
-            const filter = pill.dataset.filter;
-            mobileRoot.querySelectorAll('.dish-item').forEach((item) => {
-                const match = filter === 'all' || item.dataset.category === filter || item.classList.contains(filter);
-                item.classList.toggle('hidden', !match);
-            });
+            applyMobileMenuFilter();
         });
     });
 
@@ -745,23 +855,31 @@ const initRestaurantShow = () => {
             desktopRoot.querySelectorAll('.category-btn').forEach((item) => item.classList.remove('is-active'));
             btn.classList.add('is-active');
 
-            const target = document.getElementById(`section-${btn.dataset.section}`);
+            const key = btn.dataset.section;
+            const target = key === 'all'
+                ? desktopRoot.querySelector('[data-menu-section]')
+                : document.getElementById(`section-${key}`);
             target?.scrollIntoView({ behavior: 'smooth', block: 'start' });
         });
     });
 
-    const bindSearch = (input, items) => {
-        input?.addEventListener('input', () => {
-            const term = input.value.trim().toLowerCase();
-            items.forEach((item) => {
-                const name = (item.dataset.name || '').toLowerCase();
-                item.classList.toggle('hidden', Boolean(term) && !name.includes(term));
-            });
-        });
+    const bindSearch = (root, onSearch) => {
+        root?.querySelector('.menu-search')?.addEventListener('input', onSearch);
     };
 
-    bindSearch(mobileRoot?.querySelector('.menu-search'), [...(mobileRoot?.querySelectorAll('.dish-item') || [])]);
-    bindSearch(desktopRoot?.querySelector('.menu-search'), [...(desktopRoot?.querySelectorAll('.dish-item') || [])]);
+    bindSearch(mobileRoot, applyMobileMenuFilter);
+    bindSearch(desktopRoot, () => {
+        if (!desktopRoot) {
+            return;
+        }
+
+        const term = (desktopRoot.querySelector('.menu-search')?.value || '').trim().toLowerCase();
+        desktopRoot.querySelectorAll('.dish-item').forEach((item) => {
+            const name = (item.dataset.name || '').toLowerCase();
+            item.classList.toggle('hidden', Boolean(term) && !name.includes(term));
+        });
+        syncMenuGroups(desktopRoot);
+    });
 
     page.querySelectorAll('[data-open-customizer]').forEach((button) => {
         button.addEventListener('click', () => {
@@ -778,12 +896,18 @@ const initRestaurantShow = () => {
             }
 
             if (descLabel) {
-                descLabel.textContent = button.dataset.itemDesc || 'اختر الكمية والإضافات المفضلة لوجبتك';
+                descLabel.textContent = button.dataset.itemDesc || 'اختر الكمية والنوع إن وُجد';
             }
 
-            customForm.querySelectorAll('.addon-check').forEach((box) => {
-                box.checked = false;
-            });
+            if (dishImage) {
+                const src = button.dataset.itemImage || '';
+                dishImage.hidden = !src;
+                if (src) {
+                    dishImage.src = src;
+                }
+            }
+
+            renderOptionGroups(button.dataset.optionGroups || '[]');
 
             const notes = document.getElementById('orderNotes');
             if (notes) {
@@ -803,6 +927,12 @@ const initRestaurantShow = () => {
     customModal?.querySelector('.js-qty-plus')?.addEventListener('click', () => {
         quantity = Math.min(20, quantity + 1);
         recalcModal();
+    });
+
+    customModal?.addEventListener('change', (event) => {
+        if (event.target?.hasAttribute?.('data-option-choice')) {
+            recalcModal();
+        }
     });
 
     customModal?.querySelector('.js-close-customizer')?.addEventListener('click', () => setOpen(customModal, false));

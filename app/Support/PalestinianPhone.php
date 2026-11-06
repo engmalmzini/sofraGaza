@@ -12,12 +12,28 @@ class PalestinianPhone
 
     public const CUSTOMER_HTML_PATTERN = '^05[0-9]{8}$';
 
-    public static function digits(?string $value): string
+    public static function digits(mixed $value): string
     {
+        if (is_array($value)) {
+            foreach ($value as $item) {
+                $digits = self::digits($item);
+
+                if ($digits !== '') {
+                    return $digits;
+                }
+            }
+
+            return '';
+        }
+
+        if ($value === null || is_bool($value) || is_object($value)) {
+            return '';
+        }
+
         return preg_replace('/\D+/', '', (string) $value) ?: '';
     }
 
-    public static function local(?string $value): string
+    public static function local(mixed $value): string
     {
         $digits = self::digits($value);
 
@@ -32,7 +48,7 @@ class PalestinianPhone
         return $digits;
     }
 
-    public static function international(?string $value): ?string
+    public static function international(mixed $value): ?string
     {
         $digits = self::digits($value);
 
@@ -51,7 +67,7 @@ class PalestinianPhone
         return $digits;
     }
 
-    public static function whatsappUrl(?string $phone, ?string $text = null): ?string
+    public static function whatsappUrl(mixed $phone, ?string $text = null): ?string
     {
         $intl = self::international($phone);
 
@@ -110,7 +126,7 @@ class PalestinianPhone
         ];
     }
 
-    public static function mask(string $phone): string
+    public static function mask(mixed $phone): string
     {
         $digits = self::digits($phone);
 

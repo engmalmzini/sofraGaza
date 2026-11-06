@@ -1,8 +1,10 @@
 @php
     $reviewsList = $approvedReviews ?? $restaurant->approvedReviews()->with('user')->take(20)->get();
     $breakdown = $ratingBreakdown ?? $restaurant->ratingBreakdown();
-    $avgRating = $rating ?? number_format($restaurant->averageRating(), 1);
     $totalCount = $reviews ?? $restaurant->reviewsCount();
+    $avgRating = $totalCount > 0
+        ? ($rating ?? number_format($restaurant->averageRating() ?? 0, 1))
+        : null;
 @endphp
 
 <section id="reviews" class="rounded-3xl bg-surface-container-lowest border border-slate-100 p-6 sm:p-8 shadow-xs space-y-8 my-8">
@@ -19,13 +21,13 @@
 
         <div class="flex items-center gap-3 bg-[#fff7ed] border border-[#fed7aa] rounded-2xl px-5 py-3 shrink-0">
             <div class="text-center">
-                <span class="text-3xl sm:text-4xl font-black text-[#9a3412] font-mono block leading-none">{{ $avgRating }}</span>
+                <span class="text-3xl sm:text-4xl font-black text-[#9a3412] font-mono block leading-none">{{ $avgRating ?? '—' }}</span>
                 <span class="text-[10px] text-[#c2410c] font-semibold block mt-1">من 5 نجوم</span>
             </div>
             <div class="border-r border-[#fed7aa] pr-3 flex flex-col justify-center">
                 <div class="flex items-center gap-0.5">
                     @for($i = 1; $i <= 5; $i++)
-                        @if($i <= round((float) $avgRating))
+                        @if($avgRating && $i <= round((float) $avgRating))
                             @include('partials.star-icon', ['class' => 'w-4 h-4 text-[#d65e15]'])
                         @else
                             @include('partials.star-icon', ['class' => 'w-4 h-4 text-stone-200'])

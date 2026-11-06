@@ -96,7 +96,75 @@ class FinanceController extends Controller
             'row' => $row,
             'orders' => $orders,
             'history' => $history,
+            'payoutMethods' => RestaurantPayout::METHODS,
         ]);
+    }
+
+    public function payRestaurant(Request $request, Restaurant $restaurant, NotificationService $notifications): RedirectResponse
+    {
+        if ($restaurant->hasPendingPayout()) {
+            return back()->with('error', 'لهذا المطعم طلب سحب معلّق. أكّده أو ارفضه من صفحة سحب المطاعم قبل عمل تسوية جديدة.');
+        }
+
+        $available = $restaurant->availableBalance();
+        if ($available <= 0) {
+            return back()->with('error', 'لا يوجد رصيد متاح لتسوية هذا المطعم.');
+        }
+
+        $validMethods = implode(',', array_keys(RestaurantPayout::METHODS));
+        $data = $request->validate([
+            'amount' => ['required', 'numeric', 'min:1', 'max:'.$available],
+            'payout_method' => ['required', 'string', 'in:'.$validMethods],
+            'transfer_details' => ['required', 'string', 'min:5', 'max:500'],
+            'admin_notes' => ['nullable', 'string', 'max:500'],
+            'receipt' => ['required', 'image', 'max:6144'],
+        ], [
+            'amount.required' => 'أدخل مبلغ التسوية.',
+            'amount.min' => 'الحد الأدنى للتسوية هو 1 ₪.',
+            'amount.max' => 'المبلغ أكبر من الرصيد المتاح ('.$available.' ₪).',
+            'payout_method.required' => 'اختر طريقة التحويل.',
+            'transfer_details.required' => 'أدخل بيانات التحويل.',
+            'receipt.required' => 'ارفع صورة إشعار التحويل لإتمام التسوية.',
+            'receipt.image' => 'إشعار التحويل يجب أن يكون صورة.',
+        ]);
+
+        $path = $request->file('receipt')->store('payouts/restaurants', 'public');
+        $notes = trim((string) ($data['admin_notes'] ?? ''));
+        if ($notes === '') {
+            $notes = 'تسوية مباشرة من الإدارة بدون طلب سحب من المطعم.';
+        }
+
+        $payout = RestaurantPayout::query()->create([
+            'restaurant_id' => $restaurant->id,
+            'amount' => round((float) $data['amount'], 2),
+            'status' => RestaurantPayout::STATUS_COMPLETED,
+            'period' => 'all',
+            'payout_method' => $data['payout_method'],
+            'transfer_details' => $data['transfer_details'],
+            'admin_notes' => $notes,
+            'transfer_receipt_path' => $path,
+            'processed_by' => $request->user()->id,
+            'processed_at' => now(),
+        ]);
+
+        $restaurant->update([
+            'payout_method' => $data['payout_method'],
+            'payout_details' => $data['transfer_details'],
+        ]);
+
+        if ($restaurant->owner) {
+            $formatted = number_format((float) $payout->amount, 2);
+            $notifications->notify(
+                $restaurant->owner,
+                'تم تحويل مستحقات المطعم',
+                "قامت الإدارة بتسوية وتحويل مبلغ {$formatted} ₪ إلى حساب {$restaurant->name} ({$payout->methodLabel()}). يمكنك مراجعة إشعار التحويل من الرصيد والسحب.",
+                route('partner.wallet')
+            );
+        }
+
+        return redirect()
+            ->route('admin.finance.payouts', ['payout_status' => 'completed'])
+            ->with('success', "تم تحويل {$payout->amount} ₪ لـ {$restaurant->name} مباشرة بدون طلب سحب. خُصم المبلغ من الرصيد المتاح.");
     }
 
     public function settle(Request $request, Restaurant $restaurant): RedirectResponse
@@ -114,7 +182,7 @@ class FinanceController extends Controller
 
         return redirect()
             ->route('admin.finance.restaurants.show', array_merge(['restaurant' => $restaurant], $this->finance->queryFromPeriod($period)))
-            ->with('success', 'تم إقفال حساب الفترة لـ '.$restaurant->name.' محاسبياً. هذا لا يحوّل فلوس؛ التحويل الفعلي من صفحة سحب المطاعم.');
+            ->with('success', 'تم إقفال حساب الفترة لـ '.$restaurant->name.' محاسبياً. هذا لا يحوّل فلوس؛ لتحويل المستحقات استخدم تسوية مباشرة أو صفحة سحب المطاعم.');
     }
 
     public function destroySettlement(Request $request, RestaurantSettlement $settlement): RedirectResponse
@@ -257,7 +325,6 @@ class FinanceController extends Controller
             'payouts' => $payouts,
             'pendingCount' => $pendingCount,
             'status' => $status,
-            'commissionLabel' => Finance::restaurantCommissionLabel(),
         ]);
     }
 

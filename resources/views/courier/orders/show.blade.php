@@ -120,6 +120,7 @@
                             </span>
                             <div>
                                 <span class="font-bold text-sm text-stone-900 block">{{ $item->quantity }}× {{ $item->name }}</span>
+                                @include('partials.item-choices', ['choices' => $item->selectedOptions()])
                                 <span class="text-[11px] text-slate-500">سعر الوحدة: {{ number_format($item->price, 2) }} ₪</span>
                             </div>
                         </div>

@@ -53,7 +53,7 @@
                 @if($row->items())
                     <ul class="mt-2 text-[11px] text-stone-600 space-y-0.5">
                         @foreach($row->items() as $line)
-                            <li>{{ $line['qty'] ?? 1 }}× {{ $line['name'] ?? 'صنف' }}</li>
+                            <li>{{ $line['qty'] ?? 1 }}× {{ $line['name'] ?? 'صنف' }}@if(!empty($line['options'])) — {{ \App\Support\MenuOptions::label($line['options']) }}@endif</li>
                         @endforeach
                     </ul>
                 @endif
@@ -67,7 +67,7 @@
             <ul class="text-xs text-stone-700 space-y-1">
                 @foreach($quote['lines'] as $line)
                     <li class="flex justify-between gap-2">
-                        <span>{{ $line['qty'] }}× {{ $line['item']->name }}</span>
+                        <span>{{ $line['qty'] }}× {{ $line['name'] ?? $line['item']->name }}@if(!empty($line['choices'])) — {{ \App\Support\MenuOptions::label($line['choices']) }}@endif</span>
                         <span class="font-mono">{{ number_format($line['line_total'], 2) }} ₪</span>
                     </li>
                 @endforeach

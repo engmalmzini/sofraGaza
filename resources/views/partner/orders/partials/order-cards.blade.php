@@ -6,6 +6,9 @@
                 <span class="admin-pill {{ in_array($order->status, ['pending_confirmation', 'confirmed']) ? 'admin-pill--wait' : ($order->status === 'preparing' ? 'admin-pill--warn' : 'admin-pill--ok') }}">
                     {{ $order->statusLabel() }}
                 </span>
+                @if($order->shouldShowPaidBadge())
+                    <span class="admin-pill admin-pill--ok text-[11px]">تم الدفع</span>
+                @endif
                 @if($order->isPrepared())
                     <span class="admin-pill bg-emerald-100 text-emerald-800 text-[11px] font-bold">جاهز للاستلام 🍳</span>
                 @endif
@@ -46,7 +49,7 @@
                     @foreach($order->items as $item)
                         <li class="pt-1.5 first:pt-0">
                             <div class="flex justify-between font-semibold">
-                                <span>{{ $item->quantity }}× {{ $item->name }}</span>
+                                <span>{{ $item->quantity }}× {{ $item->name }}@if($item->choicesLabel()) — {{ $item->choicesLabel() }}@endif</span>
                                 <span>{{ number_format($item->line_total, 2) }} ₪</span>
                             </div>
                             @if($item->notes)
@@ -99,6 +102,11 @@
                         </span>
                     @endif
                 @endif
+                @include('partials.order-print-button', [
+                    'printUrl' => route('partner.orders.print', $order),
+                    'label' => 'طباعة',
+                    'class' => 'admin-btn admin-btn--ghost text-xs py-1 px-3',
+                ])
                 <a href="{{ route('partner.orders.show', $order) }}" class="admin-btn admin-btn--ghost text-xs py-1 px-3">
                     عرض الفاتورة
                 </a>
@@ -109,6 +117,6 @@
     <div class="text-center py-8 text-on-surface-variant bg-surface-container-low/50 rounded-2xl border border-dashed border-outline/20">
         <span class="material-symbols-outlined text-4xl text-outline/60 block mb-1">receipt_long</span>
         <p class="font-bold text-sm">لا توجد طلبات جارية حالياً.</p>
-        <p class="text-xs text-on-surface-variant mt-1">أي طلب جديد يصل للمطعم يظهر هنا مباشرة مع صوت تنبيه دون الحاجة لتحديث الصفحة.</p>
+        <p class="text-xs text-on-surface-variant mt-1">بعد تأكيد الإدارة للدفع يصل الطلب هنا مباشرة مع شارة تم الدفع وصوت تنبيه.</p>
     </div>
 @endforelse

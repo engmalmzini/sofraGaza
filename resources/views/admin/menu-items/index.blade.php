@@ -6,8 +6,16 @@
 @section('content')
 <div class="admin-toolbar">
     <a href="{{ route('admin.restaurants.index') }}" class="admin-btn admin-btn--ghost">عودة للمطاعم</a>
+    <a href="{{ route('admin.restaurants.menu-offers.create', $restaurant) }}" class="admin-btn admin-btn--ghost">إضافة عرض</a>
     <a href="{{ route('admin.restaurants.menu-items.create', $restaurant) }}" class="admin-btn admin-btn--primary">إضافة صنف</a>
 </div>
+@include('admin.menu-offers._list', [
+    'offers' => $offers ?? collect(),
+    'restaurant' => $restaurant,
+    'createRoute' => route('admin.restaurants.menu-offers.create', $restaurant),
+    'editRouteName' => 'admin.restaurants.menu-offers.edit',
+    'destroyRouteName' => 'admin.restaurants.menu-offers.destroy',
+])
 @php
     $usedCategories = $restaurant->menuItems()
         ->whereNotNull('category')
@@ -49,7 +57,14 @@
         <tbody>
             @foreach($items as $item)
                 <tr>
-                    <td class="font-bold text-slate-900">{{ $item->name }}</td>
+                    <td class="font-bold text-slate-900">
+                        <div class="flex items-center gap-3">
+                            @if($item->imageUrl())
+                                <img src="{{ $item->imageUrl() }}" alt="" class="h-12 w-12 rounded-xl object-cover border border-slate-200 shrink-0">
+                            @endif
+                            <span>{{ $item->name }}@if($item->is_featured) <em class="text-[11px] font-bold text-amber-700 not-italic">مميز</em>@endif @if($item->hasOptionGroups()) <em class="text-[11px] font-bold text-primary not-italic">أقسام</em>@endif</span>
+                        </div>
+                    </td>
                     <td><span class="font-semibold text-slate-700">{{ $item->category }}</span></td>
                     <td class="font-mono font-bold text-slate-900">{{ number_format($item->price, 2) }} <span class="ils">₪</span></td>
                     <td class="text-xs text-slate-600">{{ $item->earn_points !== null ? $item->earn_points.' نقطة' : 'حسب السعر' }}</td>
@@ -63,6 +78,13 @@
                     <td>@include('admin.partials.pill', ['status' => $item->isOrderable() ? 'approved' : 'cancelled', 'label' => $item->isOrderable() ? 'متوفر' : 'غير متوفر'])</td>
                     <td class="whitespace-nowrap">
                         <div class="admin-table-actions">
+                            <form method="POST" action="{{ route('admin.restaurants.menu-items.featured', [$restaurant, $item]) }}">
+                                @csrf
+                                <button type="submit" class="admin-action-btn admin-action-btn--outline admin-action-btn--sm" title="{{ $item->is_featured ? 'إزالة التمييز' : 'تمييز في أول الصفحة' }}">
+                                    <span class="material-symbols-outlined {{ $item->is_featured ? 'text-amber-600' : '' }}">{{ $item->is_featured ? 'star' : 'star' }}</span>
+                                    <span>{{ $item->is_featured ? 'مميز' : 'تمييز' }}</span>
+                                </button>
+                            </form>
                             <a class="admin-action-btn admin-action-btn--outline admin-action-btn--sm" href="{{ route('admin.restaurants.menu-items.edit', [$restaurant, $item]) }}">
                                 <span class="material-symbols-outlined">edit</span>
                                 <span>تعديل</span>

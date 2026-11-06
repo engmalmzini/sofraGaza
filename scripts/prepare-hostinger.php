@@ -76,6 +76,7 @@ $excludeFiles = [
     'test_mockup.html',
     'current_section.png',
     'Logo sofra presentation.pdf',
+    'hot',
 ];
 
 $iterator = new RecursiveIteratorIterator(

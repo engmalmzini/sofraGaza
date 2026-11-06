@@ -28,12 +28,14 @@ class RegisterController
     {
         $this->rememberRegistrationPassword($request);
 
+        $workingDays = OperatingHours::submittedDays((array) $request->input('working_days', []));
+        $customDayHours = $request->boolean('custom_day_hours');
         $request->merge([
             'phone' => PalestinianPhone::digits($request->input('phone')),
             'restaurant_phone' => PalestinianPhone::digits($request->input('restaurant_phone')),
             'opens_at' => substr((string) $request->input('opens_at'), 0, 5),
             'closes_at' => substr((string) $request->input('closes_at'), 0, 5),
-            'working_days' => OperatingHours::submittedDays((array) $request->input('working_days', [])),
+            'working_days' => $workingDays,
         ]);
 
         $data = $request->validate([
@@ -50,9 +52,7 @@ class RegisterController
             'license_number' => ['nullable', 'string', 'max:50'],
             'area' => ['required', Rule::in(collect(config('brand.areas', []))->pluck('key')->all())],
             'address' => ['required', 'string', 'max:255'],
-            'opens_at' => ['required', 'date_format:H:i'],
-            'closes_at' => ['required', 'date_format:H:i', 'different:opens_at'],
-            ...OperatingHours::daysValidationRules(),
+            ...OperatingHours::hoursValidationRules($customDayHours, $workingDays),
             'image' => ['nullable', 'image', 'max:4096'],
             'terms' => ['accepted'],
         ], [
@@ -73,10 +73,7 @@ class RegisterController
             'restaurant_phone.required' => 'هاتف المطعم مطلوب.',
             'area.required' => 'اختر منطقة المطعم.',
             'address.required' => 'عنوان المطعم مطلوب.',
-            'opens_at.required' => 'حدد ساعة الافتتاح.',
-            'closes_at.required' => 'حدد ساعة الإغلاق.',
-            'closes_at.different' => 'ساعة الإغلاق يجب أن تختلف عن ساعة الافتتاح.',
-            ...OperatingHours::daysValidationMessages(),
+            ...OperatingHours::hoursValidationMessages($workingDays),
             'terms.accepted' => 'يجب الموافقة على شروط الانضمام للمنصة.',
         ]);
 
@@ -84,7 +81,15 @@ class RegisterController
             ? $request->file('image')->store('restaurants', 'public')
             : null;
 
-        $restaurant = DB::transaction(function () use ($data, $imagePath) {
+        $dayHours = OperatingHours::submittedDayHours(
+            $request->input('day_hours'),
+            $workingDays,
+            $data['opens_at'],
+            $data['closes_at'],
+            $customDayHours
+        );
+
+        $restaurant = DB::transaction(function () use ($data, $imagePath, $workingDays, $dayHours) {
             $user = User::create([
                 'name' => $data['owner_name'],
                 'phone' => $data['phone'],
@@ -106,7 +111,8 @@ class RegisterController
                 'area' => $data['area'],
                 'opens_at' => $data['opens_at'],
                 'closes_at' => $data['closes_at'],
-                'working_days' => OperatingHours::submittedDays($data['working_days'] ?? []),
+                'working_days' => $workingDays,
+                'day_hours' => $dayHours,
                 'image_path' => $imagePath,
                 'starts_at' => now()->toDateString(),
                 'expires_at' => now()->addYear()->toDateString(),

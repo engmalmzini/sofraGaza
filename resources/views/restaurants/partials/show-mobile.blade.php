@@ -61,11 +61,12 @@
                             {{ $restaurant->name }}
                         </h1>
                         
-                        {{-- Small Rating Badge (Half size) --}}
+                        @if($reviews > 0 && $rating)
                         <div class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-[#fff7ed] border border-[#fed7aa] text-[#9a3412] text-[10px] font-bold shrink-0 select-none">
                             @include('partials.star-icon', ['class' => 'w-3 h-3 text-[#d65e15]'])
-                            <span class="font-mono font-bold">{{ number_format((float) $rating, 1) }}</span>
+                            <span class="font-mono font-bold">{{ $rating }}</span>
                         </div>
+                        @endif
 
                         {{-- Small Reviews Toggle Button (Changes to 'الأطباق' only when viewing reviews) --}}
                         <button type="button" 
@@ -92,7 +93,7 @@
                         <span>دقيقة</span>
                         @if($restaurant->opens_at && $restaurant->closes_at)
                             <span class="text-stone-300">•</span>
-                            <span class="truncate">{{ \App\Support\OperatingHours::rangeLabel($restaurant->opens_at, $restaurant->closes_at) }}</span>
+                            <span class="truncate">{{ $restaurant->todayHoursLabel() }}</span>
                         @endif
                     </div>
                 </div>
@@ -129,8 +130,14 @@
     <div id="mobile-categories-bar" class="sticky top-0 z-30 bg-white/95 backdrop-blur-md pt-2 pb-1 px-margin mt-2 shadow-xs">
         <div class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1">
             <button type="button" class="category-pill is-active px-3.5 py-1.5 rounded-full text-xs font-extrabold whitespace-nowrap bg-primary text-white shadow-xs" data-filter="all">الكل ({{ $itemCount }})</button>
+            @if(($menuOffers ?? collect())->isNotEmpty())
+                <button type="button" class="category-pill px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap bg-amber-50 text-amber-800 hover:bg-amber-100 transition-colors" data-filter="offers">العروض ({{ $menuOffers->count() }})</button>
+            @endif
+            @if(($featuredItems ?? collect())->isNotEmpty())
+                <button type="button" class="category-pill px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap bg-stone-100 text-stone-700 hover:bg-stone-200 transition-colors" data-filter="featured">مميز ({{ $featuredItems->count() }})</button>
+            @endif
             @foreach($menuSections as $section)
-                <button type="button" class="category-pill px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap bg-stone-100 text-stone-700 hover:bg-stone-200 transition-colors" data-filter="{{ $section['key'] }}">{{ $section['name'] }}</button>
+                <button type="button" class="category-pill px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap bg-stone-100 text-stone-700 hover:bg-stone-200 transition-colors" data-filter="{{ $section['key'] }}">{{ $section['name'] }} ({{ $section['items']->count() }})</button>
             @endforeach
         </div>
 
@@ -156,16 +163,45 @@
         @endif
     </div>
 
-    {{-- 4. Dishes List (عرض الوجبات) --}}
-    <div class="px-margin flex flex-col gap-2 mt-3" id="dishList">
+    {{-- 4. Dishes List (عرض الوجبات) — grouped by section even when "الكل" is selected --}}
+    <div class="px-margin flex flex-col gap-6 mt-3" id="dishList">
+        @if(($menuOffers ?? collect())->isNotEmpty())
+            <section class="menu-group" data-menu-section="offers" id="mobile-section-offers">
+                <h2 class="menu-section-title text-[18px] font-extrabold text-stone-900 tracking-tight leading-none px-0.5 mb-2.5">العروض</h2>
+                <div class="flex flex-col gap-2">
+                    @foreach($menuOffers as $offer)
+                        @include('restaurants.partials.offer-card-mobile', ['offer' => $offer])
+                    @endforeach
+                </div>
+            </section>
+        @endif
+        @if(($featuredItems ?? collect())->isNotEmpty())
+            <section class="menu-group" data-menu-section="featured" id="mobile-section-featured">
+                <h2 class="menu-section-title text-[18px] font-extrabold text-stone-900 tracking-tight leading-none px-0.5 mb-2.5">مميز</h2>
+                <div class="flex flex-col gap-2">
+                    @foreach($featuredItems as $item)
+                        @include('restaurants.partials.dish-card-mobile', [
+                            'item' => $item,
+                            'sectionKey' => 'featured',
+                            'popular' => false,
+                        ])
+                    @endforeach
+                </div>
+            </section>
+        @endif
         @forelse($menuSections as $section)
-            @foreach($section['items'] as $item)
-                @include('restaurants.partials.dish-card-mobile', [
-                    'item' => $item,
-                    'sectionKey' => $section['key'],
-                    'popular' => $loop->parent->first && $loop->first,
-                ])
-            @endforeach
+            <section class="menu-group" data-menu-section="{{ $section['key'] }}" id="mobile-section-{{ $section['key'] }}">
+                <h2 class="menu-section-title text-[18px] font-extrabold text-stone-900 tracking-tight leading-none px-0.5 mb-2.5">{{ $section['name'] }}</h2>
+                <div class="flex flex-col gap-2">
+                    @foreach($section['items'] as $item)
+                        @include('restaurants.partials.dish-card-mobile', [
+                            'item' => $item,
+                            'sectionKey' => $section['key'],
+                            'popular' => $loop->parent->first && $loop->first,
+                        ])
+                    @endforeach
+                </div>
+            </section>
         @empty
             <p class="rounded-xl bg-surface-container-lowest p-8 text-on-surface-variant text-center">لا توجد أصناف في القائمة حالياً.</p>
         @endforelse

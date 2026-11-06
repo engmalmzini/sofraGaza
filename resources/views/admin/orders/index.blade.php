@@ -25,6 +25,10 @@
             </button>
         </div>
 
+        <button type="button" class="admin-btn admin-btn--ghost text-xs flex items-center gap-1 js-desktop-notify-btn" title="تفعيل إشعارات الجهاز">
+            <span class="material-symbols-outlined text-primary text-[16px]">notification_add</span>
+            <span class="js-desktop-notify-label">تفعيل إشعارات الجهاز</span>
+        </button>
         <button type="button" id="btn-toggle-sound" class="admin-btn admin-btn--ghost text-xs flex items-center gap-1" title="اختبار نغمة التنبيه">
             <span class="material-symbols-outlined text-primary text-[16px]">volume_up</span>
             <span id="sound-status-label">تنبيه صوتي: مفعل</span>

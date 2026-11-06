@@ -24,6 +24,9 @@
                 <span class="admin-order-card__group">جماعي</span>
             @endif
         </a>
+        @if($cardContext === 'partner' && $order->shouldShowPaidBadge())
+            <span class="admin-pill admin-pill--ok text-[10px] font-bold">تم الدفع</span>
+        @endif
         <span class="admin-order-card__time">
             {{ $order->created_at->diffForHumans(null, true) }}
         </span>
@@ -61,7 +64,7 @@
         <ul class="admin-order-card__items">
             @foreach($order->items->take(3) as $item)
                 <li>
-                    <span>{{ $item->quantity }}× {{ $item->name }}</span>
+                    <span>{{ $item->quantity }}× {{ $item->name }}@if($item->choicesLabel()) — {{ $item->choicesLabel() }}@endif</span>
                     @if($item->notes)
                         <span class="admin-order-card__note">{{ $item->notes }}</span>
                     @endif
@@ -90,17 +93,26 @@
     <div class="admin-order-card__footer">
         <span class="admin-order-card__pay">
             @if($cardContext === 'partner')
-                حساب الوجبات:
+                {{ $order->shouldShowPaidBadge() ? 'تم الدفع · حساب الوجبات:' : 'حساب الوجبات:' }}
             @elseif($order->payment_method === 'wallet')
                 💳 محفظة
             @else
                 💵 كاش
             @endif
         </span>
-        <a href="{{ route($showRouteName, $order) }}" class="admin-order-card__btn">
-            <span>التفاصيل</span>
-            <span class="material-symbols-outlined !text-sm">arrow_back</span>
-        </a>
+        @php
+            $printRouteName = $printRouteName ?? ($cardContext === 'partner' ? 'partner.orders.print' : 'admin.orders.print');
+        @endphp
+        <span class="admin-order-card__actions">
+            <a href="{{ route($printRouteName, $order) }}" target="_blank" rel="noopener" class="admin-order-card__btn" title="طباعة الطلب">
+                <span class="material-symbols-outlined !text-sm">print</span>
+                <span>طباعة</span>
+            </a>
+            <a href="{{ route($showRouteName, $order) }}" class="admin-order-card__btn">
+                <span>التفاصيل</span>
+                <span class="material-symbols-outlined !text-sm">arrow_back</span>
+            </a>
+        </span>
     </div>
 
     @if($cardContext === 'partner' && $order->status === 'preparing' && ! $order->isPrepared())

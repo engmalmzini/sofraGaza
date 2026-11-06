@@ -172,6 +172,7 @@
                         </span>
                         <div class="min-w-0 flex-1">
                             <h4 class="font-bold text-sm text-stone-900 leading-snug">{{ $item->name }}</h4>
+                            @include('partials.item-choices', ['choices' => $item->selectedOptions()])
                             @if($item->ordered_by_name)
                                 <span class="text-[11px] text-primary font-bold block mt-0.5">طلب {{ $item->ordered_by_name }}</span>
                             @endif

@@ -15,7 +15,7 @@ class Order extends Model
     use HasStoredReceipt;
 
     public const STATUSES = [
-        'pending_confirmation' => 'بانتظار التأكيد',
+        'pending_confirmation' => 'بانتظار تأكيد الدفع',
         'confirmed' => 'مؤكد',
         'preparing' => 'قيد التحضير',
         'delivering' => 'قيد التوصيل',
@@ -95,6 +95,68 @@ class Order extends Model
         return max(0.0, round((float) $this->subtotal, 2));
     }
 
+    /**
+     * Payload for Windows/Chrome desktop toasts on admin and partner boards.
+     *
+     * @return array{
+     *     id: int,
+     *     customer: ?string,
+     *     phone: ?string,
+     *     restaurant: string,
+     *     area: ?string,
+     *     items: string,
+     *     items_count: int,
+     *     notes: ?string,
+     *     total: float,
+     *     payment: string,
+     *     status: string,
+     *     status_label: string
+     * }
+     */
+    public function desktopAlertPayload(string $tone = 'admin'): array
+    {
+        $this->loadMissing(['user', 'restaurant', 'items']);
+
+        $itemBits = $this->items->take(3)->map(function ($item) {
+            $label = ((int) $item->quantity).'× '.$item->name;
+            $choices = $item->choicesLabel();
+
+            return $choices !== '' ? $label.' ('.$choices.')' : $label;
+        })->all();
+
+        if ($this->items->count() > 3) {
+            $itemBits[] = '+'.($this->items->count() - 3);
+        }
+
+        $notes = trim((string) $this->notes);
+        $itemNotes = $this->items
+            ->filter(fn ($item) => filled($item->notes))
+            ->take(2)
+            ->map(fn ($item) => $item->name.': '.$item->notes)
+            ->implode('، ');
+        if ($itemNotes !== '') {
+            $notes = $notes !== '' ? $notes.' — '.$itemNotes : $itemNotes;
+        }
+        if (mb_strlen($notes) > 90) {
+            $notes = mb_substr($notes, 0, 88).'…';
+        }
+
+        return [
+            'id' => (int) $this->id,
+            'customer' => $this->user?->name,
+            'phone' => $this->phone ?: $this->user?->phone,
+            'restaurant' => $this->venueName(),
+            'area' => $tone === 'partner' ? null : $this->deliveryAreaLabel(),
+            'items' => implode('، ', $itemBits),
+            'items_count' => $this->items->count(),
+            'notes' => $notes !== '' ? $notes : null,
+            'total' => $tone === 'partner' ? $this->foodTotal() : (float) $this->total,
+            'payment' => $this->isPaidWithWallet() ? 'محفظة' : 'كاش',
+            'status' => (string) $this->status,
+            'status_label' => $this->statusLabel(),
+        ];
+    }
+
     public function isPurchase(): bool
     {
         return ($this->type ?? 'purchase') !== 'redemption';
@@ -105,9 +167,27 @@ class Order extends Model
         return ($this->type ?? '') === 'redemption' || (int) $this->points_spent > 0;
     }
 
+    public function commissionRate(): float
+    {
+        $this->loadMissing('restaurant');
+
+        return $this->restaurant
+            ? $this->restaurant->commissionRate()
+            : Finance::restaurantCommissionRate();
+    }
+
+    public function commissionLabel(): string
+    {
+        $this->loadMissing('restaurant');
+
+        return $this->restaurant
+            ? $this->restaurant->commissionLabel()
+            : Finance::restaurantCommissionLabel();
+    }
+
     public function platformCommission(): float
     {
-        return round($this->foodTotal() * Finance::restaurantCommissionRate(), 2);
+        return round($this->foodTotal() * $this->commissionRate(), 2);
     }
 
     public function restaurantNet(): float
@@ -241,6 +321,35 @@ class Order extends Model
         return $this->payment_method === 'wallet';
     }
 
+    public function isPaymentConfirmed(): bool
+    {
+        if ($this->status === 'pending_confirmation') {
+            return false;
+        }
+
+        return $this->confirmed_at !== null
+            || in_array($this->status, ['confirmed', 'preparing', 'delivering', 'delivered'], true);
+    }
+
+    public function isVisibleToRestaurant(): bool
+    {
+        return $this->isPaymentConfirmed();
+    }
+
+    public function shouldShowPaidBadge(): bool
+    {
+        return $this->isPaymentConfirmed() && ! in_array($this->status, ['rejected', 'cancelled'], true);
+    }
+
+    public function scopeVisibleToRestaurant(Builder $query): Builder
+    {
+        return $query->where('status', '!=', 'pending_confirmation')
+            ->where(function (Builder $inner) {
+                $inner->whereNotNull('confirmed_at')
+                    ->orWhereIn('status', ['confirmed', 'preparing', 'delivering', 'delivered']);
+            });
+    }
+
     public function paymentMethodLabel(): string
     {
         $label = match ($this->payment_method) {
@@ -260,7 +369,7 @@ class Order extends Model
     public function nextStatuses(): array
     {
         return match ($this->status) {
-            'pending_confirmation' => ['confirmed' => 'تأكيد الطلب', 'rejected' => 'رفض الطلب'],
+            'pending_confirmation' => ['confirmed' => 'تأكيد الدفع وإرساله للمطعم', 'rejected' => 'رفض الطلب'],
             'confirmed' => ['preparing' => 'بدء التحضير'],
             'preparing' => ['delivering' => 'بدء التوصيل'],
             'delivering' => ['delivered' => 'تم التسليم'],

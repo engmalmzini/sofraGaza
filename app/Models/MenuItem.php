@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use App\Support\Media;
+use App\Support\MenuOptions;
 use RuntimeException;
 
 class MenuItem extends Model
@@ -15,19 +16,29 @@ class MenuItem extends Model
         'category',
         'description',
         'price',
+        'option_groups',
         'image_path',
         'is_available',
+        'is_featured',
         'stock_unlimited',
         'stock_qty',
         'earn_points',
         'redeem_points',
     ];
 
+    protected $attributes = [
+        'is_available' => true,
+        'is_featured' => false,
+        'stock_unlimited' => true,
+    ];
+
     protected function casts(): array
     {
         return [
             'price' => 'decimal:2',
+            'option_groups' => 'array',
             'is_available' => 'boolean',
+            'is_featured' => 'boolean',
             'stock_unlimited' => 'boolean',
             'stock_qty' => 'integer',
             'earn_points' => 'integer',
@@ -38,6 +49,35 @@ class MenuItem extends Model
     public function restaurant(): BelongsTo
     {
         return $this->belongsTo(Restaurant::class);
+    }
+
+    /**
+     * @return list<array{name: string, required: bool, type: string, choices: list<array{name: string, price: float}>}>
+     */
+    public function optionGroups(): array
+    {
+        return MenuOptions::normalize($this->option_groups);
+    }
+
+    public function hasOptionGroups(): bool
+    {
+        return $this->optionGroups() !== [];
+    }
+
+    public function requiresOptions(): bool
+    {
+        foreach ($this->optionGroups() as $group) {
+            if ($group['required']) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public function displayPrice(): float
+    {
+        return round((float) $this->price + MenuOptions::startingExtra($this->optionGroups()), 2);
     }
 
     public function scopeOrderable($query)

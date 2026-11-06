@@ -13,7 +13,7 @@
         <span class="admin-metric__note">{{ $totals['count'] }} طلب مكتمل</span>
     </article>
     <article class="admin-metric">
-        <div class="admin-metric__top"><span>عمولة المنصة +{{ \App\Support\Finance::restaurantCommissionLabel() }}</span></div>
+        <div class="admin-metric__top"><span>عمولة المنصة</span></div>
         <strong class="finance-in">{{ number_format($totals['commission'], 2) }} <span class="ils">₪</span></strong>
         <span class="admin-metric__note">من قيمة الطعام بعد الخصم</span>
     </article>
@@ -36,7 +36,7 @@
 
 <section class="admin-card mt-4">
     <h2>تفصيل كل طلب مكتمل</h2>
-    <p class="text-xs text-slate-500 mb-3">قيمة الطلب، عمولة المنصة (+{{ \App\Support\Finance::restaurantCommissionLabel() }})، أجرة الكابتن (−15%)، وصافي المطعم</p>
+    <p class="text-xs text-slate-500 mb-3">قيمة الطلب، عمولة المنصة حسب نسبة كل مطعم، أجرة الكابتن (−15%)، وصافي المطعم</p>
     <div class="admin-table-wrap">
         <table class="admin-table">
             <thead>
@@ -45,7 +45,7 @@
                     <th>المطعم</th>
                     <th>الزبون</th>
                     <th>قيمة الطلب</th>
-                    <th>عمولة المنصة +{{ \App\Support\Finance::restaurantCommissionLabel() }}</th>
+                    <th>عمولة المنصة</th>
                     <th>أجرة الكابتن −15%</th>
                     <th>صافي المطعم</th>
                     <th>التاريخ</th>
@@ -58,7 +58,7 @@
                         <td>{{ $order->venueName() }}</td>
                         <td>{{ $order->user->name }}</td>
                         <td class="font-mono font-bold">{{ number_format($order->foodTotal(), 2) }} ₪</td>
-                        <td class="font-mono finance-in">+{{ number_format($order->platformCommission(), 2) }} ₪</td>
+                        <td class="font-mono finance-in">+{{ number_format($order->platformCommission(), 2) }} ₪ <span class="text-[11px] text-slate-500">{{ $order->commissionLabel() }}</span></td>
                         <td class="font-mono finance-out">−{{ number_format($order->courierFinanceShare(), 2) }} ₪</td>
                         <td class="font-mono">{{ number_format($order->restaurantNet(), 2) }} ₪</td>
                         <td class="text-xs text-slate-500">{{ optional($order->delivered_at ?? $order->updated_at)->format('Y/m/d H:i') }}</td>

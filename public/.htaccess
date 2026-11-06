@@ -5,6 +5,10 @@
 
     RewriteEngine On
 
+    RewriteRule ^storage/logs(/|$) - [F,L]
+    RewriteRule ^storage/framework(/|$) - [F,L]
+    RewriteRule ^storage/app/private(/|$) - [F,L]
+
     # Hostinger / LiteSpeed: do not cache Laravel HTML (CSRF + sessions).
     <IfModule LiteSpeed>
         CacheDisable public /

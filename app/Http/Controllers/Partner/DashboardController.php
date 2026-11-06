@@ -18,11 +18,13 @@ class DashboardController extends Controller
         $menuByCategory = $restaurant->menuItems()->orderBy('name')->get()->groupBy('category');
 
         $activeOrders = $restaurant->orders()
+            ->visibleToRestaurant()
             ->with(['user', 'items', 'courier'])
-            ->whereIn('status', ['pending_confirmation', 'confirmed', 'preparing', 'delivering'])
+            ->whereIn('status', ['confirmed', 'preparing', 'delivering'])
             ->latest('id')
             ->get();
         $deliveredOrders = $restaurant->orders()
+            ->visibleToRestaurant()
             ->with(['user', 'items', 'courier'])
             ->where('status', 'delivered')
             ->latest('id')
@@ -42,7 +44,7 @@ class DashboardController extends Controller
             'ordersByStatus' => $ordersByStatus,
             'availableBalance' => $restaurant->availableBalance(),
             'totalWithdrawn' => $restaurant->totalWithdrawn(),
-            'commissionLabel' => \App\Support\Finance::restaurantCommissionLabel(),
+            'commissionLabel' => $restaurant->commissionLabel(),
         ]);
     }
 }

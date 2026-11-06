@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\Finance;
 use App\Support\Media;
 use App\Support\OperatingHours;
 use Carbon\CarbonInterface;
@@ -37,12 +38,14 @@ class Restaurant extends Model
         'opens_at',
         'closes_at',
         'working_days',
+        'day_hours',
         'image_path',
         'starts_at',
         'expires_at',
         'is_active',
         'panel_suspended',
         'is_featured',
+        'commission_percent',
         'points_per_amount',
         'points_redeem_per_amount',
         'verification_status',
@@ -63,6 +66,8 @@ class Restaurant extends Model
             'panel_suspended' => 'boolean',
             'is_featured' => 'boolean',
             'working_days' => 'array',
+            'day_hours' => 'array',
+            'commission_percent' => 'decimal:2',
             'points_per_amount' => 'decimal:2',
             'points_redeem_per_amount' => 'decimal:2',
         ];
@@ -81,6 +86,11 @@ class Restaurant extends Model
     public function menuItems(): HasMany
     {
         return $this->hasMany(MenuItem::class);
+    }
+
+    public function menuOffers(): HasMany
+    {
+        return $this->hasMany(MenuOffer::class);
     }
 
     public function orders(): HasMany
@@ -113,9 +123,37 @@ class Restaurant extends Model
         return round((float) $this->completedPurchaseOrders()->get()->sum(fn (Order $order) => $order->foodTotal()), 2);
     }
 
+    public function hasCustomCommission(): bool
+    {
+        return $this->commission_percent !== null;
+    }
+
+    public function commissionPercent(): float
+    {
+        if ($this->hasCustomCommission()) {
+            return max(0.0, min(100.0, (float) $this->commission_percent));
+        }
+
+        return Finance::restaurantCommissionPercent();
+    }
+
+    public function commissionRate(): float
+    {
+        return round($this->commissionPercent() / 100, 4);
+    }
+
+    public function commissionLabel(): string
+    {
+        return Finance::formatCommissionPercent($this->commissionPercent());
+    }
+
     public function lifetimeCommission(): float
     {
-        return round((float) $this->completedPurchaseOrders()->get()->sum(fn (Order $order) => $order->platformCommission()), 2);
+        return round((float) $this->completedPurchaseOrders()->get()->sum(function (Order $order) {
+            $order->setRelation('restaurant', $this);
+
+            return $order->platformCommission();
+        }), 2);
     }
 
     public function lifetimeNet(): float
@@ -158,6 +196,7 @@ class Restaurant extends Model
         }
 
         $orders = $query->latest('id')->get();
+        $orders->each->setRelation('restaurant', $this);
         $sales = round($orders->sum(fn (Order $order) => $order->foodTotal()), 2);
         $commission = round($orders->sum(fn (Order $order) => $order->platformCommission()), 2);
         $net = round($sales - $commission, 2);
@@ -410,14 +449,38 @@ class Restaurant extends Model
         return OperatingHours::normalizeDays(is_array($this->working_days) ? $this->working_days : null);
     }
 
+    /**
+     * @return array<string, array{opens_at: string, closes_at: string}>
+     */
+    public function dayHours(): array
+    {
+        return is_array($this->day_hours) ? $this->day_hours : [];
+    }
+
+    public function hasCustomDayHours(): bool
+    {
+        return $this->dayHours() !== [];
+    }
+
     public function hoursLabel(): string
     {
-        return OperatingHours::fullLabel($this->opens_at, $this->closes_at, $this->working_days);
+        return OperatingHours::fullLabel($this->opens_at, $this->closes_at, $this->working_days, $this->day_hours);
+    }
+
+    public function todayHoursLabel(?CarbonInterface $at = null): string
+    {
+        return OperatingHours::momentRangeLabel(
+            $this->opens_at,
+            $this->closes_at,
+            $this->working_days,
+            $this->day_hours,
+            $at
+        );
     }
 
     public function isWithinOwnHours(?CarbonInterface $at = null): bool
     {
-        return OperatingHours::isOpen($this->opens_at, $this->closes_at, $this->workingDays(), $at);
+        return OperatingHours::isOpen($this->opens_at, $this->closes_at, $this->workingDays(), $at, $this->day_hours);
     }
 
     public function isOpen(?CarbonInterface $at = null): bool
@@ -684,19 +747,20 @@ class Restaurant extends Model
         return $this->approvedReviews()->count();
     }
 
-    public function averageRating(): float
+    public function averageRating(): ?float
     {
         if ($this->relationLoaded('reviews')) {
             $approved = $this->reviews->where('is_approved', true);
             if ($approved->isEmpty()) {
-                return 4.9;
+                return null;
             }
+
             return round((float) $approved->avg('rating'), 1);
         }
 
         $avg = $this->approvedReviews()->avg('rating');
 
-        return $avg ? round((float) $avg, 1) : 4.9;
+        return $avg ? round((float) $avg, 1) : null;
     }
 
     public function ratingBreakdown(): array

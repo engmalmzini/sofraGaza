@@ -55,6 +55,17 @@ class OrderController extends Controller
         return view('admin.orders.show', compact('order'));
     }
 
+    public function print(Order $order): View
+    {
+        $order->load(['user', 'restaurant', 'items', 'groupOrder.members.user']);
+
+        return view('orders.print', [
+            'order' => $order,
+            'tone' => 'admin',
+            'backUrl' => route('admin.orders.show', $order),
+        ]);
+    }
+
     public function receipt(Order $order)
     {
         return $order->receiptResponse();
@@ -102,7 +113,7 @@ class OrderController extends Controller
     {
         $hasLastId = $request->has('last_id');
         $lastId = (int) $request->input('last_id', 0);
-        $latest = Order::query()->latest('id')->first();
+        $latest = Order::query()->with(['user', 'restaurant', 'items'])->latest('id')->first();
         $latestId = $latest?->id ?? 0;
         $pendingCount = Order::query()->where('status', 'pending_confirmation')->count();
         $activeCount = Order::query()->whereIn('status', ['pending_confirmation', 'confirmed', 'preparing', 'delivering'])->count();
@@ -133,14 +144,7 @@ class OrderController extends Controller
             'pending_count' => $pendingCount,
             'active_count' => $activeCount,
             'has_new' => $hasNew,
-            'latest_order' => $latest ? [
-                'id' => $latest->id,
-                'customer' => $latest->user?->name,
-                'restaurant' => $latest->venueName(),
-                'total' => (float) $latest->total,
-                'status' => $latest->status,
-                'status_label' => $latest->statusLabel(),
-            ] : null,
+            'latest_order' => $latest?->desktopAlertPayload('admin'),
             'html' => $html,
             'board_html' => $boardHtml,
             'board_signature' => $boardSignature,

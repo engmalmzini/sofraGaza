@@ -525,7 +525,7 @@
                 </div>
 
                 @include('partials.working-days-picker', [
-                    'field' => 'platform_working_days',
+                    'workingDaysField' => 'platform_working_days',
                     'defaultDays' => $platformWorkingDays,
                     'labelClass' => 'mb-2 block text-xs font-bold text-stone-900',
                 ])
@@ -834,7 +834,7 @@
                     <div class="p-4 rounded-xl bg-white border border-slate-200/90 shadow-2xs space-y-2">
                         <label class="block text-xs font-bold text-stone-900 flex items-center gap-1.5">
                             <span class="material-symbols-outlined text-primary text-[18px]">percent</span>
-                            <span>نسبة عمولة المنصة من مبيعات المطعم</span>
+                            <span>النسبة العامة لعمولة المنصة من المطاعم</span>
                         </label>
                         <div class="flex items-center gap-2">
                             <input type="number"
@@ -846,7 +846,7 @@
                                    class="text-sm font-bold font-mono w-full !h-10">
                             <span class="text-xs font-bold text-slate-500">%</span>
                         </div>
-                        <p class="text-[11px] text-slate-400">تلقائياً 10%. صافي المطعم = المبيعات ناقص هذه النسبة. تقدر تغيّرها في أي وقت.</p>
+                        <p class="text-[11px] text-slate-400">تُستخدم للمطاعم التي لم يحدد لها الأدمن نسبة خاصة من صفحة المطعم. لتحديد نسبة مختلفة لكل مطعم: المطاعم ← تعديل المطعم.</p>
                     </div>
                 </div>
 

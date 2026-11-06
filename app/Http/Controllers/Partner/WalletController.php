@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Partner;
 
 use App\Models\RestaurantPayout;
 use App\Services\NotificationService;
-use App\Support\Finance;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -22,7 +21,7 @@ class WalletController extends Controller
         $totalWithdrawn = $restaurant->totalWithdrawn();
         $pendingPayouts = $restaurant->pendingPayoutsAmount();
         $payouts = $restaurant->payouts()->with('processor')->paginate(15)->withQueryString();
-        $commissionLabel = Finance::restaurantCommissionLabel();
+        $commissionLabel = $restaurant->commissionLabel();
         $payoutMethods = RestaurantPayout::METHODS;
         $periodLabels = RestaurantPayout::PERIODS;
         $formPeriod = $period === 'yesterday' ? 'today' : $period;

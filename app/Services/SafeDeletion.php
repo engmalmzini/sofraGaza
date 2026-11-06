@@ -7,6 +7,7 @@ use App\Models\GroupOrder;
 use App\Models\Membership;
 use App\Models\MembershipSubscription;
 use App\Models\MenuItem;
+use App\Models\MenuOffer;
 use App\Models\Order;
 use App\Models\Restaurant;
 use App\Models\RestaurantBoost;
@@ -62,6 +63,11 @@ class SafeDeletion
         Favorite::query()
             ->where('favorable_type', MenuItem::class)
             ->where('favorable_id', $item->id)
+            ->delete();
+
+        MenuOffer::query()
+            ->where('first_item_id', $item->id)
+            ->orWhere('second_item_id', $item->id)
             ->delete();
 
         $item->delete();

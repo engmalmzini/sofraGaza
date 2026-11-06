@@ -25,6 +25,7 @@
                 <th>الاسم</th>
                 <th>صاحب المطعم</th>
                 <th>المنيو</th>
+                <th>العمولة</th>
                 <th>التحقق</th>
                 <th>الظهور</th>
                 <th>اللوحة</th>
@@ -40,6 +41,12 @@
                     </td>
                     <td>{{ $restaurant->owner->name ?? 'مضاف من الإدارة' }}</td>
                     <td><span class="font-bold text-slate-800">{{ $restaurant->menu_items_count }}</span> صنف</td>
+                    <td>
+                        <span class="font-bold font-mono">{{ $restaurant->commissionLabel() }}</span>
+                        @if(! $restaurant->hasCustomCommission())
+                            <div class="text-[11px] text-on-surface-variant font-normal">عامة</div>
+                        @endif
+                    </td>
                     <td>@include('admin.partials.pill', ['status' => $restaurant->verification_status, 'label' => $restaurant->verificationLabel()])</td>
                     <td>@include('admin.partials.pill', ['status' => $restaurant->isVisible() ? 'approved' : 'cancelled', 'label' => $restaurant->isVisible() ? 'ظاهر' : 'غير منشور'])</td>
                     <td>@include('admin.partials.pill', ['status' => $restaurant->panel_suspended ? 'rejected' : 'approved', 'label' => $restaurant->panel_suspended ? 'موقوفة' : 'مفتوحة'])</td>
@@ -65,7 +72,7 @@
                     </td>
                 </tr>
             @empty
-                <tr><td colspan="7">لا توجد مطاعم مطابقة.</td></tr>
+                <tr><td colspan="8">لا توجد مطاعم مطابقة.</td></tr>
             @endforelse
         </tbody>
     </table>

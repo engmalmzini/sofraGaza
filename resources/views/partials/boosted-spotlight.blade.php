@@ -9,7 +9,10 @@
 @endphp
 @if($spotHero)
     @php
-        $heroRating = number_format((float) ($spotHero->avg_rating ?? $spotHero->averageRating()), 1);
+        $heroReviews = (int) ($spotHero->approved_reviews_count ?? $spotHero->reviewsCount());
+        $heroRating = $heroReviews > 0
+            ? number_format((float) ($spotHero->avg_rating ?? $spotHero->averageRating()), 1)
+            : null;
         $heroEta = $spotHero->type === 'cafe' ? '20-25 دقيقة' : '25-35 دقيقة';
     @endphp
     <section class="sg-ad-spotlight" aria-label="إعلانات">
@@ -23,7 +26,9 @@
                     <strong>{{ $spotHero->name }}</strong>
                     <p>{{ $spotHero->cuisineLabel() }} • {{ $spotHero->areaLabel() }}</p>
                     <div class="sg-ad-hero__meta">
-                        <span>★ {{ $heroRating }}</span>
+                        @if($heroRating)
+                            <span>★ {{ $heroRating }}</span>
+                        @endif
                         <span>{{ $heroEta }}</span>
                         <span>توصيل سريع</span>
                     </div>

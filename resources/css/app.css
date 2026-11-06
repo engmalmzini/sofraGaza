@@ -2211,6 +2211,7 @@ body.partner-visit-lock {
     align-items: center;
     justify-content: space-between;
     gap: 0.5rem;
+    flex-wrap: wrap;
     padding-top: 0.5rem;
     border-top: 1px solid #f8fafc;
     margin-top: auto;
@@ -2223,6 +2224,13 @@ body.partner-visit-lock {
     display: inline-flex;
     align-items: center;
     gap: 0.25rem;
+}
+
+.admin-order-card__actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-inline-start: auto;
 }
 
 .admin-order-card__btn {

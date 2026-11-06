@@ -1,0 +1,30 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::table('menu_items', function (Blueprint $table) {
+            $table->json('option_groups')->nullable()->after('price');
+        });
+
+        Schema::table('order_items', function (Blueprint $table) {
+            $table->json('options')->nullable()->after('notes');
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::table('menu_items', function (Blueprint $table) {
+            $table->dropColumn('option_groups');
+        });
+
+        Schema::table('order_items', function (Blueprint $table) {
+            $table->dropColumn('options');
+        });
+    }
+};

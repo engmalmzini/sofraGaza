@@ -30,6 +30,11 @@ class OrderService
         $quote['restaurant']->assertAcceptingOrders();
 
         foreach ($quote['lines'] as $line) {
+            if (! empty($line['offer'])) {
+                $line['offer']->assertCanSell((int) $line['qty']);
+                continue;
+            }
+
             /** @var MenuItem $item */
             $item = $line['item'];
             $item->assertCanSell((int) $line['qty']);
@@ -78,17 +83,35 @@ class OrderService
             ]);
 
             foreach ($quote['lines'] as $line) {
+                if (! empty($line['offer'])) {
+                    $offer = $line['offer'];
+                    $offer->loadMissing(['firstItem', 'secondItem']);
+                    $offer->consumeStock((int) $line['qty']);
+
+                    $order->items()->create([
+                        'menu_item_id' => $offer->first_item_id,
+                        'name' => $line['name'] ?? $offer->cartName(),
+                        'price' => $line['unit_price'] ?? $offer->price,
+                        'quantity' => $line['qty'],
+                        'line_total' => $line['line_total'],
+                        'notes' => $line['notes'] ?? null,
+                        'options' => $offer->orderOptions(),
+                    ]);
+                    continue;
+                }
+
                 $item = MenuItem::query()->whereKey($line['item']->id)->lockForUpdate()->first()
                     ?? $line['item'];
                 $item->consumeStock((int) $line['qty']);
 
                 $order->items()->create([
                     'menu_item_id' => $item->id,
-                    'name' => $item->name,
-                    'price' => $item->price,
+                    'name' => $line['name'] ?? $item->name,
+                    'price' => $line['unit_price'] ?? $item->price,
                     'quantity' => $line['qty'],
                     'line_total' => $line['line_total'],
                     'notes' => $line['notes'] ?? null,
+                    'options' => $line['choices'] ?? null,
                 ]);
             }
 
@@ -105,21 +128,15 @@ class OrderService
 
         $this->cart->clear();
 
-        $adminTitle = $isWallet ? 'طلب جديد مدفوع من المحفظة (مؤكد)' : 'طلب جديد بانتظار التأكيد';
+        $adminTitle = $isWallet ? 'طلب جديد مدفوع من المحفظة (مؤكد)' : 'طلب جديد بانتظار تأكيد الدفع';
         $this->notifications->notifyAdmins(
             $adminTitle,
             "طلب #{$order->id} من {$user->name} بقيمة {$order->total} ₪ (".($isWallet ? 'خصم من الرصيد' : 'حوالة').').',
             route('admin.orders.show', $order)
         );
 
-        $restaurantOwner = $order->restaurant?->owner;
-        if ($restaurantOwner) {
-            $this->notifications->notify(
-                $restaurantOwner,
-                'طلب جديد وارد لمطعمك!',
-                "وصل طلب جديد رقم #{$order->id} بقيمة {$order->total} ₪ من {$user->name}.",
-                route('partner.orders.show', $order)
-            );
+        if ($isWallet) {
+            $this->notifyRestaurantOfPaidOrder($order);
         }
 
         return $order;
@@ -317,6 +334,10 @@ class OrderService
             $this->points->earnForOrder($order->fresh());
         }
 
+        if ($old === 'pending_confirmation' && $status === 'confirmed') {
+            $this->notifyRestaurantOfPaidOrder($order->fresh());
+        }
+
         if ($notify) {
             $this->notifications->notify(
                 $order->user,
@@ -415,17 +436,43 @@ class OrderService
         $this->changeStatus($order, 'delivered');
     }
 
+    private function notifyRestaurantOfPaidOrder(Order $order): void
+    {
+        $order->loadMissing(['restaurant.owner', 'user']);
+        $owner = $order->restaurant?->owner;
+        if (! $owner) {
+            return;
+        }
+
+        $customerName = $order->user?->name ?: 'زبون';
+        $amount = number_format((float) $order->foodTotal(), 2);
+
+        $this->notifications->notify(
+            $owner,
+            'طلب جديد مدفوع وارد لمطعمك',
+            "تم تأكيد الدفع للطلب #{$order->id} من {$customerName} بقيمة {$amount} ₪. يمكنك بدء التحضير.",
+            route('partner.orders.show', $order)
+        );
+    }
+
     private function restoreOrderStock(Order $order): void
     {
         $order->loadMissing('items');
 
         foreach ($order->items as $line) {
-            if (! $line->menu_item_id) {
-                continue;
+            $ids = collect($line->selectedOptions())
+                ->pluck('menu_item_id')
+                ->filter()
+                ->unique()
+                ->values();
+
+            if ($ids->isEmpty() && $line->menu_item_id) {
+                $ids = collect([$line->menu_item_id]);
             }
 
-            $item = MenuItem::query()->whereKey($line->menu_item_id)->first();
-            $item?->restoreStock((int) $line->quantity);
+            foreach ($ids as $id) {
+                MenuItem::query()->whereKey($id)->first()?->restoreStock((int) $line->quantity);
+            }
         }
     }
 }

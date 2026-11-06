@@ -11,9 +11,8 @@
 @include('admin.finance.partials.toolbar', ['routeName' => 'admin.finance.restaurants.show', 'restaurant' => $restaurant])
 
 <p class="text-xs text-slate-500 mb-3">
-    الأرقام هنا ملخص المبيعات والعمولة لهذه الفترة. <strong>تحويل فلوس المطعم يتم من
-    <a href="{{ route('admin.finance.payouts') }}" class="text-primary font-bold hover:underline">سحب المطاعم</a></strong>
-    بعد طلب السحب، مع رفع إشعار التحويل.
+    الأرقام هنا ملخص المبيعات والعمولة لهذه الفترة. يمكنك <strong>تسوية المطعم مباشرة</strong> من النموذج أدناه دون انتظار طلب سحب، أو مراجعة الطلبات من
+    <a href="{{ route('admin.finance.payouts') }}" class="text-primary font-bold hover:underline">سحب المطاعم</a>.
 </p>
 
 <div class="admin-metrics !grid-cols-2 lg:!grid-cols-4">
@@ -25,7 +24,7 @@
     <article class="admin-metric">
         <div class="admin-metric__top"><span>العمولة المستحقة</span></div>
         <strong class="finance-in">{{ number_format($row['commission'] ?? 0, 2) }} <span class="ils">₪</span></strong>
-        <span class="admin-metric__note">{{ \App\Support\Finance::restaurantCommissionLabel() }} من المبيعات</span>
+        <span class="admin-metric__note">{{ $restaurant->commissionLabel() }} من المبيعات</span>
     </article>
     <article class="admin-metric">
         <div class="admin-metric__top"><span>صافي مستحقات المطعم</span></div>
@@ -44,6 +43,53 @@
         </span>
     </article>
 </div>
+
+@php $availableNow = (float) $restaurant->availableBalance(); @endphp
+@if($availableNow > 0.009)
+    <section class="admin-card mt-4 border border-emerald-200 bg-emerald-50/30">
+        <h2>تسوية مباشرة للمطعم</h2>
+        <p class="text-xs text-slate-600 mt-1">حوّل المستحقات الآن بدون ما يطلب المطعم سحب. الرصيد يُخصم فور تأكيد التحويل ورفع الإشعار، ويظهر لصاحب المطعم أنه تم الدفع.</p>
+        @if($restaurant->hasPendingPayout())
+            <div class="admin-alert admin-alert--wait mt-3 text-xs">
+                يوجد طلب سحب معلّق. أكّده أو ارفضه من
+                <a href="{{ route('admin.finance.payouts', ['payout_status' => 'pending']) }}" class="font-bold underline">سحب المطاعم</a>
+                قبل عمل تسوية جديدة.
+            </div>
+        @else
+            <form method="POST" action="{{ route('admin.finance.restaurants.payout', $restaurant) }}" enctype="multipart/form-data" class="mt-3 grid gap-3 sm:grid-cols-2 text-xs" onsubmit="return confirm('تأكيد تحويل المستحقات لهذا المطعم الآن؟ سيُخصم المبلغ من الرصيد المتاح.');">
+                @csrf
+                <label>
+                    <span class="block font-bold mb-1">المبلغ (₪)</span>
+                    <input type="number" step="0.5" min="1" max="{{ $availableNow }}" name="amount" value="{{ old('amount', $availableNow) }}" required class="w-full !h-10 font-mono font-bold">
+                    <small class="text-slate-500">المتاح الآن: {{ number_format($availableNow, 2) }} ₪</small>
+                </label>
+                <label>
+                    <span class="block font-bold mb-1">طريقة التحويل</span>
+                    <select name="payout_method" required class="w-full !h-10">
+                        @foreach($payoutMethods as $key => $label)
+                            <option value="{{ $key }}" @selected(old('payout_method', $restaurant->payout_method ?? 'jawwal_pay') === $key)>{{ $label }}</option>
+                        @endforeach
+                    </select>
+                </label>
+                <label class="sm:col-span-2">
+                    <span class="block font-bold mb-1">بيانات التحويل</span>
+                    <textarea name="transfer_details" rows="2" required placeholder="رقم المحفظة أو الحساب البنكي والاسم">{{ old('transfer_details', $restaurant->payout_details) }}</textarea>
+                </label>
+                <label>
+                    <span class="block font-bold mb-1">إشعار التحويل</span>
+                    <input type="file" name="receipt" accept="image/*" required class="w-full text-xs">
+                </label>
+                <label>
+                    <span class="block font-bold mb-1">ملاحظة (اختياري)</span>
+                    <input type="text" name="admin_notes" value="{{ old('admin_notes') }}" placeholder="مثلاً: تسوية أسبوع 19 أكتوبر" class="w-full !h-10">
+                </label>
+                <div class="sm:col-span-2">
+                    <button class="admin-btn admin-btn--primary text-xs" type="submit">تأكيد التسوية والتحويل</button>
+                </div>
+            </form>
+        @endif
+    </section>
+@endif
 
 @if(($row['status'] ?? 'pending') !== 'paid' && $row)
     <section class="admin-card mt-4">

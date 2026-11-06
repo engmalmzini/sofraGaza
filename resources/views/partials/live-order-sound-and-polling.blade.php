@@ -3,17 +3,23 @@
     $role = null;
     $liveEndpoint = null;
     $hasSound = false;
+    $desktopNotify = false;
     $serverLatestOrderId = 0;
+    $logoPath = public_path('images/logo.png');
+    $desktopIconUrl = file_exists($logoPath) ? asset('images/logo.png').'?v='.filemtime($logoPath) : asset('favicon-32.png');
+    $desktopBadgeUrl = asset('favicon-32.png');
 
     if (request()->routeIs('partner.*') && auth()->check() && auth()->user()->isPartner()) {
         $role = 'partner';
         $liveEndpoint = route('partner.orders.live');
         $hasSound = true;
-        $serverLatestOrderId = auth()->user()->ownedRestaurant?->orders()->max('id') ?? 0;
+        $desktopNotify = true;
+        $serverLatestOrderId = auth()->user()->ownedRestaurant?->orders()->visibleToRestaurant()->max('id') ?? 0;
     } elseif (request()->routeIs('admin.*') && auth()->check() && auth()->user()->isAdmin() && auth()->user()->canAccessAdmin('orders')) {
         $role = 'admin';
         $liveEndpoint = route('admin.orders.live');
         $hasSound = true;
+        $desktopNotify = true;
         $serverLatestOrderId = \App\Models\Order::max('id') ?? 0;
     } elseif (request()->routeIs('courier.*') && auth()->check() && auth()->user()->isCourier()) {
         $role = 'courier';
@@ -24,6 +30,31 @@
 @endphp
 
 @if($liveEndpoint)
+@if($desktopNotify)
+<div id="desktop-notify-prompt" class="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-6 sm:w-[26rem] z-50 hidden" role="dialog" aria-labelledby="desktop-notify-title">
+    <div class="rounded-2xl bg-white text-stone-900 p-4 shadow-2xl border border-primary/30">
+        <div class="flex items-start gap-3">
+            <div class="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                <span class="material-symbols-outlined text-[22px]">notifications_active</span>
+            </div>
+            <div class="flex-1 min-w-0">
+                <strong id="desktop-notify-title" class="block text-sm font-extrabold">تفعيل إشعارات الجهاز</strong>
+                <p class="text-xs text-stone-600 mt-1 leading-relaxed">
+                    مثل واتساب على كروم: يظهر إشعار على جانب ويندوز عند وصول طلب، والضغط عليه يفتح الطلب ويطبعه على الطابعة.
+                </p>
+                <div class="mt-3 flex flex-wrap items-center gap-2">
+                    <button type="button" id="desktop-notify-enable" class="admin-btn admin-btn--primary text-xs py-1.5 px-3">
+                        تفعيل الإشعارات
+                    </button>
+                    <button type="button" id="desktop-notify-later" class="admin-btn admin-btn--ghost text-xs py-1.5 px-3">
+                        لاحقاً
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@endif
 <div id="live-order-banner" class="fixed top-4 left-4 right-4 sm:left-auto sm:right-6 sm:w-96 z-50 transform -translate-y-28 opacity-0 transition-all duration-300 pointer-events-none" style="display: none;">
     <div class="rounded-2xl bg-stone-900/95 text-white p-4 shadow-2xl border-2 border-primary backdrop-blur-md pointer-events-auto flex items-start gap-3">
         <div class="w-10 h-10 rounded-full bg-primary/20 text-primary flex items-center justify-center shrink-0">
@@ -43,6 +74,9 @@
                 <a id="live-banner-link" href="#" class="px-3 py-1.5 rounded-lg bg-primary hover:bg-primary-container text-on-primary text-xs font-bold transition-colors">
                     عرض الطلب
                 </a>
+                <a id="live-banner-print" href="#" target="_blank" rel="noopener" class="px-3 py-1.5 rounded-lg bg-white text-stone-900 text-xs font-bold transition-colors hidden">
+                    طباعة الطلب
+                </a>
                 <button type="button" id="live-banner-mute" class="px-2.5 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-xs text-stone-300 transition-colors">
                     إغلاق
                 </button>
@@ -58,8 +92,12 @@
     const ROLE = @json($role);
     const LIVE_URL = @json($liveEndpoint);
     const HAS_SOUND = @json($hasSound);
+    const DESKTOP_NOTIFY = @json($desktopNotify);
+    const ICON_URL = @json($desktopIconUrl);
+    const BADGE_URL = @json($desktopBadgeUrl);
     const SERVER_LATEST_ID = parseInt(@json($serverLatestOrderId), 10) || 0;
     const POLL_INTERVAL = 4000; // 4 seconds
+    const promptDismissKey = 'sofra_desktop_notify_dismissed_' + ROLE;
 
     const storageKey = 'sofra_last_order_id_' + ROLE;
     const notifiedKey = 'sofra_last_notified_order_id_' + ROLE;
@@ -189,10 +227,267 @@
 
     window.addEventListener('focus', stopTitleAlert);
 
+    function orderPageUrl(order) {
+        const id = order && Number(order.id);
+        if (ROLE === 'partner') {
+            return id ? `/partner/orders/${id}` : '/partner/orders';
+        }
+        if (ROLE === 'admin') {
+            return id ? `/admin/orders/${id}` : '/admin/orders';
+        }
+        return id ? `/courier/orders/${id}` : '/courier';
+    }
+
+    function orderPrintUrl(order) {
+        const id = order && Number(order.id);
+        if (!id || order.id === 'تجربة') {
+            return '';
+        }
+        if (ROLE === 'partner') {
+            return `/partner/orders/${id}/print`;
+        }
+        if (ROLE === 'admin') {
+            return `/admin/orders/${id}/print`;
+        }
+        return '';
+    }
+
+    function orderNotificationLines(order) {
+        if (!order) {
+            return [];
+        }
+
+        const lines = [];
+        const who = [order.customer, order.phone].filter(Boolean).join(' · ');
+        if (who) {
+            lines.push(who);
+        }
+        if (order.items) {
+            lines.push(order.items);
+        } else if (order.items_count) {
+            lines.push(order.items_count + ' أصناف');
+        }
+
+        const money = [];
+        if (ROLE !== 'partner' && order.restaurant) {
+            money.push(order.restaurant);
+        }
+        if (order.area) {
+            money.push(order.area);
+        }
+        if (order.total) {
+            money.push(order.total + ' ₪');
+        }
+        if (order.payment) {
+            money.push(order.payment);
+        }
+        if (money.length) {
+            lines.push(money.join(' · '));
+        }
+        if (order.notes) {
+            lines.push('ملاحظة: ' + order.notes);
+        }
+
+        return lines;
+    }
+
+    function desktopNotificationCopy(order) {
+        if (order && order.customer === 'إشعار تجريبي') {
+            return {
+                title: 'تجربة إشعار سفرة غزة',
+                body: 'إذا ظهر هذا على جانب ويندوز فالإشعارات تعمل. اضغط لفتح صفحة الطلبات.',
+            };
+        }
+
+        const lines = orderNotificationLines(order);
+        lines.push(ROLE === 'partner' || ROLE === 'admin' ? 'اضغط للطباعة' : 'اضغط لفتح الطلب');
+
+        if (ROLE === 'partner') {
+            return {
+                title: order && order.id ? `طلب جديد #${order.id}` : 'طلب جديد مدفوع لمطعمك',
+                body: lines.join('\n') || 'وصل طلب جديد بعد تأكيد الدفع. اضغط للطباعة.',
+            };
+        }
+
+        return {
+            title: order && order.id
+                ? `طلب #${order.id}${order.restaurant ? ' — ' + order.restaurant : ''}`
+                : 'طلب جديد في سفرة غزة',
+            body: lines.join('\n') || 'وصل طلب جديد. اضغط للطباعة.',
+        };
+    }
+
+    function updateDesktopNotifyButtons() {
+        const permission = ('Notification' in window) ? Notification.permission : 'denied';
+        document.querySelectorAll('.js-desktop-notify-btn').forEach((btn) => {
+            const icon = btn.querySelector('.material-symbols-outlined');
+            const label = btn.querySelector('.js-desktop-notify-label');
+            if (permission === 'granted') {
+                if (icon) icon.textContent = 'notifications_active';
+                if (label) label.textContent = 'إشعارات الجهاز: مفعّلة';
+                btn.setAttribute('title', 'إشعارات ويندوز مفعّلة (انقر للتجربة)');
+                btn.classList.remove('opacity-50');
+            } else if (permission === 'denied') {
+                if (icon) icon.textContent = 'notifications_off';
+                if (label) label.textContent = 'إشعارات الجهاز: محظورة';
+                btn.setAttribute('title', 'الإشعارات محظورة من المتصفح — اسمح بها من إعدادات كروم');
+                btn.classList.add('opacity-50');
+            } else {
+                if (icon) icon.textContent = 'notification_add';
+                if (label) label.textContent = 'تفعيل إشعارات الجهاز';
+                btn.setAttribute('title', 'فعّل إشعارات ويندوز للطلبات الجديدة');
+                btn.classList.remove('opacity-50');
+            }
+        });
+    }
+
+    function hideDesktopNotifyPrompt() {
+        const prompt = document.getElementById('desktop-notify-prompt');
+        if (prompt) prompt.classList.add('hidden');
+    }
+
+    function showDesktopNotifyPrompt() {
+        if (!DESKTOP_NOTIFY || !('Notification' in window)) return;
+        if (Notification.permission !== 'default') return;
+        if (localStorage.getItem(promptDismissKey) === '1') return;
+        const prompt = document.getElementById('desktop-notify-prompt');
+        if (prompt) prompt.classList.remove('hidden');
+    }
+
+    async function registerOrderServiceWorker() {
+        if (!DESKTOP_NOTIFY || !('serviceWorker' in navigator)) return null;
+        try {
+            return await navigator.serviceWorker.register('/sw.js', {
+                scope: '/',
+                updateViaCache: 'none',
+            });
+        } catch (e) {
+            return null;
+        }
+    }
+
+    async function requestDesktopNotifyPermission() {
+        if (!('Notification' in window)) {
+            if (window.showToast) {
+                window.showToast('هذا المتصفح لا يدعم إشعارات الجهاز.');
+            }
+            return 'denied';
+        }
+
+        let permission = Notification.permission;
+        if (permission === 'default') {
+            permission = await Notification.requestPermission();
+        }
+
+        updateDesktopNotifyButtons();
+
+        if (permission === 'granted') {
+            hideDesktopNotifyPrompt();
+            localStorage.removeItem(promptDismissKey);
+            await registerOrderServiceWorker();
+            if (window.showToast) {
+                window.showToast('تم تفعيل إشعارات الجهاز. ستظهر على جانب ويندوز عند وصول طلب.');
+            }
+        } else if (permission === 'denied' && window.showToast) {
+            window.showToast('الإشعارات محظورة. من إعدادات كروم اسمح بالإشعارات لموقع سفرة غزة.');
+        }
+
+        return permission;
+    }
+
+    async function showDesktopNotification(order) {
+        if (!DESKTOP_NOTIFY || !('Notification' in window) || Notification.permission !== 'granted') {
+            return;
+        }
+
+        const copy = desktopNotificationCopy(order);
+        const url = orderPageUrl(order);
+        const printUrl = orderPrintUrl(order);
+        const options = {
+            body: copy.body,
+            icon: ICON_URL,
+            badge: BADGE_URL,
+            tag: 'sofra-order-' + (order && order.id ? order.id : Date.now()),
+            renotify: true,
+            requireInteraction: true,
+            dir: 'rtl',
+            lang: 'ar',
+            data: { url: printUrl || url, openUrl: url, printUrl: printUrl, role: ROLE },
+            actions: printUrl ? [
+                { action: 'print', title: 'طباعة' },
+                { action: 'open', title: 'فتح الطلب' },
+            ] : [],
+        };
+
+        try {
+            const registration = await navigator.serviceWorker?.ready;
+            if (registration && registration.showNotification) {
+                await registration.showNotification(copy.title, options);
+                return;
+            }
+        } catch (e) {}
+
+        try {
+            const notification = new Notification(copy.title, options);
+            notification.onclick = function () {
+                window.focus();
+                window.location.href = printUrl || url;
+                notification.close();
+            };
+        } catch (e) {}
+    }
+
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.addEventListener('message', (event) => {
+            if (event.data && event.data.type === 'SOFRA_OPEN_URL' && event.data.url) {
+                window.location.href = event.data.url;
+            }
+        });
+    }
+
+    registerOrderServiceWorker();
+    updateDesktopNotifyButtons();
+    setTimeout(showDesktopNotifyPrompt, 1200);
+
+    document.getElementById('desktop-notify-enable')?.addEventListener('click', async (e) => {
+        e.preventDefault();
+        const permission = await requestDesktopNotifyPermission();
+        if (permission === 'granted') {
+            await showDesktopNotification({ id: 'تجربة', customer: 'إشعار تجريبي', total: '' });
+        }
+    });
+
+    document.getElementById('desktop-notify-later')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        localStorage.setItem(promptDismissKey, '1');
+        hideDesktopNotifyPrompt();
+    });
+
+    document.querySelectorAll('.js-desktop-notify-btn').forEach((btn) => {
+        btn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            const permission = ('Notification' in window) ? Notification.permission : 'denied';
+            if (permission === 'granted') {
+                await showDesktopNotification({
+                    id: 'تجربة',
+                    customer: 'إشعار تجريبي',
+                    restaurant: 'سفرة غزة',
+                    total: '',
+                });
+                if (window.showToast) {
+                    window.showToast('تم إرسال إشعار تجريبي إلى ويندوز.');
+                }
+                return;
+            }
+            await requestDesktopNotifyPermission();
+        });
+    });
+
     // Show floating banner
     const banner = document.getElementById('live-order-banner');
     const bannerText = document.getElementById('live-banner-text');
     const bannerLink = document.getElementById('live-banner-link');
+    const bannerPrint = document.getElementById('live-banner-print');
     const bannerClose = document.getElementById('live-banner-close');
     const bannerMute = document.getElementById('live-banner-mute');
 
@@ -210,17 +505,23 @@
         });
 
         if (bannerText && order) {
-            const customer = order.customer ? `من الزبون: ${order.customer}` : '';
-            const total = order.total ? `بقيمة ${order.total} ₪` : '';
-            const rest = order.restaurant ? `بمطعم: ${order.restaurant}` : '';
-            bannerText.textContent = `طلب رقم #${order.id} ${customer} ${rest} ${total}.`;
+            const details = orderNotificationLines(order).join(' · ');
+            bannerText.textContent = details
+                ? `طلب #${order.id} — ${details}`
+                : `طلب رقم #${order.id} وصل الآن.`;
         }
 
         if (bannerLink && order) {
-            const targetRoute = ROLE === 'partner' 
-                ? `/partner/orders/${order.id}` 
-                : (ROLE === 'admin' ? `/admin/orders/${order.id}` : `/courier/orders/${order.id}`);
-            bannerLink.setAttribute('href', targetRoute);
+            bannerLink.setAttribute('href', orderPageUrl(order));
+        }
+        if (bannerPrint) {
+            const printUrl = orderPrintUrl(order);
+            if (printUrl) {
+                bannerPrint.setAttribute('href', printUrl);
+                bannerPrint.classList.remove('hidden');
+            } else {
+                bannerPrint.classList.add('hidden');
+            }
         }
 
         // Auto dismiss banner after 8 seconds
@@ -348,7 +649,10 @@
                         flashTitleAlert();
                     }
 
-                    // Show order banner
+                    // Windows / Chrome desktop toast — click opens the order page
+                    showDesktopNotification(data.latest_order);
+
+                    // Show in-page banner
                     showOrderBanner(data.latest_order);
                 }
 

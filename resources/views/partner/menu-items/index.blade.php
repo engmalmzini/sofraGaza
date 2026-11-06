@@ -3,11 +3,19 @@
 @section('title', 'المنيو والتصنيفات')
 
 @section('actions')
+<a href="{{ route('partner.menu-offers.create') }}" class="admin-btn admin-btn--ghost">إضافة عرض</a>
 <a href="{{ route('partner.menu-items.create', request()->only('category')) }}" class="admin-btn admin-btn--primary">إضافة صنف</a>
 @endsection
 
 @section('content')
 <p class="mb-4 text-sm text-on-surface-variant">رتّب منيو {{ $restaurant->venueNounYours() }} حسب التصنيف: وجبات، مشروبات، أو أصناف الكافي. حتى لو كان الحساب قيد التحقق، سيكون المنيو جاهزاً لحظة الموافقة.</p>
+
+@include('admin.menu-offers._list', [
+    'offers' => $offers ?? collect(),
+    'createRoute' => route('partner.menu-offers.create'),
+    'editRouteName' => 'partner.menu-offers.edit',
+    'destroyRouteName' => 'partner.menu-offers.destroy',
+])
 
 <div class="admin-chips mb-4">
     <a class="admin-chip {{ request('category') ? '' : 'is-active' }}" href="{{ route('partner.menu-items.index', request()->except('category')) }}">الكل</a>
@@ -47,7 +55,16 @@
                 <tbody>
                     @foreach($groupItems as $item)
                         <tr>
-                            <td class="font-bold text-slate-900">{{ $item->name }}</td>
+                            <td class="font-bold text-slate-900">
+                                <div class="flex items-center gap-3">
+                                    @if($item->imageUrl())
+                                        <img src="{{ $item->imageUrl() }}" alt="" class="h-12 w-12 rounded-xl object-cover border border-slate-200 shrink-0">
+                                    @else
+                                        <span class="h-12 w-12 rounded-xl bg-stone-100 text-stone-400 flex items-center justify-center shrink-0 material-symbols-outlined">restaurant</span>
+                                    @endif
+                                    <span>{{ $item->name }}@if($item->is_featured) <em class="text-[11px] font-bold text-amber-700 not-italic">مميز</em>@endif @if($item->hasOptionGroups()) <em class="text-[11px] font-bold text-primary not-italic">أقسام</em>@endif</span>
+                                </div>
+                            </td>
                             <td class="font-mono font-bold text-slate-900">{{ number_format($item->price, 2) }} <span class="ils">₪</span></td>
                             <td>
                                 @include('admin.partials.pill', [
@@ -58,6 +75,13 @@
                             <td>@include('admin.partials.pill', ['status' => $item->isOrderable() ? 'approved' : 'cancelled', 'label' => $item->isOrderable() ? 'متوفر' : 'غير متوفر'])</td>
                             <td class="whitespace-nowrap">
                                 <div class="admin-table-actions">
+                                    <form method="POST" action="{{ route('partner.menu-items.featured', $item) }}">
+                                        @csrf
+                                        <button type="submit" class="admin-action-btn admin-action-btn--outline admin-action-btn--sm" title="{{ $item->is_featured ? 'إزالة التمييز' : 'تمييز في أول الصفحة' }}">
+                                            <span class="material-symbols-outlined {{ $item->is_featured ? 'text-amber-600' : '' }}">star</span>
+                                            <span>{{ $item->is_featured ? 'مميز' : 'تمييز' }}</span>
+                                        </button>
+                                    </form>
                                     <a class="admin-action-btn admin-action-btn--outline admin-action-btn--sm" href="{{ route('partner.menu-items.edit', $item) }}">
                                         <span class="material-symbols-outlined">edit</span>
                                         <span>تعديل</span>

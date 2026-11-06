@@ -81,7 +81,7 @@ class SettingController extends Controller
                 'palpay_name' => 'اسم صاحب محفظة بال باي',
                 'payment_instructions_note' => 'ملاحظات وتعليمات التحويل',
                 'referral_inviter_points' => 'نقاط الداعي عند انضمام صديق بكوده',
-                'restaurant_commission_percent' => 'نسبة عمولة المنصة من مبيعات المطعم (%)',
+                'restaurant_commission_percent' => 'النسبة العامة لعمولة المنصة من المطاعم (%)',
                 'referral_invitee_points' => 'نقاط الصديق الجديد عند إدخال كود الدعوة',
             ];
 

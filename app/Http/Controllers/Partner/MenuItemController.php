@@ -41,6 +41,7 @@ class MenuItemController extends Controller
             'items' => $items,
             'grouped' => $items->groupBy('category'),
             'categories' => $restaurant->menuCategories(),
+            'offers' => $restaurant->menuOffers()->with(['firstItem', 'secondItem'])->latest()->get(),
         ]);
     }
 
@@ -97,6 +98,23 @@ class MenuItemController extends Controller
             ->with('success', 'تم تحديث الصنف. وصل إشعار للإدارة لمراجعة التعديل.');
     }
 
+    public function toggleFeatured(MenuItem $menuItem): RedirectResponse
+    {
+        $this->authorizeItem($menuItem);
+        $menuItem->update(['is_featured' => ! $menuItem->is_featured]);
+
+        $this->notifyMenuChange(
+            $this->restaurant()->name,
+            $menuItem->is_featured
+                ? "صُنّف «{$menuItem->name}» كمميز في أول الصفحة."
+                : "أُزيل التمييز عن «{$menuItem->name}»."
+        );
+
+        return back()->with('success', $menuItem->is_featured
+            ? 'صار الصنف مميزاً ويظهر في أول صفحة المكان.'
+            : 'أُزيل التمييز عن الصنف.');
+    }
+
     public function destroy(MenuItem $menuItem): RedirectResponse
     {
         $this->authorizeItem($menuItem);
@@ -138,6 +156,13 @@ class MenuItemController extends Controller
             'category_custom' => ['required_if:category,__custom__', 'nullable', 'string', 'max:50'],
             'description' => ['nullable', 'string'],
             'price' => ['required', 'numeric', 'min:0'],
+            'option_groups' => ['nullable', 'array'],
+            'option_groups.*.name' => ['nullable', 'string', 'max:80'],
+            'option_groups.*.type' => ['nullable', 'in:single,multi'],
+            'option_groups.*.required' => ['nullable'],
+            'option_groups.*.choices' => ['nullable', 'array'],
+            'option_groups.*.choices.*.name' => ['nullable', 'string', 'max:180'],
+            'option_groups.*.choices.*.price' => ['nullable', 'numeric', 'min:0', 'max:9999'],
             'image' => ['nullable', 'image', 'max:4096'],
             'is_available' => ['nullable'],
             ...MenuItem::stockInputRules(),
@@ -151,6 +176,8 @@ class MenuItemController extends Controller
         }
 
         $data['is_available'] = $request->boolean('is_available');
+        $data['is_featured'] = $request->boolean('is_featured');
+        $data['option_groups'] = \App\Support\MenuOptions::fromRequest($request->input('option_groups'));
         $stock = MenuItem::stockAttributes($data);
         unset($data['image'], $data['category_custom'], $data['stock_mode'], $data['stock_qty']);
 

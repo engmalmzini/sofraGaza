@@ -25,6 +25,7 @@
         <div>أيام وساعات العمل: {{ $restaurant->hoursLabel() }}</div>
         <div>الرخصة: {{ $restaurant->license_number ?: '—' }}</div>
         <div>أصناف المنيو: {{ $restaurant->menu_items_count }}</div>
+        <div>عمولة المنصة: {{ $restaurant->commissionLabel() }}{{ $restaurant->hasCustomCommission() ? ' (خاصة بهذا المطعم)' : ' (النسبة العامة)' }}</div>
         <div>اكتساب النقاط: {{ $restaurant->points_per_amount ? 'كل '.$restaurant->points_per_amount.' ₪ = نقطة (خاص بالمطعم)' : 'حسب الإعداد العام' }}</div>
         <div>استبدال النقاط: {{ $restaurant->points_redeem_per_amount ? 'كل '.$restaurant->points_redeem_per_amount.' ₪ = نقطة (خاص بالمطعم)' : 'حسب الإعداد العام' }}</div>
         <p class="pt-2 text-on-surface-variant">{{ $restaurant->description ?: 'لا يوجد وصف.' }}</p>

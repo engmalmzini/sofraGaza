@@ -177,12 +177,17 @@ class RestaurantController extends Controller
             'image' => ['nullable', 'image', 'max:4096'],
             'is_active' => ['nullable'],
             'is_featured' => ['nullable'],
+            'commission_percent' => ['nullable', 'numeric', 'min:0', 'max:100'],
             'points_per_amount' => ['nullable', 'numeric', 'min:0.01'],
             'points_redeem_per_amount' => ['nullable', 'numeric', 'min:0.01'],
         ]);
 
         $data['is_active'] = $request->boolean('is_active');
         $data['is_featured'] = $request->boolean('is_featured');
+        $rawCommission = $request->input('commission_percent');
+        $data['commission_percent'] = ($rawCommission === null || $rawCommission === '')
+            ? null
+            : $rawCommission;
         $data['points_per_amount'] = $request->filled('points_per_amount') ? $data['points_per_amount'] : null;
         $data['points_redeem_per_amount'] = $request->filled('points_redeem_per_amount') ? $data['points_redeem_per_amount'] : null;
         unset($data['image']);

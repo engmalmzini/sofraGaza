@@ -92,6 +92,45 @@ class RestaurantOwnerRegistrationTest extends TestCase
         $this->get(route('home'))->assertDontSee('مطعم غير منشور', false);
     }
 
+    public function test_register_form_does_not_name_working_days_as_restaurant_phone(): void
+    {
+        $html = $this->get(route('partner.register'))
+            ->assertOk()
+            ->getContent();
+
+        $this->assertStringContainsString('name="working_days[]"', $html);
+        $this->assertStringNotContainsString('name="restaurant_phone[]"', $html);
+        $this->assertSame(1, substr_count($html, 'name="restaurant_phone"'));
+    }
+
+    public function test_registration_accepts_phone_fields_submitted_as_arrays(): void
+    {
+        $payload = $this->payload();
+        $payload['phone'] = ['0598887777'];
+        $payload['restaurant_phone'] = ['country' => 'PS', 'number' => '059-200-2002'];
+
+        $this->post(route('partner.register'), $payload)
+            ->assertRedirect(route('partner.dashboard'));
+
+        $this->assertAuthenticated();
+        $this->assertDatabaseHas('users', ['phone' => '0598887777']);
+        $this->assertDatabaseHas('restaurants', [
+            'name' => 'مطعم الكرم الغزي',
+            'phone' => '0592002002',
+        ]);
+    }
+
+    public function test_registration_returns_validation_error_instead_of_crashing_for_empty_phone_arrays(): void
+    {
+        $payload = $this->payload();
+        $payload['restaurant_phone'] = [['nested' => [true]]];
+
+        $this->from(route('partner.register'))
+            ->post(route('partner.register'), $payload)
+            ->assertRedirect(route('partner.register'))
+            ->assertSessionHasErrors('restaurant_phone');
+    }
+
     public function test_failed_registration_keeps_password_for_the_next_attempt(): void
     {
         $payload = $this->payload();

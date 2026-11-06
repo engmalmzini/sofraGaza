@@ -142,7 +142,10 @@
                         <div class="flex items-center justify-between text-stone-800 py-0.5">
                             <div class="flex items-center gap-1">
                                 <span class="font-mono text-stone-400">{{ $line['qty'] }}x</span>
-                                <span class="font-medium">{{ $line['item']->name }}</span>
+                                <span class="font-medium">{{ $line['name'] ?? $line['item']->name }}</span>
+                                @if(!empty($line['choices_label']) || !empty($line['choices']))
+                                    <span class="text-[10px] text-stone-500">({{ $line['choices_label'] ?? \App\Support\MenuOptions::label($line['choices'] ?? []) }})</span>
+                                @endif
                                 @if(!empty($line['notes']))
                                     <span class="text-[10px] text-stone-600 bg-stone-100 px-1 rounded">({{ $line['notes'] }})</span>
                                 @endif

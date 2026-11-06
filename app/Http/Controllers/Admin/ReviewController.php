@@ -46,7 +46,7 @@ class ReviewController extends Controller
         $totalCount = Review::count();
         $approvedCount = Review::where('is_approved', true)->count();
         $hiddenCount = Review::where('is_approved', false)->count();
-        $avgRating = (float) (Review::avg('rating') ?: 5.0);
+        $avgRating = (float) (Review::avg('rating') ?: 0);
 
         $restaurants = Restaurant::query()->orderBy('name')->get(['id', 'name']);
 

@@ -166,7 +166,7 @@
                     <span>المتبقي بعد الاستبدال</span>
                     <strong><b data-redeem-left>{{ max(0, $balance - $selectedCost) }}</b> نقطة</strong>
                 </div>
-                <p class="sg-redeem__hint">الطلب يصل للمطعم بانتظار التأكيد، بدون أي تحويل مالي.</p>
+                <p class="sg-redeem__hint">بعد تأكيد الإدارة يصل الطلب للمطعم، بدون أي تحويل مالي.</p>
                 <button type="submit" class="sg-redeem__submit" data-redeem-submit @disabled(! $canSubmit)>
                     تأكيد الاستبدال
                 </button>

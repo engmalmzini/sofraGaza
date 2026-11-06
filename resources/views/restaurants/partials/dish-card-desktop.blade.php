@@ -15,7 +15,9 @@
         @else
             <span class="rd-dish__fallback material-symbols-outlined">restaurant</span>
         @endif
-        @if($popular)
+        @if($item->is_featured)
+            <span class="rd-dish__badge">مميز</span>
+        @elseif($popular)
             <span class="rd-dish__badge">الأكثر طلباً</span>
         @endif
         @unless($item->isOrderable())
@@ -36,7 +38,7 @@
             @include('partials.dish-stock', ['item' => $item, 'class' => 'rd-dish__stock'])
         @endif
         <div class="rd-dish__foot">
-            <span class="rd-dish__price">{{ number_format((float) $item->price, 0) }} <span class="ils">₪</span></span>
+            <span class="rd-dish__price">{{ $item->hasOptionGroups() ? 'من ' : '' }}{{ number_format($item->displayPrice(), 0) }} <span class="ils">₪</span></span>
             @if($item->isOrderable() && ($canShop ?? true) && ($canOrder ?? true))
                 <div class="rd-dish__actions">
                     <button
@@ -47,14 +49,20 @@
                         data-item-name="{{ $item->name }}"
                         data-item-price="{{ (float) $item->price }}"
                         data-item-desc="{{ $item->description }}"
+                        data-item-image="{{ $item->imageUrl() ?: $restaurant->coverUrl() }}"
+                        data-option-groups="{{ json_encode($item->optionGroups(), JSON_UNESCAPED_UNICODE) }}"
                         data-add-url="{{ route('cart.add', $item) }}"
                     >
-                        تخصيص
+                        {{ $item->hasOptionGroups() ? 'اختر النوع' : 'تخصيص' }}
                     </button>
-                    <form method="POST" action="{{ route('cart.add', $item) }}">
-                        @csrf
-                        <button type="submit" class="rd-dish__plus" aria-label="إضافة سريعة">+</button>
-                    </form>
+                    @if($item->hasOptionGroups())
+                        <button type="button" class="rd-dish__plus" aria-label="إضافة" data-open-customizer data-item-id="{{ $item->id }}" data-item-name="{{ $item->name }}" data-item-price="{{ (float) $item->price }}" data-item-desc="{{ $item->description }}" data-item-image="{{ $item->imageUrl() ?: $restaurant->coverUrl() }}" data-option-groups="{{ json_encode($item->optionGroups(), JSON_UNESCAPED_UNICODE) }}" data-add-url="{{ route('cart.add', $item) }}">+</button>
+                    @else
+                        <form method="POST" action="{{ route('cart.add', $item) }}">
+                            @csrf
+                            <button type="submit" class="rd-dish__plus" aria-label="إضافة سريعة">+</button>
+                        </form>
+                    @endif
                 </div>
             @endif
         </div>

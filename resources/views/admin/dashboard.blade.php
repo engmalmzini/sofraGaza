@@ -29,7 +29,7 @@
 <div class="admin-metrics">
     <article class="admin-metric {{ $pendingOrders > 0 ? 'admin-metric--accent' : '' }}">
         <div class="admin-metric__top">
-            <span>طلبات بانتظار التأكيد</span>
+            <span>طلبات بانتظار تأكيد الدفع</span>
             <div class="admin-metric__icon">
                 <span class="material-symbols-outlined">pending_actions</span>
             </div>

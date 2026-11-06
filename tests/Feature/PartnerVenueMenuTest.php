@@ -5,7 +5,10 @@ namespace Tests\Feature;
 use App\Models\MenuItem;
 use App\Models\Restaurant;
 use App\Models\User;
+use App\Support\Media;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class PartnerVenueMenuTest extends TestCase
@@ -54,6 +57,39 @@ class PartnerVenueMenuTest extends TestCase
             ->assertDontSee('ليموناضة', false);
     }
 
+    public function test_public_menu_shows_section_headings_when_viewing_all(): void
+    {
+        [, $restaurant] = $this->makeVenue('مطعم الكرم', 'restaurant');
+
+        MenuItem::query()->create([
+            'restaurant_id' => $restaurant->id,
+            'name' => 'مسخن دجاج',
+            'category' => 'وجبات',
+            'price' => 22,
+            'is_available' => true,
+        ]);
+        MenuItem::query()->create([
+            'restaurant_id' => $restaurant->id,
+            'name' => 'ليموناضة',
+            'category' => 'مشروبات',
+            'price' => 8,
+            'is_available' => true,
+        ]);
+
+        $html = $this->get(route('restaurants.show', $restaurant))
+            ->assertOk()
+            ->assertSee('الكل', false)
+            ->assertSee('مسخن دجاج', false)
+            ->assertSee('ليموناضة', false)
+            ->assertSee('menu-section-title', false)
+            ->getContent();
+
+        $this->assertGreaterThanOrEqual(2, substr_count($html, 'data-menu-section='));
+        $this->assertGreaterThanOrEqual(2, substr_count($html, 'menu-section-title'));
+        $this->assertStringContainsString('وجبات', $html);
+        $this->assertStringContainsString('مشروبات', $html);
+    }
+
     public function test_cafe_owner_sees_cafe_categories_and_wording(): void
     {
         [$owner] = $this->makeVenue('كافي تِرا', 'cafe');
@@ -66,6 +102,48 @@ class PartnerVenueMenuTest extends TestCase
             ->assertSee('مشروبات ساخنة', false)
             ->assertSee('معجنات', false)
             ->assertDontSee('مقبلات', false);
+    }
+
+    public function test_uploaded_menu_image_is_shown_on_partner_and_public_pages(): void
+    {
+        Storage::fake('public');
+        [$owner, $restaurant] = $this->makeVenue('مطعم الصور', 'restaurant');
+
+        $this->actingAs($owner)
+            ->post(route('partner.menu-items.store'), [
+                'name' => 'مسخن',
+                'category' => 'وجبات',
+                'price' => 20,
+                'description' => 'مسخن على أصوله',
+                'is_available' => 1,
+                'stock_mode' => 'unlimited',
+                'image' => UploadedFile::fake()->image('dish.jpg', 200, 200),
+            ])
+            ->assertRedirect(route('partner.menu-items.index'));
+
+        $item = MenuItem::query()->where('name', 'مسخن')->first();
+        $this->assertNotNull($item?->image_path);
+        $this->assertStringContainsString('/storage/'.$item->image_path, (string) $item->imageUrl());
+
+        $this->actingAs($owner)
+            ->get(route('partner.menu-items.index'))
+            ->assertOk()
+            ->assertSee($item->imageUrl(), false)
+            ->assertSee($item->image_path, false);
+
+        $this->get(route('restaurants.show', $restaurant))
+            ->assertOk()
+            ->assertSee($item->image_path, false);
+    }
+
+    public function test_media_url_is_returned_even_when_file_is_missing(): void
+    {
+        $this->assertStringContainsString('/storage/menu/missing.jpg', (string) Media::url('menu/missing.jpg'));
+    }
+
+    public function test_storage_logs_are_not_served(): void
+    {
+        $this->get('/storage/logs/laravel.log')->assertNotFound();
     }
 
     public function test_owner_can_add_custom_menu_category(): void

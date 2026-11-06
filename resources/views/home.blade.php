@@ -2094,8 +2094,8 @@
         <div class="sg-place-grid" id="restaurants-grid">
             @forelse($restaurants->take(8) as $restaurant)
                 @php
-                    $rating = number_format($restaurant->averageRating(), 1);
                     $reviewsCount = $restaurant->reviewsCount();
+                    $rating = $reviewsCount > 0 ? number_format($restaurant->averageRating() ?? 0, 1) : null;
                     $eta = $restaurant->type === 'cafe' ? '20-25 دقيقة' : '25-35 دقيقة';
                     $isAd = $restaurant->isBoosted();
                 @endphp
@@ -2142,13 +2142,13 @@
                                 <span class="material-symbols-outlined text-amber-600 text-[18px]" title="مكان موثّق">verified</span>
                             </div>
 
+                            @if($reviewsCount > 0)
                             <div class="flex items-center gap-1 px-2 py-0.5 rounded-lg bg-[#fff7ed] border border-[#fed7aa] text-[#9a3412] text-xs font-black shrink-0">
                                 @include('partials.star-icon', ['class' => 'w-3.5 h-3.5 text-[#d65e15]'])
                                 <span>{{ $rating }}</span>
-                                @if($reviewsCount > 0)
-                                    <span class="text-[10px] text-stone-400">({{ $reviewsCount }})</span>
-                                @endif
+                                <span class="text-[10px] text-stone-400">({{ $reviewsCount }})</span>
                             </div>
+                            @endif
                         </div>
 
                         {{-- Cuisine & Location --}}

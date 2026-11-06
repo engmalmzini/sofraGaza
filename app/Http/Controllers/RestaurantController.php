@@ -72,8 +72,13 @@ class RestaurantController extends Controller
     {
         abort_unless($restaurant->isVisible(), 404);
 
-        $restaurant->load(['menuItems' => fn ($q) => $q->orderBy('category')->orderBy('name')]);
+        $restaurant->load([
+            'menuItems' => fn ($q) => $q->orderByDesc('is_featured')->orderBy('category')->orderBy('name'),
+            'menuOffers' => fn ($q) => $q->active()->with(['firstItem', 'secondItem'])->latest(),
+        ]);
         $grouped = $restaurant->menuItems->groupBy('category');
+        $featuredItems = $restaurant->menuItems->where('is_featured', true)->values();
+        $menuOffers = $restaurant->menuOffers->filter(fn ($offer) => $offer->firstItem)->values();
 
         $menuSections = $grouped->map(function ($items, $category) {
             $name = $category ?: 'قائمة الطعام';
@@ -104,11 +109,13 @@ class RestaurantController extends Controller
             'canOrder' => $restaurant->isAcceptingOrders(),
             'orderingBlockReason' => $restaurant->orderingBlockReason(),
             'menuSections' => $menuSections,
+            'featuredItems' => $featuredItems,
+            'menuOffers' => $menuOffers,
             'restaurantCart' => $restaurantCart,
             'rewards' => $this->points->rewardsForRestaurant($restaurant, 4),
             'membership' => auth()->user()?->activeMembership(),
             'pointsBalance' => (int) (auth()->user()->points_balance ?? 0),
-            'rating' => number_format($averageRating, 1),
+            'rating' => $reviewsCount > 0 && $averageRating !== null ? number_format($averageRating, 1) : null,
             'reviews' => $reviewsCount,
             'approvedReviews' => $approvedReviews,
             'ratingBreakdown' => $breakdown,

@@ -541,6 +541,7 @@ class User extends Authenticatable
     {
         return (float) ($this->orders()
             ->whereIn('status', ['confirmed', 'preparing', 'delivering', 'delivered'])
+            ->reorder()
             ->selectRaw('COALESCE(SUM(COALESCE(total, subtotal, 0)), 0) as spent')
             ->value('spent') ?? 0);
     }

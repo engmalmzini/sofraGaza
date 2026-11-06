@@ -34,7 +34,13 @@ class DashboardController extends Controller
             ->where('is_active', true)
             ->where('verification_status', Restaurant::VERIFICATION_APPROVED)
             ->count();
-        $activeCouriers = User::query()->where('role', 'courier')->where('is_active', true)->count();
+        $activeCouriers = User::query()
+            ->where('role', 'courier')
+            ->where(function ($query) {
+                $query->where('courier_status', User::COURIER_APPROVED)
+                    ->orWhereNull('courier_status');
+            })
+            ->count();
         $customers = User::query()->where('role', 'customer')->count();
 
         $expiringMemberships = MembershipSubscription::query()

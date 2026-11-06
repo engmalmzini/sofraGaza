@@ -361,60 +361,6 @@ class DatabaseSeeder extends Seeder
             }
         }
 
-        $sampleUsers = [
-            ['name' => 'محمد الهسي', 'phone' => '0597111222', 'email' => 'mohammed@example.com'],
-            ['name' => 'أم يوسف الغزية', 'phone' => '0597222333', 'email' => 'om_yousef@example.com'],
-            ['name' => 'خالد النجار', 'phone' => '0597333444', 'email' => 'khaled@example.com'],
-            ['name' => 'منى الكرد', 'phone' => '0597444555', 'email' => 'muna@example.com'],
-            ['name' => 'إياد حبيب', 'phone' => '0597555666', 'email' => 'eyad@example.com'],
-        ];
-
-        $users = [$customer];
-        foreach ($sampleUsers as $u) {
-            $users[] = User::query()->updateOrCreate(
-                ['phone' => $u['phone']],
-                [
-                    'name' => $u['name'],
-                    'email' => $u['email'],
-                    'password' => Hash::make('123456'),
-                    'role' => 'customer',
-                    'points_balance' => rand(15, 60),
-                    'wallet_balance' => rand(50, 250),
-                ]
-            );
-        }
-
-        $allRestaurants = Restaurant::all();
-        $sampleReviews = [
-            ['rating' => 5, 'comment' => 'الأكل واصل سخن وطازج والتوصيل سريع جداً، تجربة ممتازة وبنصح فيهم بشدة.'],
-            ['rating' => 5, 'comment' => 'شغل مرتب ونظافة عالية، ونكهة أصلية على أصولها. بارك الله فيكم.'],
-            ['rating' => 4, 'comment' => 'الطعم جداً زاكي والكمية وفيرة، التوصيل تأخر 5 دقائق فقط بس الأكل عوّض كل شي.'],
-            ['rating' => 5, 'comment' => 'الخبز طازج والمشاوي متبلة صح، أفضل تجربة طلب أونلاين في غزة.'],
-            ['rating' => 5, 'comment' => 'خدمة ممتازة وتغليف متقن حافظ على سخونة الوجبة. سفرة غزة ما قصرتوا.'],
-            ['rating' => 4, 'comment' => 'جودة ممتازة وسعر مناسب، بنطلب من عندهم دايماً.'],
-        ];
-
-        foreach ($allRestaurants as $index => $restaurant) {
-            $count = rand(3, 5);
-            for ($i = 0; $i < $count; $i++) {
-                $user = $users[($index + $i) % count($users)];
-                $sample = $sampleReviews[($index + $i) % count($sampleReviews)];
-
-                \App\Models\Review::query()->updateOrCreate(
-                    [
-                        'user_id' => $user->id,
-                        'restaurant_id' => $restaurant->id,
-                    ],
-                    [
-                        'rating' => $sample['rating'],
-                        'comment' => $sample['comment'],
-                        'is_approved' => true,
-                        'created_at' => now()->subDays(rand(1, 20))->subHours(rand(1, 12)),
-                    ]
-                );
-            }
-        }
-
         // Seed default coupons
         $coupons = [
             [

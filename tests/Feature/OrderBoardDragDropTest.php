@@ -20,7 +20,7 @@ class OrderBoardDragDropTest extends TestCase
         $this->actingAs($admin)
             ->get(route('admin.orders.index'))
             ->assertOk()
-            ->assertSee('بانتظار التأكيد', false)
+            ->assertSee('بانتظار تأكيد الدفع', false)
             ->assertSee('قيد التحضير بالمطعم', false)
             ->assertSee('مع المندوب للتوصيل', false)
             ->assertSee('تم التسليم بنجاح', false)
@@ -61,7 +61,7 @@ class OrderBoardDragDropTest extends TestCase
 
     public function test_partner_orders_and_dashboard_use_the_same_board(): void
     {
-        [$owner, $order] = $this->makePartnerOrder('pending_confirmation');
+        [$owner, $order] = $this->makePartnerOrder('confirmed');
 
         $this->actingAs($owner)
             ->get(route('partner.orders.index'))
@@ -69,13 +69,35 @@ class OrderBoardDragDropTest extends TestCase
             ->assertSee('قيد التحضير بالمطعم', false)
             ->assertSee('#'.$order->id, false)
             ->assertSee('حساب الوجبات:', false)
-            ->assertSee('/partner/orders/__ID__/move', false);
+            ->assertSee('تم الدفع', false)
+            ->assertSee('/partner/orders/__ID__/move', false)
+            ->assertDontSee('بانتظار تأكيد الدفع', false);
 
         $this->actingAs($owner)
             ->get(route('partner.dashboard'))
             ->assertOk()
             ->assertSee('قيد التحضير بالمطعم', false)
-            ->assertSee('#'.$order->id, false);
+            ->assertSee('#'.$order->id, false)
+            ->assertSee('تم الدفع', false);
+    }
+
+    public function test_partner_does_not_see_orders_before_payment_confirmation(): void
+    {
+        [$owner, $order] = $this->makePartnerOrder('pending_confirmation');
+
+        $this->actingAs($owner)
+            ->get(route('partner.orders.index'))
+            ->assertOk()
+            ->assertDontSee('#'.$order->id, false);
+
+        $this->actingAs($owner)
+            ->get(route('partner.dashboard'))
+            ->assertOk()
+            ->assertDontSee('#'.$order->id, false);
+
+        $this->actingAs($owner)
+            ->get(route('partner.orders.show', $order))
+            ->assertNotFound();
     }
 
     public function test_partner_can_drop_confirmed_order_into_preparing(): void

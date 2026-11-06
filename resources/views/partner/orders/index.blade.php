@@ -13,6 +13,10 @@
 
     {{-- Sound notification button --}}
     <div class="flex items-center gap-2">
+        <button type="button" class="admin-btn admin-btn--ghost text-xs flex items-center gap-1.5 js-desktop-notify-btn" title="تفعيل إشعارات الجهاز">
+            <span class="material-symbols-outlined text-primary text-[18px]">notification_add</span>
+            <span class="js-desktop-notify-label">تفعيل إشعارات الجهاز</span>
+        </button>
         <button type="button" id="btn-toggle-sound" class="admin-btn admin-btn--ghost text-xs flex items-center gap-1.5" title="انقر لتشغيل وتجربة نغمة التنبيه">
             <span class="material-symbols-outlined text-primary text-[18px]">volume_up</span>
             <span id="sound-status-label">تنبيه الصوت: مفعل (انقر للتجربة)</span>
@@ -25,7 +29,9 @@
     <div class="admin-chips">
         <a class="admin-chip {{ request('status') ? '' : 'is-active' }}" href="{{ route('partner.orders.index', request()->except('status')) }}">الكل</a>
         @foreach(\App\Models\Order::STATUSES as $key => $label)
-            <a class="admin-chip {{ request('status') === $key ? 'is-active' : '' }}" href="{{ route('partner.orders.index', array_merge(request()->except('page'), ['status' => $key])) }}">{{ $label }}</a>
+            @if($key !== 'pending_confirmation')
+                <a class="admin-chip {{ request('status') === $key ? 'is-active' : '' }}" href="{{ route('partner.orders.index', array_merge(request()->except('page'), ['status' => $key])) }}">{{ $label }}</a>
+            @endif
         @endforeach
     </div>
 </div>
@@ -33,7 +39,7 @@
 {{-- Real-time Orders Container --}}
 <div class="mt-4" id="partner-orders-wrapper" data-last-id="{{ $orders->max('id') ?? 0 }}" data-live-url="{{ route('partner.orders.live') }}">
     @if(! request('status'))
-        <p class="text-xs text-slate-500 mb-2">اسحب الطلب من عمود الانتظار وأفلته في قيد التحضير ليبدأ التحضير تلقائياً.</p>
+        <p class="text-xs text-slate-500 mb-2">الطلبات تظهر هنا بعد تأكيد الإدارة للدفع. اسحب الطلب وأفلته في قيد التحضير ليبدأ التحضير تلقائياً.</p>
         <div id="partner-orders-container">
             @include('partner.orders.partials.order-board', ['ordersByStatus' => $ordersByStatus])
         </div>

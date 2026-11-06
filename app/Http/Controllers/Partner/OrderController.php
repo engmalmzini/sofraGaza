@@ -18,7 +18,7 @@ class OrderController extends Controller
     public function index(Request $request): View
     {
         $restaurant = $this->restaurant();
-        $query = $restaurant->orders()->with(['user', 'items', 'courier'])->latest();
+        $query = $restaurant->orders()->visibleToRestaurant()->with(['user', 'items', 'courier'])->latest();
 
         if ($request->filled('status')) {
             $query->where('status', $request->status);
@@ -34,8 +34,12 @@ class OrderController extends Controller
         }
 
         $orders = $query->paginate(15)->withQueryString();
-        $activeCount = $restaurant->orders()->whereIn('status', ['pending_confirmation', 'confirmed', 'preparing', 'delivering'])->count();
+        $activeCount = $restaurant->orders()
+            ->visibleToRestaurant()
+            ->whereIn('status', ['confirmed', 'preparing', 'delivering'])
+            ->count();
         $boardOrders = $restaurant->orders()
+            ->visibleToRestaurant()
             ->with(['user', 'items', 'courier'])
             ->latest()
             ->take(60)
@@ -49,16 +53,33 @@ class OrderController extends Controller
     {
         $restaurant = $this->restaurant();
         abort_unless($order->restaurant_id === $restaurant->id, 403, 'غير مصرح بالوصول لهذا الطلب.');
+        abort_unless($order->isVisibleToRestaurant(), 404);
 
         $order->load(['user', 'items', 'courier', 'membership', 'groupOrder.members.user']);
 
         return view('partner.orders.show', compact('restaurant', 'order'));
     }
 
+    public function print(Order $order): View
+    {
+        $restaurant = $this->restaurant();
+        abort_unless($order->restaurant_id === $restaurant->id, 403, 'غير مصرح بالوصول لهذا الطلب.');
+        abort_unless($order->isVisibleToRestaurant(), 404);
+
+        $order->load(['user', 'items', 'groupOrder.members.user']);
+
+        return view('orders.print', [
+            'order' => $order,
+            'tone' => 'partner',
+            'backUrl' => route('partner.orders.show', $order),
+        ]);
+    }
+
     public function update(Request $request, Order $order): RedirectResponse
     {
         $restaurant = $this->restaurant();
         abort_unless($order->restaurant_id === $restaurant->id, 403);
+        abort_unless($order->isVisibleToRestaurant(), 404);
 
         $request->validate([
             'status' => ['required', 'string', 'in:preparing,confirmed'],
@@ -77,6 +98,7 @@ class OrderController extends Controller
     {
         $restaurant = $this->restaurant();
         abort_unless($order->restaurant_id === $restaurant->id, 403);
+        abort_unless($order->isVisibleToRestaurant(), 404);
 
         $data = $request->validate([
             'column' => ['required', 'string', 'in:pending_confirmation,preparing,delivering,delivered'],
@@ -102,6 +124,7 @@ class OrderController extends Controller
     {
         $restaurant = $this->restaurant();
         abort_unless($order->restaurant_id === $restaurant->id, 403);
+        abort_unless($order->isVisibleToRestaurant(), 404);
 
         if (! in_array($order->status, ['confirmed', 'preparing'], true)) {
             return back()->with('error', 'لا يمكن تعديل حالة هذا الطلب حالياً.');
@@ -140,16 +163,22 @@ class OrderController extends Controller
         $hasLastId = $request->has('last_id');
         $lastId = (int) $request->input('last_id', 0);
 
-        $latest = $restaurant->orders()->latest('id')->first();
+        $latest = $restaurant->orders()
+            ->visibleToRestaurant()
+            ->with(['user', 'items'])
+            ->latest('id')
+            ->first();
         $latestId = $latest?->id ?? 0;
 
         $activeOrders = $restaurant->orders()
+            ->visibleToRestaurant()
             ->with(['user', 'items', 'courier'])
-            ->whereIn('status', ['pending_confirmation', 'confirmed', 'preparing', 'delivering'])
+            ->whereIn('status', ['confirmed', 'preparing', 'delivering'])
             ->latest('id')
             ->get();
 
         $deliveredOrders = $restaurant->orders()
+            ->visibleToRestaurant()
             ->with(['user', 'items', 'courier'])
             ->where('status', 'delivered')
             ->latest('id')
@@ -170,14 +199,7 @@ class OrderController extends Controller
             'latest_id' => $latestId,
             'active_count' => $activeCount,
             'has_new' => $hasNew,
-            'latest_order' => $latest ? [
-                'id' => $latest->id,
-                'customer' => $latest->user?->name,
-                'total' => (float) $latest->foodTotal(),
-                'status' => $latest->status,
-                'status_label' => $latest->statusLabel(),
-                'items_count' => $latest->items->count(),
-            ] : null,
+            'latest_order' => $latest?->desktopAlertPayload('partner'),
             'html' => $html,
             'board_html' => $html,
             'board_signature' => $boardSignature,

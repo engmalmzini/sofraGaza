@@ -25,15 +25,17 @@
             </div>
             <div data-drawer-lines class="flex flex-col gap-2 mt-3">
                 @forelse($restaurantCart['lines'] ?? [] as $line)
-                    <div class="flex items-center justify-between p-2.5 rounded-lg bg-surface-container-low" data-line-id="{{ $line['item']->id }}">
+                    <div class="flex items-center justify-between p-2.5 rounded-lg bg-surface-container-low" data-line-id="{{ $line['key'] ?? $line['item']->id }}">
                         <div class="flex-1 min-w-0 pl-2">
-                            <h4 class="font-label-md text-[13px] text-on-surface font-bold truncate">{{ $line['item']->name }}</h4>
+                            <h4 class="font-label-md text-[13px] text-on-surface font-bold truncate">{{ $line['name'] ?? $line['item']->name }}</h4>
+                            @include('partials.item-choices', ['choices' => $line['choices'] ?? []])
                             <span class="font-label-md text-[13px] text-primary font-bold">{{ number_format($line['line_total'], 0) }} <span class="ils">₪</span></span>
                         </div>
                         <form method="POST" action="{{ route('cart.update') }}" class="flex items-center gap-2 bg-surface-container-lowest rounded-full p-1 shadow-xs">
                             @csrf
                             @method('PATCH')
                             <input type="hidden" name="item_id" value="{{ $line['item']->id }}">
+                            <input type="hidden" name="line_key" value="{{ $line['key'] ?? $line['item']->id }}">
                             <button type="submit" name="quantity" value="{{ $line['qty'] - 1 }}" class="w-6 h-6 rounded-full flex items-center justify-center text-on-surface" aria-label="إنقاص">
                                 <span class="material-symbols-outlined text-[16px]">remove</span>
                             </button>
@@ -73,10 +75,13 @@
 
     <div class="fixed inset-0 z-[70] bg-on-surface/40 backdrop-blur-sm items-end lg:items-center justify-center p-0 lg:p-4" id="customizeModal" hidden>
         <div class="bg-surface-container-lowest rounded-t-3xl lg:rounded-2xl w-full max-w-lg shadow-xl overflow-hidden">
-            <div class="p-4 bg-surface-container-low flex items-start justify-between">
-                <div class="flex flex-col min-w-0 pl-3">
-                    <h3 class="font-headline-sm text-[20px] font-bold text-on-surface" id="modalDishTitle">تخصيص الوجبة</h3>
-                    <p class="font-body-sm text-[14px] text-on-surface-variant pt-1" id="modalDishDesc">اختر الكمية والإضافات المفضلة لوجبتك</p>
+            <div class="p-4 bg-surface-container-low flex items-start justify-between gap-3">
+                <div class="flex items-start gap-3 min-w-0">
+                    <img id="modalDishImage" alt="" class="w-16 h-16 rounded-xl object-cover bg-surface-container shrink-0" hidden>
+                    <div class="flex flex-col min-w-0">
+                        <h3 class="font-headline-sm text-[20px] font-bold text-on-surface" id="modalDishTitle">تخصيص الوجبة</h3>
+                        <p class="font-body-sm text-[14px] text-on-surface-variant pt-1" id="modalDishDesc">اختر الكمية والنوع إن وُجد</p>
+                    </div>
                 </div>
                 <button type="button" class="js-close-customizer text-on-surface-variant hover:text-on-surface p-1" aria-label="إغلاق">
                     <span class="material-symbols-outlined">close</span>
@@ -94,33 +99,10 @@
                             <button type="button" class="js-qty-plus w-8 h-8 rounded-full bg-surface-container-lowest text-on-surface flex items-center justify-center font-bold text-lg">+</button>
                         </div>
                     </div>
+                    <div id="customize-groups" class="flex flex-col gap-4"></div>
                     <div class="flex flex-col gap-1">
-                        <span class="font-label-lg text-[15px] text-on-surface font-semibold">إضافات محببة (اختياري)</span>
-                        <label class="flex items-center justify-between p-2 rounded-lg hover:bg-surface-container-low cursor-pointer">
-                            <div class="flex items-center gap-2">
-                                <input class="addon-check w-4 h-4 rounded accent-primary" name="addons[]" value="خبز صاج وطابون طازج إضافي" data-price="0" type="checkbox">
-                                <span class="font-body-sm text-[14px] text-on-surface">خبز صاج وطابون طازج إضافي</span>
-                            </div>
-                            <span class="font-label-sm text-[11px] text-secondary font-bold">مجاناً</span>
-                        </label>
-                        <label class="flex items-center justify-between p-2 rounded-lg hover:bg-surface-container-low cursor-pointer">
-                            <div class="flex items-center gap-2">
-                                <input class="addon-check w-4 h-4 rounded accent-primary" name="addons[]" value="صلصة مثومة غنية وزيت زيتون" data-price="0" type="checkbox">
-                                <span class="font-body-sm text-[14px] text-on-surface">صلصة مثومة غنية وزيت زيتون</span>
-                            </div>
-                            <span class="font-label-sm text-[11px] text-secondary font-bold">مجاناً</span>
-                        </label>
-                        <label class="flex items-center justify-between p-2 rounded-lg hover:bg-surface-container-low cursor-pointer">
-                            <div class="flex items-center gap-2">
-                                <input class="addon-check w-4 h-4 rounded accent-primary" name="addons[]" value="سلطة دقّة غزاوية حارة بالفلفل الأخضر" data-price="0" type="checkbox">
-                                <span class="font-body-sm text-[14px] text-on-surface">سلطة دقّة غزاوية حارة بالفلفل الأخضر</span>
-                            </div>
-                            <span class="font-label-sm text-[11px] text-secondary font-bold">مجاناً</span>
-                        </label>
-                    </div>
-                    <div class="flex flex-col gap-1">
-                        <label class="font-label-lg text-[15px] text-on-surface font-semibold" for="orderNotes">ملاحظات التحضير الخاصة بالصنف</label>
-                        <textarea class="w-full rounded-xl bg-surface-container-low p-3 border border-slate-200 focus:border-primary outline-none font-body-sm text-[14px] text-on-surface placeholder:text-on-surface-variant" id="orderNotes" name="notes" placeholder="مثال: زيادة فلفل حار، بدون جبنة، بدون بصل، خبز محمص زيادة..." rows="2"></textarea>
+                        <label class="font-label-lg text-[15px] text-on-surface font-semibold" for="orderNotes">إضافة ملاحظة للصنف</label>
+                        <textarea class="w-full rounded-xl bg-surface-container-low p-3 border border-slate-200 focus:border-primary outline-none font-body-sm text-[14px] text-on-surface placeholder:text-on-surface-variant" id="orderNotes" name="notes" placeholder="مثال: زيادة فلفل حار، بدون جبنة، بدون بصل..." rows="2"></textarea>
                     </div>
                 </div>
                 <div class="p-4 bg-surface-container-low flex items-center justify-between gap-4">

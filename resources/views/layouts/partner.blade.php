@@ -9,7 +9,7 @@
     $logoSrc = file_exists($logoPath) ? asset('images/logo.png').'?v='.filemtime($logoPath) : config('brand.logo');
     $partnerRestaurant = auth()->user()->ownedRestaurant;
     $panelTitle = $partnerRestaurant?->panelTitle() ?? 'لوحة الشريك';
-    $pendingPartnerOrdersCount = $partnerRestaurant ? $partnerRestaurant->orders()->whereIn('status', ['pending_confirmation', 'confirmed', 'preparing'])->count() : 0;
+    $pendingPartnerOrdersCount = $partnerRestaurant ? $partnerRestaurant->orders()->visibleToRestaurant()->whereIn('status', ['confirmed', 'preparing'])->count() : 0;
     $navGroups = [
         [
             'label' => $partnerRestaurant?->typeLabel() ?? 'المكان',
@@ -19,7 +19,7 @@
                 ['route' => 'partner.wallet', 'icon' => 'account_balance_wallet', 'label' => 'الرصيد والسحب', 'match' => 'partner.wallet*'],
                 ['route' => 'partner.restaurant.edit', 'icon' => 'storefront', 'label' => 'بيانات '.($partnerRestaurant?->venueNoun() ?? 'المكان'), 'match' => 'partner.restaurant.*'],
                 ['route' => 'partner.boosts.index', 'icon' => 'campaign', 'label' => 'الإعلان والظهور الأول', 'match' => 'partner.boosts.*'],
-                ['route' => 'partner.menu-items.index', 'icon' => 'restaurant_menu', 'label' => 'المنيو والتصنيفات', 'match' => 'partner.menu-items.*'],
+                ['route' => 'partner.menu-items.index', 'icon' => 'restaurant_menu', 'label' => 'المنيو والتصنيفات', 'match' => 'partner.menu-*'],
             ],
         ],
         [
@@ -86,6 +86,9 @@
                         <em>{{ $pendingPartnerOrdersCount > 9 ? '9+' : $pendingPartnerOrdersCount }}</em>
                     @endif
                 </a>
+                <button type="button" class="admin-topbar__icon js-desktop-notify-btn" title="تفعيل إشعارات الجهاز">
+                    <span class="material-symbols-outlined">notification_add</span>
+                </button>
                 <button type="button" class="admin-topbar__icon js-order-sound-btn" title="اختبار نغمة تنبيه الطلبات (تزمير)">
                     <span class="material-symbols-outlined">volume_up</span>
                 </button>

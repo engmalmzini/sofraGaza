@@ -333,6 +333,7 @@ class GroupOrderService
                         'quantity' => $line['qty'],
                         'line_total' => $line['line_total'],
                         'notes' => $line['notes'] ?? null,
+                        'options' => $line['options'] ?? $line['choices'] ?? null,
                     ]);
                 }
             }
@@ -360,20 +361,10 @@ class GroupOrderService
         $order->load(['restaurant', 'items', 'user']);
 
         $this->notifications->notifyAdmins(
-            'طلب جماعي جديد بانتظار التأكيد',
+            'طلب جماعي جديد بانتظار تأكيد الدفع',
             "طلب جماعي #{$order->id} من {$host->name} في {$order->venueName()} بقيمة {$order->total} ₪ — ".($group->members->count()).' أشخاص.',
             route('admin.orders.show', $order)
         );
-
-        $owner = $order->restaurant?->owner;
-        if ($owner) {
-            $this->notifications->notify(
-                $owner,
-                'طلب جماعي وارد لمطعمك',
-                "وصل طلب جماعي #{$order->id} من {$host->name} بقيمة {$order->total} ₪.",
-                route('partner.orders.show', $order)
-            );
-        }
 
         foreach ($group->guests() as $member) {
             if ($member->user) {
@@ -479,11 +470,12 @@ class GroupOrderService
 
             return [
                 'menu_item_id' => $item->id,
-                'name' => $item->name,
+                'name' => $line['name'] ?? $item->name,
                 'qty' => (int) $line['qty'],
-                'price' => (float) $item->price,
+                'price' => (float) ($line['unit_price'] ?? $item->price),
                 'line_total' => (float) $line['line_total'],
                 'notes' => $line['notes'] ?? null,
+                'options' => $line['choices'] ?? [],
             ];
         }, $lines));
     }

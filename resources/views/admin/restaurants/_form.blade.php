@@ -30,6 +30,38 @@
 </div>
 <label class="flex items-center gap-2"><input type="checkbox" name="is_active" value="1" @checked(old('is_active', $restaurant->is_active ?? true))> ظاهر على المنصة</label>
 <label class="flex items-center gap-2"><input type="checkbox" name="is_featured" value="1" @checked(old('is_featured', $restaurant->is_featured ?? false))> مميز في الرئيسية</label>
+<div class="rounded-2xl border border-primary/20 bg-primary/5 p-4 sm:p-5 space-y-3">
+    <div class="flex items-center justify-between border-b border-primary/15 pb-3">
+        <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary text-[24px] fill-1">percent</span>
+            <div>
+                <h3 class="text-sm font-extrabold text-stone-900">نسبة عمولة المنصة من مبيعات هذا المطعم</h3>
+                <p class="text-xs text-on-surface-variant">يحددها الأدمن فقط. كل مطعم له نسبته، وصافي المطعم = المبيعات ناقص هذه النسبة.</p>
+            </div>
+        </div>
+        <span class="text-xs font-bold text-primary bg-primary/10 px-2.5 py-1 rounded-full">مالي</span>
+    </div>
+    <div class="grid gap-3 sm:grid-cols-[1fr_auto] items-end">
+        <div>
+            <label class="mb-1 block text-sm font-bold">النسبة %</label>
+            <div class="relative">
+                <input type="number"
+                       name="commission_percent"
+                       min="0"
+                       max="100"
+                       step="0.5"
+                       value="{{ old('commission_percent', $restaurant?->hasCustomCommission() ? (float) $restaurant->commission_percent : '') }}"
+                       placeholder="{{ \App\Support\Finance::restaurantCommissionPercent() }}"
+                       class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm font-bold text-stone-900 focus:border-primary focus:ring-1 focus:ring-primary">
+                <span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-xs font-bold text-slate-500">%</span>
+            </div>
+        </div>
+        <p class="text-[11px] leading-relaxed text-slate-600 bg-white p-2.5 rounded-lg border border-slate-100 sm:max-w-xs">
+            اترك الحقل فارغاً لاعتماد النسبة العامة (حالياً {{ \App\Support\Finance::restaurantCommissionLabel() }}).
+            مثال: 12 يعني المنصة تأخذ 12% من مبيعات هذا المطعم.
+        </p>
+    </div>
+</div>
 <div class="rounded-2xl border border-amber-200 bg-amber-50/40 p-4 sm:p-5 space-y-4">
     <div class="flex items-center justify-between border-b border-amber-200/60 pb-3">
         <div class="flex items-center gap-2">

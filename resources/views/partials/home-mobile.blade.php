@@ -475,7 +475,8 @@
         <div class="grid grid-cols-2 gap-3 px-3.5" id="mobile-restaurants-grid">
             @forelse($restaurants as $index => $restaurant)
                 @php
-                    $rating = number_format($restaurant->averageRating(), 1);
+                    $reviewsCount = $restaurant->reviewsCount();
+                    $rating = $reviewsCount > 0 ? number_format($restaurant->averageRating() ?? 0, 1) : null;
                     $isAd = $restaurant->isBoosted();
                     $isNew = $index === 1 || $index === 6 || $restaurant->created_at->diffInDays(now()) < 14;
                 @endphp
@@ -506,10 +507,10 @@
                             <div class="absolute top-2 left-2 bg-amber-400 text-stone-900 font-extrabold text-[10px] px-2.5 py-0.5 rounded-full shadow-xs">
                                 جديد
                             </div>
-                        @else
+                        @elseif($rating)
                             <div class="absolute top-2 left-2 bg-black/60 backdrop-blur-xs text-white text-[11px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 shadow-xs">
                                 <span class="text-amber-400 text-[12px] leading-none">★</span>
-                                <span>{{ $rating > 0 ? $rating : '4.5' }}</span>
+                                <span>{{ $rating }}</span>
                             </div>
                         @endif
                     </div>

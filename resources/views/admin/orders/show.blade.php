@@ -4,6 +4,12 @@
 @section('title', 'طلب #'.$order->id)
 
 @section('content')
+<div class="flex flex-wrap items-center justify-end gap-2 mb-3">
+    @include('partials.order-print-button', [
+        'printUrl' => route('admin.orders.print', $order),
+        'class' => 'admin-btn admin-btn--primary text-xs',
+    ])
+</div>
 <div class="grid gap-4 lg:grid-cols-[1.6fr_1fr]">
     <div class="space-y-4">
         @include('partials.order-invoice', ['order' => $order])
@@ -23,6 +29,9 @@
     <div class="space-y-4">
         <section class="admin-card">
             <div class="mt-2">@include('admin.partials.pill', ['status' => $order->status, 'label' => $order->statusLabel()])</div>
+            @if($order->status === 'pending_confirmation')
+                <p class="mt-2 text-xs text-on-surface-variant">بعد تأكيد الدفع يصل الطلب لصاحب المطعم مع شارة تم الدفع.</p>
+            @endif
             @if($order->isPrepared())
                 <div class="mt-2 p-2 rounded-lg bg-emerald-50 border border-emerald-200 text-xs text-emerald-800 flex items-center gap-1.5">
                     <span class="material-symbols-outlined text-[16px] text-emerald-600">task_alt</span>

@@ -241,7 +241,7 @@ class FinanceService
             [
                 'key' => 'commission',
                 'source' => 'دخل الطلبات',
-                'detail' => '+'.Finance::restaurantCommissionLabel().' عمولة المنصة من قيمة كل طلب مكتمل',
+                'detail' => 'عمولة المنصة من قيمة كل طلب مكتمل حسب نسبة المطعم',
                 'amount' => $commission,
             ],
         ];

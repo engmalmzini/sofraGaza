@@ -81,6 +81,10 @@
             </span>
         </div>
         <div class="flex items-center gap-2">
+            <button type="button" class="admin-btn admin-btn--ghost text-xs flex items-center gap-1 js-desktop-notify-btn" title="تفعيل إشعارات الجهاز">
+                <span class="material-symbols-outlined text-primary text-[16px]">notification_add</span>
+                <span class="js-desktop-notify-label">تفعيل إشعارات الجهاز</span>
+            </button>
             <button type="button" id="btn-toggle-sound" class="admin-btn admin-btn--ghost text-xs flex items-center gap-1" title="اختبار نغمة التنبيه">
                 <span class="material-symbols-outlined text-primary text-[16px]">volume_up</span>
                 <span id="sound-status-label">صوت التنبيه: مفعّل</span>
@@ -88,7 +92,7 @@
             <a class="admin-btn admin-btn--ghost text-xs" href="{{ route('partner.orders.index') }}">كل الطلبات</a>
         </div>
     </div>
-    <p class="mt-1 text-xs text-on-surface-variant">اسحب الطلب وأفلته في قيد التحضير ليبدأ التحضير تلقائياً. الطلبات الجديدة تظهر هنا فوراً مع رنين إشعار.</p>
+    <p class="mt-1 text-xs text-on-surface-variant">بعد تأكيد الإدارة للدفع يصل الطلب هنا مع شارة تم الدفع ورنين إشعار. اسحب الطلب وأفلته في قيد التحضير ليبدأ التحضير تلقائياً.</p>
 
     <div id="partner-orders-container" class="mt-4">
         @include('partner.orders.partials.order-board', ['ordersByStatus' => $ordersByStatus])

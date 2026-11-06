@@ -17,6 +17,21 @@ use App\Http\Controllers\RestaurantController;
 use App\Http\Controllers\SearchController;
 use Illuminate\Support\Facades\Route;
 
+Route::get('/storage/{path}', [\App\Http\Controllers\PublicMediaController::class, 'show'])
+    ->where('path', '.*')
+    ->name('storage.public');
+
+Route::get('/sw.js', function () {
+    $path = public_path('sw.js');
+    abort_unless(is_file($path), 404);
+
+    return response((string) file_get_contents($path), 200, [
+        'Content-Type' => 'application/javascript; charset=UTF-8',
+        'Cache-Control' => 'no-cache, no-store, must-revalidate',
+        'Service-Worker-Allowed' => '/',
+    ]);
+})->name('service-worker');
+
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::post('/delivery-area', [DeliveryAreaController::class, 'update'])->name('delivery-area.update');
 Route::get('/search/suggest', [SearchController::class, 'suggest'])->name('search.suggest');
@@ -28,6 +43,7 @@ Route::middleware('customer.shop')->group(function () {
     Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
     Route::post('/cart/coupon', [\App\Http\Controllers\CouponController::class, 'apply'])->name('cart.coupon.apply');
     Route::delete('/cart/coupon', [\App\Http\Controllers\CouponController::class, 'remove'])->name('cart.coupon.remove');
+    Route::post('/cart/offers/{offer}', [CartController::class, 'storeOffer'])->name('cart.add-offer');
     Route::post('/cart/{item}', [CartController::class, 'store'])->name('cart.add');
     Route::patch('/cart', [CartController::class, 'update'])->name('cart.update');
     Route::delete('/cart', [CartController::class, 'destroy'])->name('cart.clear');
@@ -120,10 +136,13 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin', 'admin.modu
     Route::get('listings/{listing}/receipt', [Admin\ListingController::class, 'receipt'])->name('listings.receipt');
     Route::post('listings/{listing}/approve', [Admin\ListingController::class, 'approve'])->name('listings.approve');
     Route::post('listings/{listing}/reject', [Admin\ListingController::class, 'reject'])->name('listings.reject');
+    Route::post('restaurants/{restaurant}/menu-items/{menuItem}/featured', [Admin\MenuItemController::class, 'toggleFeatured'])->name('restaurants.menu-items.featured');
     Route::resource('restaurants.menu-items', Admin\MenuItemController::class)->except(['show']);
+    Route::resource('restaurants.menu-offers', Admin\MenuOfferController::class)->except(['index', 'show']);
     Route::get('orders/live', [Admin\OrderController::class, 'live'])->name('orders.live');
     Route::get('orders', [Admin\OrderController::class, 'index'])->name('orders.index');
     Route::get('orders/{order}', [Admin\OrderController::class, 'show'])->name('orders.show');
+    Route::get('orders/{order}/print', [Admin\OrderController::class, 'print'])->name('orders.print');
     Route::get('orders/{order}/receipt', [Admin\OrderController::class, 'receipt'])->name('orders.receipt');
     Route::patch('orders/{order}', [Admin\OrderController::class, 'update'])->name('orders.update');
     Route::delete('orders/{order}', [Admin\OrderController::class, 'destroy'])->name('orders.destroy');
@@ -170,6 +189,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin', 'admin.modu
     Route::get('finance/restaurants', [Admin\FinanceController::class, 'restaurants'])->name('finance.restaurants');
     Route::get('finance/restaurants/{restaurant}', [Admin\FinanceController::class, 'restaurant'])->name('finance.restaurants.show');
     Route::post('finance/restaurants/{restaurant}/settle', [Admin\FinanceController::class, 'settle'])->name('finance.restaurants.settle');
+    Route::post('finance/restaurants/{restaurant}/payout', [Admin\FinanceController::class, 'payRestaurant'])->name('finance.restaurants.payout');
     Route::get('finance/payouts', [Admin\FinanceController::class, 'payouts'])->name('finance.payouts');
     Route::post('finance/payouts/{payout}/complete', [Admin\FinanceController::class, 'completeRestaurantPayout'])->name('finance.payouts.complete');
     Route::get('finance/payouts/{payout}/receipt', [Admin\FinanceController::class, 'restaurantPayoutReceipt'])->name('finance.payouts.receipt');
@@ -208,6 +228,7 @@ Route::prefix('partner')->name('partner.')->middleware(['auth', 'partner', 'part
     Route::get('wallet/payouts/{payout}/receipt', [Partner\WalletController::class, 'receipt'])->name('wallet.payout.receipt');
     Route::get('orders/live', [Partner\OrderController::class, 'live'])->name('orders.live');
     Route::get('orders/{order}', [Partner\OrderController::class, 'show'])->name('orders.show');
+    Route::get('orders/{order}/print', [Partner\OrderController::class, 'print'])->name('orders.print');
     Route::patch('orders/{order}', [Partner\OrderController::class, 'update'])->name('orders.update');
     Route::post('orders/{order}/move', [Partner\OrderController::class, 'move'])->name('orders.move');
     Route::post('orders/{order}/prepared', [Partner\OrderController::class, 'markPrepared'])->name('orders.prepared');
@@ -219,7 +240,9 @@ Route::prefix('partner')->name('partner.')->middleware(['auth', 'partner', 'part
     Route::put('restaurant', [Partner\RestaurantController::class, 'update'])->name('restaurant.update');
     Route::post('restaurant/resubmit', [Partner\RestaurantController::class, 'resubmit'])->name('restaurant.resubmit');
     Route::delete('menu-categories', [Partner\MenuItemController::class, 'destroyCategory'])->name('menu-categories.destroy');
+    Route::post('menu-items/{menuItem}/featured', [Partner\MenuItemController::class, 'toggleFeatured'])->name('menu-items.featured');
     Route::resource('menu-items', Partner\MenuItemController::class)->except(['show']);
+    Route::resource('menu-offers', Partner\MenuOfferController::class)->except(['index', 'show']);
     Route::get('card', [Partner\CardController::class, 'show'])->name('cards.show');
     Route::get('notifications', [Partner\NotificationController::class, 'index'])->name('notifications.index');
     Route::get('notifications/{notification}', [Partner\NotificationController::class, 'open'])->name('notifications.open');

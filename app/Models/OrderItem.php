@@ -17,6 +17,7 @@ class OrderItem extends Model
         'quantity',
         'line_total',
         'notes',
+        'options',
     ];
 
     protected function casts(): array
@@ -24,7 +25,21 @@ class OrderItem extends Model
         return [
             'price' => 'decimal:2',
             'line_total' => 'decimal:2',
+            'options' => 'array',
         ];
+    }
+
+    /**
+     * @return list<array{group?: string, name?: string, price?: float|int|string}>
+     */
+    public function selectedOptions(): array
+    {
+        return is_array($this->options) ? $this->options : [];
+    }
+
+    public function choicesLabel(): string
+    {
+        return \App\Support\MenuOptions::label($this->selectedOptions());
     }
 
     public function order(): BelongsTo

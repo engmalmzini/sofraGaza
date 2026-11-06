@@ -116,19 +116,24 @@
             {{-- Items List --}}
             <div class="divide-y divide-slate-100 space-y-3" id="cart-items-list">
                 @foreach($quote['lines'] as $line)
-                    <div class="pt-3 first:pt-0 space-y-2" data-cart-line="{{ $line['item']->id }}">
+                    <div class="pt-3 first:pt-0 space-y-2" data-cart-line="{{ $line['key'] ?? $line['item']->id }}" data-item-id="{{ $line['item']->id }}">
                         <div class="flex items-center justify-between gap-3">
                             {{-- Item Details --}}
                             <div class="flex items-center gap-3 min-w-0 flex-1">
                                 @php
-                                    $dishImg = $line['item']->image_path 
-                                        ? \Illuminate\Support\Facades\Storage::disk('public')->url($line['item']->image_path)
-                                        : 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=120&h=120&q=80';
+                                    $lineName = $line['name'] ?? $line['item']->name;
+                                    $dishImg = $line['image_url']
+                                        ?: ($line['item']->imageUrl()
+                                            ?: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=120&h=120&q=80');
                                 @endphp
-                                <img src="{{ $dishImg }}" alt="{{ $line['item']->name }}" class="w-14 h-14 lg:w-16 lg:h-16 rounded-xl object-cover border border-slate-100 shrink-0">
+                                <img src="{{ $dishImg }}" alt="{{ $lineName }}" class="w-14 h-14 lg:w-16 lg:h-16 rounded-xl object-cover border border-slate-100 shrink-0">
                                 
                                 <div class="min-w-0">
-                                    <h4 class="font-extrabold text-sm lg:text-[15px] text-stone-900 leading-tight truncate">{{ $line['item']->name }}</h4>
+                                    <h4 class="font-extrabold text-sm lg:text-[15px] text-stone-900 leading-tight truncate">{{ $lineName }}</h4>
+                                    @if(!empty($line['is_offer']))
+                                        <span class="inline-block text-[10px] font-extrabold text-amber-800 bg-amber-50 border border-amber-200 rounded-md px-1.5 py-0.5 mt-0.5">عرض</span>
+                                    @endif
+                                    @include('partials.item-choices', ['choices' => $line['choices'] ?? []])
                                     <p class="font-mono text-xs font-bold text-primary mt-1" data-line-total>
                                         {{ number_format($line['line_total'], 2) }} ₪
                                     </p>
@@ -138,14 +143,16 @@
                             {{-- Quantity Stepper --}}
                             <div class="flex items-center gap-1.5 shrink-0 bg-stone-50 border border-slate-200/80 rounded-xl p-1">
                                 @php
-                                    $canIncrease = $line['item']->isUnlimitedStock()
-                                        || $line['qty'] < (int) $line['item']->remainingStock();
+                                    $canIncrease = array_key_exists('can_increase', $line)
+                                        ? (bool) $line['can_increase']
+                                        : ($line['item']->isUnlimitedStock() || $line['qty'] < (int) $line['item']->remainingStock());
                                 @endphp
                                 {{-- Increase Quantity Form --}}
                                 <form method="POST" action="{{ route('cart.update') }}" class="inline">
                                     @csrf
                                     @method('PATCH')
                                     <input type="hidden" name="item_id" value="{{ $line['item']->id }}">
+                                    <input type="hidden" name="line_key" value="{{ $line['key'] ?? $line['item']->id }}">
                                     <input type="hidden" name="quantity" value="{{ $line['qty'] + 1 }}" data-cart-qty-plus>
                                     <button type="submit" class="w-7 h-7 rounded-lg bg-primary hover:bg-primary-container text-white flex items-center justify-center font-bold text-base transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed" title="زيادة" @disabled(! $canIncrease)>
                                         +
@@ -159,6 +166,7 @@
                                     @csrf
                                     @method('PATCH')
                                     <input type="hidden" name="item_id" value="{{ $line['item']->id }}">
+                                    <input type="hidden" name="line_key" value="{{ $line['key'] ?? $line['item']->id }}">
                                     <input type="hidden" name="quantity" value="{{ max(0, $line['qty'] - 1) }}" data-cart-qty-minus>
                                     <button type="submit" class="w-7 h-7 rounded-lg bg-stone-200/80 hover:bg-stone-300 text-stone-700 flex items-center justify-center transition-colors cursor-pointer" title="إنقاص">
                                         <span class="text-base font-bold leading-none">−</span>
@@ -279,7 +287,8 @@
 function saveCartNotes(notes) {
     const firstLine = document.querySelector('[data-cart-line]');
     if (firstLine) {
-        const itemId = firstLine.dataset.cartLine;
+        const itemId = firstLine.dataset.itemId || firstLine.dataset.cartLine;
+        const lineKey = firstLine.dataset.cartLine;
         const qtySpan = firstLine.querySelector('[data-cart-qty]');
         const qty = qtySpan ? parseInt(qtySpan.textContent) || 1 : 1;
         fetch('{{ route("cart.update") }}', {
@@ -292,6 +301,7 @@ function saveCartNotes(notes) {
             body: JSON.stringify({
                 _method: 'PATCH',
                 item_id: itemId,
+                line_key: lineKey,
                 quantity: qty,
                 notes: notes
             })

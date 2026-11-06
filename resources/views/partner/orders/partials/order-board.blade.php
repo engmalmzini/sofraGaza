@@ -4,4 +4,5 @@
     'moveUrl' => url('/partner/orders/__ID__/move'),
     'allowedColumns' => 'preparing',
     'cardContext' => 'partner',
+    'hiddenColumns' => ['pending_confirmation'],
 ])

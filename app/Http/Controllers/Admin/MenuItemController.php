@@ -26,8 +26,9 @@ class MenuItemController extends Controller
         }
 
         $items = $query->paginate(20)->withQueryString();
+        $offers = $restaurant->menuOffers()->with(['firstItem', 'secondItem'])->latest()->get();
 
-        return view('admin.menu-items.index', compact('restaurant', 'items'));
+        return view('admin.menu-items.index', compact('restaurant', 'items', 'offers'));
     }
 
     public function create(Restaurant $restaurant): View
@@ -71,6 +72,16 @@ class MenuItemController extends Controller
             ->with('success', 'تم تحديث الصنف.');
     }
 
+    public function toggleFeatured(Restaurant $restaurant, MenuItem $menuItem): RedirectResponse
+    {
+        abort_unless($menuItem->restaurant_id === $restaurant->id, 404);
+        $menuItem->update(['is_featured' => ! $menuItem->is_featured]);
+
+        return back()->with('success', $menuItem->is_featured
+            ? 'صار الصنف مميزاً ويظهر في أول صفحة المطعم.'
+            : 'أُزيل التمييز عن الصنف.');
+    }
+
     public function destroy(Restaurant $restaurant, MenuItem $menuItem, SafeDeletion $deletion): RedirectResponse
     {
         abort_unless($menuItem->restaurant_id === $restaurant->id, 404);
@@ -102,6 +113,13 @@ class MenuItemController extends Controller
             'category_custom' => ['required_if:category,__custom__', 'nullable', 'string', 'max:50'],
             'description' => ['nullable', 'string'],
             'price' => ['required', 'numeric', 'min:0'],
+            'option_groups' => ['nullable', 'array'],
+            'option_groups.*.name' => ['nullable', 'string', 'max:80'],
+            'option_groups.*.type' => ['nullable', 'in:single,multi'],
+            'option_groups.*.required' => ['nullable'],
+            'option_groups.*.choices' => ['nullable', 'array'],
+            'option_groups.*.choices.*.name' => ['nullable', 'string', 'max:180'],
+            'option_groups.*.choices.*.price' => ['nullable', 'numeric', 'min:0', 'max:9999'],
             'image' => ['nullable', 'image', 'max:4096'],
             'is_available' => ['nullable'],
             'earn_points' => ['nullable', 'integer', 'min:0'],
@@ -117,8 +135,10 @@ class MenuItemController extends Controller
         }
 
         $data['is_available'] = $request->boolean('is_available');
+        $data['is_featured'] = $request->boolean('is_featured');
         $data['earn_points'] = $request->filled('earn_points') ? (int) $data['earn_points'] : null;
         $data['redeem_points'] = $request->filled('redeem_points') ? (int) $data['redeem_points'] : null;
+        $data['option_groups'] = \App\Support\MenuOptions::fromRequest($request->input('option_groups'));
         $stock = MenuItem::stockAttributes($data);
         unset($data['image'], $data['category_custom'], $data['stock_mode'], $data['stock_qty']);
 

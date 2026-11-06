@@ -36,6 +36,22 @@ class OperatingHoursOrderingTest extends TestCase
             ->assertJson(['ok' => false]);
     }
 
+    public function test_gaza_noon_is_open_even_when_the_frozen_instant_is_utc_morning(): void
+    {
+        Carbon::setTestNow(Carbon::parse('2026-10-20 09:35:00', 'UTC'));
+        [$dish] = $this->visibleDish([
+            'opens_at' => '11:00',
+            'closes_at' => '23:00',
+            'working_days' => [6, 0, 1, 2, 3, 4, 5],
+        ]);
+
+        $this->assertTrue($dish->restaurant->isWithinOwnHours());
+        $this->actingAs(User::factory()->create())
+            ->postJson(route('cart.add', $dish))
+            ->assertOk()
+            ->assertJson(['ok' => true]);
+    }
+
     public function test_customer_can_add_to_cart_when_restaurant_is_open(): void
     {
         Carbon::setTestNow(Carbon::parse('2026-10-15 12:00:00')); // Thursday noon
@@ -172,6 +188,74 @@ class OperatingHoursOrderingTest extends TestCase
         $this->assertSame('10:00', substr((string) $restaurant->opens_at, 0, 5));
         $this->assertSame('01:00', substr((string) $restaurant->closes_at, 0, 5));
         $this->assertEqualsCanonicalizing([6, 0, 1, 2, 3, 4], $restaurant->workingDays());
+        $this->assertNull($restaurant->day_hours);
+    }
+
+    public function test_partner_can_save_different_hours_for_friday(): void
+    {
+        $owner = User::factory()->restaurantOwner()->create();
+        Restaurant::query()->create([
+            'owner_id' => $owner->id,
+            'name' => 'مطعم الكرم',
+            'type' => 'restaurant',
+            'cuisine' => 'palestinian',
+            'description' => 'مطبخ غزي بيتي يقدم المقلوبة والمسخن والقدرة لعائلة غزة.',
+            'phone' => '0592002002',
+            'owner_national_id' => '401234567',
+            'area' => 'الرمال',
+            'address' => 'شارع الجلاء، غزة',
+            'opens_at' => '11:00',
+            'closes_at' => '23:00',
+            'starts_at' => now()->subDay(),
+            'expires_at' => now()->addMonth(),
+            'is_active' => true,
+            'verification_status' => Restaurant::VERIFICATION_APPROVED,
+        ]);
+
+        $this->actingAs($owner)
+            ->get(route('partner.restaurant.edit'))
+            ->assertOk()
+            ->assertSee('تحديد ساعات مختلفة حسب اليوم', false);
+
+        $this->actingAs($owner)
+            ->put(route('partner.restaurant.update'), [
+                'name' => 'مطعم الكرم',
+                'type' => 'restaurant',
+                'cuisine' => 'palestinian',
+                'description' => 'مطبخ غزي بيتي يقدم المقلوبة والمسخن والقدرة لعائلة غزة.',
+                'phone' => '0592002002',
+                'owner_national_id' => '401234567',
+                'area' => 'الرمال',
+                'address' => 'شارع الجلاء، غزة',
+                'opens_at' => '11:00',
+                'closes_at' => '23:00',
+                'working_days' => [6, 0, 1, 2, 3, 4, 5],
+                'custom_day_hours' => '1',
+                'day_hours' => [
+                    6 => ['opens_at' => '11:00', 'closes_at' => '23:00'],
+                    0 => ['opens_at' => '11:00', 'closes_at' => '23:00'],
+                    1 => ['opens_at' => '11:00', 'closes_at' => '23:00'],
+                    2 => ['opens_at' => '11:00', 'closes_at' => '23:00'],
+                    3 => ['opens_at' => '11:00', 'closes_at' => '23:00'],
+                    4 => ['opens_at' => '11:00', 'closes_at' => '23:00'],
+                    5 => ['opens_at' => '08:00', 'closes_at' => '15:00'],
+                ],
+            ])
+            ->assertRedirect();
+
+        $restaurant = Restaurant::query()->first();
+        $this->assertSame('11:00', substr((string) $restaurant->opens_at, 0, 5));
+        $this->assertSame('08:00', $restaurant->dayHours()[5]['opens_at'] ?? null);
+        $this->assertSame('15:00', $restaurant->dayHours()[5]['closes_at'] ?? null);
+        $this->assertSame(
+            'السبت–الخميس 11:00 ص — 11:00 م · الجمعة 8:00 ص — 3:00 م',
+            $restaurant->hoursLabel()
+        );
+
+        Carbon::setTestNow(Carbon::parse('2026-10-16 10:00:00'));
+        $this->assertTrue($restaurant->fresh()->isWithinOwnHours());
+        Carbon::setTestNow(Carbon::parse('2026-10-16 16:00:00'));
+        $this->assertFalse($restaurant->fresh()->isWithinOwnHours());
     }
 
     public function test_restaurant_page_shows_closed_state(): void

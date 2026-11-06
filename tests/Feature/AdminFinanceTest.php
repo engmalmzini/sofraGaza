@@ -236,7 +236,7 @@ class AdminFinanceTest extends TestCase
             ->assertSee('الصافي الحقيقي', false)
             ->assertSee('مقارنة بالشهر السابق', false)
             ->assertSee('دخل الطلبات', false)
-            ->assertSee('عمولة المنصة +10%', false)
+            ->assertSee('عمولة المنصة', false)
             ->assertSee('أجرة الكابتن −15%', false)
             ->assertSee('دخل الاشتراكات', false)
             ->assertSee('اشتراكات فئة 60', false)

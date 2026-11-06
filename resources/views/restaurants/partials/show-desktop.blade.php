@@ -387,6 +387,8 @@
         margin-bottom: 0.7rem;
     }
     .rd-dish__media img {
+        position: absolute;
+        inset: 0;
         width: 100%;
         height: 100%;
         object-fit: cover;
@@ -698,6 +700,7 @@
                     @endif
                 </div>
                 <div class="rd-stats">
+                    @if($reviews > 0 && $rating)
                     <div class="rd-stat">
                         @include('partials.star-icon', ['class' => 'w-4 h-4 text-[#d65e15]'])
                         <div>
@@ -705,6 +708,7 @@
                             <span>{{ number_format($reviews) }} تقييم معتمد</span>
                         </div>
                     </div>
+                    @endif
                     <div class="rd-stat">
                         <span class="material-symbols-outlined">schedule</span>
                         <div>
@@ -778,10 +782,26 @@
     <div class="rd-nav">
         <div class="rd-nav__inner">
             <div class="rd-nav__cats">
+                <button type="button" class="category-btn is-active" data-section="all">
+                    <span class="material-symbols-outlined">grid_view</span>
+                    <span>الكل ({{ $itemCount }})</span>
+                </button>
+                @if(($menuOffers ?? collect())->isNotEmpty())
+                    <button type="button" class="category-btn" data-section="offers">
+                        <span class="material-symbols-outlined">sell</span>
+                        <span>العروض ({{ $menuOffers->count() }})</span>
+                    </button>
+                @endif
+                @if(($featuredItems ?? collect())->isNotEmpty())
+                    <button type="button" class="category-btn" data-section="featured">
+                        <span class="material-symbols-outlined">star</span>
+                        <span>مميز ({{ $featuredItems->count() }})</span>
+                    </button>
+                @endif
                 @foreach($menuSections as $section)
-                    <button type="button" class="category-btn{{ $loop->first ? ' is-active' : '' }}" data-section="{{ $section['key'] }}">
+                    <button type="button" class="category-btn" data-section="{{ $section['key'] }}">
                         <span class="material-symbols-outlined">{{ $section['icon'] }}</span>
-                        <span>{{ $section['name'] }}</span>
+                        <span>{{ $section['name'] }} ({{ $section['items']->count() }})</span>
                     </button>
                 @endforeach
                 @if(($canShop ?? true) && count($rewards))
@@ -801,8 +821,39 @@
     <div class="rd-wrap" style="padding-top: 0;">
         <div class="rd-layout{{ ($canShop ?? true) ? '' : ' rd-layout--browse' }}">
             <div>
+                @if(($menuOffers ?? collect())->isNotEmpty())
+                    <section class="menu-section rd-section" id="section-offers" data-section="offers" data-menu-section="offers">
+                        <div class="rd-section__head">
+                            <h2>العروض</h2>
+                            <small>سعر خاص على صنف أو صنفين · {{ $menuOffers->count() }}</small>
+                        </div>
+                        <div class="rd-grid">
+                            @foreach($menuOffers as $offer)
+                                @include('restaurants.partials.offer-card-desktop', ['offer' => $offer])
+                            @endforeach
+                        </div>
+                    </section>
+                @endif
+                @if(($featuredItems ?? collect())->isNotEmpty())
+                    <section class="menu-section rd-section" id="section-featured" data-section="featured" data-menu-section="featured">
+                        <div class="rd-section__head">
+                            <h2>مميز</h2>
+                            <small>اختيارات المكان في أول القائمة · {{ $featuredItems->count() }}</small>
+                        </div>
+                        <div class="rd-grid">
+                            @foreach($featuredItems as $item)
+                                @include('restaurants.partials.dish-card-desktop', [
+                                    'item' => $item,
+                                    'sectionKey' => 'featured',
+                                    'popular' => false,
+                                    'featured' => $loop->first,
+                                ])
+                            @endforeach
+                        </div>
+                    </section>
+                @endif
                 @forelse($menuSections as $section)
-                    <section class="menu-section rd-section" id="section-{{ $section['key'] }}" data-section="{{ $section['key'] }}">
+                    <section class="menu-section rd-section" id="section-{{ $section['key'] }}" data-section="{{ $section['key'] }}" data-menu-section="{{ $section['key'] }}">
                         <div class="rd-section__head">
                             <h2>{{ $section['name'] }}</h2>
                             <small>{{ $section['hint'] }} · {{ $section['items']->count() }} أطباق</small>
@@ -871,9 +922,12 @@
 
                     <div data-desktop-cart-lines class="rd-cart__lines">
                         @forelse($restaurantCart['lines'] ?? [] as $line)
-                            <div class="pt-2 first:pt-0 flex flex-col gap-1.5 border-t border-slate-100 first:border-0" data-line-id="{{ $line['item']->id }}">
+                            <div class="pt-2 first:pt-0 flex flex-col gap-1.5 border-t border-slate-100 first:border-0" data-line-id="{{ $line['key'] ?? $line['item']->id }}">
                                 <div class="flex items-start justify-between gap-2">
-                                    <span class="text-[13px] font-semibold text-on-surface truncate">{{ $line['item']->name }}</span>
+                                    <div class="min-w-0">
+                                        <span class="text-[13px] font-semibold text-on-surface truncate block">{{ $line['name'] ?? $line['item']->name }}</span>
+                                        @include('partials.item-choices', ['choices' => $line['choices'] ?? []])
+                                    </div>
                                     <span class="text-[13px] font-bold text-on-surface shrink-0">{{ number_format($line['line_total'], 0) }} <span class="ils">₪</span></span>
                                 </div>
                                 <div class="flex items-center justify-between">
@@ -881,6 +935,7 @@
                                         @csrf
                                         @method('PATCH')
                                         <input type="hidden" name="item_id" value="{{ $line['item']->id }}">
+                                        <input type="hidden" name="line_key" value="{{ $line['key'] ?? $line['item']->id }}">
                                         <button type="submit" name="quantity" value="{{ $line['qty'] - 1 }}" class="w-4 h-4 flex items-center justify-center text-slate-500 text-xs font-bold">-</button>
                                         <span class="text-xs font-semibold px-1">{{ $line['qty'] }}</span>
                                         <button type="submit" name="quantity" value="{{ $line['qty'] + 1 }}" class="w-4 h-4 flex items-center justify-center text-slate-500 text-xs font-bold">+</button>

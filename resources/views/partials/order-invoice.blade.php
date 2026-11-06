@@ -11,6 +11,9 @@
                 @if($order->isGroupOrder())
                     · طلب جماعي
                 @endif
+                @if($tone === 'partner' && $order->shouldShowPaidBadge())
+                    · تم الدفع
+                @endif
             </p>
         </div>
         <div class="sg-invoice__when">
@@ -50,6 +53,7 @@
                             <tr>
                                 <td>
                                     <strong>{{ $item->name }}</strong>
+                                    @include('partials.item-choices', ['choices' => $item->selectedOptions()])
                                     @if($item->notes)
                                         <div class="mt-1 text-xs text-primary font-medium flex items-center gap-1">
                                             <span class="material-symbols-outlined text-[14px]">edit_note</span>

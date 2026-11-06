@@ -18,7 +18,7 @@
         1 => ['owner_name', 'owner_national_id', 'phone', 'email'],
         2 => ['password', 'password_confirmation'],
         3 => ['restaurant_name', 'type', 'cuisine', 'restaurant_phone', 'license_number'],
-        4 => ['area', 'address', 'opens_at', 'closes_at', 'working_days', 'description'],
+        4 => ['area', 'address', 'opens_at', 'closes_at', 'working_days', 'day_hours', 'custom_day_hours', 'description'],
         5 => ['image', 'terms'],
     ];
     $skipPasswordStep = filled(session('partner_register.password'))
@@ -81,15 +81,15 @@
                         <input name="owner_national_id" value="{{ old('owner_national_id') }}" required inputmode="numeric" maxlength="9" minlength="9" pattern="[0-9]{9}" placeholder="رقم الهوية">
                     </label>
                     <label class="auth-field">
-                        <input name="phone" value="{{ old('phone') }}" required inputmode="numeric" minlength="10" maxlength="15" pattern="{{ \App\Support\PalestinianPhone::HTML_PATTERN }}" placeholder="059XXXXXXXX">
+                        <input name="phone" value="{{ \App\Support\PalestinianPhone::digits(old('phone')) }}" required inputmode="numeric" minlength="10" maxlength="15" pattern="{{ \App\Support\PalestinianPhone::HTML_PATTERN }}" placeholder="059XXXXXXXX" autocomplete="tel">
                     </label>
                     <label class="auth-field auth-field--icon">
                         <span class="material-symbols-outlined">mail</span>
                         <input type="email" name="email" value="{{ old('email') }}" placeholder="البريد الإلكتروني (اختياري)">
                     </label>
                 </div>
-                @foreach(['owner_name', 'owner_national_id', 'phone', 'email'] as $field)
-                    @error($field)
+                @foreach(['owner_name', 'owner_national_id', 'phone', 'email'] as $errorField)
+                    @error($errorField)
                         <p class="partner-wizard__error">{{ $message }}</p>
                     @enderror
                 @endforeach
@@ -131,14 +131,14 @@
                         </select>
                     </label>
                     <label class="auth-field">
-                        <input name="restaurant_phone" value="{{ old('restaurant_phone') }}" required inputmode="numeric" minlength="10" maxlength="15" pattern="{{ \App\Support\PalestinianPhone::HTML_PATTERN }}" placeholder="059XXXXXXXX">
+                        <input name="restaurant_phone" value="{{ \App\Support\PalestinianPhone::digits(old('restaurant_phone')) }}" required inputmode="numeric" minlength="10" maxlength="15" pattern="{{ \App\Support\PalestinianPhone::HTML_PATTERN }}" placeholder="059XXXXXXXX" autocomplete="tel">
                     </label>
                     <label class="auth-field">
                         <input name="license_number" value="{{ old('license_number') }}" placeholder="رقم الرخصة (اختياري)">
                     </label>
                 </div>
-                @foreach(['restaurant_name', 'type', 'cuisine', 'restaurant_phone'] as $field)
-                    @error($field)
+                @foreach(['restaurant_name', 'type', 'cuisine', 'restaurant_phone'] as $errorField)
+                    @error($errorField)
                         <p class="partner-wizard__error">{{ $message }}</p>
                     @enderror
                 @endforeach
@@ -158,23 +158,21 @@
                     <label class="auth-field">
                         <input name="address" value="{{ old('address') }}" required maxlength="255" placeholder="العنوان التفصيلي">
                     </label>
-                    <label class="auth-field">
-                        <input type="time" name="opens_at" value="{{ old('opens_at', '09:00') }}" required aria-label="يفتح الساعة">
-                    </label>
-                    <label class="auth-field">
-                        <input type="time" name="closes_at" value="{{ old('closes_at', '23:00') }}" required aria-label="يغلق الساعة">
-                    </label>
                 </div>
-                @include('partials.working-days-picker', [
-                    'wrapperClass' => 'mt-3',
+                @include('partials.working-hours-editor', [
+                    'workingDaysField' => 'working_days',
+                    'wrapperClass' => 'mt-3 space-y-3',
                     'labelClass' => 'mb-2 block text-sm font-bold',
                     'errorClass' => 'partner-wizard__error',
+                    'variant' => 'auth',
+                    'defaultOpens' => '09:00',
+                    'defaultCloses' => '23:00',
                 ])
                 <label class="auth-field auth-field--area">
                     <textarea name="description" rows="3" required minlength="20" maxlength="1000" placeholder="وصف المطعم وأشهر أطباقه">{{ old('description') }}</textarea>
                 </label>
-                @foreach(['area', 'address', 'opens_at', 'closes_at', 'description'] as $field)
-                    @error($field)
+                @foreach(['area', 'address', 'opens_at', 'closes_at', 'description'] as $errorField)
+                    @error($errorField)
                         <p class="partner-wizard__error">{{ $message }}</p>
                     @enderror
                 @endforeach

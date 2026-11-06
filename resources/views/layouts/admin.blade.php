@@ -257,6 +257,9 @@
                     @endif
                 </a>
                 @if(auth()->user()->canAccessAdmin('orders'))
+                    <button type="button" class="admin-topbar__icon js-desktop-notify-btn" title="تفعيل إشعارات الجهاز">
+                        <span class="material-symbols-outlined">notification_add</span>
+                    </button>
                     <button type="button" class="admin-topbar__icon js-order-sound-btn" title="اختبار نغمة تنبيه الطلبات (تزمير)">
                         <span class="material-symbols-outlined">volume_up</span>
                     </button>
